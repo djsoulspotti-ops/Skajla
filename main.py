@@ -502,3 +502,41 @@ if __name__ == '__main__':
     print("🎯 Ready to revolutionize Italian schools!")
 
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+import sqlite3
+
+app.secret_key = "chiave_segreta_super_sicura"  # Cambiala con una chiave segreta vera
+
+# Route Login - mostra il form
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+        # Connessione al DB
+        conn = sqlite3.connect("skaila.db")
+        cursor = conn.cursor()
+
+        # Cerca utente
+        cursor.execute("SELECT * FROM utenti WHERE email = ? AND password = ?", (email, password))
+        utente = cursor.fetchone()
+        conn.close()
+
+        if utente:
+            session["utente"] = utente[1]  # Salviamo il nome utente in sessione
+            return redirect(url_for("chat"))  # Vai alla chat
+        else:
+            flash("Email o password errati", "errore")
+            return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+# Route Chat - solo se loggati
+@app.route("/chat")
+def chat():
+    if "utente" in session:
+        return render_template("chat.html", utente=session["utente"])
+    else:
+        flash("Devi effettuare il login", "errore")
+        return redirect(url_for("login"))
