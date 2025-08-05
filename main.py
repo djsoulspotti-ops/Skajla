@@ -502,31 +502,3 @@ if __name__ == '__main__':
     print("🎯 Ready to revolutionize Italian schools!")
 
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
-from flask import Flask, render_template
-from flask_socketio import SocketIO, send
-
-# Inizializza Flask e SocketIO
-app = Flask(_name_)
-app.config['SECRET_KEY'] = 'chiave_segreta_skaila'
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-# Route per la home
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-# Route per la chat
-@app.route('/chat')
-def chat():
-    return render_template('chat.html')
-
-# Gestione messaggi in tempo reale
-@socketio.on('message')
-def handle_message(msg):
-    print(f"[Nuovo messaggio] {msg}")
-    send(msg, broadcast=True)  # Invia a tutti i client connessi
-
-if _name_ == '_main_':
-    print("🚀 SKAILA backend avviato")
-    print("💬 Messaggistica in tempo reale attiva")
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
