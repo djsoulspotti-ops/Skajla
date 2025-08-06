@@ -502,3 +502,16 @@ if __name__ == '__main__':
     print("🎯 Ready to revolutionize Italian schools!")
 
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    import sqlite3
+
+    conn = sqlite3.connect("skaila.db")  # stesso nome usato in crea_database.py
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM utenti")
+    utenti = cursor.fetchall()
+
+    print("Utenti nel database:")
+    for utente in utenti:
+        print(utente)
+
+    conn.close()
