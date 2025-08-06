@@ -105,12 +105,33 @@ def init_db():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', ('founder@skaila.it', generate_password_hash('founder123'), 'Founder', 'SKAILA', 'admin', 'SKAILA HQ', 1000, 10))
 
-        # Canali di esempio
+        # Altri utenti di esempio per popolare la piattaforma
+        utenti_esempio = [
+            ('prof.rossi@liceo.it', 'Prof123', 'Mario', 'Rossi', 'professore', 'Liceo Demo', '', 150, 3),
+            ('lucia.bianchi@student.it', 'Student123', 'Lucia', 'Bianchi', 'studente', 'Liceo Demo', '3A', 85, 2),
+            ('marco.verdi@student.it', 'Student123', 'Marco', 'Verdi', 'studente', 'Liceo Demo', '3A', 120, 3),
+            ('anna.ferrari@parent.it', 'Parent123', 'Anna', 'Ferrari', 'genitore', 'Liceo Demo', '', 30, 1),
+            ('dirigente@liceo.it', 'Admin123', 'Carla', 'Neri', 'dirigente', 'Liceo Demo', '', 200, 4),
+        ]
+
+        for email, password, nome, cognome, ruolo, scuola, classe, xp, livello in utenti_esempio:
+            cursor.execute('''
+                INSERT OR IGNORE INTO users (email, password_hash, nome, cognome, ruolo, scuola, classe, xp_totale, livello) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (email, generate_password_hash(password), nome, cognome, ruolo, scuola, classe, xp, livello))
+
+        # Canali di esempio più ricchi
         canali_esempio = [
             ('🏫 Generale', 'Comunicazioni generali della scuola', 'generale', 'Liceo Demo'),
-            ('🤖 SKAILA AI', 'Assistente AI sempre disponibile', 'ai_support', 'Sistema'),
-            ('📚 Matematica 3A', 'Discussioni di matematica per la 3A', 'materia', 'Liceo Demo'),
-            ('📖 Italiano 2B', 'Letteratura e grammatica', 'materia', 'Liceo Demo'),
+            ('🤖 SKAILA AI', 'Assistente AI sempre disponibile per supporto 24/7', 'ai_support', 'Sistema'),
+            ('📚 Matematica 3A', 'Discussioni di matematica per la classe 3A', 'materia', 'Liceo Demo'),
+            ('📖 Italiano 2B', 'Letteratura e grammatica italiana', 'materia', 'Liceo Demo'),
+            ('🔬 Laboratorio Scienze', 'Esperimenti e progetti scientifici', 'materia', 'Liceo Demo'),
+            ('🎨 Arte e Design', 'Creatività e progetti artistici', 'materia', 'Liceo Demo'),
+            ('💼 SKAILA Connect', 'Opportunità di stage e lavoro per studenti', 'generale', 'Sistema'),
+            ('👥 Studenti 5A', 'Chat privata della classe 5A', 'classe', 'Liceo Demo'),
+            ('👨‍🏫 Professori', 'Area riservata docenti', 'generale', 'Liceo Demo'),
+            ('📢 Annunci Importanti', 'Comunicazioni urgenti e avvisi', 'generale', 'Liceo Demo'),
         ]
 
         for canale in canali_esempio:
@@ -118,6 +139,40 @@ def init_db():
                 INSERT OR IGNORE INTO canali (nome, descrizione, tipo, scuola) 
                 VALUES (?, ?, ?, ?)
             ''', canale)
+
+        # Aggiungi messaggi di esempio per rendere i canali più vivaci
+        messaggi_esempio = [
+            (1, 1, "🎉 Benvenuti al nuovo anno scolastico! SKAILA è qui per migliorare la nostra comunicazione!", False),
+            (1, 2, "Ciao a tutti! Sono entusiasta di usare questa nuova piattaforma!", False),
+            (2, None, "Ciao! Sono SKAILA AI, il vostro assistente virtuale. Sono qui per aiutarvi con qualsiasi domanda!", True),
+            (3, 1, "Oggi studieremo le equazioni di secondo grado. Chi ha dubbi sui compiti?", False),
+            (3, 2, "Professore, non riesco a capire il discriminante!", False),
+            (2, None, "Il discriminante Δ = b² - 4ac ti dice quante soluzioni ha l'equazione! Se Δ > 0 ci sono 2 soluzioni reali!", True),
+            (4, 1, "Per domani leggete il primo capitolo dei Promessi Sposi", False),
+            (5, 1, "Ricordate: domani esperimento di chimica in laboratorio!", False),
+            (7, None, "🚀 Nuove opportunità di stage disponibili presso aziende tech locali! Contattatemi per info!", True),
+            (1, 1, "Gli scrutini del primo trimestre sono fissati per il 15 dicembre", False),
+        ]
+
+        # Inserisci messaggi solo se non esistono già
+        for canale_id, utente_id, contenuto, ai_generato in messaggi_esempio:
+            cursor.execute('''
+                INSERT OR IGNORE INTO messaggi (canale_id, utente_id, contenuto, ai_generato, data_invio)
+                VALUES (?, ?, ?, ?, datetime('now', '-' || ABS(RANDOM() % 72) || ' hours'))
+            ''', (canale_id, utente_id, contenuto, ai_generato))
+
+        # Aggiungi tutti gli utenti ai canali pubblici automaticamente
+        cursor.execute('SELECT id FROM users')
+        users = cursor.fetchall()
+        cursor.execute('SELECT id FROM canali WHERE tipo IN ("generale", "ai_support")')
+        canali_pubblici = cursor.fetchall()
+
+        for user in users:
+            for canale in canali_pubblici:
+                cursor.execute('''
+                    INSERT OR IGNORE INTO partecipanti_canali (canale_id, utente_id) 
+                    VALUES (?, ?)
+                ''', (canale[0], user[0]))
 
         conn.commit()
 
