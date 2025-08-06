@@ -98,6 +98,12 @@ def init_db():
             INSERT OR IGNORE INTO users (email, password_hash, nome, cognome, ruolo, scuola, xp_totale, livello) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', ('demo@skaila.it', generate_password_hash('demo123'), 'Demo', 'User', 'studente', 'Liceo Demo', 50, 2))
+        
+        # Founder account per te
+        cursor.execute('''
+            INSERT OR IGNORE INTO users (email, password_hash, nome, cognome, ruolo, scuola, xp_totale, livello) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', ('founder@skaila.it', generate_password_hash('founder123'), 'Founder', 'SKAILA', 'admin', 'SKAILA HQ', 1000, 10))
 
         # Canali di esempio
         canali_esempio = [
