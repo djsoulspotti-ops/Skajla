@@ -1,6 +1,6 @@
 
 from flask import Flask, request, jsonify, session, render_template, redirect, url_for, flash
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import random
@@ -24,9 +24,15 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    # Drop existing tables to ensure clean schema
+    cursor.execute('DROP TABLE IF EXISTS messaggi')
+    cursor.execute('DROP TABLE IF EXISTS partecipanti_canali')
+    cursor.execute('DROP TABLE IF EXISTS canali')
+    cursor.execute('DROP TABLE IF EXISTS users')
+    
     # Tabella users (unificata)
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
@@ -44,7 +50,7 @@ def init_db():
     
     # Tabella canali
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS canali (
+        CREATE TABLE canali (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             descrizione TEXT,
