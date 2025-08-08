@@ -73,6 +73,15 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
         .btn {
             width: 100%;
             padding: 1rem;
@@ -97,6 +106,15 @@
             border-radius: 8px;
             margin-bottom: 1rem;
             border: 1px solid #fecaca;
+        }
+
+        .success {
+            color: #059669;
+            background: #ecfdf5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #a7f3d0;
         }
 
         .login-link {
@@ -127,7 +145,28 @@
         </div>
         {% endif %}
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ 'success' if category == 'success' else 'error' }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <form method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nome">👤 Nome</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="cognome">👤 Cognome</label>
+                    <input type="text" id="cognome" name="cognome" required>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="email">📧 Email</label>
                 <input type="email" id="email" name="email" required>
@@ -135,38 +174,23 @@
 
             <div class="form-group">
                 <label for="password">🔒 Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required minlength="6">
             </div>
 
-            <div class="form-group">
-                <label for="nome">👤 Nome</label>
-                <input type="text" id="nome" name="nome" required>
-            </div>
-
-            <div class="form-group">
-                <label for="cognome">👤 Cognome</label>
-                <input type="text" id="cognome" name="cognome" required>
-            </div>
-
-            <div class="form-group">
-                <label for="ruolo">🎭 Ruolo</label>
-                <select id="ruolo" name="ruolo" required>
-                    <option value="">Seleziona il tuo ruolo</option>
-                    <option value="studente">🎓 Studente</option>
-                    <option value="professore">👨‍🏫 Professore</option>
-                    <option value="genitore">👨‍👩‍👧‍👦 Genitore</option>
-                    <option value="dirigente">🏢 Dirigente</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="scuola">🏫 Scuola</label>
-                <input type="text" id="scuola" name="scuola" placeholder="Es: Liceo Scientifico Galilei" required>
-            </div>
-
-            <div class="form-group">
-                <label for="classe">📚 Classe (opzionale)</label>
-                <input type="text" id="classe" name="classe" placeholder="Es: 3A, 4B...">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ruolo">🎭 Ruolo</label>
+                    <select id="ruolo" name="ruolo" required>
+                        <option value="studente">👨‍🎓 Studente</option>
+                        <option value="professore">👨‍🏫 Professore</option>
+                        <option value="genitore">👪 Genitore</option>
+                        <option value="admin">⚙️ Amministratore</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scuola">🏫 Scuola</label>
+                    <input type="text" id="scuola" name="scuola" placeholder="Nome della scuola">
+                </div>
             </div>
 
             <button type="submit" class="btn">
