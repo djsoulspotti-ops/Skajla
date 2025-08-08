@@ -1,578 +1,283 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from flask_socketio import SocketIO, emit, join_room
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, request, jsonify, session, render_template
+from flask_socketio import SocketIO
 import sqlite3
-import os
-import json
+import hashlib
+import secrets
 from datetime import datetime
-import random
+import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'skaila-secret-key-2025'
+app.secret_key = 'skaila_super_secret_key_2024'  # Cambia questa in produzione!
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# Configurazione database
 DATABASE = 'skaila.db'
 
-def init_db():
-    """Inizializza il database SKAILA"""
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-        # Tabella utenti
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                nome TEXT NOT NULL,
-                cognome TEXT NOT NULL,
-                ruolo TEXT NOT NULL CHECK(ruolo IN ('studente', 'professore', 'genitore', 'dirigente', 'admin')),
-                scuola TEXT,
-                classe TEXT,
-                xp_totale INTEGER DEFAULT 0,
-                livello INTEGER DEFAULT 1,
-                badge_ottenuti TEXT DEFAULT '[]',
-                status TEXT DEFAULT 'offline',
-                ultimo_accesso TIMESTAMP,
-                data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
+def init_database():
+    """Inizializza database con tabelle necessarie"""
+    conn = get_db_connection()
 
-        # Tabella canali
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS canali (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT NULL,
-                descrizione TEXT,
-                tipo TEXT NOT NULL CHECK(tipo IN ('generale', 'classe', 'materia', 'ai_support')),
-                scuola TEXT NOT NULL,
-                classe TEXT,
-                materia TEXT,
-                ai_abilitato BOOLEAN DEFAULT 1,
-                data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
+    # Tabella utenti migliorata
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS utenti (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            nome TEXT NOT NULL,
+            cognome TEXT NOT NULL,
+            ruolo TEXT DEFAULT 'studente',
+            classe TEXT,
+            data_registrazione DATETIME DEFAULT CURRENT_TIMESTAMP,
+            ultimo_accesso DATETIME,
+            attivo BOOLEAN DEFAULT 1
+        )
+    ''')
 
-        # Tabella messaggi
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS messaggi (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                canale_id INTEGER NOT NULL,
-                utente_id INTEGER,
-                contenuto TEXT NOT NULL,
-                ai_generato BOOLEAN DEFAULT 0,
-                data_invio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (canale_id) REFERENCES canali (id),
-                FOREIGN KEY (utente_id) REFERENCES users (id)
-            )
-        ''')
+    # Tabella sessioni per sicurezza
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS sessioni (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            token TEXT UNIQUE,
+            data_creazione DATETIME DEFAULT CURRENT_TIMESTAMP,
+            data_scadenza DATETIME,
+            FOREIGN KEY (user_id) REFERENCES utenti (id)
+        )
+    ''')
 
-        # Tabella partecipanti canali
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS partecipanti_canali (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                canale_id INTEGER NOT NULL,
-                utente_id INTEGER NOT NULL,
-                data_aggiunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (canale_id) REFERENCES canali (id),
-                FOREIGN KEY (utente_id) REFERENCES users (id),
-                UNIQUE(canale_id, utente_id)
-            )
-        ''')
+    # Tabella messaggi per chat
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS messaggi (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mittente_id INTEGER,
+            destinatario_id INTEGER,
+            contenuto TEXT NOT NULL,
+            data_invio DATETIME DEFAULT CURRENT_TIMESTAMP,
+            letto BOOLEAN DEFAULT 0,
+            tipo TEXT DEFAULT 'testo',
+            FOREIGN KEY (mittente_id) REFERENCES utenti (id),
+            FOREIGN KEY (destinatario_id) REFERENCES utenti (id)
+        )
+    ''')
 
-        # Tabella attività XP
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS attivita_xp (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                utente_id INTEGER NOT NULL,
-                tipo_attivita TEXT NOT NULL,
-                xp_guadagnati INTEGER NOT NULL,
-                descrizione TEXT,
-                data_attivita TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (utente_id) REFERENCES users (id)
-            )
-        ''')
+    conn.commit()
+    conn.close()
+    print("✅ Database inizializzato!")
 
-        # Inserisci dati di esempio
-        cursor.execute('''
-            INSERT OR IGNORE INTO users (email, password_hash, nome, cognome, ruolo, scuola, xp_totale, livello) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('demo@skaila.it', generate_password_hash('demo123'), 'Demo', 'User', 'studente', 'Liceo Demo', 50, 2))
-        
-        # Founder account per te
-        cursor.execute('''
-            INSERT OR IGNORE INTO users (email, password_hash, nome, cognome, ruolo, scuola, xp_totale, livello) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('founder@skaila.it', generate_password_hash('founder123'), 'Founder', 'SKAILA', 'admin', 'SKAILA HQ', 1000, 10))
+def hash_password(password):
+    """Hash sicuro delle password"""
+    salt = secrets.token_hex(32)
+    password_hash = hashlib.pbkdf2_hmac('sha256', 
+                                        password.encode('utf-8'), 
+                                        salt.encode('utf-8'), 
+                                        100000)
+    return salt + password_hash.hex()
 
-        # Altri utenti di esempio per popolare la piattaforma
-        utenti_esempio = [
-            ('prof.rossi@liceo.it', 'Prof123', 'Mario', 'Rossi', 'professore', 'Liceo Demo', '', 150, 3),
-            ('lucia.bianchi@student.it', 'Student123', 'Lucia', 'Bianchi', 'studente', 'Liceo Demo', '3A', 85, 2),
-            ('marco.verdi@student.it', 'Student123', 'Marco', 'Verdi', 'studente', 'Liceo Demo', '3A', 120, 3),
-            ('anna.ferrari@parent.it', 'Parent123', 'Anna', 'Ferrari', 'genitore', 'Liceo Demo', '', 30, 1),
-            ('dirigente@liceo.it', 'Admin123', 'Carla', 'Neri', 'dirigente', 'Liceo Demo', '', 200, 4),
-        ]
+def verify_password(password, stored_hash):
+    """Verifica password"""
+    salt = stored_hash[:64]
+    stored_password = stored_hash[64:]
+    password_hash = hashlib.pbkdf2_hmac('sha256',
+                                        password.encode('utf-8'),
+                                        salt.encode('utf-8'),
+                                        100000)
+    return password_hash.hex() == stored_password
 
-        for email, password, nome, cognome, ruolo, scuola, classe, xp, livello in utenti_esempio:
-            cursor.execute('''
-                INSERT OR IGNORE INTO users (email, password_hash, nome, cognome, ruolo, scuola, classe, xp_totale, livello) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (email, generate_password_hash(password), nome, cognome, ruolo, scuola, classe, xp, livello))
+# ==================== ROUTES API ====================
 
-        # Canali di esempio più ricchi
-        canali_esempio = [
-            ('🏫 Generale', 'Comunicazioni generali della scuola', 'generale', 'Liceo Demo'),
-            ('🤖 SKAILA AI', 'Assistente AI sempre disponibile per supporto 24/7', 'ai_support', 'Sistema'),
-            ('📚 Matematica 3A', 'Discussioni di matematica per la classe 3A', 'materia', 'Liceo Demo'),
-            ('📖 Italiano 2B', 'Letteratura e grammatica italiana', 'materia', 'Liceo Demo'),
-            ('🔬 Laboratorio Scienze', 'Esperimenti e progetti scientifici', 'materia', 'Liceo Demo'),
-            ('🎨 Arte e Design', 'Creatività e progetti artistici', 'materia', 'Liceo Demo'),
-            ('💼 SKAILA Connect', 'Opportunità di stage e lavoro per studenti', 'generale', 'Sistema'),
-            ('👥 Studenti 5A', 'Chat privata della classe 5A', 'classe', 'Liceo Demo'),
-            ('👨‍🏫 Professori', 'Area riservata docenti', 'generale', 'Liceo Demo'),
-            ('📢 Annunci Importanti', 'Comunicazioni urgenti e avvisi', 'generale', 'Liceo Demo'),
-        ]
-
-        for canale in canali_esempio:
-            cursor.execute('''
-                INSERT OR IGNORE INTO canali (nome, descrizione, tipo, scuola) 
-                VALUES (?, ?, ?, ?)
-            ''', canale)
-
-        # Aggiungi messaggi di esempio per rendere i canali più vivaci
-        messaggi_esempio = [
-            (1, 1, "🎉 Benvenuti al nuovo anno scolastico! SKAILA è qui per migliorare la nostra comunicazione!", False),
-            (1, 2, "Ciao a tutti! Sono entusiasta di usare questa nuova piattaforma!", False),
-            (2, None, "Ciao! Sono SKAILA AI, il vostro assistente virtuale. Sono qui per aiutarvi con qualsiasi domanda!", True),
-            (3, 1, "Oggi studieremo le equazioni di secondo grado. Chi ha dubbi sui compiti?", False),
-            (3, 2, "Professore, non riesco a capire il discriminante!", False),
-            (2, None, "Il discriminante Δ = b² - 4ac ti dice quante soluzioni ha l'equazione! Se Δ > 0 ci sono 2 soluzioni reali!", True),
-            (4, 1, "Per domani leggete il primo capitolo dei Promessi Sposi", False),
-            (5, 1, "Ricordate: domani esperimento di chimica in laboratorio!", False),
-            (7, None, "🚀 Nuove opportunità di stage disponibili presso aziende tech locali! Contattatemi per info!", True),
-            (1, 1, "Gli scrutini del primo trimestre sono fissati per il 15 dicembre", False),
-        ]
-
-        # Inserisci messaggi solo se non esistono già
-        for canale_id, utente_id, contenuto, ai_generato in messaggi_esempio:
-            cursor.execute('''
-                INSERT OR IGNORE INTO messaggi (canale_id, utente_id, contenuto, ai_generato, data_invio)
-                VALUES (?, ?, ?, ?, datetime('now', '-' || ABS(RANDOM() % 72) || ' hours'))
-            ''', (canale_id, utente_id, contenuto, ai_generato))
-
-        # Aggiungi tutti gli utenti ai canali pubblici automaticamente
-        cursor.execute('SELECT id FROM users')
-        users = cursor.fetchall()
-        cursor.execute('SELECT id FROM canali WHERE tipo IN ("generale", "ai_support")')
-        canali_pubblici = cursor.fetchall()
-
-        for user in users:
-            for canale in canali_pubblici:
-                cursor.execute('''
-                    INSERT OR IGNORE INTO partecipanti_canali (canale_id, utente_id) 
-                    VALUES (?, ?)
-                ''', (canale[0], user[0]))
-
-        conn.commit()
-
-def assegna_xp(utente_id, xp_amount, descrizione=""):
-    """Assegna XP a un utente"""
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
-
-        # Registra l'attività
-        cursor.execute('''
-            INSERT INTO attivita_xp (utente_id, tipo_attivita, xp_guadagnati, descrizione)
-            VALUES (?, ?, ?, ?)
-        ''', (utente_id, 'azione', xp_amount, descrizione))
-
-        # Aggiorna XP utente
-        cursor.execute('SELECT xp_totale FROM users WHERE id = ?', (utente_id,))
-        result = cursor.fetchone()
-        if result:
-            nuovo_xp = result[0] + xp_amount
-            nuovo_livello = min(50, int((nuovo_xp / 100) ** 0.5) + 1)
-            cursor.execute('UPDATE users SET xp_totale = ?, livello = ? WHERE id = ?', 
-                         (nuovo_xp, nuovo_livello, utente_id))
-            conn.commit()
-            return nuovo_xp, nuovo_livello
-        return 0, 1
-
-def genera_risposta_ai(messaggio):
-    """SKAILA AI Assistant - Genera risposte intelligenti"""
-    risposte_saluto = [
-        "Ciao! 👋 Sono SKAILA AI, il tuo assistente educativo. Come posso aiutarti oggi?",
-        "Salve! Benvenuto su SKAILA. Sono qui per supportarti nell'apprendimento! 📚",
-        "Hey! 🌟 Sono l'intelligenza artificiale di SKAILA. Dimmi, cosa posso fare per te?"
-    ]
-
-    risposte_aiuto = [
-        "Posso aiutarti con: 📖 Spiegazioni di materie, 💡 Consigli di studio, 🤔 Risoluzione problemi, ❓ Domande sulla piattaforma!",
-        "Sono specializzato nel supporto educativo! Chiedi pure di matematica, italiano, scienze, o qualsiasi altra materia! 🎯",
-        "Perfetto! Sono qui per: ✅ Aiutarti con i compiti ✅ Spiegare concetti difficili ✅ Darti consigli di studio ✅ Rispondere alle tue domande!"
-    ]
-
-    risposte_matematica = [
-        "Matematica! 🔢 La mia materia preferita! Su cosa hai bisogno di aiuto? Algebra, geometria, analisi, statistica?",
-        "Ottimo! 📐 In matematica, ricorda: ogni problema si risolve passo dopo passo. Qual è il tuo dubbio specifico?",
-        "Adoro la matematica! 🧮 Dimmi l'argomento o l'esercizio e ti aiuto a risolverlo insieme!"
-    ]
-
-    risposte_default = [
-        "Interessante! 🤔 Potresti darmi più dettagli così posso aiutarti meglio?",
-        "Bella domanda! 💭 Dimmi di più e sarò più preciso nella risposta.",
-        "Sono qui per aiutarti! 🚀 Riformula la domanda o dammi più contesto per essere più utile."
-    ]
-
-    messaggio_lower = messaggio.lower()
-
-    if any(parola in messaggio_lower for parola in ['ciao', 'salve', 'hey', 'buongiorno', 'buonasera']):
-        return random.choice(risposte_saluto)
-    elif any(parola in messaggio_lower for parola in ['aiuto', 'help', 'supporto', 'aiutami']):
-        return random.choice(risposte_aiuto)
-    elif any(parola in messaggio_lower for parola in ['matematica', 'calcolo', 'equazione', 'algebra', 'geometria']):
-        return random.choice(risposte_matematica)
-    else:
-        return random.choice(risposte_default)
-
-# Inizializza database
-init_db()
-
-# Routes principali
 @app.route('/')
 def home():
-    """Landing page SKAILA"""
     return render_template('index.html')
 
-@app.route('/app')
-def main_app():
-    """App principale di messaggistica"""
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    return render_template('app.html')
+@app.route('/api/registrazione', methods=['POST'])
+def registrazione():
+    try:
+        data = request.get_json()
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Sistema di login"""
-    if request.method == 'POST':
-        data = request.get_json() if request.is_json else request.form
-        email = data.get('email')
-        password = data.get('password')
+        # Validazione input
+        required_fields = ['username', 'email', 'password', 'nome', 'cognome']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'Campo {field} obbligatorio'}), 400
 
-        with sqlite3.connect(DATABASE) as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT id, email, nome, cognome, ruolo, password_hash FROM users WHERE email = ?', (email,))
-            user = cursor.fetchone()
+        # Controllo lunghezza password
+        if len(data['password']) < 6:
+            return jsonify({'error': 'Password deve essere almeno 6 caratteri'}), 400
 
-            if user and check_password_hash(user[5], password):
-                session['user_id'] = user[0]
-                session['user_email'] = user[1]
-                session['user_nome'] = user[2]
-                session['user_cognome'] = user[3]
-                session['user_ruolo'] = user[4]
+        conn = get_db_connection()
 
-                # Aggiorna ultimo accesso
-                cursor.execute('UPDATE users SET status = ?, ultimo_accesso = ? WHERE id = ?', 
-                             ('online', datetime.now(), user[0]))
-                conn.commit()
+        # Controllo se utente già esistente
+        existing = conn.execute(
+            'SELECT id FROM utenti WHERE username = ? OR email = ?',
+            (data['username'], data['email'])
+        ).fetchone()
 
-                # XP per login
-                assegna_xp(user[0], 5, "Login giornaliero")
+        if existing:
+            return jsonify({'error': 'Username o email già registrati'}), 400
 
-                if request.is_json:
-                    return jsonify({'success': True, 'redirect': '/app'})
-                return redirect(url_for('main_app'))
-            else:
-                error = 'Email o password non corretti'
-                if request.is_json:
-                    return jsonify({'error': error}), 401
-                return render_template('login.html', error=error)
+        # Hash password
+        password_hash = hash_password(data['password'])
 
-    return render_template('login.html')
+        # Inserimento nuovo utente
+        cursor = conn.execute('''
+            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data['username'],
+            data['email'], 
+            password_hash,
+            data['nome'],
+            data['cognome'],
+            data.get('ruolo', 'studente'),
+            data.get('classe', '')
+        ))
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    """Sistema di registrazione"""
-    if request.method == 'POST':
-        data = request.get_json() if request.is_json else request.form
-
-        email = data.get('email')
-        password = data.get('password')
-        nome = data.get('nome')
-        cognome = data.get('cognome')
-        ruolo = data.get('ruolo', 'studente')
-        scuola = data.get('scuola')
-        classe = data.get('classe', '')
-
-        if not all([email, password, nome, cognome, scuola]):
-            error = 'Tutti i campi sono obbligatori'
-            if request.is_json:
-                return jsonify({'error': error}), 400
-            return render_template('register.html', error=error)
-
-        password_hash = generate_password_hash(password)
-
-        try:
-            with sqlite3.connect(DATABASE) as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT INTO users (email, password_hash, nome, cognome, ruolo, scuola, classe, xp_totale, livello)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (email, password_hash, nome, cognome, ruolo, scuola, classe, 20, 1))
-
-                user_id = cursor.lastrowid
-
-                # Aggiungi ai canali automaticamente
-                cursor.execute('SELECT id FROM canali WHERE scuola = ? OR tipo = ?', (scuola, 'ai_support'))
-                canali = cursor.fetchall()
-
-                for canale in canali:
-                    cursor.execute('INSERT OR IGNORE INTO partecipanti_canali (canale_id, utente_id) VALUES (?, ?)', 
-                                 (canale[0], user_id))
-
-                # XP di benvenuto
-                assegna_xp(user_id, 20, "Benvenuto su SKAILA!")
-
-                conn.commit()
-
-                if request.is_json:
-                    return jsonify({'success': True, 'message': 'Registrazione completata!'})
-                return redirect(url_for('login'))
-
-        except sqlite3.IntegrityError:
-            error = 'Email già registrata'
-            if request.is_json:
-                return jsonify({'error': error}), 400
-            return render_template('register.html', error=error)
-
-    return render_template('register.html')
-
-@app.route('/logout')
-def logout():
-    """Logout utente"""
-    if 'user_id' in session:
-        with sqlite3.connect(DATABASE) as conn:
-            cursor = conn.cursor()
-            cursor.execute('UPDATE users SET status = ? WHERE id = ?', ('offline', session['user_id']))
-            conn.commit()
-
-    session.clear()
-    return redirect(url_for('home'))
-
-# API Routes
-@app.route('/api/canali')
-def api_canali():
-    """API - Lista canali utente"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Non autenticato'}), 401
-
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT c.id, c.nome, c.descrizione, c.tipo, c.ai_abilitato,
-                   COUNT(m.id) as num_messaggi
-            FROM canali c
-            JOIN partecipanti_canali pc ON c.id = pc.canale_id
-            LEFT JOIN messaggi m ON c.id = m.canale_id
-            WHERE pc.utente_id = ?
-            GROUP BY c.id
-            ORDER BY c.tipo, c.nome
-        ''', (session['user_id'],))
-
-        canali = []
-        for row in cursor.fetchall():
-            canali.append({
-                'id': row[0],
-                'nome': row[1],
-                'descrizione': row[2],
-                'tipo': row[3],
-                'ai_abilitato': row[4],
-                'num_messaggi': row[5]
-            })
-
-    return jsonify(canali)
-
-@app.route('/api/messaggi/<int:canale_id>')
-def api_messaggi(canale_id):
-    """API - Messaggi di un canale"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Non autenticato'}), 401
-
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT m.id, m.contenuto, m.data_invio, m.ai_generato,
-                   u.nome, u.cognome, u.ruolo
-            FROM messaggi m
-            LEFT JOIN users u ON m.utente_id = u.id
-            WHERE m.canale_id = ?
-            ORDER BY m.data_invio ASC
-            LIMIT 100
-        ''', (canale_id,))
-
-        messaggi = []
-        for row in cursor.fetchall():
-            messaggi.append({
-                'id': row[0],
-                'contenuto': row[1],
-                'data_invio': row[2],
-                'ai_generato': row[3],
-                'autore': {
-                    'nome': row[4] or 'SKAILA AI',
-                    'cognome': row[5] or '',
-                    'ruolo': row[6] or 'ai'
-                }
-            })
-
-    return jsonify(messaggi)
-
-@app.route('/api/user/stats')
-def api_user_stats():
-    """API - Statistiche utente"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Non autenticato'}), 401
-
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT u.xp_totale, u.livello, u.nome, u.cognome, u.ruolo,
-                   COUNT(DISTINCT m.id) as messaggi_inviati
-            FROM users u
-            LEFT JOIN messaggi m ON u.id = m.utente_id
-            WHERE u.id = ?
-            GROUP BY u.id
-        ''', (session['user_id'],))
-
-        result = cursor.fetchone()
-        if result:
-            return jsonify({
-                'xp_totale': result[0],
-                'livello': result[1],
-                'nome': result[2],
-                'cognome': result[3],
-                'ruolo': result[4],
-                'messaggi_inviati': result[5],
-                'prossimo_livello_xp': ((result[1]) ** 2) * 100
-            })
-
-    return jsonify({'error': 'Utente non trovato'}), 404
-
-# WebSocket per messaggistica real-time
-@socketio.on('connect')
-def on_connect():
-    """Connessione WebSocket"""
-    if 'user_id' in session:
-        with sqlite3.connect(DATABASE) as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT canale_id FROM partecipanti_canali WHERE utente_id = ?', (session['user_id'],))
-            for row in cursor.fetchall():
-                join_room(f"canale_{row[0]}")
-
-        emit('connected', {'message': f'Benvenuto su SKAILA, {session.get("user_nome", "Utente")}!'})
-
-@socketio.on('send_message')
-def handle_message(data):
-    """Gestione invio messaggi"""
-    if 'user_id' not in session:
-        return
-
-    canale_id = data.get('canale_id')
-    contenuto = data.get('contenuto')
-
-    if not canale_id or not contenuto:
-        return
-
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO messaggi (canale_id, utente_id, contenuto) VALUES (?, ?, ?)', 
-                      (canale_id, session['user_id'], contenuto))
-        messaggio_id = cursor.lastrowid
-
-        cursor.execute('SELECT nome, cognome, ruolo FROM users WHERE id = ?', (session['user_id'],))
-        user_info = cursor.fetchone()
-
-        cursor.execute('SELECT ai_abilitato, tipo FROM canali WHERE id = ?', (canale_id,))
-        canale_info = cursor.fetchone()
-
+        user_id = cursor.lastrowid
         conn.commit()
+        conn.close()
 
-    # XP per messaggio
-    assegna_xp(session['user_id'], 2, "Messaggio inviato")
+        return jsonify({
+            'success': True,
+            'message': 'Registrazione completata!',
+            'user_id': user_id
+        }), 201
 
-    # Invia messaggio a tutti
-    messaggio_data = {
-        'id': messaggio_id,
-        'contenuto': contenuto,
-        'canale_id': canale_id,
-        'data_invio': datetime.now().isoformat(),
-        'ai_generato': False,
-        'autore': {
-            'nome': user_info[0],
-            'cognome': user_info[1],
-            'ruolo': user_info[2]
-        }
-    }
+    except Exception as e:
+        return jsonify({'error': f'Errore server: {str(e)}'}), 500
 
-    emit('new_message', messaggio_data, room=f"canale_{canale_id}")
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
 
-    # Risposta AI automatica
-    if canale_info and canale_info[0] and ('skaila' in contenuto.lower() or canale_info[1] == 'ai_support'):
-        import threading
-        import time
+        if not username or not password:
+            return jsonify({'error': 'Username e password obbligatori'}), 400
 
-        def risposta_ai():
-            time.sleep(2)
-            risposta = genera_risposta_ai(contenuto)
+        conn = get_db_connection()
 
-            with sqlite3.connect(DATABASE) as conn:
-                cursor = conn.cursor()
-                cursor.execute('INSERT INTO messaggi (canale_id, contenuto, ai_generato) VALUES (?, ?, ?)',
-                              (canale_id, risposta, True))
-                ai_msg_id = cursor.lastrowid
-                conn.commit()
+        # Trova utente
+        user = conn.execute(
+            'SELECT * FROM utenti WHERE username = ? AND attivo = 1',
+            (username,)
+        ).fetchone()
 
-            ai_msg_data = {
-                'id': ai_msg_id,
-                'contenuto': risposta,
-                'canale_id': canale_id,
-                'data_invio': datetime.now().isoformat(),
-                'ai_generato': True,
-                'autore': {'nome': 'SKAILA AI', 'cognome': '', 'ruolo': 'ai'}
+        if not user or not verify_password(password, user['password_hash']):
+            return jsonify({'error': 'Credenziali non valide'}), 401
+
+        # Aggiorna ultimo accesso
+        conn.execute(
+            'UPDATE utenti SET ultimo_accesso = CURRENT_TIMESTAMP WHERE id = ?',
+            (user['id'],)
+        )
+        conn.commit()
+        conn.close()
+
+        # Crea sessione
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['ruolo'] = user['ruolo']
+
+        return jsonify({
+            'success': True,
+            'message': 'Login effettuato!',
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'nome': user['nome'],
+                'cognome': user['cognome'],
+                'ruolo': user['ruolo'],
+                'classe': user['classe']
             }
+        })
 
-            socketio.emit('new_message', ai_msg_data, room=f"canale_{canale_id}")
+    except Exception as e:
+        return jsonify({'error': f'Errore server: {str(e)}'}), 500
 
-        threading.Thread(target=risposta_ai).start()
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'success': True, 'message': 'Logout effettuato'})
 
-@socketio.on('join_channel')
-def on_join_channel(data):
-    """Unisciti a un canale"""
-    canale_id = data.get('canale_id')
-    if canale_id:
-        join_room(f"canale_{canale_id}")
+@app.route('/api/profilo')
+def profilo():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+
+    conn = get_db_connection()
+    user = conn.execute(
+        'SELECT id, username, email, nome, cognome, ruolo, classe, data_registrazione FROM utenti WHERE id = ?',
+        (session['user_id'],)
+    ).fetchone()
+    conn.close()
+
+    if not user:
+        return jsonify({'error': 'Utente non trovato'}), 404
+
+    return jsonify(dict(user))
+
+@app.route('/api/utenti')
+def lista_utenti():
+    """Lista tutti gli utenti - solo per admin/professori"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+
+    if session.get('ruolo') not in ['admin', 'professore']:
+        return jsonify({'error': 'Non autorizzato'}), 403
+
+    conn = get_db_connection()
+    utenti = conn.execute(
+        'SELECT id, username, nome, cognome, ruolo, classe FROM utenti WHERE attivo = 1 ORDER BY cognome, nome'
+    ).fetchall()
+    conn.close()
+
+    return jsonify([dict(user) for user in utenti])
+
+# ==================== SOCKET.IO per CHAT ====================
+
+@socketio.on('connect')
+def handle_connect():
+    if 'user_id' in session:
+        print(f"✅ {session['username']} si è connesso alla chat")
+    else:
+        print("❌ Tentativo connessione non autenticata")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    if 'user_id' in session:
+        print(f"🔌 {session['username']} si è disconnesso")
+
+@socketio.on('nuovo_messaggio')
+def handle_message(data):
+    if 'user_id' not in session:
+        return
+
+    # Salva messaggio nel database
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO messaggi (mittente_id, destinatario_id, contenuto)
+        VALUES (?, ?, ?)
+    ''', (session['user_id'], data.get('destinatario_id'), data.get('contenuto')))
+    conn.commit()
+    conn.close()
+
+    # Invia a tutti (per ora)
+    socketio.emit('messaggio_ricevuto', {
+        'mittente': session['username'],
+        'contenuto': data['contenuto'],
+        'timestamp': datetime.now().strftime('%H:%M')
+    })
 
 if __name__ == '__main__':
-    os.makedirs('templates', exist_ok=True)
-
-    print("🚀 SKAILA Backend starting...")
-    print("📊 Database initialized")
-    print("🤖 AI Assistant ready")
-    print("🏆 XP System active")
-    print("💬 Real-time messaging enabled")
-    print("🎯 Ready to revolutionize Italian schools!")
-
+    init_database()
+    print("🚀 SKAILA Server avviato!")
+    print("📍 http://localhost:5000")
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
-    import sqlite3
 
-    conn = sqlite3.connect("skaila.db")  # stesso nome usato in crea_database.py
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM utenti")
-    utenti = cursor.fetchall()
-
-    print("Utenti nel database:")
-    for utente in utenti:
-        print(utente)
-
-    conn.close()
