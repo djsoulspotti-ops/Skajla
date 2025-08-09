@@ -274,7 +274,7 @@ def check_login_attempts(email, ip_address):
 def home():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
-    return render_template('landing.html')
+    return render_template('index.html')
 
 @app.route('/registrazione')
 def registrazione_page():
