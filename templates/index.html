@@ -414,66 +414,210 @@
             line-height: 1.8;
         }
 
-        /* Stats Section */
-        .stats {
-            padding: 120px 0;
+        /* Italy Map Section */
+        .italy-map-section {
+            padding: 150px 0;
             background: var(--gradient-dark);
             color: white;
-            text-align: center;
             position: relative;
             overflow: hidden;
         }
 
-        .stats::before {
+        .italy-map-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
         }
 
-        .stats-content {
+        .map-content {
             position: relative;
             z-index: 1;
         }
 
-        .stats-grid {
+        .italy-map-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 3rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-top: 4rem;
         }
 
-        .stat-item {
-            padding: 2.5rem 1.5rem;
+        .italy-map {
+            position: relative;
+            background: rgba(255,255,255,0.03);
+            border-radius: 30px;
+            padding: 3rem;
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .italy-svg {
+            width: 100%;
+            height: 400px;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+        }
+
+        .italy-shape {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .italy-shape:hover {
+            filter: url(#glow) drop-shadow(0 0 20px rgba(102, 126, 234, 0.6));
+        }
+
+        .city-dot {
+            fill: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .city-dot:hover {
+            fill: #f093fb;
+            transform: scale(1.5);
+        }
+
+        .connection-line {
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .italy-map:hover .connection-line {
+            opacity: 0.6;
+        }
+
+        /* Floating Cards */
+        .floating-cards {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .info-card {
+            position: absolute;
+            background: rgba(255,255,255,0.95);
+            color: var(--text);
+            padding: 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-medium);
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255,255,255,0.2);
+            min-width: 200px;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .card-1 { top: 15%; right: -10%; }
+        .card-2 { top: 45%; left: -15%; }
+        .card-3 { bottom: 20%; right: -5%; }
+
+        .card-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .card-text strong {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text);
+        }
+
+        .card-text span {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @keyframes animate-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-float {
+            animation: animate-float 4s ease-in-out infinite;
+        }
+
+        .animate-float:nth-child(2) { animation-delay: 1.5s; }
+        .animate-float:nth-child(3) { animation-delay: 3s; }
+
+        /* Map Sidebar */
+        .map-sidebar {
+            padding: 2rem;
+        }
+
+        .expansion-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .expansion-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 2rem;
             background: rgba(255,255,255,0.05);
             border-radius: 20px;
             backdrop-filter: var(--blur);
             border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
 
-        .stat-item:hover {
-            transform: translateY(-10px);
+        .expansion-item:hover {
             background: rgba(255,255,255,0.1);
+            transform: translateX(10px);
         }
 
-        .stat-number {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
+        .expansion-icon {
+            font-size: 2.5rem;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: var(--gradient-accent);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
+            border-radius: 18px;
+            flex-shrink: 0;
         }
 
-        .stat-label {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            font-weight: 500;
+        .expansion-content h4 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .expansion-content p {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            font-size: 1rem;
         }
 
         /* CTA Section */
@@ -597,7 +741,36 @@
             .nav-links { display: none; }
             .features-grid { grid-template-columns: 1fr; }
             .feature-card { padding: 2.5rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            .italy-map-container { 
+                grid-template-columns: 1fr; 
+                gap: 2rem; 
+            }
+            
+            .italy-map { 
+                padding: 2rem; 
+            }
+            
+            .italy-svg { 
+                height: 300px; 
+            }
+            
+            .info-card {
+                position: static;
+                margin: 1rem 0;
+            }
+            
+            .card-1, .card-2, .card-3 {
+                position: static;
+                top: auto;
+                left: auto;
+                right: auto;
+                bottom: auto;
+            }
+            
+            .expansion-item { 
+                padding: 1.5rem; 
+            }
         }
     </style>
 </head>
@@ -679,25 +852,129 @@
             </div>
         </section>
 
-        <section class="stats" id="stats">
+        <section class="italy-map-section" id="stats">
             <div class="container">
-                <div class="stats-content">
-                    <div class="stats-grid">
-                        <div class="stat-item animate-on-scroll">
-                            <div class="stat-number">50+</div>
-                            <div class="stat-label">Scuole Partner</div>
+                <div class="map-content">
+                    <h2 class="section-title animate-on-scroll">🇮🇹 SKAILA in Tutta Italia</h2>
+                    <p class="section-subtitle animate-on-scroll">La rivoluzione digitale dell'educazione italiana è già iniziata</p>
+                    
+                    <div class="italy-map-container animate-on-scroll">
+                        <div class="italy-map">
+                            <svg viewBox="0 0 400 500" class="italy-svg">
+                                <defs>
+                                    <linearGradient id="italyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                    </linearGradient>
+                                    <filter id="glow">
+                                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                        <feMerge> 
+                                            <feMergeNode in="coloredBlur"/>
+                                            <feMergeNode in="SourceGraphic"/> 
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+                                
+                                <!-- Simplified Italy Shape -->
+                                <path d="M120 50 L140 45 L160 50 L180 60 L195 75 L200 90 L195 105 L200 120 L210 135 L220 150 L215 165 L220 180 L225 195 L220 210 L215 225 L210 240 L205 255 L200 270 L195 285 L185 295 L175 300 L165 295 L155 290 L150 280 L145 270 L140 260 L135 250 L130 240 L125 230 L120 220 L115 210 L110 200 L105 190 L100 180 L95 170 L90 160 L85 150 L80 140 L85 130 L90 120 L95 110 L100 100 L105 90 L110 80 L115 70 L120 60 Z" 
+                                      fill="url(#italyGradient)" 
+                                      stroke="#ffffff" 
+                                      stroke-width="2" 
+                                      filter="url(#glow)"
+                                      class="italy-shape"/>
+                                
+                                <!-- Animated Dots for Cities -->
+                                <circle cx="140" cy="100" r="4" class="city-dot milano" data-city="Milano">
+                                    <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="170" cy="120" r="4" class="city-dot venezia" data-city="Venezia">
+                                    <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="130" cy="140" r="4" class="city-dot bologna" data-city="Bologna">
+                                    <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="110" cy="160" r="4" class="city-dot firenze" data-city="Firenze">
+                                    <animate attributeName="r" values="4;6;4" dur="2.2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="145" cy="180" r="5" class="city-dot roma" data-city="Roma">
+                                    <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="160" cy="220" r="4" class="city-dot napoli" data-city="Napoli">
+                                    <animate attributeName="r" values="4;6;4" dur="2.8s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="180" cy="260" r="4" class="city-dot bari" data-city="Bari">
+                                    <animate attributeName="r" values="4;6;4" dur="3.2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="140" cy="300" r="4" class="city-dot palermo" data-city="Palermo">
+                                    <animate attributeName="r" values="4;6;4" dur="2.6s" repeatCount="indefinite"/>
+                                </circle>
+
+                                <!-- Connection Lines -->
+                                <path d="M140 100 L170 120 L130 140 L110 160 L145 180 L160 220 L180 260" 
+                                      stroke="#ffffff" 
+                                      stroke-width="1" 
+                                      fill="none" 
+                                      opacity="0.3"
+                                      stroke-dasharray="5,5"
+                                      class="connection-line">
+                                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite"/>
+                                </path>
+                            </svg>
+
+                            <!-- Floating Info Cards -->
+                            <div class="floating-cards">
+                                <div class="info-card card-1 animate-float">
+                                    <div class="card-icon">🏫</div>
+                                    <div class="card-text">
+                                        <strong>Licei & Istituti</strong>
+                                        <span>Al Nord Italia</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-card card-2 animate-float">
+                                    <div class="card-icon">🎓</div>
+                                    <div class="card-text">
+                                        <strong>Università Partner</strong>
+                                        <span>Centro Italia</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-card card-3 animate-float">
+                                    <div class="card-icon">🚀</div>
+                                    <div class="card-text">
+                                        <strong>Start-up Hub</strong>
+                                        <span>Sud & Isole</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-item animate-on-scroll">
-                            <div class="stat-number">15K+</div>
-                            <div class="stat-label">Studenti Attivi</div>
-                        </div>
-                        <div class="stat-item animate-on-scroll">
-                            <div class="stat-number">98%</div>
-                            <div class="stat-label">Soddisfazione</div>
-                        </div>
-                        <div class="stat-item animate-on-scroll">
-                            <div class="stat-number">24/7</div>
-                            <div class="stat-label">AI Support</div>
+                        
+                        <div class="map-sidebar">
+                            <div class="expansion-stats">
+                                <div class="expansion-item">
+                                    <div class="expansion-icon">🌍</div>
+                                    <div class="expansion-content">
+                                        <h4>Copertura Nazionale</h4>
+                                        <p>Da Milano a Palermo, SKAILA connette l'Italia dell'istruzione</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="expansion-item">
+                                    <div class="expansion-icon">⚡</div>
+                                    <div class="expansion-content">
+                                        <h4>Espansione Rapida</h4>
+                                        <p>Nuove scuole si uniscono ogni settimana alla rivoluzione digitale</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="expansion-item">
+                                    <div class="expansion-icon">🤝</div>
+                                    <div class="expansion-content">
+                                        <h4>Rete Nazionale</h4>
+                                        <p>Studenti di tutta Italia collaborano e si supportano</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -796,40 +1073,24 @@
             observer.observe(el);
         });
 
-        // Counter animation
-        function animateCounters() {
-            const counters = document.querySelectorAll('.stat-number');
-            counters.forEach(counter => {
-                const target = parseInt(counter.textContent.replace(/\D/g, ''));
-                const suffix = counter.textContent.replace(/[0-9]/g, '');
-                let current = 0;
-                const increment = target / 50;
-
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        counter.textContent = target + suffix;
-                        clearInterval(timer);
-                    } else {
-                        counter.textContent = Math.floor(current) + suffix;
-                    }
-                }, 50);
-            });
-        }
-
-        // Trigger counter animation when stats section is visible
-        const statsObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounters();
-                    statsObserver.unobserve(entry.target);
-                }
+        // Italy Map Interactive Effects
+        document.querySelectorAll('.city-dot').forEach(dot => {
+            dot.addEventListener('mouseenter', function() {
+                const cityName = this.dataset.city;
+                this.setAttribute('title', `🏛️ ${cityName} - SKAILA Network`);
             });
         });
 
-        const statsSection = document.querySelector('.stats');
-        if (statsSection) {
-            statsObserver.observe(statsSection);
+        // Map hover effects
+        const italyShape = document.querySelector('.italy-shape');
+        if (italyShape) {
+            italyShape.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            italyShape.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
         }
     </script>
 </body>
