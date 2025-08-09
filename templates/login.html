@@ -6,7 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accedi - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --blur: blur(20px);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,138 +33,374 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Floating Elements */
+        .floating-icon {
+            position: absolute;
+            color: rgba(255,255,255,0.1);
+            font-size: 3rem;
+            animation: floatIcon 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-icon:nth-child(1) { top: 10%; left: 15%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 70%; right: 10%; animation-delay: 3s; }
+        .floating-icon:nth-child(3) { bottom: 20%; left: 10%; animation-delay: 6s; }
+        .floating-icon:nth-child(4) { top: 30%; right: 20%; animation-delay: 1.5s; }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.2; }
         }
 
         .login-container {
-            background: white;
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3.5rem;
+            border-radius: 24px;
+            box-shadow: var(--shadow-heavy);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logo {
             text-align: center;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #4f46e5;
-            margin-bottom: 2rem;
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 2.5rem;
+            letter-spacing: -2px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 4px 20px rgba(255,255,255,0.3); }
+            to { text-shadow: 0 4px 30px rgba(255,255,255,0.5); }
         }
 
         h1 {
             text-align: center;
-            color: #1e293b;
-            margin-bottom: 2rem;
-            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 2.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
         }
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #374151;
-            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .input-wrapper {
+            position: relative;
         }
 
         input {
             width: 100%;
-            padding: 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            padding: 1.25rem 1.25rem 1.25rem 3.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: var(--blur);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         input:focus {
             outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            pointer-events: none;
         }
 
         .btn {
             width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            background: white;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .error {
-            color: #dc2626;
-            background: #fef2f2;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: 1px solid #fecaca;
+            color: white;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: var(--blur);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .register-link {
             text-align: center;
-            margin-top: 2rem;
-            color: #6b7280;
+            margin-top: 2.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
         }
 
         .register-link a {
-            color: #4f46e5;
+            color: white;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
         }
 
         .register-link a:hover {
-            text-decoration: underline;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            border-bottom: 2px solid white;
+        }
+
+        /* Decorative Elements */
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+            border-radius: 26px;
+            z-index: -1;
+        }
+
+        .decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: var(--blur);
+        }
+
+        .decoration:nth-child(1) {
+            top: -50px;
+            right: -50px;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .decoration:nth-child(2) {
+            bottom: -50px;
+            left: -50px;
+            animation: pulse 3s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.2; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2.5rem;
+                margin: 10px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
         }
     </style>
 </head>
 <body>
+    <i class="floating-icon fas fa-graduation-cap"></i>
+    <i class="floating-icon fas fa-rocket"></i>
+    <i class="floating-icon fas fa-star"></i>
+    <i class="floating-icon fas fa-book"></i>
+
     <div class="login-container">
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        
         <div class="logo">SKAILA</div>
-        <h1>🔐 Accedi</h1>
+        <h1>🔐 Bentornato!</h1>
 
         {% if error %}
         <div class="error">
-            <i class="fas fa-exclamation-circle"></i> {{ error }}
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
         </div>
         {% endif %}
 
         <form method="POST">
             <div class="form-group">
                 <label for="email">📧 Email</label>
-                <input type="email" id="email" name="email" required>
+                <div class="input-wrapper">
+                    <i class="input-icon fas fa-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="La tua email" required>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="password">🔒 Password</label>
-                <input type="password" id="password" name="password" required>
+                <div class="input-wrapper">
+                    <i class="input-icon fas fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="La tua password" required>
+                </div>
             </div>
 
             <button type="submit" class="btn">
-                <i class="fas fa-sign-in-alt"></i> Accedi
+                <i class="fas fa-sign-in-alt"></i> Accedi a SKAILA
             </button>
         </form>
 
         <div class="register-link">
-            Non hai un account? <a href="/register">Registrati qui</a>
+            Non hai ancora un account? <a href="/register">✨ Registrati qui</a>
         </div>
     </div>
+
+    <script>
+        // Add focus effects
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Form submission animation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = this.querySelector('.btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accesso in corso...';
+            btn.style.background = 'rgba(255,255,255,0.7)';
+        });
+
+        // Parallax effect for floating icons
+        document.addEventListener('mousemove', function(e) {
+            const icons = document.querySelectorAll('.floating-icon');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            icons.forEach((icon, index) => {
+                const speed = (index + 1) * 0.5;
+                const newX = x * speed * 10;
+                const newY = y * speed * 10;
+                icon.style.transform = `translate(${newX}px, ${newY}px) rotate(${newX}deg)`;
+            });
+        });
+    </script>
 </body>
 </html>
