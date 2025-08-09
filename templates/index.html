@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -414,16 +413,20 @@
             line-height: 1.8;
         }
 
-        /* Italy Map Section */
-        .italy-map-section {
+        /* 3D Italy Map Section */
+        .italy-3d-section {
             padding: 150px 0;
             background: var(--gradient-dark);
             color: white;
             position: relative;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
         }
 
-        .italy-map-section::before {
+        .italy-3d-section::before {
             content: '';
             position: absolute;
             top: 0;
@@ -433,307 +436,236 @@
             background: 
                 radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+            z-index: 0;
         }
 
-        .map-content {
+        .italy-3d-container {
             position: relative;
-            z-index: 1;
-        }
-
-        .italy-map-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            width: 80%;
+            max-width: 800px;
+            height: 600px;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            margin-top: 4rem;
+            transform-style: preserve-3d;
+            animation: rotateMap 30s infinite linear;
         }
 
-        .italy-map {
+        .map-3d-wrapper {
             position: relative;
-            background: rgba(255,255,255,0.03);
-            border-radius: 30px;
-            padding: 3rem;
-            backdrop-filter: var(--blur);
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: var(--shadow-heavy);
-        }
-
-        .italy-svg {
             width: 100%;
-            height: 400px;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+            height: 100%;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        .italy-shape {
-            transition: all 0.3s ease;
+        .italy-3d-map {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease-out;
+        }
+
+        .italy-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            z-index: -1;
+        }
+
+        .region {
+            position: absolute;
+            width: 30px; /* Base size, will be scaled */
+            height: 30px;
+            transform-style: preserve-3d;
+            left: var(--x, 50%);
+            top: var(--y, 50%);
+            margin-left: -15px; /* Center */
+            margin-top: -15px; /* Center */
+            animation: floatRegion 5s ease-in-out infinite alternate;
+        }
+
+        .region-face {
+            position: absolute;
+            width: 100%;
+            height: var(--height, 50px);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-sizing: border-box;
+            opacity: 0.85;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .region-face.front { transform: translateZ(15px); }
+        .region-face.back { transform: rotateY(180deg) translateZ(15px); }
+        .region-face.top { transform: rotateX(90deg) translateZ(calc(var(--height, 50px) / 2)); height: 100%; width: 100%; background: linear-gradient(to top, var(--primary), var(--secondary)); }
+        .region-face.bottom { transform: rotateX(-90deg) translateZ(calc(var(--height, 50px) / 2)); height: 100%; width: 100%; background: linear-gradient(to bottom, var(--primary), var(--secondary)); }
+        .region-face.left { transform: rotateY(-90deg) translateZ(15px); }
+        .region-face.right { transform: rotateY(90deg) translateZ(15px); }
+        
+        /* Adjust face sizes based on height */
+        .region .region-face.front,
+        .region .region-face.back,
+        .region .region-face.left,
+        .region .region-face.right {
+            height: var(--height, 50px);
+        }
+
+        .region-label {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .city-marker {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: #ffcc00; /* Yellow for cities */
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,204,0,0.8);
             cursor: pointer;
+            z-index: 3;
         }
 
-        .italy-shape:hover {
-            filter: url(#glow) drop-shadow(0 0 20px rgba(102, 126, 234, 0.6));
-        }
-
-        .city-dot {
-            fill: #ffffff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-        }
-
-        .city-dot:hover {
-            fill: #f093fb;
-            transform: scale(1.5);
-        }
-
-        .connection-line {
-            opacity: 0.3;
+        .city-marker::after {
+            content: attr(data-city); /* Fallback for older browsers or if data-city is not set */
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            opacity: 0;
             transition: opacity 0.3s ease;
         }
 
-        .italy-map:hover .connection-line {
-            opacity: 0.6;
+        .city-marker:hover::after {
+            opacity: 1;
         }
 
-        /* Floating Cards */
-        .floating-cards {
+        .floating-particles {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden;
             pointer-events: none;
         }
 
-        .info-card {
+        .particle {
             position: absolute;
-            background: rgba(255,255,255,0.95);
-            color: var(--text);
-            padding: 1.5rem;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            animation: floatParticle 5s infinite linear;
+        }
+
+        .particle:nth-child(1) { left: 10%; top: 10%; width: 8px; height: 8px; animation-delay: -2s; }
+        .particle:nth-child(2) { left: 30%; top: 30%; width: 12px; height: 12px; animation-delay: -3s; }
+        .particle:nth-child(3) { left: 50%; top: 10%; width: 6px; height: 6px; animation-delay: -1s; }
+        .particle:nth-child(4) { left: 70%; top: 30%; width: 10px; height: 10px; animation-delay: -4s; }
+        .particle:nth-child(5) { left: 90%; top: 10%; width: 7px; height: 7px; animation-delay: -2.5s; }
+        .particle:nth-child(6) { left: 5%; top: 50%; width: 9px; height: 9px; animation-delay: -3.5s; }
+        .particle:nth-child(7) { left: 40%; top: 60%; width: 11px; height: 11px; animation-delay: -1.5s; }
+        .particle:nth-child(8) { left: 80%; top: 50%; width: 8px; height: 8px; animation-delay: -2.8s; }
+
+        .connection-3d {
+            position: absolute;
+            top: calc(var(--start-y) * 1.2); /* Adjust positioning */
+            left: calc(var(--start-x) * 1.2); /* Adjust positioning */
+            width: calc(var(--end-x) - var(--start-x));
+            height: calc(var(--end-y) - var(--start-y));
+            transform-origin: 0 0;
+            transform: translate(-50%, -50%) rotateX(70deg) rotateZ(20deg); /* 3D perspective */
+            opacity: 0.6;
+            border-top: 2px dashed rgba(255, 204, 0, 0.7);
+            animation: animateConnection 4s infinite alternate;
+        }
+
+        .map-3d-controls {
+            margin-top: 20px;
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: var(--shadow-medium);
-            backdrop-filter: var(--blur);
-            border: 1px solid rgba(255,255,255,0.2);
-            min-width: 200px;
-            pointer-events: auto;
-            transition: all 0.3s ease;
+            gap: 15px;
+            z-index: 10;
         }
 
-        .info-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-heavy);
-        }
-
-        .card-1 { top: 15%; right: -10%; }
-        .card-2 { top: 45%; left: -15%; }
-        .card-3 { bottom: 20%; right: -5%; }
-
-        .card-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gradient-primary);
-            border-radius: 12px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .card-text strong {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            color: var(--text);
-        }
-
-        .card-text span {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        @keyframes animate-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .animate-float {
-            animation: animate-float 4s ease-in-out infinite;
-        }
-
-        .animate-float:nth-child(2) { animation-delay: 1.5s; }
-        .animate-float:nth-child(3) { animation-delay: 3s; }
-
-        /* Map Sidebar */
-        .map-sidebar {
-            padding: 2rem;
-        }
-
-        .expansion-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 2.5rem;
-        }
-
-        .expansion-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1.5rem;
-            padding: 2rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            backdrop-filter: var(--blur);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .expansion-item:hover {
+        .control-btn {
+            padding: 10px 20px;
             background: rgba(255,255,255,0.1);
-            transform: translateX(10px);
-        }
-
-        .expansion-icon {
-            font-size: 2.5rem;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gradient-accent);
-            border-radius: 18px;
-            flex-shrink: 0;
-        }
-
-        .expansion-content h4 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
             color: white;
-        }
-
-        .expansion-content p {
-            color: rgba(255,255,255,0.8);
-            line-height: 1.6;
-            font-size: 1rem;
-        }
-
-        /* CTA Section */
-        .cta {
-            padding: 150px 0;
-            background: var(--gradient-primary);
-            color: white;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 30s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .cta-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .cta h2 {
-            font-size: 3.5rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            letter-spacing: -2px;
-        }
-
-        .cta p {
-            font-size: 1.4rem;
-            margin-bottom: 3rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 4rem 0 2rem;
-            position: relative;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .footer-section a {
-            color: #94a3b8;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            font-weight: 400;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
         }
 
-        .footer-section a:hover {
-            color: white;
-            transform: translateX(5px);
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
         }
 
-        .footer-bottom {
-            border-top: 1px solid #334155;
-            padding-top: 2rem;
-            color: #64748b;
-            text-align: center;
+        /* Animations for 3D Map */
+        @keyframes rotateMap {
+            0% { transform: perspective(1000px) rotateY(0deg) scale(1); }
+            50% { transform: perspective(1000px) rotateY(180deg) scale(1.1); }
+            100% { transform: perspective(1000px) rotateY(360deg) scale(1); }
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+        @keyframes floatRegion {
+            0%, 100% { transform: translateY(0) rotateX(-10deg); }
+            50% { transform: translateY(-20px) rotateX(-5deg); }
+        }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        @keyframes animateConnection {
+            0% { opacity: 0.6; transform: scale(0.8); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+            100% { opacity: 0.6; transform: scale(0.8); }
+        }
+
+        /* Responsive Adjustments for 3D Map */
+        @media (max-width: 992px) {
+            .italy-3d-container {
+                width: 90%;
+                height: 500px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            .region-label { font-size: 0.7rem; }
+            .city-marker::after { font-size: 0.6rem; }
         }
 
-        .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease;
-        }
-
-        .animate-on-scroll.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .hero h1 { font-size: 3rem; }
             .section-title { font-size: 2.5rem; }
@@ -741,37 +673,25 @@
             .nav-links { display: none; }
             .features-grid { grid-template-columns: 1fr; }
             .feature-card { padding: 2.5rem; }
-            
-            .italy-map-container { 
-                grid-template-columns: 1fr; 
-                gap: 2rem; 
+
+            .italy-3d-container {
+                height: 400px;
             }
-            
-            .italy-map { 
-                padding: 2rem; 
+
+            .map-3d-controls {
+                flex-direction: column;
+                align-items: center;
             }
-            
-            .italy-svg { 
-                height: 300px; 
-            }
-            
-            .info-card {
-                position: static;
-                margin: 1rem 0;
-            }
-            
-            .card-1, .card-2, .card-3 {
-                position: static;
-                top: auto;
-                left: auto;
-                right: auto;
-                bottom: auto;
-            }
-            
-            .expansion-item { 
-                padding: 1.5rem; 
-            }
+            .control-btn { width: 80%; }
         }
+
+        @media (max-width: 576px) {
+            .italy-3d-container {
+                height: 300px;
+            }
+            .italy-3d-section { padding: 80px 0; }
+        }
+
     </style>
 </head>
 <body>
@@ -794,7 +714,7 @@
             <i class="floating-icon fas fa-graduation-cap"></i>
             <i class="floating-icon fas fa-rocket"></i>
             <i class="floating-icon fas fa-star"></i>
-            
+
             <div class="container">
                 <div class="hero-content">
                     <h1>Rivoluziona la Comunicazione Scolastica</h1>
@@ -852,129 +772,129 @@
             </div>
         </section>
 
-        <section class="italy-map-section" id="stats">
+        <!-- 3D Italy Map Section -->
+        <section class="italy-3d-section" id="stats">
             <div class="container">
-                <div class="map-content">
-                    <h2 class="section-title animate-on-scroll">🇮🇹 SKAILA in Tutta Italia</h2>
-                    <p class="section-subtitle animate-on-scroll">La rivoluzione digitale dell'educazione italiana è già iniziata</p>
-                    
-                    <div class="italy-map-container animate-on-scroll">
-                        <div class="italy-map">
-                            <svg viewBox="0 0 400 500" class="italy-svg">
-                                <defs>
-                                    <linearGradient id="italyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-                                    </linearGradient>
-                                    <filter id="glow">
-                                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                        <feMerge> 
-                                            <feMergeNode in="coloredBlur"/>
-                                            <feMergeNode in="SourceGraphic"/> 
-                                        </feMerge>
-                                    </filter>
-                                </defs>
-                                
-                                <!-- Simplified Italy Shape -->
-                                <path d="M120 50 L140 45 L160 50 L180 60 L195 75 L200 90 L195 105 L200 120 L210 135 L220 150 L215 165 L220 180 L225 195 L220 210 L215 225 L210 240 L205 255 L200 270 L195 285 L185 295 L175 300 L165 295 L155 290 L150 280 L145 270 L140 260 L135 250 L130 240 L125 230 L120 220 L115 210 L110 200 L105 190 L100 180 L95 170 L90 160 L85 150 L80 140 L85 130 L90 120 L95 110 L100 100 L105 90 L110 80 L115 70 L120 60 Z" 
-                                      fill="url(#italyGradient)" 
-                                      stroke="#ffffff" 
-                                      stroke-width="2" 
-                                      filter="url(#glow)"
-                                      class="italy-shape"/>
-                                
-                                <!-- Animated Dots for Cities -->
-                                <circle cx="140" cy="100" r="4" class="city-dot milano" data-city="Milano">
-                                    <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="170" cy="120" r="4" class="city-dot venezia" data-city="Venezia">
-                                    <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="130" cy="140" r="4" class="city-dot bologna" data-city="Bologna">
-                                    <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="110" cy="160" r="4" class="city-dot firenze" data-city="Firenze">
-                                    <animate attributeName="r" values="4;6;4" dur="2.2s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="145" cy="180" r="5" class="city-dot roma" data-city="Roma">
-                                    <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="160" cy="220" r="4" class="city-dot napoli" data-city="Napoli">
-                                    <animate attributeName="r" values="4;6;4" dur="2.8s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="180" cy="260" r="4" class="city-dot bari" data-city="Bari">
-                                    <animate attributeName="r" values="4;6;4" dur="3.2s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="140" cy="300" r="4" class="city-dot palermo" data-city="Palermo">
-                                    <animate attributeName="r" values="4;6;4" dur="2.6s" repeatCount="indefinite"/>
-                                </circle>
+                <h2 class="section-title animate-on-scroll">🇮🇹 SKAILA in 3D</h2>
+                <p class="section-subtitle animate-on-scroll">Esplora l'Italia tecnologica interattiva</p>
 
-                                <!-- Connection Lines -->
-                                <path d="M140 100 L170 120 L130 140 L110 160 L145 180 L160 220 L180 260" 
-                                      stroke="#ffffff" 
-                                      stroke-width="1" 
-                                      fill="none" 
-                                      opacity="0.3"
-                                      stroke-dasharray="5,5"
-                                      class="connection-line">
-                                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite"/>
-                                </path>
-                            </svg>
+                <div class="italy-3d-container">
+                    <div class="map-3d-wrapper">
+                        <div class="italy-3d-map" id="italy3d">
+                            <!-- Base dell'Italia -->
+                            <div class="italy-base"></div>
 
-                            <!-- Floating Info Cards -->
-                            <div class="floating-cards">
-                                <div class="info-card card-1 animate-float">
-                                    <div class="card-icon">🏫</div>
-                                    <div class="card-text">
-                                        <strong>Licei & Istituti</strong>
-                                        <span>Al Nord Italia</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-card card-2 animate-float">
-                                    <div class="card-icon">🎓</div>
-                                    <div class="card-text">
-                                        <strong>Università Partner</strong>
-                                        <span>Centro Italia</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-card card-3 animate-float">
-                                    <div class="card-icon">🚀</div>
-                                    <div class="card-text">
-                                        <strong>Start-up Hub</strong>
-                                        <span>Sud & Isole</span>
-                                    </div>
-                                </div>
+                            <!-- Regioni 3D -->
+                            <div class="region nord-ovest" data-region="Piemonte" style="--x: 20%; --y: 15%; --height: 60px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Piemonte</div>
                             </div>
+
+                            <div class="region nord-est" data-region="Lombardia" style="--x: 35%; --y: 20%; --height: 80px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Lombardia</div>
+                                <div class="city-marker milano">Milano</div>
+                            </div>
+
+                            <div class="region nord-est" data-region="Veneto" style="--x: 55%; --y: 25%; --height: 70px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Veneto</div>
+                                <div class="city-marker venezia">Venezia</div>
+                            </div>
+
+                            <div class="region centro" data-region="Toscana" style="--x: 30%; --y: 45%; --height: 65px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Toscana</div>
+                                <div class="city-marker firenze">Firenze</div>
+                            </div>
+
+                            <div class="region centro" data-region="Lazio" style="--x: 45%; --y: 60%; --height: 75px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Lazio</div>
+                                <div class="city-marker roma">Roma</div>
+                            </div>
+
+                            <div class="region sud" data-region="Campania" style="--x: 50%; --y: 75%; --height: 70px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Campania</div>
+                                <div class="city-marker napoli">Napoli</div>
+                            </div>
+
+                            <div class="region sud" data-region="Puglia" style="--x: 70%; --y: 80%; --height: 55px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Puglia</div>
+                                <div class="city-marker bari">Bari</div>
+                            </div>
+
+                            <div class="region isole" data-region="Sicilia" style="--x: 45%; --y: 95%; --height: 50px;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">Sicilia</div>
+                                <div class="city-marker palermo">Palermo</div>
+                            </div>
+
+                            <!-- Particelle fluttuanti -->
+                            <div class="floating-particles">
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                            </div>
+
+                            <!-- Connessioni 3D -->
+                            <div class="connection-3d" style="--start-x: 35%; --start-y: 20%; --end-x: 55%; --end-y: 25%;"></div>
+                            <div class="connection-3d" style="--start-x: 35%; --start-y: 20%; --end-x: 45%; --end-y: 60%;"></div>
+                            <div class="connection-3d" style="--start-x: 45%; --start-y: 60%; --end-x: 50%; --end-y: 75%;"></div>
                         </div>
-                        
-                        <div class="map-sidebar">
-                            <div class="expansion-stats">
-                                <div class="expansion-item">
-                                    <div class="expansion-icon">🌍</div>
-                                    <div class="expansion-content">
-                                        <h4>Copertura Nazionale</h4>
-                                        <p>Da Milano a Palermo, SKAILA connette l'Italia dell'istruzione</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="expansion-item">
-                                    <div class="expansion-icon">⚡</div>
-                                    <div class="expansion-content">
-                                        <h4>Espansione Rapida</h4>
-                                        <p>Nuove scuole si uniscono ogni settimana alla rivoluzione digitale</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="expansion-item">
-                                    <div class="expansion-icon">🤝</div>
-                                    <div class="expansion-content">
-                                        <h4>Rete Nazionale</h4>
-                                        <p>Studenti di tutta Italia collaborano e si supportano</p>
-                                    </div>
-                                </div>
-                            </div>
+
+                        <!-- Controlli 3D -->
+                        <div class="map-3d-controls">
+                            <button class="control-btn" id="rotateBtn">🔄 Ruota</button>
+                            <button class="control-btn" id="zoomBtn">🔍 Zoom</button>
+                            <button class="control-btn" id="resetBtn">↩️ Reset</button>
                         </div>
                     </div>
                 </div>
@@ -1073,25 +993,72 @@
             observer.observe(el);
         });
 
-        // Italy Map Interactive Effects
-        document.querySelectorAll('.city-dot').forEach(dot => {
-            dot.addEventListener('mouseenter', function() {
-                const cityName = this.dataset.city;
-                this.setAttribute('title', `🏛️ ${cityName} - SKAILA Network`);
-            });
+        // 3D Map Controls and Interactions
+        const italy3dMap = document.getElementById('italy3d');
+        const rotateBtn = document.getElementById('rotateBtn');
+        const zoomBtn = document.getElementById('zoomBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let currentRotationY = 0;
+        let currentScale = 1;
+        const rotationSpeed = 0.5;
+        const zoomSpeed = 0.1;
+
+        function updateMapTransform() {
+            italy3dMap.style.transform = `perspective(1000px) rotateY(${currentRotationY}deg) scale(${currentScale})`;
+        }
+
+        rotateBtn.addEventListener('click', () => {
+            currentRotationY += 45; // Rotate by 45 degrees
+            updateMapTransform();
         });
 
-        // Map hover effects
-        const italyShape = document.querySelector('.italy-shape');
-        if (italyShape) {
-            italyShape.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.02)';
-            });
-            
-            italyShape.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-        }
+        zoomBtn.addEventListener('click', () => {
+            currentScale += zoomSpeed;
+            updateMapTransform();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            currentRotationY = 0;
+            currentScale = 1;
+            updateMapTransform();
+        });
+
+        // Optional: Add drag-to-rotate functionality
+        let isDragging = false;
+        let startX, startY;
+        let initialRotationY;
+
+        italy3dMap.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialRotationY = currentRotationY;
+            italy3dMap.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY; // Not used for rotation here, but useful for potential panning
+
+            currentRotationY = initialRotationY + deltaX * 0.5; // Adjust sensitivity
+            updateMapTransform();
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            italy3dMap.style.cursor = 'grab';
+        });
+
+        italy3dMap.addEventListener('mouseleave', () => {
+            isDragging = false;
+            italy3dMap.style.cursor = 'grab';
+        });
+        
+        // Initial transform
+        updateMapTransform();
+
     </script>
 </body>
 </html>
