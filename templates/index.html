@@ -413,7 +413,7 @@
             line-height: 1.8;
         }
 
-        /* 3D Italy Map Section */
+        /* 3D Italy Map Section - VERSIONE MIGLIORATA */
         .italy-3d-section {
             padding: 150px 0;
             background: var(--gradient-dark);
@@ -423,7 +423,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 1000px;
+            perspective: 1500px;
         }
 
         .italy-3d-section::before {
@@ -434,21 +434,27 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+                radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.2) 0%, transparent 60%),
+                radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.2) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, rgba(240, 147, 251, 0.1) 0%, transparent 70%);
+            animation: pulseBackground 8s ease-in-out infinite alternate;
             z-index: 0;
+        }
+
+        @keyframes pulseBackground {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
         }
 
         .italy-3d-container {
             position: relative;
-            width: 80%;
-            max-width: 800px;
-            height: 600px;
+            width: 90%;
+            max-width: 900px;
+            height: 700px;
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
-            animation: rotateMap 30s infinite linear;
         }
 
         .map-3d-wrapper {
@@ -467,107 +473,170 @@
             width: 100%;
             height: 100%;
             transform-style: preserve-3d;
-            transition: transform 0.5s ease-out;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: gentleRotation 40s ease-in-out infinite;
+        }
+
+        @keyframes gentleRotation {
+            0%, 100% { transform: perspective(1500px) rotateY(0deg) rotateX(-10deg) scale(1); }
+            25% { transform: perspective(1500px) rotateY(90deg) rotateX(-5deg) scale(1.05); }
+            50% { transform: perspective(1500px) rotateY(180deg) rotateX(-10deg) scale(1.1); }
+            75% { transform: perspective(1500px) rotateY(270deg) rotateX(-5deg) scale(1.05); }
         }
 
         .italy-base {
             position: absolute;
-            bottom: 0;
+            bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80%;
-            height: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            width: 90%;
+            height: 30px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             z-index: -1;
+            animation: shadowPulse 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes shadowPulse {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.4; }
+            100% { transform: translateX(-50%) scale(1.1); opacity: 0.6; }
         }
 
         .region {
             position: absolute;
-            width: 30px; /* Base size, will be scaled */
-            height: 30px;
+            width: var(--size, 35px);
+            height: var(--size, 35px);
             transform-style: preserve-3d;
             left: var(--x, 50%);
             top: var(--y, 50%);
-            margin-left: -15px; /* Center */
-            margin-top: -15px; /* Center */
-            animation: floatRegion 5s ease-in-out infinite alternate;
+            margin-left: calc(var(--size, 35px) / -2);
+            margin-top: calc(var(--size, 35px) / -2);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: floatRegion calc(6s + var(--delay, 0s)) ease-in-out infinite alternate;
+        }
+
+        .region:hover {
+            transform: translateY(-15px) scale(1.2);
+            z-index: 100;
         }
 
         .region-face {
             position: absolute;
             width: 100%;
-            height: var(--height, 50px);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border: 1px solid rgba(255,255,255,0.2);
+            height: var(--height, 60px);
+            background: var(--region-color, linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%));
+            border: 2px solid rgba(255,255,255,0.3);
             box-sizing: border-box;
-            opacity: 0.85;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0.9;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
         }
 
-        .region-face.front { transform: translateZ(15px); }
-        .region-face.back { transform: rotateY(180deg) translateZ(15px); }
-        .region-face.top { transform: rotateX(90deg) translateZ(calc(var(--height, 50px) / 2)); height: 100%; width: 100%; background: linear-gradient(to top, var(--primary), var(--secondary)); }
-        .region-face.bottom { transform: rotateX(-90deg) translateZ(calc(var(--height, 50px) / 2)); height: 100%; width: 100%; background: linear-gradient(to bottom, var(--primary), var(--secondary)); }
-        .region-face.left { transform: rotateY(-90deg) translateZ(15px); }
-        .region-face.right { transform: rotateY(90deg) translateZ(15px); }
+        .region:hover .region-face {
+            box-shadow: 0 15px 40px rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.6);
+        }
+
+        .region-face.front { transform: translateZ(calc(var(--size, 35px) / 2)); }
+        .region-face.back { transform: rotateY(180deg) translateZ(calc(var(--size, 35px) / 2)); }
+        .region-face.top { 
+            transform: rotateX(90deg) translateZ(calc(var(--height, 60px) / 2)); 
+            height: 100%; 
+            width: 100%; 
+            background: var(--region-color-top, linear-gradient(to top, var(--primary), var(--secondary))); 
+        }
+        .region-face.bottom { 
+            transform: rotateX(-90deg) translateZ(calc(var(--height, 60px) / 2)); 
+            height: 100%; 
+            width: 100%; 
+            background: var(--region-color-bottom, linear-gradient(to bottom, var(--primary), var(--secondary))); 
+        }
+        .region-face.left { transform: rotateY(-90deg) translateZ(calc(var(--size, 35px) / 2)); }
+        .region-face.right { transform: rotateY(90deg) translateZ(calc(var(--size, 35px) / 2)); }
         
-        /* Adjust face sizes based on height */
         .region .region-face.front,
         .region .region-face.back,
         .region .region-face.left,
         .region .region-face.right {
-            height: var(--height, 50px);
+            height: var(--height, 60px);
         }
 
         .region-label {
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(100% + 15px);
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             color: white;
-            background: rgba(0,0,0,0.5);
-            padding: 3px 8px;
-            border-radius: 4px;
+            background: rgba(0,0,0,0.8);
+            padding: 6px 12px;
+            border-radius: 8px;
             white-space: nowrap;
             z-index: 2;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .region:hover .region-label {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
         }
 
         .city-marker {
             position: absolute;
-            bottom: 5px;
+            bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 10px;
-            height: 10px;
-            background: #ffcc00; /* Yellow for cities */
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #ffdd44 0%, #ff8800 100%);
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255,204,0,0.8);
+            box-shadow: 0 0 15px rgba(255,221,68,0.8), inset 0 2px 4px rgba(255,255,255,0.3);
             cursor: pointer;
             z-index: 3;
+            animation: cityPulse 3s ease-in-out infinite;
+            border: 2px solid rgba(255,255,255,0.6);
+        }
+
+        @keyframes cityPulse {
+            0%, 100% { 
+                transform: translateX(-50%) scale(1); 
+                box-shadow: 0 0 15px rgba(255,221,68,0.8), inset 0 2px 4px rgba(255,255,255,0.3); 
+            }
+            50% { 
+                transform: translateX(-50%) scale(1.3); 
+                box-shadow: 0 0 25px rgba(255,221,68,1), inset 0 2px 4px rgba(255,255,255,0.5); 
+            }
         }
 
         .city-marker::after {
-            content: attr(data-city); /* Fallback for older browsers or if data-city is not set */
+            content: attr(data-city);
             position: absolute;
-            bottom: 15px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
+            font-weight: 600;
             color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 2px 6px;
-            border-radius: 3px;
+            background: rgba(0,0,0,0.9);
+            padding: 4px 8px;
+            border-radius: 6px;
             white-space: nowrap;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,221,68,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
 
         .city-marker:hover::after {
             opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
         }
 
         .floating-particles {
@@ -582,78 +651,150 @@
 
         .particle {
             position: absolute;
-            background: rgba(255, 255, 255, 0.15);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(102, 126, 234, 0.3) 100%);
             border-radius: 50%;
-            animation: floatParticle 5s infinite linear;
+            animation: floatParticle calc(8s + var(--particle-delay, 0s)) infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
         }
 
-        .particle:nth-child(1) { left: 10%; top: 10%; width: 8px; height: 8px; animation-delay: -2s; }
-        .particle:nth-child(2) { left: 30%; top: 30%; width: 12px; height: 12px; animation-delay: -3s; }
-        .particle:nth-child(3) { left: 50%; top: 10%; width: 6px; height: 6px; animation-delay: -1s; }
-        .particle:nth-child(4) { left: 70%; top: 30%; width: 10px; height: 10px; animation-delay: -4s; }
-        .particle:nth-child(5) { left: 90%; top: 10%; width: 7px; height: 7px; animation-delay: -2.5s; }
-        .particle:nth-child(6) { left: 5%; top: 50%; width: 9px; height: 9px; animation-delay: -3.5s; }
-        .particle:nth-child(7) { left: 40%; top: 60%; width: 11px; height: 11px; animation-delay: -1.5s; }
-        .particle:nth-child(8) { left: 80%; top: 50%; width: 8px; height: 8px; animation-delay: -2.8s; }
+        .particle:nth-child(1) { left: 5%; top: 5%; width: 6px; height: 6px; --particle-delay: -1s; }
+        .particle:nth-child(2) { left: 25%; top: 15%; width: 8px; height: 8px; --particle-delay: -2s; }
+        .particle:nth-child(3) { left: 45%; top: 8%; width: 4px; height: 4px; --particle-delay: -0.5s; }
+        .particle:nth-child(4) { left: 65%; top: 20%; width: 7px; height: 7px; --particle-delay: -3s; }
+        .particle:nth-child(5) { left: 85%; top: 12%; width: 5px; height: 5px; --particle-delay: -1.5s; }
+        .particle:nth-child(6) { left: 10%; top: 40%; width: 6px; height: 6px; --particle-delay: -2.5s; }
+        .particle:nth-child(7) { left: 30%; top: 50%; width: 8px; height: 8px; --particle-delay: -0.8s; }
+        .particle:nth-child(8) { left: 70%; top: 45%; width: 5px; height: 5px; --particle-delay: -3.2s; }
+        .particle:nth-child(9) { left: 90%; top: 60%; width: 7px; height: 7px; --particle-delay: -1.8s; }
+        .particle:nth-child(10) { left: 15%; top: 70%; width: 6px; height: 6px; --particle-delay: -2.8s; }
 
-        .connection-3d {
+        .data-beam {
             position: absolute;
-            top: calc(var(--start-y) * 1.2); /* Adjust positioning */
-            left: calc(var(--start-x) * 1.2); /* Adjust positioning */
-            width: calc(var(--end-x) - var(--start-x));
-            height: calc(var(--end-y) - var(--start-y));
-            transform-origin: 0 0;
-            transform: translate(-50%, -50%) rotateX(70deg) rotateZ(20deg); /* 3D perspective */
-            opacity: 0.6;
-            border-top: 2px dashed rgba(255, 204, 0, 0.7);
-            animation: animateConnection 4s infinite alternate;
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to top, transparent 0%, #00ff88 50%, transparent 100%);
+            transform-origin: bottom;
+            animation: dataFlow 4s ease-in-out infinite;
+            left: var(--beam-x, 50%);
+            top: var(--beam-y, 50%);
+            opacity: 0.7;
+        }
+
+        .data-beam:nth-child(1) { --beam-x: 25%; --beam-y: 30%; animation-delay: -1s; }
+        .data-beam:nth-child(2) { --beam-x: 60%; --beam-y: 40%; animation-delay: -2s; }
+        .data-beam:nth-child(3) { --beam-x: 45%; --beam-y: 65%; animation-delay: -0.5s; }
+
+        @keyframes dataFlow {
+            0%, 100% { 
+                transform: translateY(0) scaleY(1); 
+                opacity: 0.3; 
+            }
+            50% { 
+                transform: translateY(-20px) scaleY(1.5); 
+                opacity: 0.8; 
+            }
         }
 
         .map-3d-controls {
-            margin-top: 20px;
+            margin-top: 30px;
             display: flex;
-            gap: 15px;
+            gap: 20px;
             z-index: 10;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .control-btn {
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.15);
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            backdrop-filter: blur(5px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
         }
 
         .control-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        /* Animations for 3D Map */
-        @keyframes rotateMap {
-            0% { transform: perspective(1000px) rotateY(0deg) scale(1); }
-            50% { transform: perspective(1000px) rotateY(180deg) scale(1.1); }
-            100% { transform: perspective(1000px) rotateY(360deg) scale(1); }
+        .control-btn:active {
+            transform: translateY(-1px);
         }
 
+        /* Animazioni migliorate per la mappa 3D */
         @keyframes floatRegion {
-            0%, 100% { transform: translateY(0) rotateX(-10deg); }
-            50% { transform: translateY(-20px) rotateX(-5deg); }
+            0%, 100% { 
+                transform: translateY(0) rotateX(-5deg) rotateZ(0deg); 
+            }
+            50% { 
+                transform: translateY(-25px) rotateX(5deg) rotateZ(2deg); 
+            }
         }
 
         @keyframes floatParticle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-30px); }
+            0%, 100% { 
+                transform: translateY(0) translateX(0); 
+                opacity: 0.3; 
+            }
+            50% { 
+                transform: translateY(-40px) translateX(10px); 
+                opacity: 0.8; 
+            }
         }
 
-        @keyframes animateConnection {
-            0% { opacity: 0.6; transform: scale(0.8); }
-            50% { opacity: 0.8; transform: scale(1.1); }
-            100% { opacity: 0.6; transform: scale(0.8); }
+        /* Colori specifici per le regioni */
+        .region.nord-ovest {
+            --region-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --region-color-top: linear-gradient(to top, #667eea, #8b9cff);
+            --region-color-bottom: linear-gradient(to bottom, #764ba2, #5a3a7a);
+        }
+
+        .region.nord-est {
+            --region-color: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --region-color-top: linear-gradient(to top, #f093fb, #ff9eff);
+            --region-color-bottom: linear-gradient(to bottom, #f5576c, #d1455a);
+        }
+
+        .region.centro {
+            --region-color: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --region-color-top: linear-gradient(to top, #4facfe, #6bb8ff);
+            --region-color-bottom: linear-gradient(to bottom, #00f2fe, #00d4e7);
+        }
+
+        .region.sud {
+            --region-color: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --region-color-top: linear-gradient(to top, #43e97b, #5ced89);
+            --region-color-bottom: linear-gradient(to bottom, #38f9d7, #2de0c1);
+        }
+
+        .region.isole {
+            --region-color: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --region-color-top: linear-gradient(to top, #fa709a, #fc86ab);
+            --region-color-bottom: linear-gradient(to bottom, #fee140, #e5ca39);
         }
 
         /* Responsive Adjustments for 3D Map */
@@ -784,95 +925,234 @@
                             <!-- Base dell'Italia -->
                             <div class="italy-base"></div>
 
-                            <!-- Regioni 3D -->
-                            <div class="region nord-ovest" data-region="Piemonte" style="--x: 20%; --y: 15%; --height: 60px;">
+                            <!-- TUTTE LE 20 REGIONI ITALIANE 3D -->
+                            
+                            <!-- NORD OVEST -->
+                            <div class="region nord-ovest" data-region="Piemonte" style="--x: 22%; --y: 18%; --height: 65px; --size: 40px; --delay: 0s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Piemonte</div>
+                                <div class="region-label">🏔️ Piemonte</div>
+                                <div class="city-marker" data-city="Torino"></div>
                             </div>
 
-                            <div class="region nord-est" data-region="Lombardia" style="--x: 35%; --y: 20%; --height: 80px;">
+                            <div class="region nord-ovest" data-region="Valle d'Aosta" style="--x: 18%; --y: 12%; --height: 45px; --size: 25px; --delay: 0.5s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Lombardia</div>
-                                <div class="city-marker milano">Milano</div>
+                                <div class="region-label">⛷️ Valle d'Aosta</div>
+                                <div class="city-marker" data-city="Aosta"></div>
                             </div>
 
-                            <div class="region nord-est" data-region="Veneto" style="--x: 55%; --y: 25%; --height: 70px;">
+                            <div class="region nord-ovest" data-region="Lombardia" style="--x: 35%; --y: 22%; --height: 85px; --size: 50px; --delay: 1s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Veneto</div>
-                                <div class="city-marker venezia">Venezia</div>
+                                <div class="region-label">🏙️ Lombardia</div>
+                                <div class="city-marker" data-city="Milano"></div>
                             </div>
 
-                            <div class="region centro" data-region="Toscana" style="--x: 30%; --y: 45%; --height: 65px;">
+                            <div class="region nord-ovest" data-region="Liguria" style="--x: 28%; --y: 32%; --height: 40px; --size: 35px; --delay: 1.5s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Toscana</div>
-                                <div class="city-marker firenze">Firenze</div>
+                                <div class="region-label">🌊 Liguria</div>
+                                <div class="city-marker" data-city="Genova"></div>
                             </div>
 
-                            <div class="region centro" data-region="Lazio" style="--x: 45%; --y: 60%; --height: 75px;">
+                            <!-- NORD EST -->
+                            <div class="region nord-est" data-region="Trentino Alto Adige" style="--x: 42%; --y: 15%; --height: 70px; --size: 38px; --delay: 2s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Lazio</div>
-                                <div class="city-marker roma">Roma</div>
+                                <div class="region-label">🎿 Trentino A.A.</div>
+                                <div class="city-marker" data-city="Trento"></div>
                             </div>
 
-                            <div class="region sud" data-region="Campania" style="--x: 50%; --y: 75%; --height: 70px;">
+                            <div class="region nord-est" data-region="Veneto" style="--x: 52%; --y: 25%; --height: 75px; --size: 45px; --delay: 2.5s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Campania</div>
-                                <div class="city-marker napoli">Napoli</div>
+                                <div class="region-label">🎭 Veneto</div>
+                                <div class="city-marker" data-city="Venezia"></div>
                             </div>
 
-                            <div class="region sud" data-region="Puglia" style="--x: 70%; --y: 80%; --height: 55px;">
+                            <div class="region nord-est" data-region="Friuli Venezia Giulia" style="--x: 62%; --y: 20%; --height: 55px; --size: 35px; --delay: 3s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Puglia</div>
-                                <div class="city-marker bari">Bari</div>
+                                <div class="region-label">🍷 Friuli V.G.</div>
+                                <div class="city-marker" data-city="Trieste"></div>
                             </div>
 
-                            <div class="region isole" data-region="Sicilia" style="--x: 45%; --y: 95%; --height: 50px;">
+                            <div class="region nord-est" data-region="Emilia Romagna" style="--x: 42%; --y: 35%; --height: 65px; --size: 55px; --delay: 3.5s;">
                                 <div class="region-face front"></div>
                                 <div class="region-face back"></div>
                                 <div class="region-face top"></div>
                                 <div class="region-face bottom"></div>
                                 <div class="region-face left"></div>
                                 <div class="region-face right"></div>
-                                <div class="region-label">Sicilia</div>
-                                <div class="city-marker palermo">Palermo</div>
+                                <div class="region-label">🍝 Emilia Romagna</div>
+                                <div class="city-marker" data-city="Bologna"></div>
                             </div>
 
-                            <!-- Particelle fluttuanti -->
+                            <!-- CENTRO -->
+                            <div class="region centro" data-region="Toscana" style="--x: 35%; --y: 48%; --height: 70px; --size: 48px; --delay: 4s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🎨 Toscana</div>
+                                <div class="city-marker" data-city="Firenze"></div>
+                            </div>
+
+                            <div class="region centro" data-region="Marche" style="--x: 52%; --y: 42%; --height: 55px; --size: 35px; --delay: 4.5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🏖️ Marche</div>
+                                <div class="city-marker" data-city="Ancona"></div>
+                            </div>
+
+                            <div class="region centro" data-region="Umbria" style="--x: 42%; --y: 52%; --height: 50px; --size: 30px; --delay: 5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🌿 Umbria</div>
+                                <div class="city-marker" data-city="Perugia"></div>
+                            </div>
+
+                            <div class="region centro" data-region="Lazio" style="--x: 45%; --y: 62%; --height: 80px; --size: 45px; --delay: 5.5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🏛️ Lazio</div>
+                                <div class="city-marker" data-city="Roma"></div>
+                            </div>
+
+                            <!-- SUD -->
+                            <div class="region sud" data-region="Abruzzo" style="--x: 55%; --y: 55%; --height: 60px; --size: 35px; --delay: 6s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🦅 Abruzzo</div>
+                                <div class="city-marker" data-city="L'Aquila"></div>
+                            </div>
+
+                            <div class="region sud" data-region="Molise" style="--x: 58%; --y: 65%; --height: 45px; --size: 28px; --delay: 6.5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🌾 Molise</div>
+                                <div class="city-marker" data-city="Campobasso"></div>
+                            </div>
+
+                            <div class="region sud" data-region="Campania" style="--x: 52%; --y: 75%; --height: 75px; --size: 42px; --delay: 7s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🍕 Campania</div>
+                                <div class="city-marker" data-city="Napoli"></div>
+                            </div>
+
+                            <div class="region sud" data-region="Puglia" style="--x: 68%; --y: 78%; --height: 65px; --size: 40px; --delay: 7.5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🫒 Puglia</div>
+                                <div class="city-marker" data-city="Bari"></div>
+                            </div>
+
+                            <div class="region sud" data-region="Basilicata" style="--x: 60%; --y: 82%; --height: 55px; --size: 32px; --delay: 8s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🌄 Basilicata</div>
+                                <div class="city-marker" data-city="Potenza"></div>
+                            </div>
+
+                            <div class="region sud" data-region="Calabria" style="--x: 58%; --y: 88%; --height: 70px; --size: 35px; --delay: 8.5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🌶️ Calabria</div>
+                                <div class="city-marker" data-city="Catanzaro"></div>
+                            </div>
+
+                            <!-- ISOLE -->
+                            <div class="region isole" data-region="Sicilia" style="--x: 48%; --y: 95%; --height: 65px; --size: 50px; --delay: 9s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🌋 Sicilia</div>
+                                <div class="city-marker" data-city="Palermo"></div>
+                            </div>
+
+                            <div class="region isole" data-region="Sardegna" style="--x: 25%; --y: 85%; --height: 60px; --size: 45px; --delay: 9.5s;">
+                                <div class="region-face front"></div>
+                                <div class="region-face back"></div>
+                                <div class="region-face top"></div>
+                                <div class="region-face bottom"></div>
+                                <div class="region-face left"></div>
+                                <div class="region-face right"></div>
+                                <div class="region-label">🏝️ Sardegna</div>
+                                <div class="city-marker" data-city="Cagliari"></div>
+                            </div>
+
+                            <!-- Particelle fluttuanti migliorate -->
                             <div class="floating-particles">
                                 <div class="particle"></div>
                                 <div class="particle"></div>
@@ -882,18 +1162,23 @@
                                 <div class="particle"></div>
                                 <div class="particle"></div>
                                 <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
                             </div>
 
-                            <!-- Connessioni 3D -->
-                            <div class="connection-3d" style="--start-x: 35%; --start-y: 20%; --end-x: 55%; --end-y: 25%;"></div>
-                            <div class="connection-3d" style="--start-x: 35%; --start-y: 20%; --end-x: 45%; --end-y: 60%;"></div>
-                            <div class="connection-3d" style="--start-x: 45%; --start-y: 60%; --end-x: 50%; --end-y: 75%;"></div>
+                            <!-- Raggi di dati 3D -->
+                            <div class="data-beam"></div>
+                            <div class="data-beam"></div>
+                            <div class="data-beam"></div>
                         </div>
 
-                        <!-- Controlli 3D -->
+                        <!-- Controlli 3D Avanzati -->
                         <div class="map-3d-controls">
                             <button class="control-btn" id="rotateBtn">🔄 Ruota</button>
-                            <button class="control-btn" id="zoomBtn">🔍 Zoom</button>
+                            <button class="control-btn" id="zoomInBtn">🔍 Zoom +</button>
+                            <button class="control-btn" id="zoomOutBtn">🔍 Zoom -</button>
+                            <button class="control-btn" id="pauseBtn">⏸️ Pausa</button>
+                            <button class="control-btn" id="speedBtn">⚡ Velocità</button>
                             <button class="control-btn" id="resetBtn">↩️ Reset</button>
                         </div>
                     </div>
@@ -993,56 +1278,155 @@
             observer.observe(el);
         });
 
-        // 3D Map Controls and Interactions
+        // 3D Map Controls and Interactions AVANZATI
         const italy3dMap = document.getElementById('italy3d');
         const rotateBtn = document.getElementById('rotateBtn');
-        const zoomBtn = document.getElementById('zoomBtn');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const speedBtn = document.getElementById('speedBtn');
         const resetBtn = document.getElementById('resetBtn');
 
         let currentRotationY = 0;
+        let currentRotationX = -10;
         let currentScale = 1;
-        const rotationSpeed = 0.5;
-        const zoomSpeed = 0.1;
+        let isAnimationPaused = false;
+        let animationSpeed = 1;
+        const rotationSpeed = 45;
+        const zoomSpeed = 0.15;
+
+        // Stato dell'animazione
+        let animationStates = {
+            rotation: true,
+            floating: true,
+            particles: true
+        };
 
         function updateMapTransform() {
-            italy3dMap.style.transform = `perspective(1000px) rotateY(${currentRotationY}deg) scale(${currentScale})`;
+            italy3dMap.style.transform = `perspective(1500px) rotateY(${currentRotationY}deg) rotateX(${currentRotationX}deg) scale(${currentScale})`;
         }
 
+        function toggleAnimation() {
+            const allAnimations = document.querySelectorAll('.italy-3d-map, .region, .particle, .data-beam');
+            
+            if (isAnimationPaused) {
+                allAnimations.forEach(el => {
+                    el.style.animationPlayState = 'running';
+                });
+                pauseBtn.innerHTML = '⏸️ Pausa';
+                pauseBtn.style.background = 'rgba(255,255,255,0.15)';
+            } else {
+                allAnimations.forEach(el => {
+                    el.style.animationPlayState = 'paused';
+                });
+                pauseBtn.innerHTML = '▶️ Play';
+                pauseBtn.style.background = 'rgba(67, 233, 123, 0.3)';
+            }
+            isAnimationPaused = !isAnimationPaused;
+        }
+
+        function changeSpeed() {
+            animationSpeed = animationSpeed >= 3 ? 0.5 : animationSpeed + 0.5;
+            const allAnimations = document.querySelectorAll('.italy-3d-map, .region, .particle, .data-beam');
+            
+            allAnimations.forEach(el => {
+                const duration = el.style.animationDuration;
+                if (duration) {
+                    const baseDuration = parseFloat(duration) / animationSpeed;
+                    el.style.animationDuration = `${baseDuration * animationSpeed}s`;
+                }
+            });
+
+            speedBtn.innerHTML = `⚡ ${animationSpeed}x`;
+            speedBtn.style.background = animationSpeed > 1 ? 'rgba(245, 87, 108, 0.3)' : 'rgba(255,255,255,0.15)';
+        }
+
+        // Event Listeners per i controlli
         rotateBtn.addEventListener('click', () => {
-            currentRotationY += 45; // Rotate by 45 degrees
+            currentRotationY += rotationSpeed;
             updateMapTransform();
+            
+            // Feedback visivo
+            rotateBtn.style.background = 'rgba(102, 126, 234, 0.4)';
+            setTimeout(() => {
+                rotateBtn.style.background = 'rgba(255,255,255,0.15)';
+            }, 200);
         });
 
-        zoomBtn.addEventListener('click', () => {
-            currentScale += zoomSpeed;
-            updateMapTransform();
+        zoomInBtn.addEventListener('click', () => {
+            if (currentScale < 2) {
+                currentScale += zoomSpeed;
+                updateMapTransform();
+                
+                zoomInBtn.style.background = 'rgba(67, 233, 123, 0.4)';
+                setTimeout(() => {
+                    zoomInBtn.style.background = 'rgba(255,255,255,0.15)';
+                }, 200);
+            }
         });
+
+        zoomOutBtn.addEventListener('click', () => {
+            if (currentScale > 0.5) {
+                currentScale -= zoomSpeed;
+                updateMapTransform();
+                
+                zoomOutBtn.style.background = 'rgba(245, 87, 108, 0.4)';
+                setTimeout(() => {
+                    zoomOutBtn.style.background = 'rgba(255,255,255,0.15)';
+                }, 200);
+            }
+        });
+
+        pauseBtn.addEventListener('click', toggleAnimation);
+        speedBtn.addEventListener('click', changeSpeed);
 
         resetBtn.addEventListener('click', () => {
             currentRotationY = 0;
+            currentRotationX = -10;
             currentScale = 1;
+            animationSpeed = 1;
+            
+            if (isAnimationPaused) {
+                toggleAnimation();
+            }
+            
             updateMapTransform();
+            
+            // Reset dei bottoni
+            pauseBtn.innerHTML = '⏸️ Pausa';
+            speedBtn.innerHTML = '⚡ Velocità';
+            pauseBtn.style.background = 'rgba(255,255,255,0.15)';
+            speedBtn.style.background = 'rgba(255,255,255,0.15)';
+            
+            resetBtn.style.background = 'rgba(240, 147, 251, 0.4)';
+            setTimeout(() => {
+                resetBtn.style.background = 'rgba(255,255,255,0.15)';
+            }, 300);
         });
 
-        // Optional: Add drag-to-rotate functionality
+        // Drag-to-rotate migliorato
         let isDragging = false;
         let startX, startY;
-        let initialRotationY;
+        let initialRotationY, initialRotationX;
 
         italy3dMap.addEventListener('mousedown', (e) => {
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
             initialRotationY = currentRotationY;
+            initialRotationX = currentRotationX;
             italy3dMap.style.cursor = 'grabbing';
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
+            
             const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY; // Not used for rotation here, but useful for potential panning
+            const deltaY = e.clientY - startY;
 
-            currentRotationY = initialRotationY + deltaX * 0.5; // Adjust sensitivity
+            currentRotationY = initialRotationY + deltaX * 0.5;
+            currentRotationX = Math.max(-30, Math.min(30, initialRotationX - deltaY * 0.3));
+            
             updateMapTransform();
         });
 
@@ -1055,9 +1439,66 @@
             isDragging = false;
             italy3dMap.style.cursor = 'grab';
         });
+
+        // Touch support per mobile
+        italy3dMap.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                initialRotationY = currentRotationY;
+                initialRotationX = currentRotationX;
+            }
+        });
+
+        italy3dMap.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length !== 1) return;
+            e.preventDefault();
+            
+            const deltaX = e.touches[0].clientX - startX;
+            const deltaY = e.touches[0].clientY - startY;
+
+            currentRotationY = initialRotationY + deltaX * 0.5;
+            currentRotationX = Math.max(-30, Math.min(30, initialRotationX - deltaY * 0.3));
+            
+            updateMapTransform();
+        });
+
+        italy3dMap.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // Effetti hover per le regioni
+        document.querySelectorAll('.region').forEach((region, index) => {
+            region.addEventListener('mouseenter', () => {
+                region.style.filter = 'brightness(1.3) drop-shadow(0 0 20px rgba(255,255,255,0.5))';
+                
+                // Effetto sonoro simulato con vibrazione
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            });
+
+            region.addEventListener('mouseleave', () => {
+                region.style.filter = 'none';
+            });
+
+            region.addEventListener('click', () => {
+                // Zoom sulla regione
+                const regionData = region.dataset.region;
+                console.log(`Regione selezionata: ${regionData}`);
+                
+                // Animazione di selezione
+                region.style.transform = 'translateY(-25px) scale(1.3)';
+                setTimeout(() => {
+                    region.style.transform = '';
+                }, 500);
+            });
+        });
         
-        // Initial transform
+        // Inizializzazione
         updateMapTransform();
+        italy3dMap.style.cursor = 'grab';
 
     </script>
 </body>
