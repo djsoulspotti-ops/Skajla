@@ -555,7 +555,7 @@
         }
         .region-face.left { transform: rotateY(-90deg) translateZ(calc(var(--size, 35px) / 2)); }
         .region-face.right { transform: rotateY(90deg) translateZ(calc(var(--size, 35px) / 2)); }
-        
+
         .region .region-face.front,
         .region .region-face.back,
         .region .region-face.left,
@@ -833,6 +833,597 @@
             .italy-3d-section { padding: 80px 0; }
         }
 
+        /* Call to Action Section Migliorata */
+        .cta {
+            padding: 150px 0;
+            background: var(--gradient-primary);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%),
+                radial-gradient(circle at 70% 30%, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: ctaPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes ctaPulse {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: white;
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255,255,255,0.5); }
+        }
+
+        .cta h2 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+        }
+
+        .cta p {
+            font-size: 1.4rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            min-width: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.75rem 3rem;
+            font-size: 1.2rem;
+            min-width: 200px;
+        }
+
+        .btn-cta small {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        /* Footer Professionale */
+        .professional-footer {
+            background: var(--gradient-dark);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .footer-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4rem;
+            padding: 4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .logo-text {
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
+        }
+
+        .logo-tagline {
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .footer-description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.8);
+            max-width: 400px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.5s;
+            z-index: 0;
+        }
+
+        .social-link:hover::before {
+            left: 0;
+        }
+
+        .social-link i {
+            font-size: 1.4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .social-link::after {
+            content: attr(data-platform);
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .social-link:hover::after {
+            opacity: 1;
+            top: -50px;
+        }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2.5rem;
+        }
+
+        .footer-column h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-link {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            text-decoration: none;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+            padding: 0.75rem;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.05);
+            transition: left 0.3s ease;
+        }
+
+        .footer-link:hover::before {
+            left: 0;
+        }
+
+        .footer-link:hover {
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .footer-link i {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .link-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .link-content span {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .link-content small {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        /* Newsletter Section */
+        .footer-newsletter {
+            padding: 3rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .newsletter-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .newsletter-info h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .newsletter-info p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+        }
+
+        .newsletter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .newsletter-input {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 60px;
+            padding: 0.5rem;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-input:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .newsletter-input input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .newsletter-input input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .newsletter-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .newsletter-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .newsletter-disclaimer {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            padding: 2rem 0;
+        }
+
+        .footer-bottom-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-copyright {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-copyright p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+        }
+
+        .made-with {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: var(--accent);
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-heavy);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive Footer */
+        @media (max-width: 1024px) {
+            .footer-main {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .footer-links {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+
+            .newsletter-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .footer-links {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+
+            .cta-stats {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .newsletter-input {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+                border-radius: 20px;
+            }
+
+            .newsletter-btn {
+                border-radius: 15px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .cta h2 {
+                font-size: 2.5rem;
+            }
+
+            .logo-text {
+                font-size: 2rem;
+            }
+
+            .footer-main {
+                padding: 3rem 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2.5rem;
+                margin: 10px;
+            }
+
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -926,7 +1517,7 @@
                             <div class="italy-base"></div>
 
                             <!-- TUTTE LE 20 REGIONI ITALIANE 3D -->
-                            
+
                             <!-- NORD OVEST -->
                             <div class="region nord-ovest" data-region="Piemonte" style="--x: 22%; --y: 18%; --height: 65px; --size: 40px; --delay: 0s;">
                                 <div class="region-face front"></div>
@@ -1200,40 +1791,200 @@
         </section>
     </main>
 
-    <footer>
+    <footer class="professional-footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>🚀 SKAILA</h3>
-                    <p style="color: #94a3b8; line-height: 1.8;">La piattaforma che sta rivoluzionando la comunicazione scolastica italiana, una scuola alla volta.</p>
+            <div class="footer-gradient"></div>
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <a href="/" class="logo-text">SKAILA</a>
+                        <span class="logo-tagline">La comunicazione scolastica, rivoluzionata.</span>
+                    </div>
+                    <p class="footer-description">Siamo un team appassionato di innovazione educativa, dedicato a creare strumenti che migliorano l'apprendimento e la collaborazione a scuola.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" data-platform="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link" data-platform="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" data-platform="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" data-platform="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="footer-section">
-                    <h3>Prodotto</h3>
-                    <a href="#features">Funzionalità</a>
-                    <a href="/register">Registrati</a>
-                    <a href="/login">Accedi</a>
-                    <a href="/app">App Messaggistica</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Supporto</h3>
-                    <a href="mailto:help@skaila.it">Centro Assistenza</a>
-                    <a href="mailto:info@skaila.it">Contattaci</a>
-                    <a href="#">Documentazione</a>
-                    <a href="#">Community</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Azienda</h3>
-                    <a href="#">Chi Siamo</a>
-                    <a href="#">Blog</a>
-                    <a href="#">Carriere</a>
-                    <a href="#">Privacy Policy</a>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>🚀 Prodotto</h4>
+                        <div class="footer-menu">
+                            <a href="#features" class="footer-link">
+                                <i class="fas fa-star"></i>
+                                <div class="link-content">
+                                    <span>Funzionalità</span>
+                                    <small>Scopri tutte le feature di SKAILA</small>
+                                </div>
+                            </a>
+                            <a href="/register" class="footer-link">
+                                <i class="fas fa-user-plus"></i>
+                                <div class="link-content">
+                                    <span>Registrati</span>
+                                    <small>Inizia la tua prova gratuita</small>
+                                </div>
+                            </a>
+                            <a href="/login" class="footer-link">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <div class="link-content">
+                                    <span>Accedi</span>
+                                    <small>Entra nella tua dashboard</small>
+                                </div>
+                            </a>
+                            <a href="/app" class="footer-link">
+                                <i class="fas fa-mobile-alt"></i>
+                                <div class="link-content">
+                                    <span>App Messaggistica</span>
+                                    <small>Comunica ovunque tu sia</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>💡 Supporto</h4>
+                        <div class="footer-menu">
+                            <a href="mailto:help@skaila.it" class="footer-link">
+                                <i class="fas fa-question-circle"></i>
+                                <div class="link-content">
+                                    <span>Centro Assistenza</span>
+                                    <small>Domande frequenti e guide</small>
+                                </div>
+                            </a>
+                            <a href="mailto:info@skaila.it" class="footer-link">
+                                <i class="fas fa-envelope"></i>
+                                <div class="link-content">
+                                    <span>Contattaci</span>
+                                    <small>Scrivici per informazioni</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-book-open"></i>
+                                <div class="link-content">
+                                    <span>Documentazione</span>
+                                    <small>Approfondisci il funzionamento</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-users"></i>
+                                <div class="link-content">
+                                    <span>Community</span>
+                                    <small>Partecipa alle discussioni</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>🏢 Azienda</h4>
+                        <div class="footer-menu">
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="link-content">
+                                    <span>Chi Siamo</span>
+                                    <small>Scopri la nostra storia</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-blog"></i>
+                                <div class="link-content">
+                                    <span>Blog</span>
+                                    <small>Aggiornamenti e novità</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-briefcase"></i>
+                                <div class="link-content">
+                                    <span>Carriere</span>
+                                    <small>Lavora con noi</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-shield-alt"></i>
+                                <div class="link-content">
+                                    <span>Privacy Policy</span>
+                                    <small>I nostri impegni sulla privacy</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>📍 Le Nostre Sedi</h4>
+                        <div class="footer-menu">
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="link-content">
+                                    <span>Milano</span>
+                                    <small>Sede Principale</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="link-content">
+                                    <span>Roma</span>
+                                    <small>Ufficio Innovazione</small>
+                                </div>
+                            </a>
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="link-content">
+                                    <span>Napoli</span>
+                                    <small>Hub Sud Italia</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div class="footer-newsletter">
+                <div class="newsletter-content">
+                    <div class="newsletter-info">
+                        <h3>Resta Aggiornato</h3>
+                        <p>Iscriviti alla nostra newsletter per ricevere novità e aggiornamenti direttamente nella tua casella di posta.</p>
+                    </div>
+                    <div class="newsletter-form">
+                        <div class="newsletter-input">
+                            <input type="email" placeholder="La tua email">
+                            <button class="newsletter-btn">
+                                Iscriviti
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="newsletter-disclaimer">
+                            <i class="fas fa-lock"></i> Proteggiamo la tua privacy.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="footer-bottom">
-                <p>&copy; 2025 SKAILA. Tutti i diritti riservati. Made with ❤️ per l'innovazione educativa italiana.</p>
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>&copy; 2025 SKAILA. Tutti i diritti riservati.</p>
+                        <span class="made-with">Made with ❤️ for Italian educational innovation.</span>
+                    </div>
+                    <div class="footer-legal">
+                        <a href="#">Termini di Servizio</a>
+                        <a href="#">Cookie Policy</a>
+                        <a href="#">Conformità GDPR</a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
+
+    <button class="back-to-top" id="backToTopBtn">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 
     <script>
         // Smooth scrolling
@@ -1308,7 +2059,7 @@
 
         function toggleAnimation() {
             const allAnimations = document.querySelectorAll('.italy-3d-map, .region, .particle, .data-beam');
-            
+
             if (isAnimationPaused) {
                 allAnimations.forEach(el => {
                     el.style.animationPlayState = 'running';
@@ -1328,12 +2079,21 @@
         function changeSpeed() {
             animationSpeed = animationSpeed >= 3 ? 0.5 : animationSpeed + 0.5;
             const allAnimations = document.querySelectorAll('.italy-3d-map, .region, .particle, .data-beam');
-            
+
             allAnimations.forEach(el => {
-                const duration = el.style.animationDuration;
-                if (duration) {
-                    const baseDuration = parseFloat(duration) / animationSpeed;
-                    el.style.animationDuration = `${baseDuration * animationSpeed}s`;
+                const animationDuration = window.getComputedStyle(el).animationDuration;
+                if (animationDuration && animationDuration !== 'none') {
+                    const parts = animationDuration.split(',');
+                    let newDurations = [];
+                    parts.forEach(part => {
+                        const durationValue = parseFloat(part.trim());
+                        if (!isNaN(durationValue)) {
+                            newDurations.push(`${durationValue / animationSpeed}s`);
+                        } else {
+                            newDurations.push(part.trim()); // Keep other parts like timing functions
+                        }
+                    });
+                    el.style.animationDuration = newDurations.join(',');
                 }
             });
 
@@ -1345,7 +2105,7 @@
         rotateBtn.addEventListener('click', () => {
             currentRotationY += rotationSpeed;
             updateMapTransform();
-            
+
             // Feedback visivo
             rotateBtn.style.background = 'rgba(102, 126, 234, 0.4)';
             setTimeout(() => {
@@ -1357,7 +2117,7 @@
             if (currentScale < 2) {
                 currentScale += zoomSpeed;
                 updateMapTransform();
-                
+
                 zoomInBtn.style.background = 'rgba(67, 233, 123, 0.4)';
                 setTimeout(() => {
                     zoomInBtn.style.background = 'rgba(255,255,255,0.15)';
@@ -1369,7 +2129,7 @@
             if (currentScale > 0.5) {
                 currentScale -= zoomSpeed;
                 updateMapTransform();
-                
+
                 zoomOutBtn.style.background = 'rgba(245, 87, 108, 0.4)';
                 setTimeout(() => {
                     zoomOutBtn.style.background = 'rgba(255,255,255,0.15)';
@@ -1385,19 +2145,19 @@
             currentRotationX = -10;
             currentScale = 1;
             animationSpeed = 1;
-            
+
             if (isAnimationPaused) {
                 toggleAnimation();
             }
-            
+
             updateMapTransform();
-            
+
             // Reset dei bottoni
             pauseBtn.innerHTML = '⏸️ Pausa';
             speedBtn.innerHTML = '⚡ Velocità';
             pauseBtn.style.background = 'rgba(255,255,255,0.15)';
             speedBtn.style.background = 'rgba(255,255,255,0.15)';
-            
+
             resetBtn.style.background = 'rgba(240, 147, 251, 0.4)';
             setTimeout(() => {
                 resetBtn.style.background = 'rgba(255,255,255,0.15)';
@@ -1420,13 +2180,13 @@
 
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            
+
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
 
             currentRotationY = initialRotationY + deltaX * 0.5;
             currentRotationX = Math.max(-30, Math.min(30, initialRotationX - deltaY * 0.3));
-            
+
             updateMapTransform();
         });
 
@@ -1454,13 +2214,13 @@
         italy3dMap.addEventListener('touchmove', (e) => {
             if (!isDragging || e.touches.length !== 1) return;
             e.preventDefault();
-            
+
             const deltaX = e.touches[0].clientX - startX;
             const deltaY = e.touches[0].clientY - startY;
 
             currentRotationY = initialRotationY + deltaX * 0.5;
             currentRotationX = Math.max(-30, Math.min(30, initialRotationX - deltaY * 0.3));
-            
+
             updateMapTransform();
         });
 
@@ -1472,7 +2232,7 @@
         document.querySelectorAll('.region').forEach((region, index) => {
             region.addEventListener('mouseenter', () => {
                 region.style.filter = 'brightness(1.3) drop-shadow(0 0 20px rgba(255,255,255,0.5))';
-                
+
                 // Effetto sonoro simulato con vibrazione
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
@@ -1487,7 +2247,7 @@
                 // Zoom sulla regione
                 const regionData = region.dataset.region;
                 console.log(`Regione selezionata: ${regionData}`);
-                
+
                 // Animazione di selezione
                 region.style.transform = 'translateY(-25px) scale(1.3)';
                 setTimeout(() => {
@@ -1495,7 +2255,24 @@
                 }, 500);
             });
         });
-        
+
+        // Back to Top Button Logic
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) { // Show button after scrolling down 300px
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
         // Inizializzazione
         updateMapTransform();
         italy3dMap.style.cursor = 'grab';
