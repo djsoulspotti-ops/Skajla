@@ -914,8 +914,14 @@
                     </div>
                 </div>
                 <div class="chat-actions">
+                    <button class="action-btn" onclick="openAIAssistant()">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </button>
                     <button class="action-btn" onclick="openNewChatModal()">
                         <i class="fas fa-plus"></i> Nuova Chat
+                    </button>
+                    <button class="action-btn" onclick="openAISettings()">
+                        <i class="fas fa-cog"></i>
                     </button>
                     <a href="/logout" class="action-btn">
                         <i class="fas fa-sign-out-alt"></i>
@@ -1744,5 +1750,8 @@
             showNotification('Connessione Persa', 'Controlla la tua connessione internet', 'warning');
         });
     </script>
+    
+    <!-- Include AI Chatbot Component -->
+    {% include 'ai_chat.html' %}
 </body>
 </html>
