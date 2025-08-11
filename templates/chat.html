@@ -285,10 +285,13 @@
         .messages-container {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            height: calc(100vh - 200px);
+            scroll-behavior: smooth;
         }
 
         .message {
@@ -858,6 +861,42 @@
             color: var(--gray-700);
             line-height: 1.4;
         }
+
+        .scroll-to-bottom {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            background: var(--primary);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.3s ease;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-to-bottom:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -938,6 +977,12 @@
                     <div class="typing-dot"></div>
                 </div>
                 <span id="typingText">Qualcuno sta scrivendo...</span>
+            </div>
+
+            <!-- Scroll to bottom button -->
+            <div class="scroll-to-bottom" id="scrollToBottomBtn" style="display: none;" onclick="scrollToBottom(true)">
+                <i class="fas fa-arrow-down"></i>
+                <span>Nuovi messaggi</span>
             </div>
 
             <div class="message-input-container" id="messageInputContainer" style="display: none;">
@@ -1171,7 +1216,7 @@
                 
                 if (response.ok) {
                     displayMessages(messages);
-                    scrollToBottom();
+                    setTimeout(() => scrollToBottom(true), 200);
                 } else {
                     throw new Error(messages.error || 'Errore nel caricamento messaggi');
                 }
@@ -1199,6 +1244,13 @@
             }
 
             container.innerHTML = messages.map(message => createMessageHtml(message)).join('');
+            
+            // Aggiungi event listener per lo scroll manuale
+            container.removeEventListener('scroll', handleScroll);
+            container.addEventListener('scroll', handleScroll);
+            
+            // Reset flag scroll utente
+            window.userScrolledUp = false;
         }
 
         // Display single message (for real-time)
@@ -1206,6 +1258,11 @@
             const container = document.getElementById('messagesContainer');
             const messageHtml = createMessageHtml(message);
             container.insertAdjacentHTML('beforeend', messageHtml);
+            
+            // Solo se l'utente non ha scrollato manualmente verso l'alto
+            if (!window.userScrolledUp) {
+                scrollToBottom(true);
+            }
         }
 
         // Create message HTML
@@ -1591,9 +1648,41 @@
             return div.innerHTML;
         }
 
-        function scrollToBottom() {
+        function scrollToBottom(force = false) {
             const container = document.getElementById('messagesContainer');
-            container.scrollTop = container.scrollHeight;
+            if (!container) return;
+            
+            // Se l'utente ha scrollato manualmente verso l'alto, non fare scroll automatico
+            if (!force && !isAtBottom(container)) {
+                return;
+            }
+            
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+
+        function isAtBottom(container) {
+            return container.scrollTop + container.clientHeight >= container.scrollHeight - 50;
+        }
+
+        // Gestione scroll manuale
+        function handleScroll() {
+            const container = document.getElementById('messagesContainer');
+            const scrollBtn = document.getElementById('scrollToBottomBtn');
+            if (!container || !scrollBtn) return;
+            
+            const atBottom = isAtBottom(container);
+            
+            // Se l'utente è vicino al fondo, abilita auto-scroll per nuovi messaggi
+            window.userScrolledUp = !atBottom;
+            
+            // Mostra/nascondi bottone scroll
+            if (atBottom) {
+                scrollBtn.style.display = 'none';
+            } else if (window.userScrolledUp) {
+                scrollBtn.style.display = 'flex';
+            }
         }
 
         function toggleSidebar() {
