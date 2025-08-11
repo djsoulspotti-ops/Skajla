@@ -341,30 +341,40 @@ def login():
         conn = get_db_connection()
         user = conn.execute('SELECT * FROM utenti WHERE email = ? AND attivo = 1', (email,)).fetchone()
         
-        if user and user['password_hash'] == hash_password(password):
-            # Login riuscito
-            session.permanent = True
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            session['nome'] = user['nome']
-            session['cognome'] = user['cognome']
-            session['ruolo'] = user['ruolo']
-            session['email'] = user['email']
-            session['classe'] = user['classe']
+        print(f"🔍 Debug Login - Email: {email}")
+        print(f"🔍 Debug Login - User found: {'Yes' if user else 'No'}")
+        
+        if user:
+            input_hash = hash_password(password)
+            stored_hash = user['password_hash']
+            print(f"🔍 Debug Login - Password match: {input_hash == stored_hash}")
             
-            # Aggiorna ultimo accesso e status online
-            conn.execute('''
-                UPDATE utenti 
-                SET ultimo_accesso = CURRENT_TIMESTAMP, status_online = 1, prima_accesso = 0
-                WHERE id = ?
-            ''', (user['id'],))
-            conn.commit()
-            conn.close()
-            
-            return redirect('/chat')
-        else:
-            conn.close()
-            return render_template('login.html', error='Credenziali non valide')
+            if stored_hash == input_hash:
+                # Login riuscito
+                session.permanent = True
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['nome'] = user['nome']
+                session['cognome'] = user['cognome']
+                session['ruolo'] = user['ruolo']
+                session['email'] = user['email']
+                session['classe'] = user['classe']
+                
+                # Aggiorna ultimo accesso e status online
+                conn.execute('''
+                    UPDATE utenti 
+                    SET ultimo_accesso = CURRENT_TIMESTAMP, status_online = 1, primo_accesso = 0
+                    WHERE id = ?
+                ''', (user['id'],))
+                conn.commit()
+                conn.close()
+                
+                print(f"✅ Login successful for: {user['nome']} {user['cognome']}")
+                return redirect('/chat')
+        
+        conn.close()
+        print("❌ Login failed - Invalid credentials")
+        return render_template('login.html', error='Email o password non corretti. Controlla di aver inserito: alessandro.demo@student.skaila.it')
     
     return render_template('login.html')
 
