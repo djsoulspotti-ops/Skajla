@@ -265,7 +265,8 @@ def init_database():
             ('marco.bianchi', 'marco.bianchi@student.skaila.it', 'Marco', 'Bianchi'),
             ('giulia.rossi', 'giulia.rossi@student.skaila.it', 'Giulia', 'Rossi'),
             ('luca.verdi', 'luca.verdi@student.skaila.it', 'Luca', 'Verdi'),
-            ('sara.neri', 'sara.neri@student.skaila.it', 'Sara', 'Neri')
+            ('sara.neri', 'sara.neri@student.skaila.it', 'Sara', 'Neri'),
+            ('alessandro.demo', 'alessandro.demo@student.skaila.it', 'Alessandro', 'Demo')
         ]
         
         for username, email, nome, cognome in studenti_demo:
@@ -826,4 +827,5 @@ if __name__ == '__main__':
     print("   - giulia.rossi@student.skaila.it / stud123")
     print("   - luca.verdi@student.skaila.it / stud123")
     print("   - sara.neri@student.skaila.it / stud123")
+    print("   - alessandro.demo@student.skaila.it / stud123")
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
