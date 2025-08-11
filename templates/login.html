@@ -41,7 +41,6 @@
             justify-content: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
         }
 
         /* Animated Background */
@@ -308,17 +307,49 @@
 
         /* Responsive */
         @media (max-width: 480px) {
+            body {
+                min-height: 100vh;
+                align-items: flex-start;
+                padding: 10px;
+                padding-top: 20px;
+            }
+            
             .login-container {
-                padding: 2.5rem;
-                margin: 10px;
+                padding: 2rem;
+                margin: 0;
+                width: 100%;
+                max-width: none;
+                border-radius: 20px;
             }
             
             .logo {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
+                margin-bottom: 1.5rem;
             }
             
             h1 {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+            
+            input {
+                padding: 1rem 1rem 1rem 3rem;
+            }
+            
+            .btn {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding-top: 10px;
             }
         }
     </style>
