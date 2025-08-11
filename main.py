@@ -34,7 +34,7 @@ def get_db_connection():
 
 def hash_password(password):
     """Hash sicuro della password"""
-    return hashlib.pbkdf2_hex(password.encode('utf-8'), b'skaila_salt', 100000)
+    return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), b'skaila_salt', 100000).hex()
 
 def require_auth(f):
     """Decoratore per richiedere autenticazione"""
@@ -243,23 +243,23 @@ def init_database():
         # Crea dirigente demo
         dirigente_password = hash_password('dirigente123')
         conn.execute('''
-            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, scuola, email_verificata)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('dirigente.skaila', 'dirigente@skaila.it', dirigente_password, 'Maria', 'Dirigente', 'dirigente', 'IIS Da Vinci', 1))
+            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, scuola, email_verificata, primo_accesso)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', ('dirigente.skaila', 'dirigente@skaila.it', dirigente_password, 'Maria', 'Dirigente', 'dirigente', 'IIS Da Vinci', 1, 0))
 
         # Crea professore demo
         prof_password = hash_password('prof123')
         conn.execute('''
-            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe, scuola, materie_insegnate, email_verificata)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('prof.rossi', 'prof.rossi@skaila.it', prof_password, 'Mario', 'Rossi', 'professore', '3A', 'IIS Da Vinci', '["Informatica", "Sistemi e Reti"]', 1))
+            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe, scuola, materie_insegnate, email_verificata, primo_accesso)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', ('prof.rossi', 'prof.rossi@skaila.it', prof_password, 'Mario', 'Rossi', 'professore', '3A', 'IIS Da Vinci', '["Informatica", "Sistemi e Reti"]', 1, 0))
 
         # Crea altro professore demo
         prof2_password = hash_password('prof2123')
         conn.execute('''
-            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe, scuola, materie_insegnate, email_verificata)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('prof.verdi', 'prof.verdi@skaila.it', prof2_password, 'Anna', 'Verdi', 'professore', '3A', 'IIS Da Vinci', '["Matematica", "Fisica"]', 1))
+            INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe, scuola, materie_insegnate, email_verificata, primo_accesso)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', ('prof.verdi', 'prof.verdi@skaila.it', prof2_password, 'Anna', 'Verdi', 'professore', '3A', 'IIS Da Vinci', '["Matematica", "Fisica"]', 1, 0))
 
         # Crea studenti demo
         stud_password = hash_password('stud123')
@@ -273,9 +273,9 @@ def init_database():
         
         for username, email, nome, cognome in studenti_demo:
             conn.execute('''
-                INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe, scuola, email_verificata)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, email, stud_password, nome, cognome, 'studente', '3A', 'IIS Da Vinci', 1))
+                INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, classe, scuola, email_verificata, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, email, stud_password, nome, cognome, 'studente', '3A', 'IIS Da Vinci', 1, 0))
 
         # Crea conversazione di gruppo classe demo
         conn.execute('''
@@ -343,13 +343,9 @@ def login():
         conn = get_db_connection()
         user = conn.execute('SELECT * FROM utenti WHERE email = ? AND attivo = 1', (email,)).fetchone()
         
-        print(f"🔍 Debug Login - Email: {email}")
-        print(f"🔍 Debug Login - User found: {'Yes' if user else 'No'}")
-        
         if user:
             input_hash = hash_password(password)
             stored_hash = user['password_hash']
-            print(f"🔍 Debug Login - Password match: {input_hash == stored_hash}")
             
             if stored_hash == input_hash:
                 # Login riuscito
@@ -371,12 +367,10 @@ def login():
                 conn.commit()
                 conn.close()
                 
-                print(f"✅ Login successful for: {user['nome']} {user['cognome']}")
                 return redirect('/chat')
         
         conn.close()
-        print("❌ Login failed - Invalid credentials")
-        return render_template('login.html', error='Email o password non corretti. Controlla di aver inserito: alessandro.demo@student.skaila.it')
+        return render_template('login.html', error='Email o password non corretti')
     
     return render_template('login.html')
 
