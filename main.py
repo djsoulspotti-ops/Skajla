@@ -224,7 +224,9 @@ def init_database():
 
     # Inserimento dati demo se non esistono
     admin_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "admin"').fetchone()[0]
-    if admin_exists == 0:
+    alessandro_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE email = "alessandro.demo@student.skaila.it"').fetchone()[0]
+    
+    if admin_exists == 0 or alessandro_exists == 0:
         # Crea admin di default
         admin_password = hash_password('admin123')
         conn.execute('''
