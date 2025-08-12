@@ -95,7 +95,7 @@ def init_db():
             data_aggiunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (chat_id, utente_id),
             FOREIGN KEY (chat_id) REFERENCES chat (id),
-            FOREIGNKEY (utente_id) REFERENCES utenti (id)
+            FOREIGN KEY (utente_id) REFERENCES utenti (id)
         )
     ''')
 
