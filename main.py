@@ -140,6 +140,13 @@ def init_db():
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', ('admin', 'admin@skaila.it', admin_password, 'Admin', 'SKAILA', 'admin', 0))
         
+        # Crea founder con credenziali facili
+        founder_password = hash_password('founder123')
+        conn.execute('''
+            INSERT OR IGNORE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', ('founder', 'founder@skaila.it', founder_password, 'Daniele', 'Founder', 'admin', 0))
+        
         # Crea professore demo
         prof_password = hash_password('prof123')
         conn.execute('''
