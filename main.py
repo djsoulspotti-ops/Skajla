@@ -292,6 +292,7 @@ def login():
             stored_hash = user['password_hash']
             print(f"🔍 Password check - Input hash: {input_hash[:20]}..., Stored hash: {stored_hash[:20]}...")
             print(f"🔍 Password match: {stored_hash == input_hash}")
+            print(f"🔍 User active: {user['attivo'] == 1}")
 
             if stored_hash == input_hash and user['attivo'] == 1:
                 # Login riuscito
@@ -405,6 +406,7 @@ def ai_chat():
 def api_conversations():
     if 'user_id' not in session:
         print(f"❌ API /api/conversations - No user_id in session")
+        print(f"🔍 Session contents: {dict(session)}")
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
