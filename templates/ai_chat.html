@@ -446,6 +446,15 @@ function closeAIDashboard() {
 async function loadAIProfile() {
     try {
         const response = await fetch('/api/ai/profile');
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
         const profile = await response.json();
         aiProfile = profile;
         

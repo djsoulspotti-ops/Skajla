@@ -405,7 +405,7 @@ def ai_chat():
 def api_conversations():
     if 'user_id' not in session:
         print(f"❌ API /api/conversations - No user_id in session")
-        return redirect('/login')
+        return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
         print(f"✅ API /api/conversations - User: {session.get('nome', 'Unknown')}")
@@ -458,7 +458,7 @@ def api_conversations():
 def api_messages(conversation_id):
     if 'user_id' not in session:
         print(f"❌ API /api/messages - No user_id in session")
-        return redirect('/login')
+        return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
         print(f"✅ API /api/messages - User: {session.get('nome', 'Unknown')}, Chat: {conversation_id}")
@@ -555,7 +555,7 @@ def api_create_conversation():
 def api_ai_profile():
     if 'user_id' not in session:
         print(f"❌ API /api/ai/profile - No user_id in session")
-        return redirect('/login')
+        return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
         print(f"✅ API /api/ai/profile - User: {session.get('nome', 'Unknown')}")
@@ -625,6 +625,83 @@ def api_save_ai_profile():
         return jsonify({'success': True})
 
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/chat', methods=['POST'])
+def api_ai_chat():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        if not message.strip():
+            return jsonify({'error': 'Messaggio vuoto'}), 400
+
+        # Genera risposta AI
+        response = ai_bot.generate_response(
+            message, 
+            session['nome'], 
+            session['ruolo']
+        )
+
+        # Salva conversazione AI nel database
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT INTO ai_conversations (utente_id, message, response)
+            VALUES (?, ?, ?)
+        ''', (session['user_id'], message, response))
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            'response': response,
+            'bot_name': 'SKAILA Assistant',
+            'bot_avatar': '🤖'
+        })
+
+    except Exception as e:
+        print(f"❌ Error in AI chat: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/dashboard')
+def api_ai_dashboard():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        conn = get_db_connection()
+        
+        # Calcola metriche di progresso
+        total_conversations = conn.execute('''
+            SELECT COUNT(*) FROM ai_conversations WHERE utente_id = ?
+        ''', (session['user_id'],)).fetchone()[0]
+        
+        # Simula metriche per ora
+        dashboard_data = {
+            'progress_metrics': {
+                'overall_progress': min(total_conversations * 10, 100),
+                'weekly_activity': total_conversations,
+                'study_time': total_conversations * 5
+            },
+            'recent_topics': [
+                {'name': 'Matematica', 'progress': 75},
+                {'name': 'Informatica', 'progress': 60},
+                {'name': 'Italiano', 'progress': 80}
+            ],
+            'achievements': [
+                {'name': 'Prima conversazione', 'unlocked': total_conversations > 0},
+                {'name': 'Studioso', 'unlocked': total_conversations > 5},
+                {'name': 'Esperto AI', 'unlocked': total_conversations > 10}
+            ]
+        }
+        
+        conn.close()
+        return jsonify(dashboard_data)
+
+    except Exception as e:
+        print(f"❌ Error in AI dashboard: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/logout')

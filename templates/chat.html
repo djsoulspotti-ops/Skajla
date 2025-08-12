@@ -1133,6 +1133,13 @@
         async function loadConversations() {
             try {
                 const response = await fetch('/api/conversations');
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
                 conversations = await response.json();
                 displayConversations(conversations);
             } catch (error) {
@@ -1220,14 +1227,19 @@
         async function loadMessages(conversationId) {
             try {
                 const response = await fetch(`/api/messages/${conversationId}`);
-                const messages = await response.json();
                 
-                if (response.ok) {
-                    displayMessages(messages);
-                    setTimeout(() => scrollToBottom(true), 200);
-                } else {
-                    throw new Error(messages.error || 'Errore nel caricamento messaggi');
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
                 }
+                
+                const messages = await response.json();
+                displayMessages(messages);
+                setTimeout(() => scrollToBottom(true), 200);
+                
             } catch (error) {
                 console.error('Errore caricamento messaggi:', error);
                 document.getElementById('messagesContainer').innerHTML = `
