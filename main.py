@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import os
 from werkzeug.utils import secure_filename
 import openai
-from ai_chatbot import AIChestBot
+from ai_chatbot import AISkailaBot
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'skaila_secret_key_super_secure_2024'
@@ -18,8 +18,8 @@ app.permanent_session_lifetime = timedelta(days=30)
 
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Inizializza il chatbot AI
-ai_bot = AIChestBot()
+# Inizializza il chatbot AI personalizzato
+ai_bot = AISkailaBot()
 
 # Utility per password hashing
 def hash_password(password):
@@ -99,30 +99,62 @@ def init_db():
         )
     ''')
 
-    # Tabella per profili AI personalizzati
+    # Tabella per profili AI personalizzati - ENHANCED
     conn.execute('''
         CREATE TABLE IF NOT EXISTS ai_profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             utente_id INTEGER UNIQUE,
-            bot_name TEXT DEFAULT 'CHEST Assistant',
+            bot_name TEXT DEFAULT 'SKAILA Assistant',
+            bot_avatar TEXT DEFAULT '🤖',
             conversation_style TEXT DEFAULT 'friendly',
-            learning_preferences TEXT,
+            learning_preferences TEXT DEFAULT 'adaptive',
+            difficulty_preference TEXT DEFAULT 'medium',
             subject_strengths TEXT,
             subject_weaknesses TEXT,
+            personality_traits TEXT,
+            study_schedule TEXT,
+            preferred_examples TEXT DEFAULT 'mixed',
+            interaction_goals TEXT,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            total_interactions INTEGER DEFAULT 0,
+            success_rate REAL DEFAULT 0.0,
             FOREIGN KEY (utente_id) REFERENCES utenti (id)
         )
     ''')
 
-    # Tabella per conversazioni AI
+    # Tabella per conversazioni AI - ENHANCED
     conn.execute('''
         CREATE TABLE IF NOT EXISTS ai_conversations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             utente_id INTEGER,
             message TEXT NOT NULL,
             response TEXT NOT NULL,
+            subject_detected TEXT,
+            difficulty_level TEXT,
+            sentiment_analysis TEXT,
+            learning_objective TEXT,
+            success_metric REAL,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             feedback_rating INTEGER,
+            interaction_duration INTEGER,
+            follow_up_needed BOOLEAN DEFAULT 0,
+            FOREIGN KEY (utente_id) REFERENCES utenti (id)
+        )
+    ''')
+
+    # Tabella per tracking di apprendimento
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS learning_analytics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            utente_id INTEGER,
+            subject TEXT,
+            skill_level TEXT,
+            progress_percentage REAL DEFAULT 0.0,
+            time_spent_minutes INTEGER DEFAULT 0,
+            exercises_completed INTEGER DEFAULT 0,
+            success_rate REAL DEFAULT 0.0,
+            last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            streak_days INTEGER DEFAULT 0,
             FOREIGN KEY (utente_id) REFERENCES utenti (id)
         )
     ''')
@@ -545,6 +577,92 @@ def api_create_conversation():
                 VALUES (?, ?)
             ''', (conversation_id, user_id))
 
+
+
+@app.route('/api/ai/quiz', methods=['POST'])
+def api_ai_quiz():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        subject = data.get('subject', 'general')
+        difficulty = data.get('difficulty', 'adaptive')
+        
+        print(f"🧠 Generating personalized quiz - Subject: {subject}, Difficulty: {difficulty}")
+        
+        # Carica profilo utente
+        user_profile = ai_bot.load_user_profile(session['user_id'])
+        
+        # Genera domanda personalizzata
+        question_data = ai_bot.generate_adaptive_quiz_question(subject, user_profile, difficulty)
+        
+        # Salva nel database per tracking
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT INTO ai_conversations 
+            (utente_id, message, response, subject_detected, difficulty_level)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (session['user_id'], f"Quiz Request: {subject}", 
+              f"Generated quiz question", subject, difficulty))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'question': question_data,
+            'personalized': True,
+            'adapted_difficulty': difficulty,
+            'bot_name': user_profile.get('bot_name', 'SKAILA Assistant')
+        })
+
+    except Exception as e:
+        print(f"❌ Error generating personalized quiz: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/feedback', methods=['POST'])
+def api_ai_feedback():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        rating = data.get('rating', 3)
+        message_id = data.get('message_id')
+        feedback_text = data.get('feedback', '')
+        
+        conn = get_db_connection()
+        
+        # Aggiorna il rating della conversazione
+        if message_id:
+            conn.execute('''
+                UPDATE ai_conversations 
+                SET feedback_rating = ? 
+                WHERE id = ? AND utente_id = ?
+            ''', (rating, message_id, session['user_id']))
+        
+        # Aggiorna il success rate nel profilo
+        avg_rating = conn.execute('''
+            SELECT AVG(feedback_rating) FROM ai_conversations 
+            WHERE utente_id = ? AND feedback_rating IS NOT NULL
+        ''', (session['user_id'],)).fetchone()[0]
+        
+        if avg_rating:
+            conn.execute('''
+                UPDATE ai_profiles 
+                SET success_rate = ? 
+                WHERE utente_id = ?
+            ''', (avg_rating, session['user_id']))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Feedback salvato!'})
+
+    except Exception as e:
+        print(f"❌ Error saving AI feedback: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
         conn.commit()
         conn.close()
 
@@ -568,12 +686,14 @@ def api_ai_profile():
         ''', (session['user_id'],)).fetchone()
 
         if not profile:
-            print(f"🔧 Creating default AI profile for user {session['user_id']}")
-            # Crea profilo di default
+            print(f"🔧 Creating enhanced AI profile for user {session['user_id']}")
+            # Crea profilo avanzato di default
             conn.execute('''
-                INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
-                VALUES (?, ?, ?)
-            ''', (session['user_id'], 'SKAILA Assistant', 'friendly'))
+                INSERT INTO ai_profiles (
+                    utente_id, bot_name, bot_avatar, conversation_style, 
+                    learning_preferences, difficulty_preference, subject_strengths, subject_weaknesses
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (session['user_id'], 'SKAILA Assistant', '🤖', 'friendly', 'adaptive', 'medium', '', ''))
             conn.commit()
 
             profile = conn.execute('''
@@ -583,17 +703,20 @@ def api_ai_profile():
         conn.close()
 
         profile_data = {
-            'bot_name': profile['bot_name'],
-            'bot_avatar': '🤖',
-            'conversation_style': profile['conversation_style'],
-            'learning_style': 'visual',
-            'difficulty_preference': 'medio',
-            'conversation_tone': 'friendly',
-            'strong_subjects': [],
-            'weak_subjects': []
+            'bot_name': profile['bot_name'] or 'SKAILA Assistant',
+            'bot_avatar': profile['bot_avatar'] or '🤖',
+            'conversation_style': profile['conversation_style'] or 'friendly',
+            'learning_style': profile['learning_preferences'] or 'adaptive',
+            'difficulty_preference': profile['difficulty_preference'] or 'medium',
+            'conversation_tone': profile['conversation_style'] or 'friendly',
+            'strong_subjects': (profile['subject_strengths'] or '').split(',') if profile['subject_strengths'] else [],
+            'weak_subjects': (profile['subject_weaknesses'] or '').split(',') if profile['subject_weaknesses'] else [],
+            'personality_traits': (profile['personality_traits'] or '').split(',') if profile.get('personality_traits') else [],
+            'total_interactions': profile.get('total_interactions', 0),
+            'success_rate': profile.get('success_rate', 0.0)
         }
         
-        print(f"🔍 AI Profile loaded: {profile_data['bot_name']}")
+        print(f"🔍 Enhanced AI Profile loaded: {profile_data['bot_name']} (Style: {profile_data['conversation_style']}, Learning: {profile_data['learning_style']})")
         return jsonify(profile_data)
 
     except Exception as e:
@@ -607,26 +730,35 @@ def api_save_ai_profile():
 
     try:
         data = request.get_json()
+        print(f"💾 Saving enhanced AI profile for user {session['user_id']}: {data}")
 
         conn = get_db_connection()
         conn.execute('''
             INSERT OR REPLACE INTO ai_profiles 
-            (utente_id, bot_name, conversation_style, learning_preferences, subject_strengths, subject_weaknesses)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (utente_id, bot_name, bot_avatar, conversation_style, learning_preferences, 
+             difficulty_preference, subject_strengths, subject_weaknesses, personality_traits, 
+             preferred_examples, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ''', (
             session['user_id'],
             data.get('bot_name', 'SKAILA Assistant'),
+            data.get('bot_avatar', '🤖'),
             data.get('conversation_tone', 'friendly'),
-            data.get('learning_style', 'visual'),
+            data.get('learning_style', 'adaptive'),
+            data.get('difficulty_preference', 'medium'),
             ','.join(data.get('strong_subjects', [])),
-            ','.join(data.get('weak_subjects', []))
+            ','.join(data.get('weak_subjects', [])),
+            ','.join(data.get('personality_traits', [])),
+            data.get('preferred_examples', 'mixed')
         ))
         conn.commit()
         conn.close()
 
-        return jsonify({'success': True})
+        print(f"✅ AI Profile saved successfully for {session.get('nome', 'User')}")
+        return jsonify({'success': True, 'message': 'Profilo AI aggiornato con successo!'})
 
     except Exception as e:
+        print(f"❌ Error saving AI profile: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/ai/chat', methods=['POST'])
@@ -641,30 +773,59 @@ def api_ai_chat():
         if not message.strip():
             return jsonify({'error': 'Messaggio vuoto'}), 400
 
-        # Genera risposta AI
+        print(f"🤖 AI Chat request from {session.get('nome', 'User')}: {message[:50]}...")
+
+        # Carica profilo utente per personalizzazione
+        conn = get_db_connection()
+        profile = conn.execute('''
+            SELECT * FROM ai_profiles WHERE utente_id = ?
+        ''', (session['user_id'],)).fetchone()
+
+        # Genera risposta AI personalizzata
         response = ai_bot.generate_response(
             message, 
             session['nome'], 
-            session['ruolo']
+            session['ruolo'],
+            session['user_id']
         )
 
-        # Salva conversazione AI nel database
-        conn = get_db_connection()
+        # Analizza il messaggio per insights
+        subject_detected = ai_bot.detect_subject(message)
+        sentiment_analysis = ','.join(ai_bot.analyze_user_sentiment(message))
+        
+        # Salva conversazione AI avanzata nel database
         conn.execute('''
-            INSERT INTO ai_conversations (utente_id, message, response)
-            VALUES (?, ?, ?)
-        ''', (session['user_id'], message, response))
+            INSERT INTO ai_conversations 
+            (utente_id, message, response, subject_detected, sentiment_analysis, timestamp)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ''', (session['user_id'], message, response, subject_detected, sentiment_analysis))
+
+        # Aggiorna contatori nel profilo
+        conn.execute('''
+            UPDATE ai_profiles 
+            SET total_interactions = total_interactions + 1,
+                last_updated = CURRENT_TIMESTAMP
+            WHERE utente_id = ?
+        ''', (session['user_id'],))
+
         conn.commit()
         conn.close()
 
-        return jsonify({
+        # Prepara risposta con dati del profilo
+        bot_data = {
             'response': response,
-            'bot_name': 'SKAILA Assistant',
-            'bot_avatar': '🤖'
-        })
+            'bot_name': profile['bot_name'] if profile else 'SKAILA Assistant',
+            'bot_avatar': profile['bot_avatar'] if profile else '🤖',
+            'subject_detected': subject_detected,
+            'sentiment': sentiment_analysis,
+            'personalized': True
+        }
+
+        print(f"✅ AI Response generated (Subject: {subject_detected}, Sentiment: {sentiment_analysis})")
+        return jsonify(bot_data)
 
     except Exception as e:
-        print(f"❌ Error in AI chat: {e}")
+        print(f"❌ Error in enhanced AI chat: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/ai/dashboard')
@@ -673,37 +834,91 @@ def api_ai_dashboard():
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
+        print(f"📊 Loading AI dashboard for user {session.get('nome', 'Unknown')}")
         conn = get_db_connection()
         
-        # Calcola metriche di progresso
+        # Calcola metriche avanzate di progresso
         total_conversations = conn.execute('''
             SELECT COUNT(*) FROM ai_conversations WHERE utente_id = ?
         ''', (session['user_id'],)).fetchone()[0]
+
+        # Analisi per materia
+        subject_stats = conn.execute('''
+            SELECT subject_detected, COUNT(*) as count
+            FROM ai_conversations 
+            WHERE utente_id = ? AND subject_detected IS NOT NULL
+            GROUP BY subject_detected
+            ORDER BY count DESC
+        ''', (session['user_id'],)).fetchall()
+
+        # Analisi sentiment nel tempo
+        recent_sentiment = conn.execute('''
+            SELECT sentiment_analysis, COUNT(*) as count
+            FROM ai_conversations 
+            WHERE utente_id = ? AND timestamp > datetime('now', '-7 days')
+            GROUP BY sentiment_analysis
+        ''', (session['user_id'],)).fetchall()
+
+        # Carica profilo per raccomandazioni
+        user_profile = ai_bot.load_user_profile(session['user_id'])
+        analytics = ai_bot.get_learning_analytics(session['user_id'])
         
-        # Simula metriche per ora
+        # Genera raccomandazioni e obiettivi personalizzati
+        recommendations = ai_bot.generate_learning_recommendations(session['user_id'], analytics)
+        daily_goals = ai_bot.generate_daily_goals(user_profile)
+
+        # Calcola streak e consistenza
+        weekly_conversations = conn.execute('''
+            SELECT COUNT(*) FROM ai_conversations 
+            WHERE utente_id = ? AND timestamp > datetime('now', '-7 days')
+        ''', (session['user_id'],)).fetchone()[0]
+
         dashboard_data = {
             'progress_metrics': {
-                'overall_progress': min(total_conversations * 10, 100),
-                'weekly_activity': total_conversations,
-                'study_time': total_conversations * 5
+                'overall_progress': min(total_conversations * 8, 100),
+                'weekly_activity': weekly_conversations,
+                'consistency': min((weekly_conversations / 7) * 100, 100),
+                'total_interactions': total_conversations,
+                'study_streak': analytics.get('progress_metrics', {}).get('weekly_activity', 0)
             },
-            'recent_topics': [
-                {'name': 'Matematica', 'progress': 75},
-                {'name': 'Informatica', 'progress': 60},
-                {'name': 'Italiano', 'progress': 80}
+            'subject_analytics': [
+                {
+                    'name': row[0].title() if row[0] != 'general' else 'Generale',
+                    'interactions': row[1],
+                    'progress': min(row[1] * 15, 100)
+                } for row in subject_stats[:5]
             ],
+            'sentiment_trends': [
+                {
+                    'sentiment': row[0],
+                    'frequency': row[1]
+                } for row in recent_sentiment
+            ],
+            'learning_analytics': analytics,
             'achievements': [
-                {'name': 'Prima conversazione', 'unlocked': total_conversations > 0},
-                {'name': 'Studioso', 'unlocked': total_conversations > 5},
-                {'name': 'Esperto AI', 'unlocked': total_conversations > 10}
-            ]
+                {'name': '🌱 Primi Passi', 'description': 'Prima conversazione AI', 'unlocked': total_conversations > 0, 'progress': 100 if total_conversations > 0 else 0},
+                {'name': '💬 Conversatore', 'description': '10 conversazioni completate', 'unlocked': total_conversations >= 10, 'progress': min((total_conversations / 10) * 100, 100)},
+                {'name': '🎓 Studioso', 'description': 'Una settimana di studio costante', 'unlocked': weekly_conversations >= 5, 'progress': min((weekly_conversations / 5) * 100, 100)},
+                {'name': '🚀 Esperto AI', 'description': '50 conversazioni AI completate', 'unlocked': total_conversations >= 50, 'progress': min((total_conversations / 50) * 100, 100)},
+                {'name': '🌟 Master Learner', 'description': 'Padronanza in 3+ materie', 'unlocked': len(subject_stats) >= 3, 'progress': min((len(subject_stats) / 3) * 100, 100)}
+            ],
+            'recommendations': recommendations[:5],  # Top 5 raccomandazioni
+            'daily_goals': daily_goals,
+            'personalization_score': min((len(user_profile.get('subject_strengths', [])) + len(user_profile.get('subject_weaknesses', []))) * 25, 100),
+            'bot_personality': {
+                'name': user_profile.get('bot_name', 'SKAILA Assistant'),
+                'avatar': user_profile.get('bot_avatar', '🤖'),
+                'style': user_profile.get('conversation_style', 'friendly'),
+                'learning_approach': user_profile.get('learning_preferences', 'adaptive')
+            }
         }
         
         conn.close()
+        print(f"✅ AI Dashboard loaded with {total_conversations} interactions, {len(subject_stats)} subjects")
         return jsonify(dashboard_data)
 
     except Exception as e:
-        print(f"❌ Error in AI dashboard: {e}")
+        print(f"❌ Error in enhanced AI dashboard: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/logout')
