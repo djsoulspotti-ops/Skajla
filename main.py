@@ -130,22 +130,34 @@ def init_db():
 
     # Inserimento dati demo se non esistono
     admin_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "admin"').fetchone()[0]
-    alessandro_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE email = "alessandro.demo@student.skaila.it"').fetchone()[0]
+    founder_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE email = "founder@skaila.it"').fetchone()[0]
     
-    if admin_exists == 0 or alessandro_exists == 0:
+    print(f"🔍 Database check - Admin exists: {admin_exists}, Founder exists: {founder_exists}")
+    
+    if admin_exists == 0 or founder_exists == 0:
+        print("🔧 Creating default users...")
+        
         # Crea admin di default
         admin_password = hash_password('admin123')
-        conn.execute('''
-            INSERT OR IGNORE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', ('admin', 'admin@skaila.it', admin_password, 'Admin', 'SKAILA', 'admin', 0))
+        try:
+            conn.execute('''
+                INSERT OR REPLACE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('admin', 'admin@skaila.it', admin_password, 'Admin', 'SKAILA', 'admin', 0))
+            print("✅ Admin user created")
+        except Exception as e:
+            print(f"❌ Error creating admin: {e}")
         
         # Crea founder con credenziali facili
         founder_password = hash_password('founder123')
-        conn.execute('''
-            INSERT OR IGNORE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', ('founder', 'founder@skaila.it', founder_password, 'Daniele', 'Founder', 'admin', 0))
+        try:
+            conn.execute('''
+                INSERT OR REPLACE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('founder', 'founder@skaila.it', founder_password, 'Daniele', 'Founder', 'admin', 0))
+            print("✅ Founder user created")
+        except Exception as e:
+            print(f"❌ Error creating founder: {e}")
         
         # Crea professore demo
         prof_password = hash_password('prof123')
@@ -202,6 +214,11 @@ def init_db():
                 ''', (chat_3b['id'], utente['id']))
         
         print("✅ Database inizializzato con dati demo")
+        
+        # Verifica che gli utenti siano stati creati
+        verify_users = conn.execute('SELECT email, nome FROM utenti WHERE email IN (?, ?)', 
+                                  ('admin@skaila.it', 'founder@skaila.it')).fetchall()
+        print(f"🔍 Users created: {[dict(u) for u in verify_users]}")
     
     conn.commit()
     conn.close()
@@ -223,9 +240,14 @@ def login():
         
         conn = get_db_connection()
         
-        # Prima verifica se l'utente esiste
+        # Verifica se l'utente esiste nel database
         user = conn.execute('SELECT * FROM utenti WHERE email = ?', (email,)).fetchone()
         print(f"🔍 User found: {'Yes' if user else 'No'}")
+        
+        # Se non trova l'utente, mostra tutti gli utenti per debug
+        if not user:
+            all_users = conn.execute('SELECT email, nome FROM utenti LIMIT 5').fetchall()
+            print(f"🔍 Available users in DB: {[dict(u) for u in all_users]}")
         
         if user:
             print(f"🔍 User details - ID: {user['id']}, Nome: {user['nome']}, Attivo: {user['attivo']}")
@@ -495,6 +517,16 @@ def handle_send_message(data):
     # Invia a tutti nella chat
     emit('nuovo_messaggio', dict(messaggio), room=f"chat_{chat_id}")
 
-if __name__ == '__main__':
+def reset_database():
+    """Forza la ricreazione completa del database"""
+    import os
+    if os.path.exists('skaila.db'):
+        os.remove('skaila.db')
+        print("🗑️ Database rimosso")
     init_db()
+    print("🔄 Database ricreato completamente")
+
+if __name__ == '__main__':
+    # Forza ricreazione database per debug
+    reset_database()
     app.run(host='0.0.0.0', port=5000, debug=True)
