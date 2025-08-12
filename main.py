@@ -190,6 +190,17 @@ def init_db():
         except Exception as e:
             print(f"❌ Error creating founder: {e}")
 
+        # Crea account per papà con credenziali semplici
+        papa_password = hash_password('papa123')
+        try:
+            conn.execute('''
+                INSERT OR REPLACE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('papa', 'papa@skaila.it', papa_password, 'Papà', 'Famiglia', 'genitore', 0))
+            print("✅ Papa user created")
+        except Exception as e:
+            print(f"❌ Error creating papa: {e}")
+
         # Crea professore demo
         prof_password = hash_password('prof123')
         conn.execute('''
