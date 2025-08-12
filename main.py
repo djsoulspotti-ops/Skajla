@@ -1,4 +1,3 @@
-
 import sqlite3
 import hashlib
 from flask import Flask, render_template, request, redirect, session, flash, jsonify
@@ -35,7 +34,7 @@ def get_db_connection():
 # Inizializzazione database
 def init_db():
     conn = get_db_connection()
-    
+
     # Tabella utenti
     conn.execute('''
         CREATE TABLE IF NOT EXISTS utenti (
@@ -55,7 +54,7 @@ def init_db():
             data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    
+
     # Tabella chat/canali
     conn.execute('''
         CREATE TABLE IF NOT EXISTS chat (
@@ -70,7 +69,7 @@ def init_db():
             FOREIGN KEY (creatore_id) REFERENCES utenti (id)
         )
     ''')
-    
+
     # Tabella messaggi
     conn.execute('''
         CREATE TABLE IF NOT EXISTS messaggi (
@@ -86,7 +85,7 @@ def init_db():
             FOREIGN KEY (utente_id) REFERENCES utenti (id)
         )
     ''')
-    
+
     # Tabella partecipanti chat
     conn.execute('''
         CREATE TABLE IF NOT EXISTS partecipanti_chat (
@@ -131,12 +130,12 @@ def init_db():
     # Inserimento dati demo se non esistono
     admin_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "admin"').fetchone()[0]
     founder_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE email = "founder@skaila.it"').fetchone()[0]
-    
+
     print(f"🔍 Database check - Admin exists: {admin_exists}, Founder exists: {founder_exists}")
-    
+
     if admin_exists == 0 or founder_exists == 0:
         print("🔧 Creating default users...")
-        
+
         # Crea admin di default
         admin_password = hash_password('admin123')
         try:
@@ -147,7 +146,7 @@ def init_db():
             print("✅ Admin user created")
         except Exception as e:
             print(f"❌ Error creating admin: {e}")
-        
+
         # Crea founder con credenziali facili
         founder_password = hash_password('founder123')
         try:
@@ -158,14 +157,14 @@ def init_db():
             print("✅ Founder user created")
         except Exception as e:
             print(f"❌ Error creating founder: {e}")
-        
+
         # Crea professore demo
         prof_password = hash_password('prof123')
         conn.execute('''
             INSERT OR IGNORE INTO utenti (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', ('prof_rossi', 'prof.rossi@skaila.it', prof_password, 'Mario', 'Rossi', '3A', 'professore', 0))
-        
+
         # Crea studenti demo
         stud_password = hash_password('stud123')
         studenti_demo = [
@@ -175,28 +174,28 @@ def init_db():
             ('luca_ferrari', 'luca.ferrari@student.skaila.it', 'Luca', 'Ferrari', '3B'),
             ('sofia_romano', 'sofia.romano@student.skaila.it', 'Sofia', 'Romano', '3B')
         ]
-        
+
         for username, email, nome, cognome, classe in studenti_demo:
             conn.execute('''
                 INSERT OR IGNORE INTO utenti (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (username, email, stud_password, nome, cognome, classe, 'studente', 0))
-        
+
         # Crea chat di classe
         conn.execute('''
             INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
             VALUES (?, ?, ?, ?)
         ''', ('Chat Classe 3A', 'Chat generale per la classe 3A', 'classe', '3A'))
-        
+
         conn.execute('''
             INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
             VALUES (?, ?, ?, ?)
         ''', ('Chat Classe 3B', 'Chat generale per la classe 3B', 'classe', '3B'))
-        
+
         # Aggiungi studenti alle chat di classe
         chat_3a = conn.execute('SELECT id FROM chat WHERE classe = "3A"').fetchone()
         chat_3b = conn.execute('SELECT id FROM chat WHERE classe = "3B"').fetchone()
-        
+
         if chat_3a:
             utenti_3a = conn.execute('SELECT id FROM utenti WHERE classe = "3A"').fetchall()
             for utente in utenti_3a:
@@ -204,7 +203,7 @@ def init_db():
                     INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
                     VALUES (?, ?)
                 ''', (chat_3a['id'], utente['id']))
-        
+
         if chat_3b:
             utenti_3b = conn.execute('SELECT id FROM utenti WHERE classe = "3B"').fetchall()
             for utente in utenti_3b:
@@ -212,14 +211,14 @@ def init_db():
                     INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
                     VALUES (?, ?)
                 ''', (chat_3b['id'], utente['id']))
-        
+
         print("✅ Database inizializzato con dati demo")
-        
+
         # Verifica che gli utenti siano stati creati
         verify_users = conn.execute('SELECT email, nome FROM utenti WHERE email IN (?, ?)', 
                                   ('admin@skaila.it', 'founder@skaila.it')).fetchall()
         print(f"🔍 Users created: {[dict(u) for u in verify_users]}")
-    
+
     conn.commit()
     conn.close()
 
@@ -235,29 +234,29 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        
+
         print(f"🔍 Login attempt - Email: {email}")
-        
+
         conn = get_db_connection()
-        
+
         # Verifica se l'utente esiste nel database
         user = conn.execute('SELECT * FROM utenti WHERE email = ?', (email,)).fetchone()
         print(f"🔍 User found: {'Yes' if user else 'No'}")
-        
+
         # Se non trova l'utente, mostra tutti gli utenti per debug
         if not user:
             all_users = conn.execute('SELECT email, nome FROM utenti LIMIT 5').fetchall()
             print(f"🔍 Available users in DB: {[dict(u) for u in all_users]}")
-        
+
         if user:
             print(f"🔍 User details - ID: {user['id']}, Nome: {user['nome']}, Attivo: {user['attivo']}")
-            
+
             # Verifica password
             input_hash = hash_password(password)
             stored_hash = user['password_hash']
             print(f"🔍 Password check - Input hash: {input_hash[:20]}..., Stored hash: {stored_hash[:20]}...")
             print(f"🔍 Password match: {stored_hash == input_hash}")
-            
+
             if stored_hash == input_hash and user['attivo'] == 1:
                 # Login riuscito
                 print(f"✅ Login successful for user: {user['nome']}")
@@ -269,7 +268,7 @@ def login():
                 session['ruolo'] = user['ruolo']
                 session['email'] = user['email']
                 session['classe'] = user['classe']
-                
+
                 # Aggiorna ultimo accesso e status online
                 conn.execute('''
                     UPDATE utenti 
@@ -278,16 +277,16 @@ def login():
                 ''', (user['id'],))
                 conn.commit()
                 conn.close()
-                
+
                 return redirect('/chat')
             else:
                 print(f"❌ Login failed - Password mismatch or user not active")
         else:
             print(f"❌ Login failed - User not found")
-        
+
         conn.close()
         return render_template('login.html', error='Email o password non corretti. Controlla di aver inserito le credenziali corrette.')
-    
+
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -300,40 +299,40 @@ def register():
             nome = request.form['nome']
             cognome = request.form['cognome']
             classe = request.form.get('classe', '')
-            
+
             conn = get_db_connection()
-            
+
             # Controlla se utente esiste già
             existing_user = conn.execute('SELECT id FROM utenti WHERE email = ? OR username = ?', (email, username)).fetchone()
             if existing_user:
                 conn.close()
                 return render_template('register.html', error='Email o username già esistenti')
-            
+
             # Crea nuovo utente
             password_hash = hash_password(password)
             conn.execute('''
                 INSERT INTO utenti (username, email, password_hash, nome, cognome, classe)
                 VALUES (?, ?, ?, ?, ?, ?)
             ''', (username, email, password_hash, nome, cognome, classe))
-            
+
             conn.commit()
             conn.close()
-            
+
             flash('Registrazione completata! Puoi ora effettuare il login.', 'success')
             return redirect('/login')
-            
+
         except Exception as e:
             return render_template('register.html', error=f'Errore durante la registrazione: {str(e)}')
-    
+
     return render_template('register.html')
 
 @app.route('/chat')
 def chat():
     if 'user_id' not in session:
         return redirect('/login')
-    
+
     conn = get_db_connection()
-    
+
     # Ottieni chat dell'utente
     if session['ruolo'] == 'admin':
         chats = conn.execute('SELECT * FROM chat ORDER BY nome').fetchall()
@@ -344,16 +343,16 @@ def chat():
             WHERE pc.utente_id = ? OR c.classe = ?
             ORDER BY c.nome
         ''', (session['user_id'], session.get('classe', ''))).fetchall()
-    
+
     # Ottieni utenti online
     utenti_online = conn.execute('''
         SELECT nome, cognome, ruolo, classe FROM utenti 
         WHERE status_online = 1 AND id != ?
         ORDER BY nome
     ''', (session['user_id'],)).fetchall()
-    
+
     conn.close()
-    
+
     return render_template('chat.html', 
                          user=session, 
                          chats=chats, 
@@ -363,70 +362,18 @@ def chat():
 def ai_chat():
     if 'user_id' not in session:
         return redirect('/login')
-    
+
     return render_template('ai_chat.html', user=session)
 
-@app.route('/api/ai-chat', methods=['POST'])
-def api_ai_chat():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Non autorizzato'}), 401
-    
-    try:
-        data = request.get_json()
-        message = data.get('message', '')
-        
-        if not message.strip():
-            return jsonify({'error': 'Messaggio vuoto'}), 400
-        
-        # Ottieni o crea profilo AI per l'utente
-        conn = get_db_connection()
-        profile = conn.execute('SELECT * FROM ai_profiles WHERE utente_id = ?', 
-                             (session['user_id'],)).fetchone()
-        
-        if not profile:
-            # Crea nuovo profilo
-            conn.execute('''
-                INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
-                VALUES (?, ?, ?)
-            ''', (session['user_id'], 'CHEST Assistant', 'friendly'))
-            conn.commit()
-            profile = conn.execute('SELECT * FROM ai_profiles WHERE utente_id = ?', 
-                                 (session['user_id'],)).fetchone()
-        
-        # Genera risposta AI
-        response = ai_bot.generate_response(
-            message, 
-            session['nome'], 
-            session['ruolo'],
-            profile['conversation_style']
-        )
-        
-        # Salva conversazione
-        conn.execute('''
-            INSERT INTO ai_conversations (utente_id, message, response)
-            VALUES (?, ?, ?)
-        ''', (session['user_id'], message, response))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            'response': response,
-            'bot_name': profile['bot_name']
-        })
-        
-    except Exception as e:
-        return jsonify({'error': f'Errore del server: {str(e)}'}), 500
-
-# API Routes
 @app.route('/api/conversations')
 def api_conversations():
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
-    
+
     try:
         conn = get_db_connection()
-        
-        # Ottieni conversazioni dell'utente
+
+        # Ottieni chat dell'utente
         if session['ruolo'] == 'admin':
             conversations = conn.execute('''
                 SELECT c.*, 
@@ -459,10 +406,10 @@ def api_conversations():
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
             ''', (session['user_id'], session.get('classe', ''))).fetchall()
-        
+
         conn.close()
         return jsonify([dict(conv) for conv in conversations])
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -470,10 +417,10 @@ def api_conversations():
 def api_messages(conversation_id):
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
-    
+
     try:
         conn = get_db_connection()
-        
+
         messages = conn.execute('''
             SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
                    m.timestamp as data_invio
@@ -483,10 +430,10 @@ def api_messages(conversation_id):
             ORDER BY m.timestamp ASC
             LIMIT 100
         ''', (conversation_id,)).fetchall()
-        
+
         conn.close()
         return jsonify([dict(msg) for msg in messages])
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -494,14 +441,14 @@ def api_messages(conversation_id):
 def api_users_search():
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
-    
+
     query = request.args.get('q', '').strip()
     if len(query) < 2:
         return jsonify([])
-    
+
     try:
         conn = get_db_connection()
-        
+
         users = conn.execute('''
             SELECT id, username, nome, cognome, ruolo, classe, status_online
             FROM utenti 
@@ -510,10 +457,10 @@ def api_users_search():
             ORDER BY nome, cognome
             LIMIT 20
         ''', (f'%{query}%', f'%{query}%', f'%{query}%', session['user_id'])).fetchall()
-        
+
         conn.close()
         return jsonify([dict(user) for user in users])
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -521,40 +468,40 @@ def api_users_search():
 def api_create_conversation():
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
-    
+
     try:
         data = request.get_json()
         tipo = data.get('tipo', 'privata')
         partecipanti = data.get('partecipanti', [])
-        
+
         conn = get_db_connection()
-        
+
         # Crea conversazione
         cursor = conn.execute('''
             INSERT INTO chat (nome, tipo, privata, creatore_id)
             VALUES (?, ?, ?, ?)
         ''', (f'Chat {datetime.now().strftime("%d/%m %H:%M")}', tipo, 1, session['user_id']))
-        
+
         conversation_id = cursor.lastrowid
-        
+
         # Aggiungi creatore
         conn.execute('''
             INSERT INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
             VALUES (?, ?, ?)
         ''', (conversation_id, session['user_id'], 'admin'))
-        
+
         # Aggiungi partecipanti
         for user_id in partecipanti:
             conn.execute('''
                 INSERT INTO partecipanti_chat (chat_id, utente_id)
                 VALUES (?, ?)
             ''', (conversation_id, user_id))
-        
+
         conn.commit()
         conn.close()
-        
+
         return jsonify({'conversation_id': conversation_id})
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -562,14 +509,14 @@ def api_create_conversation():
 def api_ai_profile():
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
-    
+
     try:
         conn = get_db_connection()
-        
+
         profile = conn.execute('''
             SELECT * FROM ai_profiles WHERE utente_id = ?
         ''', (session['user_id'],)).fetchone()
-        
+
         if not profile:
             # Crea profilo di default
             conn.execute('''
@@ -577,13 +524,13 @@ def api_ai_profile():
                 VALUES (?, ?, ?)
             ''', (session['user_id'], 'SKAILA Assistant', 'friendly'))
             conn.commit()
-            
+
             profile = conn.execute('''
                 SELECT * FROM ai_profiles WHERE utente_id = ?
             ''', (session['user_id'],)).fetchone()
-        
+
         conn.close()
-        
+
         return jsonify({
             'bot_name': profile['bot_name'],
             'bot_avatar': '🤖',
@@ -594,7 +541,7 @@ def api_ai_profile():
             'strong_subjects': [],
             'weak_subjects': []
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -602,10 +549,10 @@ def api_ai_profile():
 def api_save_ai_profile():
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
-    
+
     try:
         data = request.get_json()
-        
+
         conn = get_db_connection()
         conn.execute('''
             INSERT OR REPLACE INTO ai_profiles 
@@ -621,63 +568,11 @@ def api_save_ai_profile():
         ))
         conn.commit()
         conn.close()
-        
+
         return jsonify({'success': True})
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-@app.route('/api/ai/chat', methods=['POST'])
-def api_ai_chat():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Non autorizzato'}), 401
-    
-    try:
-        data = request.get_json()
-        message = data.get('message', '')
-        
-        if not message.strip():
-            return jsonify({'error': 'Messaggio vuoto'}), 400
-        
-        # Ottieni o crea profilo AI per l'utente
-        conn = get_db_connection()
-        profile = conn.execute('SELECT * FROM ai_profiles WHERE utente_id = ?', 
-                             (session['user_id'],)).fetchone()
-        
-        if not profile:
-            # Crea nuovo profilo
-            conn.execute('''
-                INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
-                VALUES (?, ?, ?)
-            ''', (session['user_id'], 'SKAILA Assistant', 'friendly'))
-            conn.commit()
-            profile = conn.execute('SELECT * FROM ai_profiles WHERE utente_id = ?', 
-                                 (session['user_id'],)).fetchone()
-        
-        # Genera risposta AI
-        response = ai_bot.generate_response(
-            message, 
-            session['nome'], 
-            session['ruolo'],
-            profile['conversation_style']
-        )
-        
-        # Salva conversazione
-        conn.execute('''
-            INSERT INTO ai_conversations (utente_id, message, response)
-            VALUES (?, ?, ?)
-        ''', (session['user_id'], message, response))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            'response': response,
-            'bot_name': profile['bot_name'],
-            'bot_avatar': '🤖'
-        })
-        
-    except Exception as e:
-        return jsonify({'error': f'Errore del server: {str(e)}'}), 500
 
 @app.route('/logout')
 def logout():
@@ -686,7 +581,7 @@ def logout():
         conn.execute('UPDATE utenti SET status_online = 0 WHERE id = ?', (session['user_id'],))
         conn.commit()
         conn.close()
-    
+
     session.clear()
     return redirect('/')
 
@@ -695,12 +590,12 @@ def logout():
 def handle_connect():
     if 'user_id' in session:
         join_room(f"user_{session['user_id']}")
-        
+
         conn = get_db_connection()
         conn.execute('UPDATE utenti SET status_online = 1 WHERE id = ?', (session['user_id'],))
         conn.commit()
         conn.close()
-        
+
         emit('user_connected', {
             'nome': session['nome'],
             'cognome': session['cognome'],
@@ -711,12 +606,12 @@ def handle_connect():
 def handle_disconnect():
     if 'user_id' in session:
         leave_room(f"user_{session['user_id']}")
-        
+
         conn = get_db_connection()
         conn.execute('UPDATE utenti SET status_online = 0 WHERE id = ?', (session['user_id'],))
         conn.commit()
         conn.close()
-        
+
         emit('user_disconnected', {
             'nome': session['nome'],
             'cognome': session['cognome']
@@ -726,10 +621,10 @@ def handle_disconnect():
 def handle_join_conversation(data):
     if 'user_id' not in session:
         return
-    
+
     conversation_id = data['conversation_id']
     join_room(f"chat_{conversation_id}")
-    
+
     emit('joined_conversation', {
         'conversation_id': conversation_id
     })
@@ -738,23 +633,23 @@ def handle_join_conversation(data):
 def handle_send_message(data):
     if 'user_id' not in session:
         return
-    
+
     conversation_id = data['conversation_id']
     contenuto = data.get('contenuto', '')
-    
+
     if not contenuto.strip():
         return
-    
+
     # Salva messaggio nel database
     conn = get_db_connection()
     cursor = conn.execute('''
         INSERT INTO messaggi (chat_id, utente_id, contenuto)
         VALUES (?, ?, ?)
     ''', (conversation_id, session['user_id'], contenuto))
-    
+
     message_id = cursor.lastrowid
     conn.commit()
-    
+
     # Ottieni il messaggio appena inserito con i dati utente
     messaggio = conn.execute('''
         SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
@@ -764,7 +659,7 @@ def handle_send_message(data):
         WHERE m.id = ?
     ''', (message_id,)).fetchone()
     conn.close()
-    
+
     # Invia a tutti nella chat
     emit('new_message', dict(messaggio), room=f"chat_{conversation_id}")
 
@@ -772,7 +667,7 @@ def handle_send_message(data):
 def handle_typing_start(data):
     if 'user_id' not in session:
         return
-    
+
     conversation_id = data['conversation_id']
     emit('user_typing', {
         'conversation_id': conversation_id,
@@ -784,7 +679,7 @@ def handle_typing_start(data):
 def handle_typing_stop(data):
     if 'user_id' not in session:
         return
-    
+
     conversation_id = data['conversation_id']
     emit('user_typing', {
         'conversation_id': conversation_id,
