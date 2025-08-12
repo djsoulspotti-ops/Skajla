@@ -192,9 +192,25 @@ def init_db():
             VALUES (?, ?, ?, ?)
         ''', ('Chat Classe 3B', 'Chat generale per la classe 3B', 'classe', '3B'))
 
+        # Crea chat generale per tutti
+        conn.execute('''
+            INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
+            VALUES (?, ?, ?, ?)
+        ''', ('💬 Chat Generale SKAILA', 'Chat generale per tutti gli utenti della piattaforma', 'generale', ''))
+
         # Aggiungi studenti alle chat di classe
         chat_3a = conn.execute('SELECT id FROM chat WHERE classe = "3A"').fetchone()
         chat_3b = conn.execute('SELECT id FROM chat WHERE classe = "3B"').fetchone()
+        chat_generale = conn.execute('SELECT id FROM chat WHERE nome = "💬 Chat Generale SKAILA"').fetchone()
+
+        # Aggiungi tutti gli utenti alla chat generale
+        if chat_generale:
+            tutti_utenti = conn.execute('SELECT id FROM utenti').fetchall()
+            for utente in tutti_utenti:
+                conn.execute('''
+                    INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
+                    VALUES (?, ?)
+                ''', (chat_generale['id'], utente['id']))
 
         if chat_3a:
             utenti_3a = conn.execute('SELECT id FROM utenti WHERE classe = "3A"').fetchall()
@@ -211,6 +227,26 @@ def init_db():
                     INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
                     VALUES (?, ?)
                 ''', (chat_3b['id'], utente['id']))
+
+        # Aggiungi admin e founder a tutte le chat
+        admin_user = conn.execute('SELECT id FROM utenti WHERE email = "admin@skaila.it"').fetchone()
+        founder_user = conn.execute('SELECT id FROM utenti WHERE email = "founder@skaila.it"').fetchone()
+        
+        if admin_user:
+            for chat in [chat_3a, chat_3b, chat_generale]:
+                if chat:
+                    conn.execute('''
+                        INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
+                        VALUES (?, ?, ?)
+                    ''', (chat['id'], admin_user['id'], 'admin'))
+
+        if founder_user:
+            for chat in [chat_3a, chat_3b, chat_generale]:
+                if chat:
+                    conn.execute('''
+                        INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
+                        VALUES (?, ?, ?)
+                    ''', (chat['id'], founder_user['id'], 'admin'))
 
         print("✅ Database inizializzato con dati demo")
 
@@ -368,9 +404,11 @@ def ai_chat():
 @app.route('/api/conversations')
 def api_conversations():
     if 'user_id' not in session:
-        return jsonify({'error': 'Non autorizzato'}), 401
+        print(f"❌ API /api/conversations - No user_id in session")
+        return redirect('/login')
 
     try:
+        print(f"✅ API /api/conversations - User: {session.get('nome', 'Unknown')}")
         conn = get_db_connection()
 
         # Ottieni chat dell'utente
@@ -408,17 +446,22 @@ def api_conversations():
             ''', (session['user_id'], session.get('classe', ''))).fetchall()
 
         conn.close()
-        return jsonify([dict(conv) for conv in conversations])
+        conversations_list = [dict(conv) for conv in conversations]
+        print(f"🔍 Found {len(conversations_list)} conversations for user")
+        return jsonify(conversations_list)
 
     except Exception as e:
+        print(f"❌ Error in /api/conversations: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/messages/<int:conversation_id>')
 def api_messages(conversation_id):
     if 'user_id' not in session:
-        return jsonify({'error': 'Non autorizzato'}), 401
+        print(f"❌ API /api/messages - No user_id in session")
+        return redirect('/login')
 
     try:
+        print(f"✅ API /api/messages - User: {session.get('nome', 'Unknown')}, Chat: {conversation_id}")
         conn = get_db_connection()
 
         messages = conn.execute('''
@@ -432,9 +475,12 @@ def api_messages(conversation_id):
         ''', (conversation_id,)).fetchall()
 
         conn.close()
-        return jsonify([dict(msg) for msg in messages])
+        messages_list = [dict(msg) for msg in messages]
+        print(f"🔍 Found {len(messages_list)} messages in chat {conversation_id}")
+        return jsonify(messages_list)
 
     except Exception as e:
+        print(f"❌ Error in /api/messages: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/users/search')
@@ -508,9 +554,11 @@ def api_create_conversation():
 @app.route('/api/ai/profile')
 def api_ai_profile():
     if 'user_id' not in session:
-        return jsonify({'error': 'Non autorizzato'}), 401
+        print(f"❌ API /api/ai/profile - No user_id in session")
+        return redirect('/login')
 
     try:
+        print(f"✅ API /api/ai/profile - User: {session.get('nome', 'Unknown')}")
         conn = get_db_connection()
 
         profile = conn.execute('''
@@ -518,6 +566,7 @@ def api_ai_profile():
         ''', (session['user_id'],)).fetchone()
 
         if not profile:
+            print(f"🔧 Creating default AI profile for user {session['user_id']}")
             # Crea profilo di default
             conn.execute('''
                 INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
@@ -531,7 +580,7 @@ def api_ai_profile():
 
         conn.close()
 
-        return jsonify({
+        profile_data = {
             'bot_name': profile['bot_name'],
             'bot_avatar': '🤖',
             'conversation_style': profile['conversation_style'],
@@ -540,9 +589,13 @@ def api_ai_profile():
             'conversation_tone': 'friendly',
             'strong_subjects': [],
             'weak_subjects': []
-        })
+        }
+        
+        print(f"🔍 AI Profile loaded: {profile_data['bot_name']}")
+        return jsonify(profile_data)
 
     except Exception as e:
+        print(f"❌ Error in /api/ai/profile: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/ai/profile', methods=['POST'])

@@ -1115,13 +1115,15 @@
             // This would normally come from session/API
             // For now, we'll populate from backend session data
             currentUser = {
-                nome: '{{ session.nome }}',
-                cognome: '{{ session.cognome }}',
-                username: '{{ session.username }}',
-                ruolo: '{{ session.ruolo }}',
-                email: '{{ session.email }}'
+                nome: '{{ session.nome if session.nome else "User" }}',
+                cognome: '{{ session.cognome if session.cognome else "" }}',
+                username: '{{ session.username if session.username else "user" }}',
+                ruolo: '{{ session.ruolo if session.ruolo else "studente" }}',
+                email: '{{ session.email if session.email else "" }}'
             };
 
+            console.log('🔍 Current user loaded:', currentUser);
+            
             document.getElementById('userName').textContent = `${currentUser.nome} ${currentUser.cognome}`;
             document.getElementById('userRole').textContent = currentUser.ruolo;
             document.getElementById('userAvatar').textContent = getInitials(currentUser.nome, currentUser.cognome);
