@@ -714,18 +714,21 @@ def api_ai_profile():
 
         conn.close()
 
+        # Convert Row to dict
+        profile_dict = dict(profile)
+        
         profile_data = {
-            'bot_name': profile['bot_name'] or 'SKAILA Assistant',
-            'bot_avatar': profile['bot_avatar'] or '🤖',
-            'conversation_style': profile['conversation_style'] or 'friendly',
-            'learning_style': profile['learning_preferences'] or 'adaptive',
-            'difficulty_preference': profile['difficulty_preference'] or 'medium',
-            'conversation_tone': profile['conversation_style'] or 'friendly',
-            'strong_subjects': (profile['subject_strengths'] or '').split(',') if profile['subject_strengths'] else [],
-            'weak_subjects': (profile['subject_weaknesses'] or '').split(',') if profile['subject_weaknesses'] else [],
-            'personality_traits': (profile['personality_traits'] or '').split(',') if profile.get('personality_traits') else [],
-            'total_interactions': profile.get('total_interactions', 0),
-            'success_rate': profile.get('success_rate', 0.0)
+            'bot_name': profile_dict['bot_name'] or 'SKAILA Assistant',
+            'bot_avatar': profile_dict['bot_avatar'] or '🤖',
+            'conversation_style': profile_dict['conversation_style'] or 'friendly',
+            'learning_style': profile_dict['learning_preferences'] or 'adaptive',
+            'difficulty_preference': profile_dict['difficulty_preference'] or 'medium',
+            'conversation_tone': profile_dict['conversation_style'] or 'friendly',
+            'strong_subjects': (profile_dict['subject_strengths'] or '').split(',') if profile_dict['subject_strengths'] else [],
+            'weak_subjects': (profile_dict['subject_weaknesses'] or '').split(',') if profile_dict['subject_weaknesses'] else [],
+            'personality_traits': (profile_dict['personality_traits'] or '').split(',') if profile_dict.get('personality_traits') else [],
+            'total_interactions': profile_dict.get('total_interactions', 0),
+            'success_rate': profile_dict.get('success_rate', 0.0)
         }
 
         print(f"🔍 Enhanced AI Profile loaded: {profile_data['bot_name']} (Style: {profile_data['conversation_style']}, Learning: {profile_data['learning_style']})")
