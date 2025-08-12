@@ -95,7 +95,7 @@ def init_db():
             data_aggiunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (chat_id, utente_id),
             FOREIGN KEY (chat_id) REFERENCES chat (id),
-            FOREIGN KEY (utente_id) REFERENCES utenti (id)
+            FOREIGNKEY (utente_id) REFERENCES utenti (id)
         )
     ''')
 
@@ -579,6 +579,16 @@ def api_create_conversation():
 
 
 
+        conn.commit()
+        conn.close()
+
+        return jsonify({'conversation_id': conversation_id})
+
+    except Exception as e:
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/ai/quiz', methods=['POST'])
 def api_ai_quiz():
     if 'user_id' not in session:
@@ -662,15 +672,6 @@ def api_ai_feedback():
         print(f"❌ Error saving AI feedback: {e}")
         return jsonify({'error': str(e)}), 500
 
-
-        conn.commit()
-        conn.close()
-
-        return jsonify({'conversation_id': conversation_id})
-
-    except Exception as e:
-        conn.close()
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/ai/profile')
 def api_ai_profile():
