@@ -219,15 +219,26 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
+        print(f"🔍 Login attempt - Email: {email}")
+        
         conn = get_db_connection()
-        user = conn.execute('SELECT * FROM utenti WHERE email = ? AND attivo = 1', (email,)).fetchone()
+        
+        # Prima verifica se l'utente esiste
+        user = conn.execute('SELECT * FROM utenti WHERE email = ?', (email,)).fetchone()
+        print(f"🔍 User found: {'Yes' if user else 'No'}")
         
         if user:
+            print(f"🔍 User details - ID: {user['id']}, Nome: {user['nome']}, Attivo: {user['attivo']}")
+            
+            # Verifica password
             input_hash = hash_password(password)
             stored_hash = user['password_hash']
+            print(f"🔍 Password check - Input hash: {input_hash[:20]}..., Stored hash: {stored_hash[:20]}...")
+            print(f"🔍 Password match: {stored_hash == input_hash}")
             
-            if stored_hash == input_hash:
+            if stored_hash == input_hash and user['attivo'] == 1:
                 # Login riuscito
+                print(f"✅ Login successful for user: {user['nome']}")
                 session.permanent = True
                 session['user_id'] = user['id']
                 session['username'] = user['username']
@@ -247,6 +258,10 @@ def login():
                 conn.close()
                 
                 return redirect('/chat')
+            else:
+                print(f"❌ Login failed - Password mismatch or user not active")
+        else:
+            print(f"❌ Login failed - User not found")
         
         conn.close()
         return render_template('login.html', error='Email o password non corretti. Controlla di aver inserito le credenziali corrette.')
