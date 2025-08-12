@@ -417,6 +417,268 @@ def api_ai_chat():
     except Exception as e:
         return jsonify({'error': f'Errore del server: {str(e)}'}), 500
 
+# API Routes
+@app.route('/api/conversations')
+def api_conversations():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        conn = get_db_connection()
+        
+        # Ottieni conversazioni dell'utente
+        if session['ruolo'] == 'admin':
+            conversations = conn.execute('''
+                SELECT c.*, 
+                       COUNT(DISTINCT pc.utente_id) as partecipanti_count,
+                       m.contenuto as ultimo_messaggio,
+                       m.timestamp as ultimo_messaggio_data,
+                       u.nome || ' ' || u.cognome as ultimo_mittente
+                FROM chat c
+                LEFT JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                LEFT JOIN messaggi m ON c.id = m.chat_id 
+                    AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
+                LEFT JOIN utenti u ON m.utente_id = u.id
+                GROUP BY c.id
+                ORDER BY ultimo_messaggio_data DESC NULLS LAST
+            ''').fetchall()
+        else:
+            conversations = conn.execute('''
+                SELECT c.*, 
+                       COUNT(DISTINCT pc.utente_id) as partecipanti_count,
+                       m.contenuto as ultimo_messaggio,
+                       m.timestamp as ultimo_messaggio_data,
+                       u.nome || ' ' || u.cognome as ultimo_mittente,
+                       0 as messaggi_non_letti
+                FROM chat c
+                JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                LEFT JOIN messaggi m ON c.id = m.chat_id 
+                    AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
+                LEFT JOIN utenti u ON m.utente_id = u.id
+                WHERE pc.utente_id = ? OR c.classe = ?
+                GROUP BY c.id
+                ORDER BY ultimo_messaggio_data DESC NULLS LAST
+            ''', (session['user_id'], session.get('classe', ''))).fetchall()
+        
+        conn.close()
+        return jsonify([dict(conv) for conv in conversations])
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/messages/<int:conversation_id>')
+def api_messages(conversation_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        conn = get_db_connection()
+        
+        messages = conn.execute('''
+            SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
+                   m.timestamp as data_invio
+            FROM messaggi m
+            JOIN utenti u ON m.utente_id = u.id
+            WHERE m.chat_id = ?
+            ORDER BY m.timestamp ASC
+            LIMIT 100
+        ''', (conversation_id,)).fetchall()
+        
+        conn.close()
+        return jsonify([dict(msg) for msg in messages])
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/users/search')
+def api_users_search():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    query = request.args.get('q', '').strip()
+    if len(query) < 2:
+        return jsonify([])
+    
+    try:
+        conn = get_db_connection()
+        
+        users = conn.execute('''
+            SELECT id, username, nome, cognome, ruolo, classe, status_online
+            FROM utenti 
+            WHERE (nome LIKE ? OR cognome LIKE ? OR username LIKE ?) 
+                  AND id != ? AND attivo = 1
+            ORDER BY nome, cognome
+            LIMIT 20
+        ''', (f'%{query}%', f'%{query}%', f'%{query}%', session['user_id'])).fetchall()
+        
+        conn.close()
+        return jsonify([dict(user) for user in users])
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/conversation/create', methods=['POST'])
+def api_create_conversation():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        data = request.get_json()
+        tipo = data.get('tipo', 'privata')
+        partecipanti = data.get('partecipanti', [])
+        
+        conn = get_db_connection()
+        
+        # Crea conversazione
+        cursor = conn.execute('''
+            INSERT INTO chat (nome, tipo, privata, creatore_id)
+            VALUES (?, ?, ?, ?)
+        ''', (f'Chat {datetime.now().strftime("%d/%m %H:%M")}', tipo, 1, session['user_id']))
+        
+        conversation_id = cursor.lastrowid
+        
+        # Aggiungi creatore
+        conn.execute('''
+            INSERT INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
+            VALUES (?, ?, ?)
+        ''', (conversation_id, session['user_id'], 'admin'))
+        
+        # Aggiungi partecipanti
+        for user_id in partecipanti:
+            conn.execute('''
+                INSERT INTO partecipanti_chat (chat_id, utente_id)
+                VALUES (?, ?)
+            ''', (conversation_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'conversation_id': conversation_id})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/profile')
+def api_ai_profile():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        conn = get_db_connection()
+        
+        profile = conn.execute('''
+            SELECT * FROM ai_profiles WHERE utente_id = ?
+        ''', (session['user_id'],)).fetchone()
+        
+        if not profile:
+            # Crea profilo di default
+            conn.execute('''
+                INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
+                VALUES (?, ?, ?)
+            ''', (session['user_id'], 'SKAILA Assistant', 'friendly'))
+            conn.commit()
+            
+            profile = conn.execute('''
+                SELECT * FROM ai_profiles WHERE utente_id = ?
+            ''', (session['user_id'],)).fetchone()
+        
+        conn.close()
+        
+        return jsonify({
+            'bot_name': profile['bot_name'],
+            'bot_avatar': '🤖',
+            'conversation_style': profile['conversation_style'],
+            'learning_style': 'visual',
+            'difficulty_preference': 'medio',
+            'conversation_tone': 'friendly',
+            'strong_subjects': [],
+            'weak_subjects': []
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/profile', methods=['POST'])
+def api_save_ai_profile():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        data = request.get_json()
+        
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT OR REPLACE INTO ai_profiles 
+            (utente_id, bot_name, conversation_style, learning_preferences, subject_strengths, subject_weaknesses)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            session['user_id'],
+            data.get('bot_name', 'SKAILA Assistant'),
+            data.get('conversation_tone', 'friendly'),
+            data.get('learning_style', 'visual'),
+            ','.join(data.get('strong_subjects', [])),
+            ','.join(data.get('weak_subjects', []))
+        ))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/chat', methods=['POST'])
+def api_ai_chat():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        if not message.strip():
+            return jsonify({'error': 'Messaggio vuoto'}), 400
+        
+        # Ottieni o crea profilo AI per l'utente
+        conn = get_db_connection()
+        profile = conn.execute('SELECT * FROM ai_profiles WHERE utente_id = ?', 
+                             (session['user_id'],)).fetchone()
+        
+        if not profile:
+            # Crea nuovo profilo
+            conn.execute('''
+                INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
+                VALUES (?, ?, ?)
+            ''', (session['user_id'], 'SKAILA Assistant', 'friendly'))
+            conn.commit()
+            profile = conn.execute('SELECT * FROM ai_profiles WHERE utente_id = ?', 
+                                 (session['user_id'],)).fetchone()
+        
+        # Genera risposta AI
+        response = ai_bot.generate_response(
+            message, 
+            session['nome'], 
+            session['ruolo'],
+            profile['conversation_style']
+        )
+        
+        # Salva conversazione
+        conn.execute('''
+            INSERT INTO ai_conversations (utente_id, message, response)
+            VALUES (?, ?, ?)
+        ''', (session['user_id'], message, response))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'response': response,
+            'bot_name': profile['bot_name'],
+            'bot_avatar': '🤖'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Errore del server: {str(e)}'}), 500
+
 @app.route('/logout')
 def logout():
     if 'user_id' in session:
@@ -460,31 +722,16 @@ def handle_disconnect():
             'cognome': session['cognome']
         }, broadcast=True)
 
-@socketio.on('join_chat')
-def handle_join_chat(data):
+@socketio.on('join_conversation')
+def handle_join_conversation(data):
     if 'user_id' not in session:
         return
     
-    chat_id = data['chat_id']
-    join_room(f"chat_{chat_id}")
+    conversation_id = data['conversation_id']
+    join_room(f"chat_{conversation_id}")
     
-    # Carica messaggi recenti
-    conn = get_db_connection()
-    messaggi = conn.execute('''
-        SELECT m.*, u.nome, u.cognome, u.ruolo 
-        FROM messaggi m
-        JOIN utenti u ON m.utente_id = u.id
-        WHERE m.chat_id = ?
-        ORDER BY m.timestamp DESC
-        LIMIT 50
-    ''', (chat_id,)).fetchall()
-    conn.close()
-    
-    # Inverti ordine per mostrare dal più vecchio al più nuovo
-    messaggi = list(reversed(messaggi))
-    
-    emit('messaggi_caricati', {
-        'messaggi': [dict(msg) for msg in messaggi]
+    emit('joined_conversation', {
+        'conversation_id': conversation_id
     })
 
 @socketio.on('send_message')
@@ -492,30 +739,58 @@ def handle_send_message(data):
     if 'user_id' not in session:
         return
     
-    chat_id = data['chat_id']
-    contenuto = data['contenuto']
+    conversation_id = data['conversation_id']
+    contenuto = data.get('contenuto', '')
+    
+    if not contenuto.strip():
+        return
     
     # Salva messaggio nel database
     conn = get_db_connection()
-    conn.execute('''
+    cursor = conn.execute('''
         INSERT INTO messaggi (chat_id, utente_id, contenuto)
         VALUES (?, ?, ?)
-    ''', (chat_id, session['user_id'], contenuto))
+    ''', (conversation_id, session['user_id'], contenuto))
+    
+    message_id = cursor.lastrowid
     conn.commit()
     
     # Ottieni il messaggio appena inserito con i dati utente
     messaggio = conn.execute('''
-        SELECT m.*, u.nome, u.cognome, u.ruolo 
+        SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
+               m.timestamp as data_invio
         FROM messaggi m
         JOIN utenti u ON m.utente_id = u.id
-        WHERE m.chat_id = ? AND m.utente_id = ?
-        ORDER BY m.timestamp DESC
-        LIMIT 1
-    ''', (chat_id, session['user_id'])).fetchone()
+        WHERE m.id = ?
+    ''', (message_id,)).fetchone()
     conn.close()
     
     # Invia a tutti nella chat
-    emit('nuovo_messaggio', dict(messaggio), room=f"chat_{chat_id}")
+    emit('new_message', dict(messaggio), room=f"chat_{conversation_id}")
+
+@socketio.on('typing_start')
+def handle_typing_start(data):
+    if 'user_id' not in session:
+        return
+    
+    conversation_id = data['conversation_id']
+    emit('user_typing', {
+        'conversation_id': conversation_id,
+        'user_name': session['nome'],
+        'typing': True
+    }, room=f"chat_{conversation_id}", include_self=False)
+
+@socketio.on('typing_stop')
+def handle_typing_stop(data):
+    if 'user_id' not in session:
+        return
+    
+    conversation_id = data['conversation_id']
+    emit('user_typing', {
+        'conversation_id': conversation_id,
+        'user_name': session['nome'],
+        'typing': False
+    }, room=f"chat_{conversation_id}", include_self=False)
 
 def reset_database():
     """Forza la ricreazione completa del database"""
