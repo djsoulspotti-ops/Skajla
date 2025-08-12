@@ -263,7 +263,7 @@ def init_db():
         # Aggiungi admin e founder a tutte le chat
         admin_user = conn.execute('SELECT id FROM utenti WHERE email = "admin@skaila.it"').fetchone()
         founder_user = conn.execute('SELECT id FROM utenti WHERE email = "founder@skaila.it"').fetchone()
-        
+
         if admin_user:
             for chat in [chat_3a, chat_3b, chat_generale]:
                 if chat:
@@ -588,15 +588,15 @@ def api_ai_quiz():
         data = request.get_json()
         subject = data.get('subject', 'general')
         difficulty = data.get('difficulty', 'adaptive')
-        
+
         print(f"🧠 Generating personalized quiz - Subject: {subject}, Difficulty: {difficulty}")
-        
+
         # Carica profilo utente
         user_profile = ai_bot.load_user_profile(session['user_id'])
-        
+
         # Genera domanda personalizzata
         question_data = ai_bot.generate_adaptive_quiz_question(subject, user_profile, difficulty)
-        
+
         # Salva nel database per tracking
         conn = get_db_connection()
         conn.execute('''
@@ -607,7 +607,7 @@ def api_ai_quiz():
               f"Generated quiz question", subject, difficulty))
         conn.commit()
         conn.close()
-        
+
         return jsonify({
             'question': question_data,
             'personalized': True,
@@ -629,9 +629,9 @@ def api_ai_feedback():
         rating = data.get('rating', 3)
         message_id = data.get('message_id')
         feedback_text = data.get('feedback', '')
-        
+
         conn = get_db_connection()
-        
+
         # Aggiorna il rating della conversazione
         if message_id:
             conn.execute('''
@@ -639,23 +639,23 @@ def api_ai_feedback():
                 SET feedback_rating = ? 
                 WHERE id = ? AND utente_id = ?
             ''', (rating, message_id, session['user_id']))
-        
+
         # Aggiorna il success rate nel profilo
         avg_rating = conn.execute('''
             SELECT AVG(feedback_rating) FROM ai_conversations 
             WHERE utente_id = ? AND feedback_rating IS NOT NULL
         ''', (session['user_id'],)).fetchone()[0]
-        
+
         if avg_rating:
             conn.execute('''
                 UPDATE ai_profiles 
                 SET success_rate = ? 
                 WHERE utente_id = ?
             ''', (avg_rating, session['user_id']))
-        
+
         conn.commit()
         conn.close()
-        
+
         return jsonify({'success': True, 'message': 'Feedback salvato!'})
 
     except Exception as e:
@@ -669,6 +669,7 @@ def api_ai_feedback():
         return jsonify({'conversation_id': conversation_id})
 
     except Exception as e:
+        conn.close()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/ai/profile')
@@ -690,8 +691,7 @@ def api_ai_profile():
             # Crea profilo avanzato di default
             conn.execute('''
                 INSERT INTO ai_profiles (
-                    utente_id, bot_name, bot_avatar, conversation_style, 
-                    learning_preferences, difficulty_preference, subject_strengths, subject_weaknesses
+                    utente_id, bot_name, bot_avatar, conversation_style, learning_preferences, difficulty_preference, subject_strengths, subject_weaknesses
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (session['user_id'], 'SKAILA Assistant', '🤖', 'friendly', 'adaptive', 'medium', '', ''))
             conn.commit()
@@ -715,7 +715,7 @@ def api_ai_profile():
             'total_interactions': profile.get('total_interactions', 0),
             'success_rate': profile.get('success_rate', 0.0)
         }
-        
+
         print(f"🔍 Enhanced AI Profile loaded: {profile_data['bot_name']} (Style: {profile_data['conversation_style']}, Learning: {profile_data['learning_style']})")
         return jsonify(profile_data)
 
@@ -769,7 +769,7 @@ def api_ai_chat():
     try:
         data = request.get_json()
         message = data.get('message', '')
-        
+
         if not message.strip():
             return jsonify({'error': 'Messaggio vuoto'}), 400
 
@@ -792,7 +792,7 @@ def api_ai_chat():
         # Analizza il messaggio per insights
         subject_detected = ai_bot.detect_subject(message)
         sentiment_analysis = ','.join(ai_bot.analyze_user_sentiment(message))
-        
+
         # Salva conversazione AI avanzata nel database
         conn.execute('''
             INSERT INTO ai_conversations 
@@ -836,7 +836,7 @@ def api_ai_dashboard():
     try:
         print(f"📊 Loading AI dashboard for user {session.get('nome', 'Unknown')}")
         conn = get_db_connection()
-        
+
         # Calcola metriche avanzate di progresso
         total_conversations = conn.execute('''
             SELECT COUNT(*) FROM ai_conversations WHERE utente_id = ?
@@ -862,7 +862,7 @@ def api_ai_dashboard():
         # Carica profilo per raccomandazioni
         user_profile = ai_bot.load_user_profile(session['user_id'])
         analytics = ai_bot.get_learning_analytics(session['user_id'])
-        
+
         # Genera raccomandazioni e obiettivi personalizzati
         recommendations = ai_bot.generate_learning_recommendations(session['user_id'], analytics)
         daily_goals = ai_bot.generate_daily_goals(user_profile)
@@ -912,7 +912,7 @@ def api_ai_dashboard():
                 'learning_approach': user_profile.get('learning_preferences', 'adaptive')
             }
         }
-        
+
         conn.close()
         print(f"✅ AI Dashboard loaded with {total_conversations} interactions, {len(subject_stats)} subjects")
         return jsonify(dashboard_data)
