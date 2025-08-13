@@ -1190,13 +1190,16 @@
                     </div>
                 </div>
                 <div class="chat-actions">
-                    <a href="/" class="action-btn" style="background: rgba(255,255,255,0.3); font-weight: bold; text-decoration: none; color: white;">
+                    <a href="/" class="action-btn" style="background: rgba(255,255,255,0.3); font-weight: bold; text-decoration: none; color: white; border: 2px solid rgba(255,255,255,0.5);">
                         <i class="fas fa-home"></i> 🏠 Homepage
                     </a>
                     <button class="action-btn" onclick="openNewChatModal()">
                         <i class="fas fa-plus"></i> Nuova Chat
                     </button>
-                    <button class="action-btn" onclick="openAISettings()">
+                    <button class="action-btn" onclick="openAIAssistant()" title="Chatbot AI">
+                        <i class="fas fa-robot"></i> 🤖 AI
+                    </button>
+                    <button class="action-btn" onclick="openAISettings()" title="Impostazioni AI">
                         <i class="fas fa-cog"></i>
                     </button>
                     <a href="/logout" class="action-btn">

@@ -235,61 +235,74 @@ def init_db():
             VALUES (?, ?, ?, ?)
         ''', ('Chat Classe 3B', 'Chat generale per la classe 3B', 'classe', '3B'))
 
-        # Crea chat generale per tutti
-        conn.execute('''
-            INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
-            VALUES (?, ?, ?, ?)
-        ''', ('💬 Chat Generale SKAILA', 'Chat generale per tutti gli utenti della piattaforma', 'generale', ''))
+        # Crea chat tematiche e generali
+        chat_rooms = [
+            ('💬 Chat Generale SKAILA', 'Chat generale per tutti gli utenti della piattaforma', 'generale', ''),
+            ('📚 Aiuto Compiti', 'Chat per ricevere e dare aiuto con i compiti', 'tematica', ''),
+            ('💻 Informatica & Coding', 'Discussioni su programmazione e tecnologia', 'tematica', ''),
+            ('🧮 Matematica & Fisica', 'Gruppo di studio per materie scientifiche', 'tematica', ''),
+            ('📖 Letteratura & Storia', 'Chat per appassionati di materie umanistiche', 'tematica', ''),
+            ('🌍 Inglese & Lingue', 'Pratichiamo le lingue straniere insieme', 'tematica', ''),
+            ('🎨 Creatività & Arte', 'Condividi i tuoi progetti creativi', 'tematica', ''),
+            ('🏆 Gamification SKAILA', 'Sfide, classifiche e achievement', 'evento', ''),
+            ('👥 Rappresentanti di Classe', 'Chat riservata ai rappresentanti', 'organizzativo', ''),
+            ('📢 Annunci Scuola', 'Comunicazioni ufficiali dell\'istituto', 'ufficiale', '')
+        ]
+        
+        for nome, descrizione, tipo, classe in chat_rooms:
+            conn.execute('''
+                INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
+                VALUES (?, ?, ?, ?)
+            ''', (nome, descrizione, tipo, classe))
 
-        # Aggiungi studenti alle chat di classe
-        chat_3a = conn.execute('SELECT id FROM chat WHERE classe = "3A"').fetchone()
-        chat_3b = conn.execute('SELECT id FROM chat WHERE classe = "3B"').fetchone()
-        chat_generale = conn.execute('SELECT id FROM chat WHERE nome = "💬 Chat Generale SKAILA"').fetchone()
-
-        # Aggiungi tutti gli utenti alla chat generale
-        if chat_generale:
-            tutti_utenti = conn.execute('SELECT id FROM utenti').fetchall()
-            for utente in tutti_utenti:
-                conn.execute('''
-                    INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
-                    VALUES (?, ?)
-                ''', (chat_generale['id'], utente['id']))
-
-        if chat_3a:
-            utenti_3a = conn.execute('SELECT id FROM utenti WHERE classe = "3A"').fetchall()
-            for utente in utenti_3a:
-                conn.execute('''
-                    INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
-                    VALUES (?, ?)
-                ''', (chat_3a['id'], utente['id']))
-
-        if chat_3b:
-            utenti_3b = conn.execute('SELECT id FROM utenti WHERE classe = "3B"').fetchall()
-            for utente in utenti_3b:
-                conn.execute('''
-                    INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id)
-                    VALUES (?, ?)
-                ''', (chat_3b['id'], utente['id']))
-
-        # Aggiungi admin e founder a tutte le chat
-        admin_user = conn.execute('SELECT id FROM utenti WHERE email = "admin@skaila.it"').fetchone()
-        founder_user = conn.execute('SELECT id FROM utenti WHERE email = "founder@skaila.it"').fetchone()
-
-        if admin_user:
-            for chat in [chat_3a, chat_3b, chat_generale]:
-                if chat:
+        # Ottieni tutti gli utenti e tutte le chat
+        tutti_utenti = conn.execute('SELECT id, ruolo FROM utenti').fetchall()
+        tutte_chat = conn.execute('SELECT id, tipo, classe FROM chat').fetchall()
+        
+        # Aggiungi utenti alle chat appropriate
+        for utente in tutti_utenti:
+            user_id = utente['id']
+            user_role = utente['ruolo']
+            
+            for chat in tutte_chat:
+                chat_id = chat['id']
+                chat_tipo = chat['tipo']
+                chat_classe = chat['classe']
+                
+                # Logica di assegnazione chat
+                should_add = False
+                ruolo_chat = 'membro'
+                
+                # Admin e founder in tutte le chat
+                if user_role in ['admin']:
+                    should_add = True
+                    ruolo_chat = 'admin'
+                
+                # Chat generali e tematiche per tutti
+                elif chat_tipo in ['generale', 'tematica', 'evento']:
+                    should_add = True
+                
+                # Chat di classe solo per studenti della classe
+                elif chat_tipo == 'classe' and chat_classe:
+                    user_classe = conn.execute('SELECT classe FROM utenti WHERE id = ?', (user_id,)).fetchone()
+                    if user_classe and user_classe['classe'] == chat_classe:
+                        should_add = True
+                
+                # Chat organizzative per rappresentanti e professori
+                elif chat_tipo == 'organizzativo' and user_role in ['professore', 'admin']:
+                    should_add = True
+                    ruolo_chat = 'moderatore'
+                
+                # Chat ufficiali per tutti, ma solo admin possono scrivere
+                elif chat_tipo == 'ufficiale':
+                    should_add = True
+                    ruolo_chat = 'admin' if user_role == 'admin' else 'lettore'
+                
+                if should_add:
                     conn.execute('''
                         INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
                         VALUES (?, ?, ?)
-                    ''', (chat['id'], admin_user['id'], 'admin'))
-
-        if founder_user:
-            for chat in [chat_3a, chat_3b, chat_generale]:
-                if chat:
-                    conn.execute('''
-                        INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
-                        VALUES (?, ?, ?)
-                    ''', (chat['id'], founder_user['id'], 'admin'))
+                    ''', (chat_id, user_id, ruolo_chat))
 
         print("✅ Database inizializzato con dati demo")
 
