@@ -21,9 +21,70 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Inizializza il chatbot AI personalizzato
 ai_bot = AISkailaBot()
 
-# Utility per password hashing
+# Utility per password hashing avanzato
+import secrets
+import time
+from functools import wraps
+
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash sicuro con salt per produzione"""
+    import bcrypt
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password, hashed):
+    """Verifica password con bcrypt"""
+    import bcrypt
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except:
+        # Fallback per hash SHA-256 esistenti durante migrazione
+        return hashlib.sha256(password.encode()).hexdigest() == hashed
+
+def rate_limit_login(f):
+    """Rate limiting per tentativi di login"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+        
+        # Controlla tentativi recenti
+        conn = get_db_connection()
+        recent_attempts = conn.execute('''
+            SELECT COUNT(*) FROM login_attempts 
+            WHERE ip_address = ? AND timestamp > datetime('now', '-15 minutes')
+        ''', (client_ip,)).fetchone()[0]
+        
+        if recent_attempts >= 10:  # Max 10 tentativi in 15 minuti
+            conn.close()
+            return render_template('login.html', 
+                error='Troppi tentativi di login. Riprova tra 15 minuti.')
+        
+        conn.close()
+        return f(*args, **kwargs)
+    return decorated_function
+
+def log_login_attempt(email, success, ip_address):
+    """Log dei tentativi di login per sicurezza"""
+    conn = get_db_connection()
+    
+    # Crea tabella se non esiste
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS login_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT,
+            success BOOLEAN,
+            ip_address TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_agent TEXT
+        )
+    ''')
+    
+    conn.execute('''
+        INSERT INTO login_attempts (email, success, ip_address, user_agent)
+        VALUES (?, ?, ?, ?)
+    ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
+    
+    conn.commit()
+    conn.close()
 
 # Database connection
 def get_db_connection():
@@ -386,14 +447,32 @@ def login():
 def register():
     if request.method == 'POST':
         try:
+            # Controlla se c'è un codice scuola per registrazione di massa
+            school_code = request.form.get('school_code', '')
+            
             username = request.form['username']
             email = request.form['email']
             password = request.form['password']
             nome = request.form['nome']
             cognome = request.form['cognome']
             classe = request.form.get('classe', '')
+            ruolo = request.form.get('ruolo', 'studente')
+            scuola = request.form.get('scuola', '')
 
             conn = get_db_connection()
+
+            # Verifica codice scuola per registrazioni di massa
+            if school_code:
+                valid_school = conn.execute('''
+                    SELECT nome_scuola FROM school_codes 
+                    WHERE code = ? AND attivo = 1 AND expires_at > CURRENT_TIMESTAMP
+                ''', (school_code,)).fetchone()
+                
+                if not valid_school:
+                    conn.close()
+                    return render_template('register.html', error='Codice scuola non valido o scaduto')
+                
+                scuola = valid_school['nome_scuola']
 
             # Controlla se utente esiste già
             existing_user = conn.execute('SELECT id FROM utenti WHERE email = ? OR username = ?', (email, username)).fetchone()
@@ -401,12 +480,57 @@ def register():
                 conn.close()
                 return render_template('register.html', error='Email o username già esistenti')
 
-            # Crea nuovo utente
+            # Validazione email scuola per domini autorizzati
+            if scuola:
+                school_domains = conn.execute('''
+                    SELECT authorized_domains FROM schools WHERE nome = ?
+                ''', (scuola,)).fetchone()
+                
+                if school_domains and school_domains['authorized_domains']:
+                    authorized = any(domain.strip() in email for domain in school_domains['authorized_domains'].split(','))
+                    if not authorized and ruolo in ['professore', 'admin']:
+                        conn.close()
+                        return render_template('register.html', error='Email non autorizzata per questo ruolo nella scuola')
+
+            # Crea nuovo utente con validazioni avanzate
             password_hash = hash_password(password)
+            cursor = conn.execute('''
+                INSERT INTO utenti (username, email, password_hash, nome, cognome, classe, ruolo, scuola, 
+                                   primo_accesso, data_registrazione)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+            ''', (username, email, password_hash, nome, cognome, classe, ruolo, scuola))
+
+            user_id = cursor.lastrowid
+
+            # Auto-assegnazione a chat appropriate basate su ruolo e classe
+            if ruolo == 'studente' and classe:
+                # Aggiungi a chat di classe
+                chat_classe = conn.execute('''
+                    SELECT id FROM chat WHERE classe = ? AND tipo = 'classe'
+                ''', (classe,)).fetchone()
+                
+                if chat_classe:
+                    conn.execute('''
+                        INSERT INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
+                        VALUES (?, ?, 'membro')
+                    ''', (chat_classe['id'], user_id))
+
+            # Aggiungi a chat generali per tutti
+            chat_generali = conn.execute('''
+                SELECT id FROM chat WHERE tipo IN ('generale', 'tematica') AND privata = 0
+            ''').fetchall()
+            
+            for chat in chat_generali:
+                conn.execute('''
+                    INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
+                    VALUES (?, ?, 'membro')
+                ''', (chat['id'], user_id))
+
+            # Crea profilo AI personalizzato
             conn.execute('''
-                INSERT INTO utenti (username, email, password_hash, nome, cognome, classe)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (username, email, password_hash, nome, cognome, classe))
+                INSERT INTO ai_profiles (utente_id, bot_name, conversation_style)
+                VALUES (?, ?, ?)
+            ''', (user_id, f'SKAILA Assistant per {nome}', 'friendly'))
 
             conn.commit()
             conn.close()
@@ -418,6 +542,117 @@ def register():
             return render_template('register.html', error=f'Errore durante la registrazione: {str(e)}')
 
     return render_template('register.html')
+
+@app.route('/admin/bulk-register', methods=['GET', 'POST'])
+def admin_bulk_register():
+    """Sistema di registrazione di massa per amministratori scuola"""
+    if 'user_id' not in session or session.get('ruolo') != 'admin':
+        return redirect('/login')
+
+    if request.method == 'POST':
+        try:
+            # CSV upload per registrazione di massa
+            csv_data = request.form.get('csv_data', '')
+            school_name = request.form.get('school_name', '')
+            default_password = request.form.get('default_password', 'scuola123')
+            
+            conn = get_db_connection()
+            registered_count = 0
+            errors = []
+
+            # Processa CSV: nome,cognome,email,classe,ruolo
+            for line_num, line in enumerate(csv_data.strip().split('\n'), 1):
+                if not line.strip():
+                    continue
+                    
+                try:
+                    parts = [p.strip() for p in line.split(',')]
+                    if len(parts) >= 4:
+                        nome, cognome, email, classe = parts[:4]
+                        ruolo = parts[4] if len(parts) > 4 else 'studente'
+                        username = f"{nome.lower()}.{cognome.lower()}"
+                        
+                        # Controlla duplicati
+                        existing = conn.execute('SELECT id FROM utenti WHERE email = ?', (email,)).fetchone()
+                        if not existing:
+                            password_hash = hash_password(default_password)
+                            conn.execute('''
+                                INSERT INTO utenti (username, email, password_hash, nome, cognome, 
+                                                   classe, ruolo, scuola, primo_accesso)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+                            ''', (username, email, password_hash, nome, cognome, classe, ruolo, school_name))
+                            registered_count += 1
+                        else:
+                            errors.append(f"Riga {line_num}: Email {email} già esistente")
+                    else:
+                        errors.append(f"Riga {line_num}: Formato non valido")
+                        
+                except Exception as e:
+                    errors.append(f"Riga {line_num}: {str(e)}")
+
+            conn.commit()
+            conn.close()
+
+            if errors:
+                flash(f'Registrati {registered_count} utenti. Errori: {"; ".join(errors[:5])}', 'warning')
+            else:
+                flash(f'Registrazione di massa completata! {registered_count} utenti registrati.', 'success')
+
+        except Exception as e:
+            flash(f'Errore nella registrazione di massa: {str(e)}', 'error')
+
+    return render_template('admin_bulk_register.html')
+
+@app.route('/api/school/invite-code', methods=['POST'])
+def create_school_invite():
+    """Crea codici invito per scuole"""
+    if 'user_id' not in session or session.get('ruolo') != 'admin':
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        school_name = data.get('school_name')
+        expires_days = data.get('expires_days', 30)
+        max_uses = data.get('max_uses', 1000)
+        
+        import secrets
+        invite_code = secrets.token_urlsafe(12).upper()
+        
+        conn = get_db_connection()
+        
+        # Crea tabella se non esiste
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS school_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT UNIQUE NOT NULL,
+                nome_scuola TEXT NOT NULL,
+                max_uses INTEGER DEFAULT 1000,
+                current_uses INTEGER DEFAULT 0,
+                expires_at TIMESTAMP,
+                attivo BOOLEAN DEFAULT 1,
+                created_by INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (created_by) REFERENCES utenti (id)
+            )
+        ''')
+        
+        conn.execute('''
+            INSERT INTO school_codes (code, nome_scuola, max_uses, expires_at, created_by)
+            VALUES (?, ?, ?, datetime('now', '+{} days'), ?)
+        '''.format(expires_days), (invite_code, school_name, max_uses, session['user_id']))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'invite_code': invite_code,
+            'school_name': school_name,
+            'expires_days': expires_days,
+            'max_uses': max_uses
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/chat')
 def chat():
