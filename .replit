@@ -25,4 +25,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py"
+args = "python3 -c \"import socket; s = socket.socket(); s.bind(('', 0)); port = s.getsockname()[1]; s.close(); print(f'Using port {port}')\" && python3 main.py"
