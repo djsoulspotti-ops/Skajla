@@ -6,10 +6,12 @@ hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["cargo", "libiconv", "rustc"]
 
 [deployment]
-run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+run = ["sh", "-c", "gunicorn --workers 4 --worker-class eventlet --bind 0.0.0.0:5000 main:app"]
 deploymentTarget = "cloudrun"
+build = ["sh", "-c", "pip install -r requirements.txt"]
 
 [[ports]]
 localPort = 5000
