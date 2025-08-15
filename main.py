@@ -535,8 +535,19 @@ def register():
             conn.commit()
             conn.close()
 
-            flash('Registrazione completata! Puoi ora effettuare il login.', 'success')
-            return redirect('/login')
+            # Auto-login dopo registrazione
+            session.permanent = True
+            session['user_id'] = user_id
+            session['username'] = username
+            session['nome'] = nome
+            session['cognome'] = cognome
+            session['ruolo'] = ruolo
+            session['email'] = email
+            session['classe'] = classe
+            session['primo_accesso'] = True  # Flag per onboarding
+            
+            flash('Registrazione completata con successo! 🎉', 'success')
+            return redirect('/onboarding')
 
         except Exception as e:
             return render_template('register.html', error=f'Errore durante la registrazione: {str(e)}')
@@ -653,6 +664,35 @@ def create_school_invite():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/onboarding')
+def onboarding():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    # Solo per utenti al primo accesso
+    if not session.get('primo_accesso', False):
+        return redirect('/chat')
+    
+    return render_template('onboarding.html', user=session)
+
+@app.route('/complete-onboarding', methods=['POST'])
+def complete_onboarding():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    # Aggiorna flag primo accesso
+    conn = get_db_connection()
+    conn.execute('''
+        UPDATE utenti 
+        SET primo_accesso = 0 
+        WHERE id = ?
+    ''', (session['user_id'],))
+    conn.commit()
+    conn.close()
+    
+    session['primo_accesso'] = False
+    return redirect('/chat')
 
 @app.route('/chat')
 def chat():
