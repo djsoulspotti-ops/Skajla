@@ -2,6 +2,9 @@
 """
 SKAILA Gamification System - Sistema completo di gamification
 Sistema avanzato di punti, livelli, achievement e classifiche per motivare gli studenti
++ SISTEMA AVATAR PERSONALIZZABILI
++ GAMIFICATION COLLABORATIVA
++ ANALYTICS AVANZATE
 """
 
 import sqlite3
@@ -25,7 +28,13 @@ class SKAILAGamification:
             'help_classmate': 35,
             'create_study_group': 50,
             'week_streak': 100,
-            'month_streak': 300
+            'month_streak': 300,
+            # NUOVE AZIONI COLLABORATIVE
+            'team_challenge_completed': 150,
+            'team_challenge_contributed': 75,
+            'inter_class_victory': 200,
+            'mentorship_session': 100,
+            'collaborative_project': 120
         }
 
         # Livelli e soglie XP
@@ -56,7 +65,78 @@ class SKAILAGamification:
             10: "🌟 SKAILA Master"
         }
 
-        # Achievement dinamici
+        # 🎨 SISTEMA AVATAR E RICOMPENSE VISIVE
+        self.available_avatars = {
+            # Avatar base (gratuiti)
+            'default': {'emoji': '👤', 'name': 'Default', 'unlock_level': 1, 'cost': 0},
+            'student': {'emoji': '🎓', 'name': 'Studente', 'unlock_level': 2, 'cost': 0},
+            'book_lover': {'emoji': '📚', 'name': 'Amante dei Libri', 'unlock_level': 3, 'cost': 0},
+            # Avatar premium (sbloccabili con livelli)
+            'genius': {'emoji': '🧠', 'name': 'Genio', 'unlock_level': 5, 'cost': 500},
+            'rocket': {'emoji': '🚀', 'name': 'Razzo', 'unlock_level': 6, 'cost': 750},
+            'crown': {'emoji': '👑', 'name': 'Corona Reale', 'unlock_level': 7, 'cost': 1000},
+            'diamond': {'emoji': '💎', 'name': 'Diamante', 'unlock_level': 8, 'cost': 1500},
+            'star': {'emoji': '⭐', 'name': 'Stella Dorata', 'unlock_level': 9, 'cost': 2000},
+            'master': {'emoji': '🌟', 'name': 'SKAILA Master', 'unlock_level': 10, 'cost': 3000},
+            # Avatar speciali (achievement-based)
+            'fire': {'emoji': '🔥', 'name': 'Streak Master', 'unlock_achievement': 'week_warrior', 'cost': 0},
+            'lightning': {'emoji': '⚡', 'name': 'Speed Learner', 'unlock_achievement': 'ai_enthusiast', 'cost': 0},
+            'trophy': {'emoji': '🏆', 'name': 'Campione', 'unlock_achievement': 'month_legend', 'cost': 0}
+        }
+
+        self.ui_themes = {
+            'default': {'name': 'SKAILA Default', 'unlock_level': 1, 'cost': 0},
+            'dark_mode': {'name': 'Modalità Scura', 'unlock_level': 3, 'cost': 200},
+            'neon': {'name': 'Neon Futuristico', 'unlock_level': 5, 'cost': 500},
+            'royal': {'name': 'Eleganza Reale', 'unlock_level': 7, 'cost': 1000},
+            'master': {'name': 'SKAILA Master Theme', 'unlock_level': 10, 'cost': 2500}
+        }
+
+        # 🤝 SFIDE COLLABORATIVE
+        self.team_challenges = [
+            {
+                'id': 'class_knowledge_rush',
+                'name': '🧠 Corsa della Conoscenza',
+                'description': 'Primo team a completare 50 quiz vince!',
+                'type': 'race',
+                'target': 50,
+                'duration_hours': 48,
+                'reward_winner': 300,
+                'reward_participant': 100
+            },
+            {
+                'id': 'inter_class_debate',
+                'name': '🗣️ Sfida Dibattito',
+                'description': 'Dibattito tra classi su tema scientifico',
+                'type': 'competition',
+                'target': 1,
+                'duration_hours': 72,
+                'reward_winner': 500,
+                'reward_participant': 200
+            },
+            {
+                'id': 'collaborative_study',
+                'name': '📚 Studio Collaborativo',
+                'description': 'Aiutatevi a studiare per 100 ore totali',
+                'type': 'cooperative',
+                'target': 100,
+                'duration_hours': 168,
+                'reward_winner': 400,
+                'reward_participant': 150
+            },
+            {
+                'id': 'weekend_warriors',
+                'name': '⚔️ Guerrieri del Weekend',
+                'description': 'Maggior numero di attività nel weekend',
+                'type': 'weekend_special',
+                'target': 20,
+                'duration_hours': 48,
+                'reward_winner': 250,
+                'reward_participant': 75
+            }
+        ]
+
+        # Achievement dinamici (estesi)
         self.achievements = {
             # Achievement di base
             'first_steps': {
@@ -114,10 +194,32 @@ class SKAILAGamification:
                 'xp_reward': 1000,
                 'condition': lambda stats: stats.get('max_streak', 0) >= 30,
                 'category': 'leggenda'
+            },
+            # NUOVI ACHIEVEMENT COLLABORATIVI
+            'team_player': {
+                'name': '🤝 Team Player',
+                'description': 'Partecipa a 5 sfide di squadra',
+                'xp_reward': 350,
+                'condition': lambda stats: stats.get('team_challenges_participated', 0) >= 5,
+                'category': 'collaborazione'
+            },
+            'class_champion': {
+                'name': '🏅 Campione della Classe',
+                'description': 'Vinci 3 sfide inter-classe',
+                'xp_reward': 600,
+                'condition': lambda stats: stats.get('team_challenges_won', 0) >= 3,
+                'category': 'leadership'
+            },
+            'mentor_master': {
+                'name': '👨‍🏫 Mentore Master',
+                'description': 'Conduci 10 sessioni di tutoraggio',
+                'xp_reward': 800,
+                'condition': lambda stats: stats.get('mentorship_sessions', 0) >= 10,
+                'category': 'leadership'
             }
         }
 
-        # Sfide giornaliere
+        # Sfide giornaliere (estese)
         self.daily_challenges = [
             {
                 'id': 'daily_questions',
@@ -150,6 +252,14 @@ class SKAILAGamification:
                 'target': 5,
                 'xp_reward': 100,
                 'type': 'quiz_success'
+            },
+            {
+                'id': 'team_helper',
+                'name': '🤝 Aiuto Squadra',
+                'description': 'Aiuta 2 compagni oggi',
+                'target': 2,
+                'xp_reward': 120,
+                'type': 'team_help'
             }
         ]
 
@@ -158,15 +268,16 @@ class SKAILAGamification:
             'weekend_warrior': {'name': '⚡ Weekend Warrior', 'bonus_xp': 1.5},
             'early_bird': {'name': '🌅 Early Bird', 'bonus_xp': 1.2},
             'night_owl': {'name': '🦉 Night Owl', 'bonus_xp': 1.2},
-            'combo_master': {'name': '🔥 Combo Master', 'bonus_xp': 2.0}
+            'combo_master': {'name': '🔥 Combo Master', 'bonus_xp': 2.0},
+            'team_synergy': {'name': '🤝 Team Synergy', 'bonus_xp': 1.8}
         }
 
     def init_gamification_tables(self):
-        """Inizializza le tabelle per il sistema di gamification"""
+        """Inizializza le tabelle per il sistema di gamification completo"""
         conn = sqlite3.connect('skaila.db')
         cursor = conn.cursor()
 
-        # Tabella profili gamification utenti
+        # Tabella profili gamification utenti (estesa)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_gamification (
                 user_id INTEGER PRIMARY KEY,
@@ -180,9 +291,79 @@ class SKAILAGamification:
                 quizzes_completed INTEGER DEFAULT 0,
                 help_given INTEGER DEFAULT 0,
                 study_minutes INTEGER DEFAULT 0,
+                team_challenges_participated INTEGER DEFAULT 0,
+                team_challenges_won INTEGER DEFAULT 0,
+                mentorship_sessions INTEGER DEFAULT 0,
+                current_avatar TEXT DEFAULT 'default',
+                current_theme TEXT DEFAULT 'default',
+                avatar_coins INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES utenti (id)
+            )
+        ''')
+
+        # Tabella avatar e temi sbloccati
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_unlocked_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                item_type TEXT, -- 'avatar' o 'theme'
+                item_id TEXT,
+                unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                unlock_method TEXT, -- 'level', 'purchase', 'achievement'
+                FOREIGN KEY (user_id) REFERENCES utenti (id),
+                UNIQUE(user_id, item_type, item_id)
+            )
+        ''')
+
+        # Tabella sfide collaborative
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS team_challenges (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                challenge_id TEXT,
+                challenge_name TEXT,
+                class_a TEXT,
+                class_b TEXT,
+                start_date TIMESTAMP,
+                end_date TIMESTAMP,
+                status TEXT DEFAULT 'active', -- 'active', 'completed', 'cancelled'
+                winner_class TEXT,
+                class_a_progress INTEGER DEFAULT 0,
+                class_b_progress INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        # Tabella partecipazioni sfide team
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS team_challenge_participants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                challenge_id INTEGER,
+                user_id INTEGER,
+                contribution INTEGER DEFAULT 0,
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (challenge_id) REFERENCES team_challenges (id),
+                FOREIGN KEY (user_id) REFERENCES utenti (id)
+            )
+        ''')
+
+        # Tabella analytics giornaliere
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS daily_analytics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                date DATE,
+                daily_xp_earned INTEGER DEFAULT 0,
+                messages_sent INTEGER DEFAULT 0,
+                ai_questions INTEGER DEFAULT 0,
+                quiz_completed INTEGER DEFAULT 0,
+                study_minutes INTEGER DEFAULT 0,
+                help_given INTEGER DEFAULT 0,
+                login_time TIME,
+                total_session_time INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES utenti (id),
+                UNIQUE(user_id, date)
             )
         ''')
 
@@ -257,7 +438,7 @@ class SKAILAGamification:
 
         conn.commit()
         conn.close()
-        print("✅ Tabelle gamification create con successo!")
+        print("✅ Tabelle gamification complete create con successo!")
 
     def get_or_create_user_profile(self, user_id: int) -> Dict[str, Any]:
         """Ottieni o crea il profilo gamification dell'utente"""
@@ -271,9 +452,16 @@ class SKAILAGamification:
         if not profile:
             # Crea nuovo profilo
             cursor.execute('''
-                INSERT INTO user_gamification (user_id, last_activity_date)
-                VALUES (?, DATE('now'))
+                INSERT INTO user_gamification (user_id, last_activity_date, avatar_coins)
+                VALUES (?, DATE('now'), 100)
             ''', (user_id,))
+            
+            # Sblocca avatar e tema default
+            cursor.execute('''
+                INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
+                VALUES (?, 'avatar', 'default', 'level'), (?, 'theme', 'default', 'level')
+            ''', (user_id, user_id))
+            
             conn.commit()
             
             profile = cursor.execute('''
@@ -294,10 +482,557 @@ class SKAILAGamification:
                 'ai_interactions': profile[7],
                 'quizzes_completed': profile[8],
                 'help_given': profile[9],
-                'study_minutes': profile[10]
+                'study_minutes': profile[10],
+                'team_challenges_participated': profile[11],
+                'team_challenges_won': profile[12],
+                'mentorship_sessions': profile[13],
+                'current_avatar': profile[14],
+                'current_theme': profile[15],
+                'avatar_coins': profile[16]
             }
         return {}
 
+    # 🎨 FUNZIONI SISTEMA AVATAR E RICOMPENSE VISIVE
+
+    def get_available_avatars(self, user_id: int) -> Dict[str, Any]:
+        """Ottieni avatar disponibili per l'utente"""
+        profile = self.get_or_create_user_profile(user_id)
+        user_level = profile['current_level']
+        
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Ottieni achievement sbloccati
+        unlocked_achievements = cursor.execute('''
+            SELECT achievement_id FROM user_achievements WHERE user_id = ?
+        ''', (user_id,)).fetchall()
+        achievement_ids = [row[0] for row in unlocked_achievements]
+        
+        # Ottieni avatar già sbloccati
+        unlocked_items = cursor.execute('''
+            SELECT item_id FROM user_unlocked_items 
+            WHERE user_id = ? AND item_type = 'avatar'
+        ''', (user_id,)).fetchall()
+        unlocked_avatar_ids = [row[0] for row in unlocked_items]
+        
+        conn.close()
+        
+        avatar_status = {}
+        for avatar_id, avatar_data in self.available_avatars.items():
+            can_unlock = False
+            unlock_reason = ""
+            
+            if avatar_id in unlocked_avatar_ids:
+                can_unlock = True
+                unlock_reason = "Posseduto"
+            elif 'unlock_level' in avatar_data and user_level >= avatar_data['unlock_level']:
+                can_unlock = True
+                unlock_reason = f"Livello {avatar_data['unlock_level']} raggiunto"
+            elif 'unlock_achievement' in avatar_data and avatar_data['unlock_achievement'] in achievement_ids:
+                can_unlock = True
+                unlock_reason = f"Achievement sbloccato"
+            elif 'cost' in avatar_data and profile['avatar_coins'] >= avatar_data['cost']:
+                unlock_reason = f"Acquistabile per {avatar_data['cost']} monete"
+            else:
+                unlock_reason = f"Richiede livello {avatar_data.get('unlock_level', '?')} o achievement"
+            
+            avatar_status[avatar_id] = {
+                **avatar_data,
+                'unlocked': avatar_id in unlocked_avatar_ids,
+                'can_unlock': can_unlock,
+                'unlock_reason': unlock_reason
+            }
+        
+        return avatar_status
+
+    def purchase_avatar(self, user_id: int, avatar_id: str) -> Dict[str, Any]:
+        """Acquista un avatar con le monete"""
+        if avatar_id not in self.available_avatars:
+            return {'success': False, 'error': 'Avatar non trovato'}
+        
+        profile = self.get_or_create_user_profile(user_id)
+        avatar_data = self.available_avatars[avatar_id]
+        cost = avatar_data.get('cost', 0)
+        
+        if profile['avatar_coins'] < cost:
+            return {'success': False, 'error': 'Monete insufficienti'}
+        
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Controlla se già posseduto
+        existing = cursor.execute('''
+            SELECT id FROM user_unlocked_items 
+            WHERE user_id = ? AND item_type = 'avatar' AND item_id = ?
+        ''', (user_id, avatar_id)).fetchone()
+        
+        if existing:
+            conn.close()
+            return {'success': False, 'error': 'Avatar già posseduto'}
+        
+        # Acquista avatar
+        cursor.execute('''
+            INSERT INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
+            VALUES (?, 'avatar', ?, 'purchase')
+        ''', (user_id, avatar_id))
+        
+        # Sottrai monete
+        cursor.execute('''
+            UPDATE user_gamification 
+            SET avatar_coins = avatar_coins - ?
+            WHERE user_id = ?
+        ''', (cost, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            'success': True,
+            'message': f'Avatar {avatar_data["name"]} acquistato!',
+            'remaining_coins': profile['avatar_coins'] - cost
+        }
+
+    def change_avatar(self, user_id: int, avatar_id: str) -> Dict[str, Any]:
+        """Cambia avatar dell'utente"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Verifica possesso
+        unlocked = cursor.execute('''
+            SELECT id FROM user_unlocked_items 
+            WHERE user_id = ? AND item_type = 'avatar' AND item_id = ?
+        ''', (user_id, avatar_id)).fetchone()
+        
+        if not unlocked:
+            conn.close()
+            return {'success': False, 'error': 'Avatar non posseduto'}
+        
+        # Cambia avatar
+        cursor.execute('''
+            UPDATE user_gamification 
+            SET current_avatar = ?
+            WHERE user_id = ?
+        ''', (avatar_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        avatar_data = self.available_avatars[avatar_id]
+        return {
+            'success': True,
+            'message': f'Avatar cambiato in {avatar_data["name"]}!',
+            'new_avatar': avatar_data
+        }
+
+    # 🤝 FUNZIONI GAMIFICATION COLLABORATIVA
+
+    def create_team_challenge(self, challenge_type: str, class_a: str, class_b: str) -> Dict[str, Any]:
+        """Crea una nuova sfida tra squadre/classi"""
+        challenge_template = next((c for c in self.team_challenges if c['id'] == challenge_type), None)
+        if not challenge_template:
+            return {'success': False, 'error': 'Tipo sfida non valido'}
+        
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Calcola date di inizio e fine
+        start_date = datetime.now()
+        end_date = start_date + timedelta(hours=challenge_template['duration_hours'])
+        
+        # Crea sfida
+        cursor.execute('''
+            INSERT INTO team_challenges 
+            (challenge_id, challenge_name, class_a, class_b, start_date, end_date)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (challenge_type, challenge_template['name'], class_a, class_b, start_date, end_date))
+        
+        challenge_db_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return {
+            'success': True,
+            'challenge_id': challenge_db_id,
+            'message': f'Sfida {challenge_template["name"]} creata tra {class_a} e {class_b}!',
+            'end_date': end_date.isoformat()
+        }
+
+    def join_team_challenge(self, user_id: int, challenge_id: int) -> Dict[str, Any]:
+        """Unisciti a una sfida di squadra"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Verifica esistenza sfida
+        challenge = cursor.execute('''
+            SELECT * FROM team_challenges WHERE id = ? AND status = 'active'
+        ''', (challenge_id,)).fetchone()
+        
+        if not challenge:
+            conn.close()
+            return {'success': False, 'error': 'Sfida non trovata o non attiva'}
+        
+        # Verifica se utente appartiene a una delle classi
+        user_class = cursor.execute('''
+            SELECT classe FROM utenti WHERE id = ?
+        ''', (user_id,)).fetchone()[0]
+        
+        if user_class not in [challenge[3], challenge[4]]:  # class_a, class_b
+            conn.close()
+            return {'success': False, 'error': 'Non appartienti alle classi partecipanti'}
+        
+        # Unisciti alla sfida
+        cursor.execute('''
+            INSERT OR IGNORE INTO team_challenge_participants (challenge_id, user_id)
+            VALUES (?, ?)
+        ''', (challenge_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            'success': True,
+            'message': f'Ti sei unito alla sfida {challenge[2]}!'
+        }
+
+    def update_team_challenge_progress(self, user_id: int, challenge_id: int, contribution: int = 1) -> Dict[str, Any]:
+        """Aggiorna il progresso di una sfida di squadra"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Aggiorna contributo utente
+        cursor.execute('''
+            UPDATE team_challenge_participants 
+            SET contribution = contribution + ?
+            WHERE challenge_id = ? AND user_id = ?
+        ''', (contribution, challenge_id, user_id))
+        
+        # Ottieni classe utente
+        user_class = cursor.execute('''
+            SELECT classe FROM utenti WHERE id = ?
+        ''', (user_id,)).fetchone()[0]
+        
+        # Aggiorna progresso classe
+        if user_class:
+            cursor.execute('''
+                UPDATE team_challenges 
+                SET class_a_progress = class_a_progress + ?
+                WHERE id = ? AND class_a = ?
+            ''', (contribution, challenge_id, user_class))
+            
+            cursor.execute('''
+                UPDATE team_challenges 
+                SET class_b_progress = class_b_progress + ?
+                WHERE id = ? AND class_b = ?
+            ''', (contribution, challenge_id, user_class))
+        
+        # Verifica se sfida completata
+        challenge = cursor.execute('''
+            SELECT * FROM team_challenges WHERE id = ?
+        ''', (challenge_id,)).fetchone()
+        
+        challenge_template = next((c for c in self.team_challenges if c['id'] == challenge[1]), None)
+        if challenge_template:
+            target = challenge_template['target']
+            
+            # Controlla vincitore
+            if challenge[6] >= target or challenge[7] >= target:  # class_a_progress, class_b_progress
+                winner = challenge[3] if challenge[6] >= target else challenge[4]
+                cursor.execute('''
+                    UPDATE team_challenges 
+                    SET status = 'completed', winner_class = ?
+                    WHERE id = ?
+                ''', (winner, challenge_id))
+                
+                # Assegna ricompense
+                self.distribute_team_challenge_rewards(challenge_id, winner)
+        
+        conn.commit()
+        conn.close()
+        
+        return {'success': True, 'contribution_added': contribution}
+
+    def distribute_team_challenge_rewards(self, challenge_id: int, winner_class: str):
+        """Distribuisci ricompense per sfida di squadra completata"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Ottieni partecipanti
+        participants = cursor.execute('''
+            SELECT tcp.user_id, u.classe, tcp.contribution
+            FROM team_challenge_participants tcp
+            JOIN utenti u ON tcp.user_id = u.id
+            WHERE tcp.challenge_id = ?
+        ''', (challenge_id,)).fetchall()
+        
+        challenge = cursor.execute('''
+            SELECT challenge_id FROM team_challenges WHERE id = ?
+        ''', (challenge_id,)).fetchone()
+        
+        challenge_template = next((c for c in self.team_challenges if c['id'] == challenge[0]), None)
+        
+        if challenge_template:
+            for user_id, user_class, contribution in participants:
+                if user_class == winner_class:
+                    # Vincitori
+                    xp_reward = challenge_template['reward_winner']
+                    self.award_xp(user_id, 'team_challenge_completed', 1.0, f"Vittoria sfida: {challenge_template['name']}")
+                    cursor.execute('''
+                        UPDATE user_gamification 
+                        SET team_challenges_won = team_challenges_won + 1
+                        WHERE user_id = ?
+                    ''', (user_id,))
+                else:
+                    # Partecipanti
+                    xp_reward = challenge_template['reward_participant']
+                    self.award_xp(user_id, 'team_challenge_contributed', 1.0, f"Partecipazione sfida: {challenge_template['name']}")
+                
+                # Aggiorna contatore partecipazioni
+                cursor.execute('''
+                    UPDATE user_gamification 
+                    SET team_challenges_participated = team_challenges_participated + 1
+                    WHERE user_id = ?
+                ''', (user_id,))
+        
+        conn.commit()
+        conn.close()
+
+    def get_active_team_challenges(self, user_class: str = None) -> List[Dict[str, Any]]:
+        """Ottieni sfide di squadra attive"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        query = '''
+            SELECT * FROM team_challenges 
+            WHERE status = 'active' AND end_date > CURRENT_TIMESTAMP
+        '''
+        params = []
+        
+        if user_class:
+            query += ' AND (class_a = ? OR class_b = ?)'
+            params.extend([user_class, user_class])
+        
+        challenges = cursor.execute(query, params).fetchall()
+        conn.close()
+        
+        result = []
+        for challenge in challenges:
+            challenge_template = next((c for c in self.team_challenges if c['id'] == challenge[1]), None)
+            if challenge_template:
+                result.append({
+                    'id': challenge[0],
+                    'name': challenge[2],
+                    'class_a': challenge[3],
+                    'class_b': challenge[4],
+                    'progress_a': challenge[6],
+                    'progress_b': challenge[7],
+                    'target': challenge_template['target'],
+                    'end_date': challenge[5],
+                    'reward_winner': challenge_template['reward_winner'],
+                    'reward_participant': challenge_template['reward_participant']
+                })
+        
+        return result
+
+    # 📈 FUNZIONI ANALYTICS AVANZATE
+
+    def record_daily_activity(self, user_id: int, activity_type: str, value: int = 1):
+        """Registra attività giornaliera per analytics"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        today = datetime.now().date()
+        
+        # Crea record giornaliero se non esiste
+        cursor.execute('''
+            INSERT OR IGNORE INTO daily_analytics (user_id, date)
+            VALUES (?, ?)
+        ''', (user_id, today))
+        
+        # Aggiorna attività specifica
+        if activity_type == 'message_sent':
+            cursor.execute('''
+                UPDATE daily_analytics 
+                SET messages_sent = messages_sent + ?
+                WHERE user_id = ? AND date = ?
+            ''', (value, user_id, today))
+        elif activity_type == 'ai_question':
+            cursor.execute('''
+                UPDATE daily_analytics 
+                SET ai_questions = ai_questions + ?
+                WHERE user_id = ? AND date = ?
+            ''', (value, user_id, today))
+        elif activity_type == 'quiz_completed':
+            cursor.execute('''
+                UPDATE daily_analytics 
+                SET quiz_completed = quiz_completed + ?
+                WHERE user_id = ? AND date = ?
+            ''', (value, user_id, today))
+        elif activity_type == 'study_minutes':
+            cursor.execute('''
+                UPDATE daily_analytics 
+                SET study_minutes = study_minutes + ?
+                WHERE user_id = ? AND date = ?
+            ''', (value, user_id, today))
+        elif activity_type == 'help_given':
+            cursor.execute('''
+                UPDATE daily_analytics 
+                SET help_given = help_given + ?
+                WHERE user_id = ? AND date = ?
+            ''', (value, user_id, today))
+        
+        conn.commit()
+        conn.close()
+
+    def get_user_analytics(self, user_id: int, days: int = 30) -> Dict[str, Any]:
+        """Ottieni analytics dettagliate dell'utente"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Analytics giornaliere recenti
+        daily_data = cursor.execute('''
+            SELECT date, daily_xp_earned, messages_sent, ai_questions, 
+                   quiz_completed, study_minutes, help_given
+            FROM daily_analytics 
+            WHERE user_id = ? AND date > DATE('now', '-{} days')
+            ORDER BY date ASC
+        '''.format(days), (user_id,)).fetchall()
+        
+        # Statistiche aggregate
+        totals = cursor.execute('''
+            SELECT 
+                SUM(daily_xp_earned) as total_xp_period,
+                SUM(messages_sent) as total_messages_period,
+                SUM(ai_questions) as total_ai_questions_period,
+                SUM(quiz_completed) as total_quiz_period,
+                SUM(study_minutes) as total_study_minutes_period,
+                SUM(help_given) as total_help_period,
+                AVG(daily_xp_earned) as avg_daily_xp,
+                COUNT(*) as active_days
+            FROM daily_analytics 
+            WHERE user_id = ? AND date > DATE('now', '-{} days')
+        '''.format(days), (user_id,)).fetchone()
+        
+        # Trend settimanali
+        weekly_trends = cursor.execute('''
+            SELECT 
+                strftime('%W', date) as week,
+                SUM(daily_xp_earned) as week_xp,
+                SUM(messages_sent) as week_messages,
+                SUM(ai_questions) as week_ai_questions
+            FROM daily_analytics 
+            WHERE user_id = ? AND date > DATE('now', '-{} days')
+            GROUP BY strftime('%W', date)
+            ORDER BY week ASC
+        '''.format(days), (user_id,)).fetchall()
+        
+        # Orari di attività preferiti
+        activity_patterns = cursor.execute('''
+            SELECT 
+                strftime('%H', login_time) as hour,
+                COUNT(*) as login_frequency
+            FROM daily_analytics 
+            WHERE user_id = ? AND login_time IS NOT NULL
+                AND date > DATE('now', '-{} days')
+            GROUP BY hour
+            ORDER BY login_frequency DESC
+        '''.format(days), (user_id,)).fetchall()
+        
+        conn.close()
+        
+        # Processa dati per grafici
+        daily_chart_data = []
+        for row in daily_data:
+            daily_chart_data.append({
+                'date': row[0],
+                'xp_earned': row[1],
+                'messages': row[2],
+                'ai_questions': row[3],
+                'quiz_completed': row[4],
+                'study_minutes': row[5],
+                'help_given': row[6]
+            })
+        
+        weekly_chart_data = []
+        for row in weekly_trends:
+            weekly_chart_data.append({
+                'week': row[0],
+                'total_xp': row[1],
+                'total_messages': row[2],
+                'total_ai_questions': row[3]
+            })
+        
+        activity_heatmap = {}
+        for row in activity_patterns:
+            activity_heatmap[int(row[0])] = row[1]
+        
+        return {
+            'period_days': days,
+            'daily_data': daily_chart_data,
+            'weekly_trends': weekly_chart_data,
+            'activity_heatmap': activity_heatmap,
+            'summary_stats': {
+                'total_xp_earned': totals[0] or 0,
+                'total_messages': totals[1] or 0,
+                'total_ai_questions': totals[2] or 0,
+                'total_quiz_completed': totals[3] or 0,
+                'total_study_minutes': totals[4] or 0,
+                'total_help_given': totals[5] or 0,
+                'avg_daily_xp': round(totals[6] or 0, 1),
+                'active_days': totals[7] or 0,
+                'consistency_score': round(((totals[7] or 0) / days) * 100, 1)
+            },
+            'insights': self.generate_analytics_insights(daily_chart_data, totals)
+        }
+
+    def generate_analytics_insights(self, daily_data: List[Dict], totals: tuple) -> List[str]:
+        """Genera insights personalizzati dai dati analytics"""
+        insights = []
+        
+        if not daily_data:
+            return ["Non ci sono abbastanza dati per generare insights."]
+        
+        # Analisi streak
+        current_streak = 0
+        for day in reversed(daily_data):
+            if day['xp_earned'] > 0:
+                current_streak += 1
+            else:
+                break
+        
+        if current_streak >= 7:
+            insights.append(f"🔥 Sei in una striscia fantastica di {current_streak} giorni attivi!")
+        elif current_streak >= 3:
+            insights.append(f"💪 Bella consistenza: {current_streak} giorni di fila attivo!")
+        
+        # Analisi produttività
+        avg_daily_xp = totals[6] or 0
+        if avg_daily_xp > 100:
+            insights.append("🚀 Sei un super learner con una media XP alta!")
+        elif avg_daily_xp > 50:
+            insights.append("📈 Ottima progressione, continua così!")
+        
+        # Analisi attività preferite
+        total_messages = totals[1] or 0
+        total_ai_questions = totals[2] or 0
+        
+        if total_ai_questions > total_messages:
+            insights.append("🤖 Ami imparare con l'AI! Sei un vero ricercatore di conoscenza.")
+        elif total_messages > total_ai_questions * 2:
+            insights.append("💬 Sei un social learner! Ti piace condividere e discutere.")
+        
+        # Analisi miglioramenti
+        if len(daily_data) >= 7:
+            recent_avg = sum(day['xp_earned'] for day in daily_data[-7:]) / 7
+            older_avg = sum(day['xp_earned'] for day in daily_data[:-7]) / max(1, len(daily_data) - 7)
+            
+            if recent_avg > older_avg * 1.2:
+                insights.append("📊 Trend in crescita! Stai migliorando settimana dopo settimana.")
+            elif recent_avg < older_avg * 0.8:
+                insights.append("💡 Potresti tornare ai livelli precedenti con un po' più di focus.")
+        
+        return insights[:5]  # Massimo 5 insights
+
+    # Resto delle funzioni esistenti (award_xp, check_level_up, etc.)
     def award_xp(self, user_id: int, action_type: str, bonus_multiplier: float = 1.0, description: str = "") -> Dict[str, Any]:
         """Assegna XP per un'azione e controlla achievement e livelli"""
         if action_type not in self.xp_actions:
@@ -316,11 +1051,36 @@ class SKAILAGamification:
             WHERE user_id = ?
         ''', (final_xp, user_id))
 
+        # Assegna monete avatar (10% dell'XP guadagnato)
+        avatar_coins_earned = max(1, final_xp // 10)
+        cursor.execute('''
+            UPDATE user_gamification 
+            SET avatar_coins = avatar_coins + ?
+            WHERE user_id = ?
+        ''', (avatar_coins_earned, user_id))
+
         # Log dell'attività
         cursor.execute('''
             INSERT INTO xp_activity_log (user_id, action_type, xp_earned, bonus_multiplier, description)
             VALUES (?, ?, ?, ?, ?)
         ''', (user_id, action_type, final_xp, bonus_multiplier, description))
+
+        # Aggiorna analytics giornaliere
+        cursor.execute('''
+            UPDATE daily_analytics 
+            SET daily_xp_earned = daily_xp_earned + ?
+            WHERE user_id = ? AND date = DATE('now')
+        ''', (final_xp, user_id))
+
+        # Registra attività per analytics
+        if action_type == 'message_sent':
+            self.record_daily_activity(user_id, 'message_sent')
+        elif action_type in ['ai_question', 'ai_correct_answer']:
+            self.record_daily_activity(user_id, 'ai_question')
+        elif action_type == 'quiz_completed':
+            self.record_daily_activity(user_id, 'quiz_completed')
+        elif action_type == 'help_classmate':
+            self.record_daily_activity(user_id, 'help_given')
 
         # Aggiorna contatori specifici
         if action_type == 'message_sent':
@@ -345,6 +1105,7 @@ class SKAILAGamification:
         return {
             'success': True,
             'xp_earned': final_xp,
+            'avatar_coins_earned': avatar_coins_earned,
             'level_up': level_up_info,
             'new_achievements': new_achievements,
             'bonus_applied': bonus_multiplier > 1.0
@@ -370,6 +1131,21 @@ class SKAILAGamification:
                 SET current_level = ? 
                 WHERE user_id = ?
             ''', (new_level, user_id))
+            
+            # Sblocca avatar e temi per livello
+            for avatar_id, avatar_data in self.available_avatars.items():
+                if avatar_data.get('unlock_level') == new_level:
+                    cursor.execute('''
+                        INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
+                        VALUES (?, 'avatar', ?, 'level')
+                    ''', (user_id, avatar_id))
+            
+            for theme_id, theme_data in self.ui_themes.items():
+                if theme_data.get('unlock_level') == new_level:
+                    cursor.execute('''
+                        INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
+                        VALUES (?, 'theme', ?, 'level')
+                    ''', (user_id, theme_id))
             
             conn.commit()
             conn.close()
@@ -415,6 +1191,14 @@ class SKAILAGamification:
                         SET total_xp = total_xp + ? 
                         WHERE user_id = ?
                     ''', (achievement['xp_reward'], user_id))
+
+                    # Sblocca avatar speciali per achievement
+                    for avatar_id, avatar_data in self.available_avatars.items():
+                        if avatar_data.get('unlock_achievement') == achievement_id:
+                            cursor.execute('''
+                                INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
+                                VALUES (?, 'avatar', ?, 'achievement')
+                            ''', (user_id, avatar_id))
 
                     new_achievements.append({
                         'id': achievement_id,
@@ -573,6 +1357,7 @@ class SKAILAGamification:
         # Query base per classifica
         base_query = '''
             SELECT u.nome, u.cognome, u.classe, ug.total_xp, ug.current_level, u.id,
+                   ug.current_avatar, ug.current_theme,
                    ROW_NUMBER() OVER (ORDER BY ug.total_xp DESC) as rank
             FROM user_gamification ug
             JOIN utenti u ON ug.user_id = u.id
@@ -616,12 +1401,14 @@ class SKAILAGamification:
         return {
             'leaderboard': [
                 {
-                    'rank': row[6],
+                    'rank': row[8],
                     'name': f"{row[0]} {row[1]}",
                     'class': row[2],
                     'total_xp': row[3],
                     'level': row[4],
                     'level_title': self.level_titles.get(row[4], 'Studente'),
+                    'avatar': self.available_avatars.get(row[6], self.available_avatars['default']),
+                    'theme': row[7],
                     'is_current_user': row[5] == user_id
                 } for row in leaderboard
             ],
@@ -668,7 +1455,8 @@ class SKAILAGamification:
                 **profile,
                 'level_title': self.level_titles[current_level],
                 'next_level_xp': next_level_xp,
-                'level_progress': level_progress
+                'level_progress': level_progress,
+                'current_avatar_data': self.available_avatars.get(profile['current_avatar'], self.available_avatars['default'])
             },
             'achievements': {
                 'unlocked': [
@@ -694,6 +1482,7 @@ class SKAILAGamification:
                 ]
             },
             'daily_challenges': self.get_daily_challenges(user_id),
+            'team_challenges': self.get_active_team_challenges(profile.get('classe')),
             'recent_activity': [
                 {
                     'action': row[0],
@@ -703,11 +1492,14 @@ class SKAILAGamification:
                 } for row in recent_activity
             ],
             'leaderboard_position': self.get_leaderboard(user_id, 'weekly'),
+            'analytics': self.get_user_analytics(user_id, 30),
+            'available_avatars': self.get_available_avatars(user_id),
             'statistics': {
                 'total_achievements': len(unlocked_achievements),
                 'completion_rate': (len(unlocked_achievements) / len(self.achievements)) * 100,
                 'daily_streak': profile['current_streak'],
-                'best_streak': profile['max_streak']
+                'best_streak': profile['max_streak'],
+                'avatar_coins': profile['avatar_coins']
             }
         }
 
@@ -725,6 +1517,12 @@ class SKAILAGamification:
             return min(100, (profile['help_given'] / 10) * 100)
         elif achievement_id == 'month_legend':
             return min(100, (profile['max_streak'] / 30) * 100)
+        elif achievement_id == 'team_player':
+            return min(100, (profile['team_challenges_participated'] / 5) * 100)
+        elif achievement_id == 'class_champion':
+            return min(100, (profile['team_challenges_won'] / 3) * 100)
+        elif achievement_id == 'mentor_master':
+            return min(100, (profile['mentorship_sessions'] / 10) * 100)
         
         return 0.0
 
@@ -735,7 +1533,7 @@ gamification_system = SKAILAGamification()
 def init_gamification():
     """Inizializza il sistema di gamification"""
     gamification_system.init_gamification_tables()
-    print("🎮 Sistema di Gamification SKAILA inizializzato!")
+    print("🎮 Sistema di Gamification SKAILA completo inizializzato!")
 
 if __name__ == "__main__":
     init_gamification()

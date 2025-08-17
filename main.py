@@ -1012,6 +1012,144 @@ def api_gamification_dashboard():
         print(f"❌ Error loading gamification dashboard: {e}")
         return jsonify({'error': str(e)}), 500
 
+# ========== API SISTEMA AVATAR ==========
+
+@app.route('/api/gamification/avatar/available')
+def api_available_avatars():
+    """Ottieni avatar disponibili per l'utente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        avatars = gamification_system.get_available_avatars(session['user_id'])
+        return jsonify({'avatars': avatars})
+
+    except Exception as e:
+        print(f"❌ Error loading available avatars: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/avatar/purchase', methods=['POST'])
+def api_purchase_avatar():
+    """Acquista un avatar con le monete"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        avatar_id = data.get('avatar_id')
+        
+        result = gamification_system.purchase_avatar(session['user_id'], avatar_id)
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error purchasing avatar: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/avatar/change', methods=['POST'])
+def api_change_avatar():
+    """Cambia avatar dell'utente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        avatar_id = data.get('avatar_id')
+        
+        result = gamification_system.change_avatar(session['user_id'], avatar_id)
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error changing avatar: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ========== API SFIDE COLLABORATIVE ==========
+
+@app.route('/api/gamification/team-challenges')
+def api_team_challenges():
+    """Ottieni sfide di squadra attive"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        user_class = session.get('classe')
+        challenges = gamification_system.get_active_team_challenges(user_class)
+        return jsonify({'challenges': challenges})
+
+    except Exception as e:
+        print(f"❌ Error loading team challenges: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/team-challenge/create', methods=['POST'])
+def api_create_team_challenge():
+    """Crea una nuova sfida tra squadre (solo admin)"""
+    if 'user_id' not in session or session.get('ruolo') != 'admin':
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        challenge_type = data.get('challenge_type')
+        class_a = data.get('class_a')
+        class_b = data.get('class_b')
+        
+        result = gamification_system.create_team_challenge(challenge_type, class_a, class_b)
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error creating team challenge: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/team-challenge/join', methods=['POST'])
+def api_join_team_challenge():
+    """Unisciti a una sfida di squadra"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        challenge_id = data.get('challenge_id')
+        
+        result = gamification_system.join_team_challenge(session['user_id'], challenge_id)
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error joining team challenge: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ========== API ANALYTICS AVANZATE ==========
+
+@app.route('/api/gamification/analytics')
+def api_user_analytics():
+    """Ottieni analytics dettagliate dell'utente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        days = request.args.get('days', 30, type=int)
+        analytics = gamification_system.get_user_analytics(session['user_id'], days)
+        return jsonify(analytics)
+
+    except Exception as e:
+        print(f"❌ Error loading user analytics: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/analytics/record', methods=['POST'])
+def api_record_activity():
+    """Registra attività per analytics"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        activity_type = data.get('activity_type')
+        value = data.get('value', 1)
+        
+        gamification_system.record_daily_activity(session['user_id'], activity_type, value)
+        return jsonify({'success': True, 'message': 'Attività registrata'})
+
+    except Exception as e:
+        print(f"❌ Error recording activity: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/gamification/leaderboard')
 def api_gamification_leaderboard():
     """Classifica gamification"""

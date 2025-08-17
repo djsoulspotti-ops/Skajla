@@ -7,6 +7,7 @@
     <title>🎮 Gamification Dashboard - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #667eea;
@@ -67,6 +68,31 @@
         .user-level-info {
             position: relative;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .avatar-display {
+            font-size: 4rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-display:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .level-info {
+            text-align: left;
         }
 
         .level-badge {
@@ -100,10 +126,67 @@
             transition: width 0.6s ease;
         }
 
+        .avatar-coins {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,215,0,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-top: 1rem;
+        }
+
+        .dashboard-nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-light);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
         .dashboard-content {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .content-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
@@ -133,6 +216,141 @@
             gap: 0.5rem;
         }
 
+        /* AVATAR CUSTOMIZATION */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .avatar-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .avatar-option.unlocked {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            transform: scale(1.05);
+        }
+
+        .avatar-option.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .avatar-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .avatar-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .avatar-cost {
+            font-size: 0.7rem;
+            color: var(--warning);
+            margin-top: 0.25rem;
+        }
+
+        /* TEAM CHALLENGES */
+        .team-challenges-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .team-challenge {
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .challenge-vs {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .class-info {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+        }
+
+        .progress-vs {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .vs-divider {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* ANALYTICS CHARTS */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .insights-list {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Standard components (achievements, challenges, etc.) */
         .achievements-grid {
             display: grid;
             gap: 1rem;
@@ -270,6 +488,11 @@
         .rank-3 { background: linear-gradient(135deg, #cd7f32, #daa520); }
         .rank-other { background: var(--gradient-primary); }
 
+        .player-avatar {
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -327,14 +550,58 @@
             background: white;
         }
 
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .dashboard-content {
-                grid-template-columns: 1fr;
                 padding: 1rem;
             }
             
             .dashboard-header {
                 padding: 1.5rem 1rem;
+            }
+
+            .user-level-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                gap: 1rem;
+            }
+
+            .chart-container {
+                height: 250px;
             }
         }
     </style>
@@ -346,97 +613,245 @@
 
     <div class="dashboard-header">
         <div class="user-level-info">
-            <div class="level-badge">
-                <span id="levelTitle">🌱 Novizio SKAILA</span>
+            <div class="avatar-display" id="currentAvatarDisplay" onclick="openAvatarCustomization()">
+                🌱
             </div>
-            <h1>🎮 Dashboard Gamification</h1>
-            <p>Livello <span id="currentLevel">1</span> • <span id="totalXP">0</span> XP</p>
-            
-            <div class="xp-progress">
-                <div class="xp-bar">
-                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+            <div class="level-info">
+                <div class="level-badge">
+                    <span id="levelTitle">🌱 Novizio SKAILA</span>
                 </div>
-                <p style="margin-top: 0.5rem;">
-                    <span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP al prossimo livello
-                </p>
+                <h1>🎮 Dashboard Gamification</h1>
+                <p>Livello <span id="currentLevel">1</span> • <span id="totalXP">0</span> XP</p>
+                
+                <div class="xp-progress">
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                    </div>
+                    <p style="margin-top: 0.5rem;">
+                        <span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP al prossimo livello
+                    </p>
+                </div>
+
+                <div class="avatar-coins">
+                    <span>🪙</span>
+                    <span id="avatarCoins">0</span>
+                    <span>Monete Avatar</span>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="dashboard-nav">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('overview')">
+                <i class="fas fa-home"></i> Panoramica
+            </button>
+            <button class="nav-tab" onclick="switchTab('avatar')">
+                <i class="fas fa-user-circle"></i> Avatar & Temi
+            </button>
+            <button class="nav-tab" onclick="switchTab('team')">
+                <i class="fas fa-users"></i> Sfide di Squadra
+            </button>
+            <button class="nav-tab" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+            <button class="nav-tab" onclick="switchTab('achievements')">
+                <i class="fas fa-trophy"></i> Achievement
+            </button>
+            <button class="nav-tab" onclick="switchTab('leaderboard')">
+                <i class="fas fa-medal"></i> Classifica
+            </button>
+        </div>
+    </div>
+
     <div class="dashboard-content">
-        <!-- Achievement Card -->
-        <div class="card">
-            <h2 class="card-title">
-                <i class="fas fa-trophy"></i>
-                Achievement
-            </h2>
-            <div class="achievements-grid" id="achievementsList">
-                <!-- Achievement dinamici -->
-            </div>
-        </div>
-
-        <!-- Sfide Giornaliere -->
-        <div class="card">
-            <h2 class="card-title">
-                <i class="fas fa-calendar-day"></i>
-                Sfide Giornaliere
-            </h2>
-            <div class="challenges-list" id="challengesList">
-                <!-- Sfide dinamiche -->
-            </div>
-        </div>
-
-        <!-- Classifica -->
-        <div class="card">
-            <h2 class="card-title">
-                <i class="fas fa-medal"></i>
-                Classifica Settimanale
-            </h2>
-            <div class="leaderboard-list" id="leaderboardList">
-                <!-- Classifica dinamica -->
-            </div>
-        </div>
-
-        <!-- Statistiche -->
-        <div class="card">
-            <h2 class="card-title">
-                <i class="fas fa-chart-bar"></i>
-                Le Tue Statistiche
-            </h2>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalAchievements">0</div>
-                    <div>Achievement</div>
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+            <div class="content-grid">
+                <!-- Sfide Giornaliere -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-calendar-day"></i>
+                        Sfide Giornaliere
+                    </h2>
+                    <div class="challenges-list" id="challengesList">
+                        <!-- Sfide dinamiche -->
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="currentStreak">0</div>
-                    <div>Giorni Streak</div>
+
+                <!-- Statistiche Rapide -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Le Tue Statistiche
+                    </h2>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalAchievements">0</div>
+                            <div>Achievement</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="currentStreak">0</div>
+                            <div>Giorni Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="completionRate">0%</div>
+                            <div>Completamento</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="bestStreak">0</div>
+                            <div>Best Streak</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="completionRate">0%</div>
-                    <div>Completamento</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="bestStreak">0</div>
-                    <div>Best Streak</div>
+
+                <!-- Attività Recente -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i>
+                        Attività Recente
+                    </h2>
+                    <div class="recent-activity" id="recentActivity">
+                        <!-- Attività dinamiche -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Attività Recente -->
-        <div class="card">
-            <h2 class="card-title">
-                <i class="fas fa-history"></i>
-                Attività Recente
-            </h2>
-            <div class="recent-activity" id="recentActivity">
-                <!-- Attività dinamiche -->
+        <!-- AVATAR & THEMES TAB -->
+        <div id="avatar" class="tab-content">
+            <div class="content-grid">
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-user-circle"></i>
+                        Personalizza Avatar
+                    </h2>
+                    <div class="avatar-grid" id="avatarGrid">
+                        <!-- Avatar dinamici -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-palette"></i>
+                        Temi Interfaccia
+                    </h2>
+                    <div id="themesGrid">
+                        <p>Funzionalità temi in arrivo! 🎨</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEAM CHALLENGES TAB -->
+        <div id="team" class="tab-content">
+            <div class="content-grid">
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-users"></i>
+                        Sfide di Squadra Attive
+                    </h2>
+                    <div class="team-challenges-list" id="teamChallengesList">
+                        <!-- Sfide team dinamiche -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-trophy"></i>
+                        I Tuoi Successi di Squadra
+                    </h2>
+                    <div id="teamStats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="teamChallengesParticipated">0</div>
+                                <div>Sfide Partecipate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="teamChallengesWon">0</div>
+                                <div>Sfide Vinte</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="analytics" class="tab-content">
+            <div class="analytics-grid">
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        Progresso Giornaliero (XP)
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="dailyXPChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Attività per Categoria
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-lightbulb"></i>
+                        I Tuoi Insights
+                    </h2>
+                    <div class="insights-list" id="insightsList">
+                        <!-- Insights dinamici -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-clock"></i>
+                        Mappa Oraria Attività
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="heatmapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACHIEVEMENTS TAB -->
+        <div id="achievements" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-trophy"></i>
+                    Achievement
+                </h2>
+                <div class="achievements-grid" id="achievementsList">
+                    <!-- Achievement dinamici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD TAB -->
+        <div id="leaderboard" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-medal"></i>
+                    Classifica Settimanale
+                </h2>
+                <div class="leaderboard-list" id="leaderboardList">
+                    <!-- Classifica dinamica -->
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let dashboardData = {};
+        let currentTab = 'overview';
 
         async function loadGamificationDashboard() {
             try {
@@ -454,6 +869,31 @@
             }
         }
 
+        function switchTab(tabName) {
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // Update active content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            currentTab = tabName;
+
+            // Load specific tab content
+            switch(tabName) {
+                case 'avatar':
+                    loadAvatarCustomization();
+                    break;
+                case 'team':
+                    loadTeamChallenges();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+            }
+        }
+
         function updateDashboard() {
             const profile = dashboardData.profile;
             
@@ -464,21 +904,360 @@
             document.getElementById('currentXP').textContent = profile.total_xp.toLocaleString();
             document.getElementById('nextLevelXP').textContent = profile.next_level_xp.toLocaleString();
             document.getElementById('xpFill').style.width = profile.level_progress + '%';
+            document.getElementById('avatarCoins').textContent = profile.avatar_coins;
 
-            // Aggiorna achievement
-            updateAchievements();
-            
+            // Aggiorna avatar corrente
+            const currentAvatar = profile.current_avatar_data;
+            if (currentAvatar) {
+                document.getElementById('currentAvatarDisplay').textContent = currentAvatar.emoji;
+            }
+
             // Aggiorna sfide giornaliere
             updateDailyChallenges();
-            
-            // Aggiorna classifica
-            updateLeaderboard();
             
             // Aggiorna statistiche
             updateStatistics();
             
             // Aggiorna attività recente
             updateRecentActivity();
+
+            // Se siamo su altri tab, aggiorna quelli
+            if (currentTab === 'achievements') {
+                updateAchievements();
+            } else if (currentTab === 'leaderboard') {
+                updateLeaderboard();
+            }
+        }
+
+        function updateDailyChallenges() {
+            const container = document.getElementById('challengesList');
+            container.innerHTML = '';
+
+            dashboardData.daily_challenges.forEach(challenge => {
+                const div = document.createElement('div');
+                div.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
+                div.innerHTML = `
+                    <div>
+                        <h4>${challenge.name}</h4>
+                        <p>${challenge.description}</p>
+                        <div class="challenge-progress">
+                            ${challenge.progress}/${challenge.target} ${challenge.completed ? '✓ Completata!' : ''}
+                        </div>
+                    </div>
+                    <div class="challenge-reward">+${challenge.xp_reward} XP</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateStatistics() {
+            const stats = dashboardData.statistics;
+            document.getElementById('totalAchievements').textContent = stats.total_achievements;
+            document.getElementById('currentStreak').textContent = stats.daily_streak;
+            document.getElementById('completionRate').textContent = Math.round(stats.completion_rate) + '%';
+            document.getElementById('bestStreak').textContent = stats.best_streak;
+
+            // Aggiorna statistiche team se esistono
+            if (dashboardData.profile.team_challenges_participated !== undefined) {
+                const teamParticipated = document.getElementById('teamChallengesParticipated');
+                const teamWon = document.getElementById('teamChallengesWon');
+                if (teamParticipated) teamParticipated.textContent = dashboardData.profile.team_challenges_participated;
+                if (teamWon) teamWon.textContent = dashboardData.profile.team_challenges_won;
+            }
+        }
+
+        function updateRecentActivity() {
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = '';
+
+            dashboardData.recent_activity.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = 'activity-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600;">${activity.description || activity.action}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-light);">
+                            ${new Date(activity.timestamp).toLocaleString('it-IT')}
+                        </div>
+                    </div>
+                    <div style="font-weight: 600; color: var(--success);">+${activity.xp_earned} XP</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadAvatarCustomization() {
+            if (!dashboardData.available_avatars) return;
+
+            const container = document.getElementById('avatarGrid');
+            container.innerHTML = '';
+
+            Object.entries(dashboardData.available_avatars).forEach(([avatarId, avatarData]) => {
+                const div = document.createElement('div');
+                div.className = `avatar-option ${avatarData.unlocked ? 'unlocked' : 'locked'}`;
+                if (dashboardData.profile.current_avatar === avatarId) {
+                    div.classList.add('selected');
+                }
+
+                div.innerHTML = `
+                    <div class="avatar-emoji">${avatarData.emoji}</div>
+                    <div class="avatar-name">${avatarData.name}</div>
+                    ${avatarData.cost > 0 && !avatarData.unlocked ? `<div class="avatar-cost">${avatarData.cost} 🪙</div>` : ''}
+                    <div style="font-size: 0.7rem; color: var(--text-light); margin-top: 0.25rem;">
+                        ${avatarData.unlock_reason}
+                    </div>
+                `;
+
+                if (avatarData.unlocked) {
+                    div.onclick = () => changeAvatar(avatarId);
+                } else if (avatarData.can_unlock && avatarData.cost > 0) {
+                    div.onclick = () => purchaseAvatar(avatarId);
+                }
+
+                container.appendChild(div);
+            });
+        }
+
+        async function changeAvatar(avatarId) {
+            try {
+                const response = await fetch('/api/gamification/avatar/change', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({avatar_id: avatarId})
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    dashboardData.profile.current_avatar = avatarId;
+                    loadGamificationDashboard(); // Reload per aggiornare tutto
+                } else {
+                    alert('Errore: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error changing avatar:', error);
+            }
+        }
+
+        async function purchaseAvatar(avatarId) {
+            try {
+                const response = await fetch('/api/gamification/avatar/purchase', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({avatar_id: avatarId})
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadGamificationDashboard(); // Reload per aggiornare tutto
+                } else {
+                    alert('Errore: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error purchasing avatar:', error);
+            }
+        }
+
+        function loadTeamChallenges() {
+            if (!dashboardData.team_challenges) return;
+
+            const container = document.getElementById('teamChallengesList');
+            container.innerHTML = '';
+
+            if (dashboardData.team_challenges.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-light);">
+                        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>Nessuna sfida di squadra attiva al momento.</p>
+                        <p>Le sfide collaborative verranno create dagli amministratori!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            dashboardData.team_challenges.forEach(challenge => {
+                const div = document.createElement('div');
+                div.className = 'team-challenge';
+                
+                const progressA = (challenge.progress_a / challenge.target) * 100;
+                const progressB = (challenge.progress_b / challenge.target) * 100;
+                
+                div.innerHTML = `
+                    <div class="challenge-header">
+                        <h3>${challenge.name}</h3>
+                        <div class="challenge-reward">🏆 ${challenge.reward_winner} XP (Vincitori)</div>
+                    </div>
+                    
+                    <div class="challenge-vs">
+                        <div class="class-info">
+                            <h4>${challenge.class_a}</h4>
+                            <div class="progress-vs">
+                                <div style="flex: 1; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+                                    <div style="height: 20px; background: var(--gradient-primary); width: ${progressA}%; transition: width 0.6s ease;"></div>
+                                </div>
+                                <span>${challenge.progress_a}/${challenge.target}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="vs-divider">VS</div>
+                        
+                        <div class="class-info">
+                            <h4>${challenge.class_b}</h4>
+                            <div class="progress-vs">
+                                <span>${challenge.progress_b}/${challenge.target}</span>
+                                <div style="flex: 1; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+                                    <div style="height: 20px; background: var(--gradient-accent); width: ${progressB}%; transition: width 0.6s ease;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);">
+                        Scade: ${new Date(challenge.end_date).toLocaleString('it-IT')}
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function loadAnalytics() {
+            if (!dashboardData.analytics) return;
+
+            // Crea grafico XP giornalieri
+            createDailyXPChart();
+            
+            // Crea grafico attività
+            createActivityChart();
+            
+            // Carica insights
+            loadInsights();
+            
+            // Crea heatmap oraria (semplificata)
+            createHeatmapChart();
+        }
+
+        function createDailyXPChart() {
+            const ctx = document.getElementById('dailyXPChart').getContext('2d');
+            const dailyData = dashboardData.analytics.daily_data || [];
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dailyData.map(d => new Date(d.date).toLocaleDateString('it-IT')),
+                    datasets: [{
+                        label: 'XP Guadagnati',
+                        data: dailyData.map(d => d.xp_earned),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function createActivityChart() {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            const summary = dashboardData.analytics.summary_stats || {};
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Messaggi', 'Domande AI', 'Quiz', 'Aiuto Dato'],
+                    datasets: [{
+                        data: [
+                            summary.total_messages || 0,
+                            summary.total_ai_questions || 0,
+                            summary.total_quiz_completed || 0,
+                            summary.total_help_given || 0
+                        ],
+                        backgroundColor: [
+                            '#667eea',
+                            '#f093fb',
+                            '#10b981',
+                            '#f59e0b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadInsights() {
+            const container = document.getElementById('insightsList');
+            const insights = dashboardData.analytics.insights || [];
+            
+            container.innerHTML = '';
+            
+            if (insights.length === 0) {
+                container.innerHTML = '<p>Continua a usare SKAILA per ottenere insights personalizzati! 📊</p>';
+                return;
+            }
+            
+            insights.forEach(insight => {
+                const div = document.createElement('div');
+                div.className = 'insight-item';
+                div.innerHTML = `<span>${insight}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function createHeatmapChart() {
+            const ctx = document.getElementById('heatmapChart').getContext('2d');
+            const heatmap = dashboardData.analytics.activity_heatmap || {};
+            
+            const hours = Array.from({length: 24}, (_, i) => i);
+            const data = hours.map(hour => heatmap[hour] || 0);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: hours.map(h => h + ':00'),
+                    datasets: [{
+                        label: 'Accessi',
+                        data: data,
+                        backgroundColor: '#f093fb',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
         function updateAchievements() {
@@ -519,27 +1298,6 @@
             });
         }
 
-        function updateDailyChallenges() {
-            const container = document.getElementById('challengesList');
-            container.innerHTML = '';
-
-            dashboardData.daily_challenges.forEach(challenge => {
-                const div = document.createElement('div');
-                div.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
-                div.innerHTML = `
-                    <div>
-                        <h4>${challenge.name}</h4>
-                        <p>${challenge.description}</p>
-                        <div class="challenge-progress">
-                            ${challenge.progress}/${challenge.target} ${challenge.completed ? '✓ Completata!' : ''}
-                        </div>
-                    </div>
-                    <div class="challenge-reward">+${challenge.xp_reward} XP</div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
         function updateLeaderboard() {
             const container = document.getElementById('leaderboardList');
             container.innerHTML = '';
@@ -559,6 +1317,7 @@
                         <h4>${player.name} ${player.is_current_user ? '(Tu)' : ''}</h4>
                         <p>${player.level_title} • ${player.class || ''}</p>
                     </div>
+                    <div class="player-avatar">${player.avatar ? player.avatar.emoji : '👤'}</div>
                     <div style="text-align: right;">
                         <div style="font-weight: 600;">${player.total_xp.toLocaleString()} XP</div>
                         <div style="font-size: 0.9rem; color: var(--text-light);">Livello ${player.level}</div>
@@ -568,32 +1327,8 @@
             });
         }
 
-        function updateStatistics() {
-            const stats = dashboardData.statistics;
-            document.getElementById('totalAchievements').textContent = stats.total_achievements;
-            document.getElementById('currentStreak').textContent = stats.daily_streak;
-            document.getElementById('completionRate').textContent = Math.round(stats.completion_rate) + '%';
-            document.getElementById('bestStreak').textContent = stats.best_streak;
-        }
-
-        function updateRecentActivity() {
-            const container = document.getElementById('recentActivity');
-            container.innerHTML = '';
-
-            dashboardData.recent_activity.forEach(activity => {
-                const div = document.createElement('div');
-                div.className = 'activity-item';
-                div.innerHTML = `
-                    <div>
-                        <div style="font-weight: 600;">${activity.description || activity.action}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-light);">
-                            ${new Date(activity.timestamp).toLocaleString('it-IT')}
-                        </div>
-                    </div>
-                    <div style="font-weight: 600; color: var(--success);">+${activity.xp_earned} XP</div>
-                `;
-                container.appendChild(div);
-            });
+        function openAvatarCustomization() {
+            switchTab('avatar');
         }
 
         function goBack() {
