@@ -1,6 +1,6 @@
 import sqlite3
 import hashlib
-from flask import Flask, render_template, request, redirect, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, session, flash, jsonify, make_response
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from datetime import datetime, timedelta
 import os
@@ -776,7 +776,11 @@ def gamification_dashboard():
     if 'user_id' not in session:
         return redirect('/login')
 
-    return render_template('gamification_dashboard.html', user=session)
+    # Aggiungi header per permettere embedding
+    response = make_response(render_template('gamification_dashboard.html', user=session))
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
+    return response
 
 @app.route('/api/conversations')
 def api_conversations():
