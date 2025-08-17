@@ -17,7 +17,32 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Configurazione sessioni permanenti
 app.permanent_session_lifetime = timedelta(days=30)
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+# Configurazione per Replit Webview
+@app.after_request
+def after_request(response):
+    # Headers per permettere iframe in Replit
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
+    
+    # Headers per CORS
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    
+    # Cache control per sviluppo
+    if app.debug:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    
+    return response
+
+socketio = SocketIO(app, 
+                   cors_allowed_origins="*",
+                   logger=True, 
+                   engineio_logger=True,
+                   allow_upgrades=True,
+                   transports=['websocket', 'polling'])
 
 # Inizializza il chatbot AI personalizzato
 ai_bot = AISkailaBot()

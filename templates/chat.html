@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKAILA Chat - Sistema Messaggistica</title>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>💬 Chat SKAILA - Connetti, Condividi, Cresci</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
@@ -31,7 +33,7 @@
             --gray-100: #f3f4f6;
             --gray-50: #f9fafb;
             --white: #ffffff;
-            
+
             /* Advanced Gradients */
             --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             --gradient-primary-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.8) 50%, rgba(240, 147, 251, 0.7) 100%);
@@ -39,7 +41,7 @@
             --gradient-glass: linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%);
             --gradient-glass-strong: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.12) 100%);
             --gradient-dark: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
-            
+
             /* Enhanced Shadows */
             --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -49,7 +51,7 @@
             --shadow-glass: 0 8px 32px rgba(102, 126, 234, 0.15);
             --shadow-glow: 0 0 30px rgba(102, 126, 234, 0.3);
             --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.2);
-            
+
             /* Modern Border Radius */
             --border-radius-sm: 8px;
             --border-radius: 12px;
@@ -57,19 +59,19 @@
             --border-radius-lg: 20px;
             --border-radius-xl: 24px;
             --border-radius-full: 50px;
-            
+
             /* Enhanced Blur */
             --blur-sm: blur(8px);
             --blur: blur(16px);
             --blur-lg: blur(24px);
             --blur-xl: blur(32px);
-            
+
             /* Smooth Transitions */
             --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             --transition-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            
+
             /* Spacing System */
             --space-xs: 0.25rem;
             --space-sm: 0.5rem;
@@ -1511,6 +1513,321 @@
                 transform: translateY(0);
             }
         }
+
+        /* Replit Webview Optimizations */
+        body.replit-webview {
+            overflow-x: hidden;
+        }
+
+        body.replit-webview .chat-container {
+            height: calc(100vh - 20px);
+            margin: 10px;
+        }
+
+        body.replit-webview .sidebar {
+            width: 280px;
+        }
+
+        /* Fix for iframe context */
+        .replit-webview iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 10px;
+                border-radius: var(--border-radius-lg);
+                height: calc(100vh - 20px);
+            }
+
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                z-index: 100;
+                left: -100%;
+                transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+                backdrop-filter: var(--blur-xl);
+            }
+
+            .sidebar.active {
+                left: 0;
+                box-shadow: var(--shadow-xl);
+            }
+
+            .main-chat {
+                width: 100%;
+            }
+
+            .chat-header {
+                padding: 16px 20px;
+                backdrop-filter: var(--blur-lg);
+            }
+
+            .current-chat-info::before {
+                content: '☰';
+                font-size: 20px;
+                margin-right: 12px;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: var(--border-radius-sm);
+                background: rgba(255,255,255,0.1);
+                transition: var(--transition-smooth);
+            }
+
+            .current-chat-info:hover::before {
+                background: rgba(255,255,255,0.2);
+                transform: scale(1.1);
+            }
+
+            .messages-container {
+                padding: 12px;
+            }
+
+            .message {
+                max-width: 95%;
+            }
+
+            .message-input-wrapper {
+                padding: 6px;
+            }
+
+            .action-btn {
+                padding: 10px 12px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chat-container {
+                margin: 5px;
+                border-radius: var(--border-radius-md);
+            }
+
+            .sidebar-header {
+                padding: var(--space-md);
+            }
+
+            .user-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+
+            .action-btn {
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            .message-bubble {
+                padding: 12px 16px;
+            }
+
+            .send-button {
+                width: 44px;
+                height: 44px;
+            }
+        }
+
+        /* ENHANCED LOADING STATES */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-2xl);
+            color: var(--gray-600);
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.15);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spinGlow 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            box-shadow: 
+                0 0 20px rgba(102, 126, 234, 0.3),
+                inset 0 0 10px rgba(102, 126, 234, 0.1);
+            position: relative;
+        }
+
+        .spinner::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spinGlow 0.7s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+        }
+
+        .spinner::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 2px solid rgba(240, 147, 251, 0.1);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spinGlow 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes spinGlow {
+            0% { 
+                transform: rotate(0deg); 
+                box-shadow: 
+                    0 0 20px rgba(102, 126, 234, 0.3),
+                    inset 0 0 10px rgba(102, 126, 234, 0.1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 35px rgba(102, 126, 234, 0.5),
+                    inset 0 0 15px rgba(102, 126, 234, 0.2);
+            }
+            100% { 
+                transform: rotate(360deg); 
+                box-shadow: 
+                    0 0 20px rgba(102, 126, 234, 0.3),
+                    inset 0 0 10px rgba(102, 126, 234, 0.1);
+            }
+        }
+
+        /* Area messaggi senza schermata di benvenuto */
+
+        /* Skeleton loading animation */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 75%);
+            background-size: 200% 100%;
+            animation: skeletonPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes skeletonPulse {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Performance optimizations */
+        * {
+            will-change: auto;
+        }
+
+        .message, .conversation-item, .action-btn, .send-button {
+            will-change: transform, opacity;
+        }
+
+        /* Reduce motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* FILE UPLOAD */
+        .file-upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            margin: 16px 0;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area.drag-over {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            color: var(--gray-400);
+            margin-bottom: 16px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .notification-close {
+            border: none;
+            background: none;
+            color: var(--gray-500);
+            cursor: pointer;
+        }
+
+        .notification-content {
+            font-size: 13px;
+            color: var(--gray-700);
+            line-height: 1.4;
+        }
+
+        .scroll-to-bottom {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            background: var(--primary);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.3s ease;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-to-bottom:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1665,6 +1982,17 @@
 
         // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
+            // Detect if running in Replit webview
+            const isReplitWebview = window.parent !== window.self || 
+                                   window.location.href.includes('replit.com') ||
+                                   window.location.href.includes('repl.co');
+
+            if (isReplitWebview) {
+                console.log('🔍 Rilevato Replit Webview - Configurazione ottimizzata');
+                // Add webview-specific optimizations
+                document.body.classList.add('replit-webview');
+            }
+
             initializeSocket();
             loadUserInfo();
             loadConversations();
@@ -1679,7 +2007,22 @@
 
         // Socket.IO initialization
         function initializeSocket() {
-            socket = io();
+            // Initialize Socket.IO with Replit-optimized settings
+            const socket = io({
+                transports: ['polling', 'websocket'], // Polling first for Replit compatibility
+                upgrade: true,
+                rememberUpgrade: false, // Disable for Replit webview
+                timeout: 30000,
+                forceNew: false,
+                reconnection: true,
+                reconnectionDelay: 2000,
+                reconnectionAttempts: 10,
+                maxReconnectionAttempts: 15,
+                // Replit-specific options
+                autoConnect: true,
+                secure: true,
+                rejectUnauthorized: false
+            });
 
             socket.on('connect', function() {
                 console.log('✅ Connesso al server SKAILA');
@@ -1785,6 +2128,15 @@
                     ${conv.messaggi_non_letti > 0 ? `<div class="unread-badge">${conv.messaggi_non_letti}</div>` : ''}
                 </div>
             `).join('');
+
+            // Update active conversation in sidebar
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (currentConversation) {
+                document.querySelector(`[onclick="selectConversation(${currentConversation.id})"]`)
+                    ?.classList.add('active');
+            }
         }
 
         // Select conversation
