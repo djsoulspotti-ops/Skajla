@@ -1857,6 +1857,13 @@
                     <button class="action-btn" onclick="openAISettings()" title="Impostazioni AI">
                         <i class="fas fa-cog"></i>
                     </button>
+                    
+                    <!-- Gamification Button -->
+                    <li><a href="#" onclick="openGamificationModal()" class="action-btn">
+                        <i class="fas fa-trophy"></i>
+                        <span>Gamification</span>
+                    </a></li>
+
                     <a href="/logout" class="action-btn">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
@@ -1968,6 +1975,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GAMIFICATION -->
+    <div class="modal" id="gamificationModal">
+        <div class="modal-content" id="gamificationContent" style="max-width: 90%; width: 80%; max-height: 90vh;">
+            <!-- Gamification dashboard content will be loaded here -->
         </div>
     </div>
 
@@ -2722,6 +2736,78 @@
         window.addEventListener('offline', function() {
             showNotification('Connessione Persa', 'Controlla la tua connessione internet', 'warning');
         });
+
+        // Funzioni Modal Gamification
+        async function openGamificationModal() {
+            const modal = document.getElementById('gamificationModal');
+            const content = document.getElementById('gamificationContent');
+
+            modal.style.display = 'block';
+            content.innerHTML = '<div class="loading">📊 Caricamento dashboard gamification...</div>';
+
+            try {
+                // Carica il contenuto della dashboard
+                const response = await fetch('/gamification');
+                const html = await response.text();
+
+                // Estrai solo il body content dalla risposta
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const dashboardContent = doc.querySelector('.dashboard-content');
+                const dashboardHeader = doc.querySelector('.dashboard-header');
+                const dashboardNav = doc.querySelector('.dashboard-nav');
+
+                if (dashboardContent && dashboardHeader && dashboardNav) {
+                    content.innerHTML = '';
+                    content.appendChild(dashboardHeader.cloneNode(true));
+                    content.appendChild(dashboardNav.cloneNode(true));
+                    content.appendChild(dashboardContent.cloneNode(true));
+
+                    // Esegui gli script della dashboard
+                    const scripts = doc.querySelectorAll('script');
+                    scripts.forEach(script => {
+                        if (script.src) return; // Skip external scripts
+                        const newScript = document.createElement('script');
+                        newScript.textContent = script.textContent;
+                        content.appendChild(newScript);
+                    });
+
+                    // Aggiungi gli stili necessari
+                    const styles = doc.querySelectorAll('style');
+                    styles.forEach(style => {
+                        if (!document.querySelector(`style[data-gamification="${style.textContent.substring(0, 50)}"]`)) {
+                            const newStyle = document.createElement('style');
+                            newStyle.textContent = style.textContent;
+                            newStyle.setAttribute('data-gamification', style.textContent.substring(0, 50));
+                            document.head.appendChild(newStyle);
+                        }
+                    });
+
+                } else {
+                    content.innerHTML = '<div class="loading">❌ Errore nel caricamento della dashboard</div>';
+                }
+
+            } catch (error) {
+                console.error('Errore caricamento gamification:', error);
+                content.innerHTML = '<div class="loading">❌ Errore di connessione</div>';
+            }
+        }
+
+        function closeGamificationModal() {
+            document.getElementById('gamificationModal').style.display = 'none';
+        }
+
+        // Chiudi modal cliccando fuori
+        window.onclick = function(event) {
+            const modal = document.getElementById('gamificationModal');
+            if (event.target === modal) {
+                closeGamificationModal();
+            }
+        }
+
+        // Carica dashboard al caricamento della pagina
+        // This was moved to the DOMContentLoaded listener at the top of the script
+        // document.addEventListener('DOMContentLoaded', loadGamificationDashboard);
     </script>
 
     <!-- Include AI Chatbot Component -->
