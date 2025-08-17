@@ -7,6 +7,7 @@ import os
 from werkzeug.utils import secure_filename
 import openai
 from ai_chatbot import AISkailaBot
+from gamification import gamification_system
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'skaila_secret_key_super_secure_2024'
@@ -20,6 +21,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Inizializza il chatbot AI personalizzato
 ai_bot = AISkailaBot()
+
+# Inizializza sistema gamification
+gamification_system.init_gamification_tables()
 
 # Utility per password hashing avanzato
 import secrets
@@ -432,6 +436,15 @@ def login():
                 conn.commit()
                 conn.close()
 
+                # Sistema Gamification - Login giornaliero
+                gamification_system.get_or_create_user_profile(user['id'])
+                streak_info = gamification_system.update_streak(user['id'])
+                
+                if streak_info['current_streak'] == 1 and not streak_info['streak_broken']:
+                    gamification_system.award_xp(user['id'], 'first_login_day', description="Primo accesso della giornata!")
+                else:
+                    gamification_system.award_xp(user['id'], 'login_daily', description="Login giornaliero")
+
                 return redirect('/chat')
             else:
                 print(f"❌ Login failed - Password mismatch or user not active")
@@ -733,6 +746,13 @@ def ai_chat():
 
     return render_template('ai_chat.html', user=session)
 
+@app.route('/gamification')
+def gamification_dashboard():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    return render_template('gamification_dashboard.html', user=session)
+
 @app.route('/api/conversations')
 def api_conversations():
     if 'user_id' not in session:
@@ -965,10 +985,137 @@ def api_ai_feedback():
         conn.commit()
         conn.close()
 
+        # Gamification - Feedback positivo
+        if rating >= 4:
+            gamification_system.award_xp(session['user_id'], 'ai_correct_answer', description="Feedback positivo AI!")
+
         return jsonify({'success': True, 'message': 'Feedback salvato!'})
 
     except Exception as e:
         print(f"❌ Error saving AI feedback: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== API GAMIFICATION COMPLETE ==========
+
+@app.route('/api/gamification/dashboard')
+def api_gamification_dashboard():
+    """Dashboard completa gamification per l'utente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        dashboard_data = gamification_system.get_user_dashboard(session['user_id'])
+        return jsonify(dashboard_data)
+
+    except Exception as e:
+        print(f"❌ Error loading gamification dashboard: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/leaderboard')
+def api_gamification_leaderboard():
+    """Classifica gamification"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        period = request.args.get('period', 'weekly')
+        class_filter = request.args.get('class_filter', session.get('classe'))
+        
+        leaderboard_data = gamification_system.get_leaderboard(
+            session['user_id'], 
+            period, 
+            class_filter
+        )
+        return jsonify(leaderboard_data)
+
+    except Exception as e:
+        print(f"❌ Error loading leaderboard: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/award-xp', methods=['POST'])
+def api_award_xp():
+    """Assegna XP per azioni specifiche"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        action_type = data.get('action_type')
+        bonus_multiplier = data.get('bonus_multiplier', 1.0)
+        description = data.get('description', '')
+
+        result = gamification_system.award_xp(
+            session['user_id'], 
+            action_type, 
+            bonus_multiplier, 
+            description
+        )
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error awarding XP: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/challenges')
+def api_daily_challenges():
+    """Ottieni sfide giornaliere dell'utente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        challenges = gamification_system.get_daily_challenges(session['user_id'])
+        return jsonify({'challenges': challenges})
+
+    except Exception as e:
+        print(f"❌ Error loading daily challenges: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/challenge-progress', methods=['POST'])
+def api_update_challenge_progress():
+    """Aggiorna progresso sfida giornaliera"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        challenge_type = data.get('challenge_type')
+        increment = data.get('increment', 1)
+
+        result = gamification_system.update_challenge_progress(
+            session['user_id'], 
+            challenge_type, 
+            increment
+        )
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error updating challenge progress: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/profile')
+def api_gamification_profile():
+    """Profilo gamification dell'utente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        profile = gamification_system.get_or_create_user_profile(session['user_id'])
+        
+        # Aggiungi informazioni di livello
+        profile['level_title'] = gamification_system.level_titles[profile['current_level']]
+        
+        next_level = profile['current_level'] + 1 if profile['current_level'] < 10 else 10
+        next_level_xp = gamification_system.level_thresholds.get(next_level, gamification_system.level_thresholds[10])
+        profile['next_level_xp'] = next_level_xp
+        profile['level_progress'] = min(100, (profile['total_xp'] / next_level_xp) * 100) if next_level_xp > 0 else 100
+
+        return jsonify(profile)
+
+    except Exception as e:
+        print(f"❌ Error loading gamification profile: {e}")
         return jsonify({'error': str(e)}), 500
 
 
@@ -1113,6 +1260,16 @@ def api_ai_chat():
 
         conn.commit()
         conn.close()
+
+        # Gamification - Domanda AI
+        gamification_result = gamification_system.award_xp(
+            session['user_id'], 
+            'ai_question', 
+            description=f"Domanda AI su {subject_detected}"
+        )
+        
+        # Aggiorna progresso sfide giornaliere
+        gamification_system.update_challenge_progress(session['user_id'], 'ai_questions')
 
         # Prepara risposta con dati del profilo
         bot_data = {
@@ -1309,6 +1466,10 @@ def handle_send_message(data):
         WHERE m.id = ?
     ''', (message_id,)).fetchone()
     conn.close()
+
+    # Gamification - Messaggio inviato
+    gamification_system.award_xp(session['user_id'], 'message_sent', description="Messaggio in chat")
+    gamification_system.update_challenge_progress(session['user_id'], 'messages')
 
     # Invia a tutti nella chat
     emit('new_message', dict(messaggio), room=f"chat_{conversation_id}")

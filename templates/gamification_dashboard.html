@@ -1,0 +1,610 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Gamification Dashboard - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .dashboard-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .user-level-info {
+            position: relative;
+            z-index: 10;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .xp-progress {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .xp-bar {
+            background: rgba(255,255,255,0.3);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            background: linear-gradient(90deg, #10b981, #34d399);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        .dashboard-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .achievements-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-item.unlocked {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-color: var(--success);
+        }
+
+        .achievement-item.locked {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            opacity: 0.7;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--gradient-accent);
+            color: white;
+        }
+
+        .achievement-info h4 {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .achievement-info p {
+            margin: 0.25rem 0 0 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-accent);
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .challenges-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .challenge-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .challenge-item.completed {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-left-color: var(--success);
+        }
+
+        .challenge-progress {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .challenge-reward {
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item.current-user {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid var(--warning);
+        }
+
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e5e5e5); }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #daa520); }
+        .rank-other { background: var(--gradient-primary); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255,255,255,0.9);
+            color: var(--primary);
+            border: none;
+            padding: 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.1);
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .dashboard-header {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <div class="dashboard-header">
+        <div class="user-level-info">
+            <div class="level-badge">
+                <span id="levelTitle">🌱 Novizio SKAILA</span>
+            </div>
+            <h1>🎮 Dashboard Gamification</h1>
+            <p>Livello <span id="currentLevel">1</span> • <span id="totalXP">0</span> XP</p>
+            
+            <div class="xp-progress">
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                </div>
+                <p style="margin-top: 0.5rem;">
+                    <span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP al prossimo livello
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <!-- Achievement Card -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-trophy"></i>
+                Achievement
+            </h2>
+            <div class="achievements-grid" id="achievementsList">
+                <!-- Achievement dinamici -->
+            </div>
+        </div>
+
+        <!-- Sfide Giornaliere -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-calendar-day"></i>
+                Sfide Giornaliere
+            </h2>
+            <div class="challenges-list" id="challengesList">
+                <!-- Sfide dinamiche -->
+            </div>
+        </div>
+
+        <!-- Classifica -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-medal"></i>
+                Classifica Settimanale
+            </h2>
+            <div class="leaderboard-list" id="leaderboardList">
+                <!-- Classifica dinamica -->
+            </div>
+        </div>
+
+        <!-- Statistiche -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-chart-bar"></i>
+                Le Tue Statistiche
+            </h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalAchievements">0</div>
+                    <div>Achievement</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="currentStreak">0</div>
+                    <div>Giorni Streak</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completionRate">0%</div>
+                    <div>Completamento</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="bestStreak">0</div>
+                    <div>Best Streak</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attività Recente -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-history"></i>
+                Attività Recente
+            </h2>
+            <div class="recent-activity" id="recentActivity">
+                <!-- Attività dinamiche -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dashboardData = {};
+
+        async function loadGamificationDashboard() {
+            try {
+                const response = await fetch('/api/gamification/dashboard');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    dashboardData = data;
+                    updateDashboard();
+                } else {
+                    console.error('Error loading dashboard:', data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function updateDashboard() {
+            const profile = dashboardData.profile;
+            
+            // Aggiorna header
+            document.getElementById('levelTitle').textContent = profile.level_title;
+            document.getElementById('currentLevel').textContent = profile.current_level;
+            document.getElementById('totalXP').textContent = profile.total_xp.toLocaleString();
+            document.getElementById('currentXP').textContent = profile.total_xp.toLocaleString();
+            document.getElementById('nextLevelXP').textContent = profile.next_level_xp.toLocaleString();
+            document.getElementById('xpFill').style.width = profile.level_progress + '%';
+
+            // Aggiorna achievement
+            updateAchievements();
+            
+            // Aggiorna sfide giornaliere
+            updateDailyChallenges();
+            
+            // Aggiorna classifica
+            updateLeaderboard();
+            
+            // Aggiorna statistiche
+            updateStatistics();
+            
+            // Aggiorna attività recente
+            updateRecentActivity();
+        }
+
+        function updateAchievements() {
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = '';
+
+            // Achievement sbloccati
+            dashboardData.achievements.unlocked.forEach(achievement => {
+                const div = document.createElement('div');
+                div.className = 'achievement-item unlocked';
+                div.innerHTML = `
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-info">
+                        <h4>${achievement.name}</h4>
+                        <p>${achievement.description}</p>
+                        <p><strong>+${achievement.xp_earned} XP</strong> • Sbloccato</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            // Achievement disponibili
+            dashboardData.achievements.available.forEach(achievement => {
+                const div = document.createElement('div');
+                div.className = 'achievement-item locked';
+                div.innerHTML = `
+                    <div class="achievement-icon">🔒</div>
+                    <div class="achievement-info">
+                        <h4>${achievement.name}</h4>
+                        <p>${achievement.description}</p>
+                        <p><strong>+${achievement.xp_reward} XP</strong> quando sbloccato</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${achievement.progress}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateDailyChallenges() {
+            const container = document.getElementById('challengesList');
+            container.innerHTML = '';
+
+            dashboardData.daily_challenges.forEach(challenge => {
+                const div = document.createElement('div');
+                div.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
+                div.innerHTML = `
+                    <div>
+                        <h4>${challenge.name}</h4>
+                        <p>${challenge.description}</p>
+                        <div class="challenge-progress">
+                            ${challenge.progress}/${challenge.target} ${challenge.completed ? '✓ Completata!' : ''}
+                        </div>
+                    </div>
+                    <div class="challenge-reward">+${challenge.xp_reward} XP</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateLeaderboard() {
+            const container = document.getElementById('leaderboardList');
+            container.innerHTML = '';
+
+            dashboardData.leaderboard_position.leaderboard.forEach((player, index) => {
+                const div = document.createElement('div');
+                div.className = `leaderboard-item ${player.is_current_user ? 'current-user' : ''}`;
+                
+                let rankClass = 'rank-other';
+                if (player.rank === 1) rankClass = 'rank-1';
+                else if (player.rank === 2) rankClass = 'rank-2';
+                else if (player.rank === 3) rankClass = 'rank-3';
+
+                div.innerHTML = `
+                    <div class="rank-badge ${rankClass}">${player.rank}</div>
+                    <div style="flex: 1;">
+                        <h4>${player.name} ${player.is_current_user ? '(Tu)' : ''}</h4>
+                        <p>${player.level_title} • ${player.class || ''}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 600;">${player.total_xp.toLocaleString()} XP</div>
+                        <div style="font-size: 0.9rem; color: var(--text-light);">Livello ${player.level}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateStatistics() {
+            const stats = dashboardData.statistics;
+            document.getElementById('totalAchievements').textContent = stats.total_achievements;
+            document.getElementById('currentStreak').textContent = stats.daily_streak;
+            document.getElementById('completionRate').textContent = Math.round(stats.completion_rate) + '%';
+            document.getElementById('bestStreak').textContent = stats.best_streak;
+        }
+
+        function updateRecentActivity() {
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = '';
+
+            dashboardData.recent_activity.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = 'activity-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600;">${activity.description || activity.action}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-light);">
+                            ${new Date(activity.timestamp).toLocaleString('it-IT')}
+                        </div>
+                    </div>
+                    <div style="font-weight: 600; color: var(--success);">+${activity.xp_earned} XP</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Carica dashboard al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', loadGamificationDashboard);
+
+        // Aggiorna dashboard ogni 30 secondi
+        setInterval(loadGamificationDashboard, 30000);
+    </script>
+</body>
+</html>
