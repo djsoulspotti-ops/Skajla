@@ -1677,4 +1677,15 @@ def reset_database():
 if __name__ == '__main__':
     # Forza ricreazione database per debug
     reset_database()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    # Usa porta da variabile d'ambiente o porta dinamica
+    port = int(os.environ.get('PORT', 0))
+    if port == 0:
+        import socket
+        sock = socket.socket()
+        sock.bind(('', 0))
+        port = sock.getsockname()[1]
+        sock.close()
+    
+    print(f"🚀 SKAILA Server starting on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=True)
