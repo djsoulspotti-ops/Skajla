@@ -36,40 +36,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 -c \""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "import socket"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sock = socket.socket()"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sock.bind(('', 0))"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "port = sock.getsockname()[1]"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sock.close()"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "print(f'🚀 Starting SKAILA on port {port}')"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "import os"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "os.environ['PORT'] = str(port)"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "\" && gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 main:app"
+args = "python3 -c \"import socket; s = socket.socket(); s.bind(('', 0)); port = s.getsockname()[1]; s.close(); import os; os.environ['PORT'] = str(port); print(f'🚀 Starting SKAILA on port {port}')\" && gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 main:app"

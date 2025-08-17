@@ -291,6 +291,38 @@ def init_db():
         except Exception as e:
             print(f"❌ Error creating papa: {e}")
 
+        # Crea account per mamma con credenziali semplici
+        mamma_password = hash_password('mamma123')
+        try:
+            conn.execute('''
+                INSERT OR REPLACE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('mamma', 'mamma@skaila.it', mamma_password, 'Mamma', 'Famiglia', 'genitore', 0))
+            print("✅ Mamma user created")
+        except Exception as e:
+            print(f"❌ Error creating mamma: {e}")
+
+        # Crea account demo genitori con nomi reali (opzionale)
+        genitore1_password = hash_password('demo123')
+        try:
+            conn.execute('''
+                INSERT OR REPLACE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('genitore_demo1', 'genitore1@demo.skaila.it', genitore1_password, 'Mario', 'Genitore', 'genitore', 0))
+            print("✅ Genitore demo 1 created")
+        except Exception as e:
+            print(f"❌ Error creating genitore demo 1: {e}")
+
+        genitore2_password = hash_password('demo123')
+        try:
+            conn.execute('''
+                INSERT OR REPLACE INTO utenti (username, email, password_hash, nome, cognome, ruolo, primo_accesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('genitore_demo2', 'genitore2@demo.skaila.it', genitore2_password, 'Laura', 'Genitore', 'genitore', 0))
+            print("✅ Genitore demo 2 created")
+        except Exception as e:
+            print(f"❌ Error creating genitore demo 2: {e}")
+
         # Crea professore demo
         prof_password = hash_password('prof123')
         conn.execute('''
