@@ -1082,93 +1082,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* WELCOME SCREEN */
-        .welcome-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 40px;
-            text-align: center;
-            color: var(--gray-600);
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: var(--blur);
-            border-radius: var(--border-radius-lg);
-            margin: 20px;
-        }
-
-        .welcome-icon {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            backdrop-filter: var(--blur);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 64px;
-            color: var(--white);
-            margin-bottom: 32px;
-            animation: welcomeFloat 3s ease-in-out infinite;
-            box-shadow: 
-                0 20px 40px rgba(102, 126, 234, 0.3),
-                0 0 80px rgba(102, 126, 234, 0.2);
-            position: relative;
-        }
-
-        .welcome-icon::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            opacity: 0.3;
-            z-index: -1;
-            animation: welcomeRing 2s ease-in-out infinite;
-        }
-
-        @keyframes welcomeFloat {
-            0%, 100% { 
-                transform: translateY(0) scale(1); 
-                box-shadow: 
-                    0 20px 40px rgba(102, 126, 234, 0.3),
-                    0 0 80px rgba(102, 126, 234, 0.2);
-            }
-            50% { 
-                transform: translateY(-10px) scale(1.02); 
-                box-shadow: 
-                    0 30px 50px rgba(102, 126, 234, 0.4),
-                    0 0 100px rgba(102, 126, 234, 0.3);
-            }
-        }
-
-        @keyframes welcomeRing {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.1; }
-        }
-
-        .welcome-title {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-            margin-bottom: 16px;
-        }
-
-        .welcome-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: 12px;
-        }
-
-        .welcome-subtitle {
-            font-size: 16px;
-            line-height: 1.6;
-            max-width: 400px;
-        }
+        /* Area messaggi vuota - CSS rimosso per welcome screen */
 
         /* MODALS */
         .modal {
@@ -1465,31 +1379,7 @@
             }
         }
 
-        /* Enhanced empty states */
-        .welcome-screen {
-            background: var(--gradient-glass);
-            backdrop-filter: var(--blur-lg);
-            border-radius: var(--border-radius-xl);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            margin: var(--space-lg);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-screen::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, 
-                rgba(102, 126, 234, 0.05) 0%, 
-                rgba(240, 147, 251, 0.05) 100%);
-            animation: welcomeShimmer 3s ease-in-out infinite;
-        }
-
-        @keyframes welcomeShimmer {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
+        /* Area messaggi senza schermata di benvenuto */
 
         /* Skeleton loading animation */
         .skeleton {
@@ -1691,16 +1581,7 @@
             </div>
 
             <div class="messages-container" id="messagesContainer">
-                <div class="welcome-screen">
-                    <div class="welcome-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h2 class="welcome-title">Benvenuto in SKAILA Chat!</h2>
-                    <p class="welcome-subtitle">
-                        Seleziona una conversazione dalla barra laterale per iniziare a chattare, 
-                        oppure crea una nuova conversazione con studenti e professori.
-                    </p>
-                </div>
+                <!-- Area messaggi vuota inizialmente -->
             </div>
 
             <div class="typing-indicator" id="typingIndicator" style="display: none;">
@@ -1936,8 +1817,7 @@
                 // Load messages
                 await loadMessages(conversationId);
 
-                // Hide welcome screen
-                document.querySelector('.welcome-screen')?.remove();
+                // L'area messaggi è ora vuota di default
 
                 // On mobile, hide sidebar when conversation is selected
                 if (window.innerWidth <= 768) {
