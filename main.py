@@ -1457,13 +1457,48 @@ def api_ai_chat():
             SELECT * FROM ai_profiles WHERE utente_id = ?
         ''', (session['user_id'],)).fetchone()
 
-        # Genera risposta AI personalizzata
-        response = ai_bot.generate_response(
+        profile_dict = dict(profile) if profile else {}
+        
+        # Ottimizzazione costi AI
+        from ai_cost_manager import optimize_ai_costs, cost_manager
+        
+        cached_response, estimated_cost = optimize_ai_costs(
             message, 
-            session['nome'], 
-            session['ruolo'],
+            profile_dict, 
             session['user_id']
         )
+        
+        if cached_response and estimated_cost == 0.0:
+            # Risposta dalla cache
+            response = cached_response
+            print(f"✅ Cache hit - risposta servita dalla cache")
+        else:
+            # Genera nuova risposta AI
+            response = ai_bot.generate_response(
+                message, 
+                session['nome'], 
+                session['ruolo'],
+                session['user_id']
+            )
+            
+            # Cache la risposta per future richieste
+            if ai_bot.openai_available:
+                user_context = f"{profile_dict.get('conversation_style', '')}{profile_dict.get('learning_preferences', '')}"
+                cost_manager.cache_response(message, response, user_context, 'gpt-3.5-turbo')
+                
+                # Traccia il costo se non era cached
+                if estimated_cost > 0:
+                    input_tokens = cost_manager.estimate_tokens(message)
+                    output_tokens = cost_manager.estimate_tokens(response)
+                    actual_cost = cost_manager.calculate_cost('gpt-3.5-turbo', input_tokens, output_tokens)
+                    cost_manager.track_cost(
+                        session['user_id'], 
+                        'gpt-3.5-turbo', 
+                        input_tokens, 
+                        output_tokens, 
+                        actual_cost, 
+                        'chat'
+                    )
 
         # Analizza il messaggio per insights
         subject_detected = ai_bot.detect_subject(message)
@@ -1500,18 +1535,36 @@ def api_ai_chat():
         # Prepara risposta con dati del profilo
         bot_data = {
             'response': response,
-            'bot_name': profile['bot_name'] if profile else 'SKAILA Assistant',
-            'bot_avatar': profile['bot_avatar'] if profile else '🤖',
+            'bot_name': profile_dict.get('bot_name') if profile_dict else 'SKAILA Assistant',
+            'bot_avatar': profile_dict.get('bot_avatar') if profile_dict else '🤖',
             'subject_detected': subject_detected,
             'sentiment': sentiment_analysis,
-            'personalized': True
+            'personalized': True,
+            'openai_powered': ai_bot.openai_available,
+            'cached': cached_response is not None and estimated_cost == 0.0
         }
 
-        print(f"✅ AI Response generated (Subject: {subject_detected}, Sentiment: {sentiment_analysis})")
+        print(f"✅ AI Response generated (Subject: {subject_detected}, Powered by: {'OpenAI' if ai_bot.openai_available else 'Fallback'})")
         return jsonify(bot_data)
 
     except Exception as e:
         print(f"❌ Error in enhanced AI chat: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ai/usage-stats')
+def api_ai_usage_stats():
+    """API per statistiche di utilizzo AI"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        from ai_cost_manager import cost_manager
+        
+        stats = cost_manager.get_usage_stats(session['user_id'])
+        return jsonify(stats)
+
+    except Exception as e:
+        print(f"❌ Error loading AI usage stats: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/ai/dashboard')

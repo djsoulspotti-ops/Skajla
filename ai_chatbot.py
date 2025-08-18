@@ -1,3 +1,4 @@
+
 import random
 import json
 from datetime import datetime, timedelta
@@ -9,16 +10,28 @@ from typing import Dict, List, Any, Tuple
 
 class AISkailaBot:
     def __init__(self):
-        # Configurazione OpenAI (se disponibile)
+        # Configurazione OpenAI
         self.openai_available = False
-        try:
-            openai.api_key = os.getenv('OPENAI_API_KEY')
-            if openai.api_key:
-                self.openai_available = True
-                print("✅ OpenAI API configured")
-        except:
-            print("⚠️ OpenAI API not configured - using enhanced mock responses")
-
+        self.setup_openai()
+        
+        # Modelli disponibili
+        self.models = {
+            'gpt-4': {
+                'name': 'gpt-4',
+                'max_tokens': 8192,
+                'cost_per_1k_input': 0.03,
+                'cost_per_1k_output': 0.06,
+                'best_for': ['complex_reasoning', 'creative_writing', 'detailed_explanations']
+            },
+            'gpt-3.5-turbo': {
+                'name': 'gpt-3.5-turbo',
+                'max_tokens': 4096,
+                'cost_per_1k_input': 0.0015,
+                'cost_per_1k_output': 0.002,
+                'best_for': ['quick_responses', 'simple_questions', 'general_chat']
+            }
+        }
+        
         # Sistema di personalità avanzato
         self.personality_system = {
             'core_traits': {
@@ -34,82 +47,276 @@ class AISkailaBot:
             'emotional_intelligence': True
         }
 
-        # Database di conoscenze espanso
-        self.knowledge_base = {
-            'matematica': {
-                'concetti': {
-                    'algebra': {
-                        'spiegazione': "L'algebra è il linguaggio della matematica che usa lettere per rappresentare numeri sconosciuti.",
-                        'esempi': ["Se x + 5 = 12, allora x = 7", "2y = 10 significa y = 5"],
-                        'trucchi': ["Ricorda: quello che fai a sinistra dell'uguale, fallo anche a destra!", "Le lettere sono solo numeri misteriosi che aspettano di essere scoperti!"],
-                        'difficolta_comune': "Molti studenti confondono le operazioni inverse - ricorda che addizione e sottrazione sono opposte!"
-                    },
-                    'geometria': {
-                        'spiegazione': "La geometria studia le forme, le dimensioni e le proprietà dello spazio.",
-                        'esempi': ["Un triangolo ha sempre angoli che sommano 180°", "L'area del rettangolo = base × altezza"],
-                        'trucchi': ["Visualizza sempre! Disegna la figura per capire meglio", "Ogni teorema ha una storia - cerca di capire il 'perché'"],
-                        'difficolta_comune': "Le dimostrazioni sembrano difficili, ma sono solo una conversazione logica!"
-                    }
-                },
-                'strategie_studio': [
-                    "Pratica ogni giorno 15-20 minuti invece di studiare 3 ore una volta a settimana",
-                    "Spiega i concetti a voce alta o a un amico - se non riesci a spiegarlo, non l'hai capito"
-                ]
-            },
-            'informatica': {
-                'concetti': {
-                    'programmazione': {
-                        'spiegazione': "Programmare è come scrivere ricette molto precise per il computer.",
-                        'esempi': [
-                            "print('Ciao mondo!') dice al computer di mostrare un messaggio"
-                        ],
-                        'trucchi': [
-                            "Inizia sempre con problemi piccoli e costruisci passo dopo passo"
-                        ]
-                    }
-                }
-            },
-            'generale': {
-                'concetti': {
-                    'studio': {
-                        'spiegazione': "Lo studio efficace richiede metodo e costanza.",
-                        'trucchi': ["Organizza il tempo", "Fai pause regolari"]
-                    }
-                }
-            }
-        }
+        # Context del sistema SKAILA
+        self.system_context = """
+        Sei SKAILA Assistant, un tutor AI intelligente e personalizzato per studenti italiani.
+        
+        PERSONALITÀ:
+        - Empatico e incoraggiante
+        - Esperto in pedagogia e didattica
+        - Paziente e motivazionale
+        - Adatta il linguaggio all'età dello studente
+        - Usa emoji in modo appropriato ma non eccessivo
+        
+        COMPETENZE:
+        - Tutte le materie scolastiche (matematica, italiano, storia, scienze, informatica, inglese, etc.)
+        - Metodologie di studio personalizzate
+        - Supporto emotivo e motivazionale
+        - Gamification e apprendimento ludico
+        
+        STILE:
+        - Risposte chiare e strutturate
+        - Esempi pratici e relatable
+        - Passo-dopo-passo per concetti complessi
+        - Incoraggiamento costante
+        - Linguaggio amichevole ma professionale
+        
+        OBIETTIVO:
+        Aiutare ogni studente a raggiungere il proprio potenziale massimo attraverso apprendimento personalizzato.
+        """
 
-        # Stili di conversazione
-        self.conversation_styles = {
-            'friendly': {
-                'greeting': ['Ciao! 👋', 'Ehi! Come posso aiutarti?', 'Salve! Sono qui per te! 😊'],
-                'encouragement': ['Ottimo lavoro!', 'Stai andando benissimo!', 'Continua così! 🚀'],
-                'tone': 'casual e amichevole',
-                'emoji_usage': 'alto'
-            },
-            'professional': {
-                'greeting': ['Buongiorno', 'Salve, come posso assisterla?', 'Benvenuto'],
-                'encouragement': ['Eccellente', 'Molto bene', 'Ottimo progresso'],
-                'tone': 'formale e rispettoso',
-                'emoji_usage': 'basso'
-            }
-        }
+    def setup_openai(self):
+        """Configura l'API OpenAI"""
+        try:
+            # Prova a caricare la chiave API da variabili d'ambiente
+            api_key = os.getenv('OPENAI_API_KEY')
+            if api_key:
+                openai.api_key = api_key
+                self.openai_available = True
+                print("✅ OpenAI API configurata con successo!")
+                
+                # Test connessione
+                self.test_openai_connection()
+            else:
+                print("⚠️ OPENAI_API_KEY non trovata - usando risposte mock avanzate")
+                self.openai_available = False
+        except Exception as e:
+            print(f"❌ Errore configurazione OpenAI: {e}")
+            self.openai_available = False
 
-        # Risposte emotive
-        self.emotional_responses = {
-            'frustrated': [
-                "Capisco perfettamente la tua frustrazione! 😤 È normale sentirsi così quando si affronta qualcosa di nuovo.",
-                "La frustrazione è il segnale che stai sfidando te stesso! 💪 Facciamo un passo indietro e affrontiamo questo insieme."
-            ],
-            'confused': [
-                "Non preoccuparti, la confusione è l'inizio della comprensione! 🤔 Scomponiamo tutto passo per passo.",
-                "È normale sentirsi confusi! 🌟 Andiamo piano e chiariamo tutto insieme."
-            ],
-            'confident': [
-                "Wow! Sento la tua sicurezza! 🔥 Continua così!",
-                "Fantastico! La fiducia in se stessi è metà del successo! 🚀"
-            ]
-        }
+    def test_openai_connection(self):
+        """Testa la connessione con OpenAI"""
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "test"}],
+                max_tokens=10
+            )
+            print("✅ Connessione OpenAI testata con successo!")
+            return True
+        except Exception as e:
+            print(f"❌ Test connessione OpenAI fallito: {e}")
+            self.openai_available = False
+            return False
+
+    def select_optimal_model(self, message: str, user_profile: Dict) -> str:
+        """Seleziona il modello OpenAI ottimale basato sul contesto"""
+        message_length = len(message.split())
+        complexity_keywords = ['spiega', 'analizza', 'confronta', 'dimostra', 'perché', 'come funziona']
+        
+        # Usa GPT-4 per richieste complesse
+        if (message_length > 50 or 
+            any(keyword in message.lower() for keyword in complexity_keywords) or
+            user_profile.get('difficulty_preference') == 'advanced'):
+            return 'gpt-4'
+        
+        # Usa GPT-3.5-turbo per richieste semplici
+        return 'gpt-3.5-turbo'
+
+    def build_conversation_context(self, message: str, user_name: str, user_profile: Dict, user_id: int) -> List[Dict]:
+        """Costruisce il contesto della conversazione per OpenAI"""
+        
+        # Sistema message con personalizzazione
+        system_msg = f"{self.system_context}\n\n"
+        system_msg += f"STUDENTE: {user_name}\n"
+        system_msg += f"PROFILO: {user_profile.get('conversation_style', 'friendly')}\n"
+        system_msg += f"STILE APPRENDIMENTO: {user_profile.get('learning_preferences', 'adaptive')}\n"
+        
+        if user_profile.get('subject_strengths'):
+            system_msg += f"PUNTI FORTI: {', '.join(user_profile.get('subject_strengths', []))}\n"
+        if user_profile.get('subject_weaknesses'):
+            system_msg += f"AREE DA MIGLIORARE: {', '.join(user_profile.get('subject_weaknesses', []))}\n"
+            
+        messages = [{"role": "system", "content": system_msg}]
+        
+        # Aggiungi cronologia recente (ultimi 5 messaggi)
+        try:
+            conn = sqlite3.connect('skaila.db')
+            recent_conversations = conn.execute('''
+                SELECT message, response FROM ai_conversations 
+                WHERE utente_id = ? 
+                ORDER BY timestamp DESC 
+                LIMIT 5
+            ''', (user_id,)).fetchall()
+            conn.close()
+            
+            # Aggiungi in ordine cronologico
+            for conv in reversed(recent_conversations):
+                messages.append({"role": "user", "content": conv[0]})
+                messages.append({"role": "assistant", "content": conv[1]})
+                
+        except Exception as e:
+            print(f"Errore caricamento cronologia: {e}")
+        
+        # Aggiungi messaggio corrente
+        messages.append({"role": "user", "content": message})
+        
+        return messages
+
+    def generate_response(self, message: str, user_name: str, user_role: str, user_id: int) -> str:
+        """Genera una risposta AI usando OpenAI o fallback intelligente"""
+        
+        # Carica profilo utente
+        user_profile = self.load_user_profile(user_id)
+        
+        if self.openai_available:
+            return self.generate_openai_response(message, user_name, user_profile, user_id)
+        else:
+            return self.generate_enhanced_fallback_response(message, user_name, user_profile, user_id)
+
+    def generate_openai_response(self, message: str, user_name: str, user_profile: Dict, user_id: int) -> str:
+        """Genera risposta usando OpenAI API"""
+        try:
+            # Seleziona modello ottimale
+            model = self.select_optimal_model(message, user_profile)
+            
+            # Costruisci contesto
+            messages = self.build_conversation_context(message, user_name, user_profile, user_id)
+            
+            # Chiamata a OpenAI
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=messages,
+                max_tokens=1000,
+                temperature=0.7,
+                top_p=0.9,
+                frequency_penalty=0.1,
+                presence_penalty=0.1
+            )
+            
+            ai_response = response.choices[0].message.content.strip()
+            
+            # Post-processing per migliorare la risposta
+            ai_response = self.post_process_response(ai_response, user_profile)
+            
+            print(f"✅ Risposta OpenAI generata ({model}): {ai_response[:50]}...")
+            return ai_response
+            
+        except Exception as e:
+            print(f"❌ Errore OpenAI: {e}")
+            # Fallback a risposta mock avanzata
+            return self.generate_enhanced_fallback_response(message, user_name, user_profile, user_id)
+
+    def post_process_response(self, response: str, user_profile: Dict) -> str:
+        """Post-processa la risposta per migliorarla"""
+        
+        # Aggiungi emoji appropriati se il profilo lo richiede
+        if user_profile.get('conversation_style') == 'friendly':
+            if 'matematica' in response.lower() and '📊' not in response:
+                response = response.replace('matematica', 'matematica 📊')
+            if 'fisica' in response.lower() and '⚗️' not in response:
+                response = response.replace('fisica', 'fisica ⚗️')
+            if 'informatica' in response.lower() and '💻' not in response:
+                response = response.replace('informatica', 'informatica 💻')
+        
+        # Assicurati che la risposta sia incoraggiante
+        encouraging_endings = [
+            "\n\nContinua così, stai facendo un ottimo lavoro! 🌟",
+            "\n\nSei sulla strada giusta! 💪",
+            "\n\nOttima domanda! Questo dimostra che stai pensando! 🧠"
+        ]
+        
+        if not any(ending.strip() in response for ending in encouraging_endings):
+            if len(response) > 200:  # Solo per risposte lunghe
+                response += random.choice(encouraging_endings)
+        
+        return response
+
+    def generate_enhanced_fallback_response(self, message: str, user_name: str, user_profile: Dict, user_id: int) -> str:
+        """Genera risposta fallback avanzata quando OpenAI non è disponibile"""
+        
+        # Analizza il messaggio
+        subject = self.detect_subject(message)
+        sentiment = self.analyze_user_sentiment(message)
+        learning_style = self.detect_learning_style_preference(message, user_profile)
+        
+        # Risposte specifiche per soggetto
+        if subject == 'matematica':
+            return self.generate_math_response(message, user_profile)
+        elif subject == 'informatica':
+            return self.generate_programming_response(message, user_profile)
+        elif 'aiuto' in message.lower() or 'help' in message.lower():
+            return self.generate_help_response(user_name, user_profile)
+        elif self.is_greeting(message):
+            return self.generate_greeting(user_name, user_profile)
+        else:
+            return self.generate_general_response(message, subject, user_profile)
+
+    def generate_math_response(self, message: str, user_profile: Dict) -> str:
+        """Genera risposta specifica per matematica"""
+        if 'algebra' in message.lower():
+            return """🔢 **Algebra** - Il linguaggio della matematica!
+
+L'algebra usa lettere (variabili) per rappresentare numeri sconosciuti. Ecco alcuni concetti chiave:
+
+📚 **Concetti Base:**
+• Le variabili (x, y, z) sono "scatole" che contengono numeri
+• Le equazioni sono "bilance" che devono restare in equilibrio
+• Quello che fai a sinistra, fallo anche a destra!
+
+💡 **Esempio Pratico:**
+Se x + 5 = 12, quanto vale x?
+- Sottrai 5 da entrambi i lati: x + 5 - 5 = 12 - 5
+- Risultato: x = 7
+
+🎯 **Trucco per Ricordare:**
+Pensa alle equazioni come a una bilancia: mantieni sempre l'equilibrio!
+
+Hai qualche esercizio specifico su cui lavorare? 🚀"""
+
+        elif 'geometria' in message.lower():
+            return """📐 **Geometria** - Il mondo delle forme!
+
+La geometria studia forme, dimensioni e spazi. È ovunque intorno a noi!
+
+🔍 **Concetti Fondamentali:**
+• Punti, linee, angoli
+• Triangoli, quadrati, cerchi
+• Perimetri, aree, volumi
+
+📏 **Formule Essenziali:**
+• Area rettangolo = base × altezza
+• Area triangolo = (base × altezza) / 2
+• Circonferenza = 2 × π × raggio
+
+💭 **Consiglio di Studio:**
+Disegna sempre! La geometria si capisce meglio visualizzando.
+
+Su quale figura geometrica vuoi concentrarti? 🎨"""
+        
+        return "🔢 Matematica è fantastica! Su quale argomento specifico posso aiutarti? Algebra, geometria, calcolo? Dimmi tutto! 📊"
+
+    def generate_programming_response(self, message: str, user_profile: Dict) -> str:
+        """Genera risposta specifica per programmazione"""
+        return """💻 **Programmazione** - Creare il futuro con il codice!
+
+🚀 **Concetti Base:**
+• Algoritmi: ricette step-by-step per il computer
+• Variabili: contenitori per i dati
+• Funzioni: blocchi di codice riutilizzabili
+
+🐍 **Esempio Python:**
+```python
+def saluta(nome):
+    return f"Ciao {nome}! Benvenuto in SKAILA!"
+
+print(saluta("Studente"))
+```
+
+💡 **Consiglio:**
+Inizia sempre con problemi piccoli e costruisci passo dopo passo!
+
+Su quale linguaggio o concetto vuoi lavorare? 🔧"""
 
     def load_user_profile(self, user_id: int) -> Dict[str, Any]:
         """Carica il profilo AI personalizzato dell'utente"""
@@ -150,7 +357,7 @@ class AISkailaBot:
 
             conn.close()
 
-            # Converti Row in dict manualmente
+            # Converti Row in dict
             profile_dict = {
                 'bot_name': profile[1] if len(profile) > 1 else 'SKAILA Assistant',
                 'bot_avatar': profile[2] if len(profile) > 2 else '🤖',
@@ -190,12 +397,14 @@ class AISkailaBot:
         message_lower = message.lower()
 
         subject_keywords = {
-            'matematica': ['matematica', 'algebra', 'geometria', 'calcolo', 'equazione'],
-            'informatica': ['informatica', 'programmazione', 'codice', 'computer'],
-            'italiano': ['italiano', 'grammatica', 'letteratura'],
-            'storia': ['storia', 'guerra', 'impero'],
-            'inglese': ['inglese', 'english', 'grammar'],
-            'fisica': ['fisica', 'forza', 'energia']
+            'matematica': ['matematica', 'algebra', 'geometria', 'calcolo', 'equazione', 'numero', 'frazione'],
+            'informatica': ['informatica', 'programmazione', 'codice', 'computer', 'python', 'javascript'],
+            'italiano': ['italiano', 'grammatica', 'letteratura', 'poesia', 'romanzo'],
+            'storia': ['storia', 'guerra', 'impero', 'rivoluzione', 'antichità'],
+            'inglese': ['inglese', 'english', 'grammar', 'vocabulary'],
+            'fisica': ['fisica', 'forza', 'energia', 'velocità', 'accelerazione'],
+            'chimica': ['chimica', 'molecola', 'atomo', 'reazione'],
+            'biologia': ['biologia', 'cellula', 'DNA', 'evoluzione']
         }
 
         for subject, keywords in subject_keywords.items():
@@ -210,16 +419,20 @@ class AISkailaBot:
         sentiments = []
 
         # Sentimenti positivi
-        if any(word in message_lower for word in ['grazie', 'perfetto', 'ottimo', 'bene']):
+        if any(word in message_lower for word in ['grazie', 'perfetto', 'ottimo', 'bene', 'fantastico']):
             sentiments.append('positive')
 
         # Frustrazione
-        if any(word in message_lower for word in ['non capisco', 'difficile', 'aiuto', 'problema']):
+        if any(word in message_lower for word in ['non capisco', 'difficile', 'aiuto', 'problema', 'confuso']):
             sentiments.append('frustrated')
 
         # Curiosità
-        if any(word in message_lower for word in ['perché', 'come', 'cosa', 'interessante']):
+        if any(word in message_lower for word in ['perché', 'come', 'cosa', 'interessante', 'voglio sapere']):
             sentiments.append('curious')
+
+        # Motivazione
+        if any(word in message_lower for word in ['imparo', 'studio', 'esame', 'test']):
+            sentiments.append('motivated')
 
         return sentiments if sentiments else ['neutral']
 
@@ -227,47 +440,18 @@ class AISkailaBot:
         """Rileva lo stile di apprendimento preferito dal contesto"""
         message_lower = message.lower()
 
-        if any(word in message_lower for word in ['schema', 'grafico', 'immagine']):
+        if any(word in message_lower for word in ['schema', 'grafico', 'immagine', 'vedo', 'mostra']):
             return 'visual'
-        if any(word in message_lower for word in ['spiegami', 'raccontami', 'dimmi']):
+        if any(word in message_lower for word in ['spiegami', 'raccontami', 'dimmi', 'sento']):
             return 'auditory'
-        if any(word in message_lower for word in ['esempio', 'pratica', 'provo']):
+        if any(word in message_lower for word in ['esempio', 'pratica', 'provo', 'faccio']):
             return 'kinesthetic'
 
         return user_profile.get('learning_preferences', 'adaptive')
 
-    def generate_response(self, message: str, user_name: str, user_role: str, user_id: int) -> str:
-        """Genera una risposta AI personalizzata e intelligente"""
-        try:
-            # Carica profilo utente
-            user_profile = self.load_user_profile(user_id)
-
-            # Analizza il messaggio
-            subject = self.detect_subject(message)
-            sentiment = self.analyze_user_sentiment(message)
-            learning_style = self.detect_learning_style_preference(message, user_profile)
-
-            # Seleziona stile di conversazione
-            conv_style = user_profile.get('conversation_style', 'friendly')
-            style_config = self.conversation_styles.get(conv_style, self.conversation_styles['friendly'])
-
-            # Genera risposta basata sul contenuto
-            if self.is_greeting(message):
-                return self.generate_greeting(user_name, style_config, user_profile)
-            elif self.is_question(message) or 'dimmi' in message.lower():
-                return self.generate_educational_response(message, subject, sentiment, learning_style, style_config, user_profile)
-            elif 'aiuto' in message.lower() or 'help' in message.lower():
-                return self.generate_help_response()
-            else:
-                return self.generate_contextual_response(message, subject, sentiment, style_config, user_profile)
-
-        except Exception as e:
-            print(f"Error generating AI response: {e}")
-            return "Mi dispiace, ho avuto un piccolo problema tecnico. Puoi riprovare a farmi la domanda? 🤖"
-
     def is_greeting(self, message: str) -> bool:
         """Controlla se il messaggio è un saluto"""
-        greetings = ['ciao', 'salve', 'buongiorno', 'buonasera', 'hey', 'hello']
+        greetings = ['ciao', 'salve', 'buongiorno', 'buonasera', 'hey', 'hello', 'hi']
         return any(greeting in message.lower() for greeting in greetings)
 
     def is_question(self, message: str) -> bool:
@@ -275,129 +459,64 @@ class AISkailaBot:
         question_indicators = ['?', 'come', 'cosa', 'quando', 'dove', 'perché', 'chi', 'quale', 'quanto']
         return any(indicator in message.lower() for indicator in question_indicators)
 
-    def generate_greeting(self, user_name: str, style_config: Dict, user_profile: Dict) -> str:
+    def generate_greeting(self, user_name: str, user_profile: Dict) -> str:
         """Genera un saluto personalizzato"""
-        greeting = random.choice(style_config['greeting'])
         bot_name = user_profile.get('bot_name', 'SKAILA Assistant')
-
-        return f"{greeting} Sono {bot_name}, il tuo assistente di apprendimento personalizzato! Come posso aiutarti oggi con i tuoi studi?"
-
-    def generate_educational_response(self, message: str, subject: str, sentiment: List[str], 
-                                   learning_style: str, style_config: Dict, user_profile: Dict) -> str:
-        """Genera una risposta educativa personalizzata"""
-
-        # Risposta specifica per richieste generali
-        if any(word in message.lower() for word in ['cosa puoi fare', 'dimmi tutto', 'tutte le cose']):
-            return self.generate_capabilities_response(user_profile)
-
-        # Base della risposta basata sulla materia
-        if subject in self.knowledge_base:
-            response = self.get_subject_specific_response(message, subject, learning_style)
+        style = user_profile.get('conversation_style', 'friendly')
+        
+        if style == 'friendly':
+            greetings = [
+                f"Ciao {user_name}! 👋 Sono {bot_name}, pronto ad aiutarti con i tuoi studi!",
+                f"Hey {user_name}! 😊 È {bot_name} qui! Come posso supportarti oggi?",
+                f"Salve {user_name}! 🌟 Sono {bot_name}, il tuo tutor AI personale!"
+            ]
         else:
-            response = "È una domanda interessante! Vediamo come posso aiutarti a comprenderla meglio."
+            greetings = [
+                f"Buongiorno {user_name}. Sono {bot_name}, come posso assisterla?",
+                f"Salve {user_name}. {bot_name} al suo servizio per l'apprendimento."
+            ]
+        
+        return random.choice(greetings)
 
-        # Adatta il tono al sentiment
-        if 'frustrated' in sentiment:
-            response = f"Capisco che possa sembrare complicato, non preoccuparti! {response}"
-        elif 'curious' in sentiment:
-            response = f"Ottima domanda! La curiosità è la chiave dell'apprendimento. {response}"
-
-        # Aggiungi incoraggiamento
-        if 'supportive' in user_profile.get('personality_traits', []):
-            response += f" {random.choice(style_config['encouragement'])}"
-
-        return response
-
-    def generate_capabilities_response(self, user_profile: Dict) -> str:
-        """Genera una risposta completa sulle capacità del bot"""
+    def generate_help_response(self, user_name: str, user_profile: Dict) -> str:
+        """Genera una risposta di aiuto personalizzata"""
         bot_name = user_profile.get('bot_name', 'SKAILA Assistant')
+        
+        return f"""🎓 **Ciao {user_name}! Sono {bot_name}** 
 
-        capabilities = [
-            f"Ciao! Sono {bot_name} 🤖 e posso aiutarti in tantissimi modi:",
-            "",
-            "📚 **MATERIE SUPPORTATE:**",
-            "• Matematica (algebra, geometria, calcolo)",
-            "• Informatica (programmazione, algoritmi)",
-            "• Italiano (grammatica, letteratura)",
-            "• Storia, Inglese, Fisica e altre materie",
-            "",
-            "🎯 **COSA POSSO FARE:**",
-            "• Spiegazioni personalizzate per il tuo stile di apprendimento",
-            "• Esercizi e quiz su misura",
-            "• Risoluzione di problemi passo dopo passo",
-            "• Suggerimenti di studio efficaci",
-            "• Motivazione e supporto emotivo",
-            "• Analisi dei tuoi progressi",
-            "",
-            "💡 **STILI DI APPRENDIMENTO:**",
-            "• Visuale (schemi, grafici, mappe)",
-            "• Uditivo (spiegazioni vocali, discussioni)",
-            "• Cinestetico (esempi pratici, esperimenti)",
-            "• Lettura/Scrittura (testi, riassunti)",
-            "",
-            "🚀 **CARATTERISTICHE SPECIALI:**",
-            "• Mi adatto al tuo livello di conoscenza",
-            "• Ricordo le tue preferenze e punti deboli",
-            "• Offro incoraggiamento quando ne hai bisogno",
-            "• Creo piani di studio personalizzati",
-            "",
-            "Dimmi semplicemente su cosa vuoi lavorare e come posso aiutarti! 😊"
+Posso aiutarti con:
+
+📚 **MATERIE:**
+• Matematica (algebra, geometria, calcolo)
+• Informatica (programmazione, algoritmi)
+• Italiano (grammatica, letteratura)
+• Storia, Inglese, Fisica, Scienze
+
+🎯 **MODALITÀ DI AIUTO:**
+• Spiegazioni passo-dopo-passo
+• Esempi pratici e esercizi
+• Risoluzione di problemi
+• Preparazione esami e test
+• Supporto emotivo e motivazione
+
+💡 **COME FUNZIONO:**
+Mi adatto al tuo stile di apprendimento e livello. Dimmi semplicemente cosa vuoi studiare!
+
+**Esempio:** "Aiutami con le equazioni di secondo grado" o "Non capisco la fotosintesi"
+
+Cosa vuoi imparare oggi? 🚀"""
+
+    def generate_general_response(self, message: str, subject: str, user_profile: Dict) -> str:
+        """Genera una risposta generale contestuale"""
+        responses = [
+            f"Interessante domanda su {subject}! Lascia che ti aiuti a esplorare questo argomento.",
+            f"Ottima curiosità! Vediamo insieme come approfondire {subject}.",
+            f"Perfetto! {subject.title()} è un argomento affascinante. Come posso aiutarti?"
         ]
+        
+        return random.choice(responses)
 
-        return "\n".join(capabilities)
-
-    def get_subject_specific_response(self, message: str, subject: str, learning_style: str) -> str:
-        """Genera risposte specifiche per materia"""
-        if subject not in self.knowledge_base:
-            return "Vediamo insieme questo argomento nel modo più adatto a te."
-
-        subject_data = self.knowledge_base[subject]
-        response = f"Parliamo di {subject}! "
-
-        # Cerca concetti specifici
-        for concept_key, concept_data in subject_data.get('concetti', {}).items():
-            if concept_key in message.lower():
-                response += f"\n\n📚 **{concept_key.title()}**: {concept_data['spiegazione']}"
-                if 'esempi' in concept_data and concept_data['esempi']:
-                    response += f"\n\n🎯 **Esempio**: {concept_data['esempi'][0]}"
-                if 'trucchi' in concept_data and concept_data['trucchi']:
-                    response += f"\n\n💡 **Trucco**: {concept_data['trucchi'][0]}"
-                return response
-
-        # Risposta generale per la materia
-        if 'strategie_studio' in subject_data and subject_data['strategie_studio']:
-            strategy = random.choice(subject_data['strategie_studio'])
-            response += f"Ti consiglio: {strategy}"
-
-        return response
-
-    def generate_help_response(self) -> str:
-        """Genera una risposta di aiuto"""
-        return """🎓 **Cosa posso fare per te:**
-
-📚 **Materie**: Matematica, Informatica, Italiano, Storia, Inglese, Fisica, Scienze
-🤖 **Modalità**: Spiegazioni, esercizi, quiz, riassunti, mappe concettuali  
-🎯 **Stili**: Adatto le spiegazioni al tuo modo di apprendere
-💡 **Aiuto**: Risoluzione problemi, preparazione esami, chiarimenti
-
-Dimmi semplicemente cosa vuoi studiare o di cosa hai bisogno!"""
-
-    def generate_contextual_response(self, message: str, subject: str, sentiment: List[str], 
-                                   style_config: Dict, user_profile: Dict) -> str:
-        """Genera una risposta contestuale generale"""
-        contextual_responses = [
-            "Interessante! Come posso approfondire questo argomento per te?",
-            "Ho capito. Lascia che ti aiuti a sviluppare meglio questo concetto.",
-            "Ottima osservazione! Vediamo insieme come esplorare questo tema."
-        ]
-
-        response = random.choice(contextual_responses)
-
-        if subject != 'generale':
-            response += f" Dato che parliamo di {subject}, posso offrirti spiegazioni, esempi o esercizi. Cosa preferisci?"
-
-        return response
-
+    # Metodi aggiuntivi per compatibilità
     def generate_adaptive_quiz_question(self, subject: str, user_profile: Dict, difficulty: str) -> Dict[str, Any]:
         """Genera una domanda di quiz personalizzata"""
         return {
