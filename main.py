@@ -519,13 +519,21 @@ def login():
                 conn.close()
 
                 # Sistema Gamification - Login giornaliero
-                gamification_system.get_or_create_user_profile(user['id'])
-                streak_info = gamification_system.update_streak(user['id'])
-                
-                if streak_info['current_streak'] == 1 and not streak_info['streak_broken']:
-                    gamification_system.award_xp(user['id'], 'first_login_day', description="Primo accesso della giornata!")
-                else:
-                    gamification_system.award_xp(user['id'], 'login_daily', description="Login giornaliero")
+                try:
+                    gamification_system.get_or_create_user_profile(user['id'])
+                    streak_info = gamification_system.update_streak(user['id'])
+                    
+                    if streak_info and streak_info.get('streak_updated'):
+                        if streak_info.get('current_streak') == 1 and not streak_info.get('streak_broken', False):
+                            gamification_system.award_xp(user['id'], 'first_login_day', description="Primo accesso della giornata!")
+                        else:
+                            gamification_system.award_xp(user['id'], 'login_daily', description="Login giornaliero")
+                    else:
+                        # Fallback se gamification non funziona
+                        gamification_system.award_xp(user['id'], 'login_daily', description="Login giornaliero")
+                except Exception as gamification_error:
+                    print(f"⚠️ Gamification error durante login: {gamification_error}")
+                    # Il login continua anche se gamification fallisce
 
                 return redirect('/chat')
             else:

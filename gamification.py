@@ -1224,7 +1224,11 @@ class SKAILAGamification:
         if last_activity:
             days_diff = (today - last_activity).days
             
-            if days_diff == 1:
+            if days_diff == 0:
+                # Stesso giorno - non aggiornare streak
+                conn.close()
+                return {'streak_updated': False, 'current_streak': profile['current_streak'], 'streak_broken': False}
+            elif days_diff == 1:
                 # Streak continua
                 new_streak = profile['current_streak'] + 1
                 new_max_streak = max(profile['max_streak'], new_streak)
@@ -1265,7 +1269,7 @@ class SKAILAGamification:
             return {'streak_updated': True, 'current_streak': 1, 'streak_broken': False}
 
         conn.close()
-        return {'streak_updated': False}
+        return {'streak_updated': False, 'current_streak': 0, 'streak_broken': False}
 
     def get_daily_challenges(self, user_id: int) -> List[Dict[str, Any]]:
         """Ottieni le sfide giornaliere dell'utente"""
