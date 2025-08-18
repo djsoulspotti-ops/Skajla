@@ -492,14 +492,12 @@ def login():
         if user:
             print(f"🔍 User details - ID: {user['id']}, Nome: {user['nome']}, Attivo: {user['attivo']}")
 
-            # Verifica password
-            input_hash = hash_password(password)
-            stored_hash = user['password_hash']
-            print(f"🔍 Password check - Input hash: {input_hash[:20]}..., Stored hash: {stored_hash[:20]}...")
-            print(f"🔍 Password match: {stored_hash == input_hash}")
+            # Verifica password con sistema avanzato
+            password_valid = verify_password(password, user['password_hash'])
+            print(f"🔍 Password verification: {'✅ Valid' if password_valid else '❌ Invalid'}")
             print(f"🔍 User active: {user['attivo'] == 1}")
 
-            if stored_hash == input_hash and user['attivo'] == 1:
+            if password_valid and user['attivo'] == 1:
                 # Login riuscito
                 print(f"✅ Login successful for user: {user['nome']}")
                 session.permanent = True
