@@ -17,6 +17,18 @@ build = ["sh", "-c", "pip install -r requirements.txt"]
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 38509
+externalPort = 3000
+
+[[ports]]
+localPort = 39361
+externalPort = 3001
+
+[[ports]]
+localPort = 58003
+externalPort = 3002
+
 [workflows]
 runButton = "SKAILA Production"
 
@@ -36,4 +48,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 -c \"import socket; s = socket.socket(); s.bind(('', 0)); port = s.getsockname()[1]; s.close(); import os; os.environ['PORT'] = str(port); print(f'🚀 Starting SKAILA on port {port}')\" && gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 main:app"
+args = "python3 main.py"
