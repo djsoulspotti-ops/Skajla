@@ -115,10 +115,15 @@ def log_login_attempt(email, success, ip_address):
     conn.commit()
     conn.close()
 
-# Database connection
+# Database connection ottimizzata
 def get_db_connection():
-    conn = sqlite3.connect('skaila.db')
+    conn = sqlite3.connect('skaila.db', timeout=20.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    # Ottimizzazioni SQLite per performance
+    conn.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging
+    conn.execute('PRAGMA synchronous=NORMAL')  # Bilanciamento sicurezza/velocità
+    conn.execute('PRAGMA cache_size=10000')   # Cache più grande
+    conn.execute('PRAGMA temp_store=memory')  # Tabelle temporanee in RAM
     return conn
 
 # Inizializzazione database
@@ -1698,7 +1703,7 @@ def handle_typing_stop(data):
     }, room=f"chat_{conversation_id}", include_self=False)
 
 def reset_database():
-    """Forza la ricreazione completa del database"""
+    """Forza la ricreazione completa del database - Solo per manutenzione"""
     import os
     if os.path.exists('skaila.db'):
         os.remove('skaila.db')
@@ -1707,17 +1712,18 @@ def reset_database():
     print("🔄 Database ricreato completamente")
 
 if __name__ == '__main__':
-    # Forza ricreazione database per debug
-    reset_database()
+    # Inizializza database solo se non esiste
+    if not os.path.exists('skaila.db'):
+        print("🔧 Creazione database iniziale...")
+        init_db()
+    else:
+        print("✅ Database esistente trovato - riutilizzo")
     
-    # Usa porta da variabile d'ambiente o porta dinamica
-    port = int(os.environ.get('PORT', 0))
-    if port == 0:
-        import socket
-        sock = socket.socket()
-        sock.bind(('', 0))
-        port = sock.getsockname()[1]
-        sock.close()
+    # Usa porta fissa per development
+    port = int(os.environ.get('PORT', 5000))
     
     print(f"🚀 SKAILA Server starting on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    print(f"🌐 URL: http://0.0.0.0:{port}")
+    
+    # Modalità production per migliore performance
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)

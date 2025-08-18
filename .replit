@@ -34,7 +34,7 @@ localPort = 58003
 externalPort = 3002
 
 [workflows]
-runButton = "SKAILA Production"
+runButton = "SKAILA Fast"
 
 [[workflows.workflow]]
 name = "Run SKAILA"
@@ -47,6 +47,15 @@ args = "python3 -c \"import socket; s = socket.socket(); s.bind(('', 0)); port =
 
 [[workflows.workflow]]
 name = "SKAILA Production"
+author = 42788612
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 main.py"
+
+[[workflows.workflow]]
+name = "SKAILA Fast"
 author = 42788612
 mode = "sequential"
 
