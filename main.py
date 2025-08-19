@@ -393,6 +393,10 @@ def init_db():
             ('📖 Letteratura & Storia', 'Chat per appassionati di materie umanistiche', 'tematica', ''),
             ('🌍 Inglese & Lingue', 'Pratichiamo le lingue straniere insieme', 'tematica', ''),
             ('🎨 Creatività & Arte', 'Condividi i tuoi progetti creativi', 'tematica', ''),
+            ('📈 Digital Marketing', 'Strategie, campagne e trend del marketing digitale', 'tematica', ''),
+            ('₿ Crypto e Blockchain', 'Discussioni su criptovalute, NFT e tecnologie blockchain', 'tematica', ''),
+            ('⚖️ Fiscalità e Legalità', 'Consulenza fiscale, diritto e aspetti legali', 'tematica', ''),
+            ('🌱 Sostenibilità Ambientale', 'Progetti green, economia circolare e ambiente', 'tematica', ''),
             ('🏆 Gamification SKAILA', 'Sfide, classifiche e achievement', 'evento', ''),
             ('👥 Rappresentanti di Classe', 'Chat riservata ai rappresentanti', 'organizzativo', ''),
             ('📢 Annunci Scuola', 'Comunicazioni ufficiali dell\'istituto', 'ufficiale', '')
