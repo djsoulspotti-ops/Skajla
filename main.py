@@ -23,18 +23,18 @@ def after_request(response):
     # Headers per permettere iframe in Replit
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
-    
+
     # Headers per CORS
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-    
+
     # Cache control per sviluppo
     if app.debug:
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
-    
+
     return response
 
 socketio = SocketIO(app, 
@@ -74,19 +74,19 @@ def rate_limit_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
-        
+
         # Controlla tentativi recenti
         conn = get_db_connection()
         recent_attempts = conn.execute('''
             SELECT COUNT(*) FROM login_attempts 
             WHERE ip_address = ? AND timestamp > datetime('now', '-15 minutes')
         ''', (client_ip,)).fetchone()[0]
-        
+
         if recent_attempts >= 10:  # Max 10 tentativi in 15 minuti
             conn.close()
             return render_template('login.html', 
                 error='Troppi tentativi di login. Riprova tra 15 minuti.')
-        
+
         conn.close()
         return f(*args, **kwargs)
     return decorated_function
@@ -94,7 +94,7 @@ def rate_limit_login(f):
 def log_login_attempt(email, success, ip_address):
     """Log dei tentativi di login per sicurezza"""
     conn = get_db_connection()
-    
+
     # Crea tabella se non esiste
     conn.execute('''
         CREATE TABLE IF NOT EXISTS login_attempts (
@@ -106,12 +106,12 @@ def log_login_attempt(email, success, ip_address):
             user_agent TEXT
         )
     ''')
-    
+
     conn.execute('''
         INSERT INTO login_attempts (email, success, ip_address, user_agent)
         VALUES (?, ?, ?, ?)
     ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
-    
+
     conn.commit()
     conn.close()
 
@@ -397,7 +397,7 @@ def init_db():
             ('👥 Rappresentanti di Classe', 'Chat riservata ai rappresentanti', 'organizzativo', ''),
             ('📢 Annunci Scuola', 'Comunicazioni ufficiali dell\'istituto', 'ufficiale', '')
         ]
-        
+
         for nome, descrizione, tipo, classe in chat_rooms:
             conn.execute('''
                 INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
@@ -407,52 +407,54 @@ def init_db():
         # Ottieni tutti gli utenti e tutte le chat
         tutti_utenti = conn.execute('SELECT id, ruolo FROM utenti').fetchall()
         tutte_chat = conn.execute('SELECT id, tipo, classe FROM chat').fetchall()
-        
+
         # Aggiungi utenti alle chat appropriate
         for utente in tutti_utenti:
             user_id = utente['id']
             user_role = utente['ruolo']
-            
+
             for chat in tutte_chat:
                 chat_id = chat['id']
                 chat_tipo = chat['tipo']
                 chat_classe = chat['classe']
-                
+
                 # Logica di assegnazione chat
                 should_add = False
                 ruolo_chat = 'membro'
-                
+
                 # Admin e founder in tutte le chat
                 if user_role in ['admin']:
                     should_add = True
                     ruolo_chat = 'admin'
-                
+
                 # Chat generali e tematiche per tutti
                 elif chat_tipo in ['generale', 'tematica', 'evento']:
                     should_add = True
-                
+
                 # Chat di classe solo per studenti della classe
                 elif chat_tipo == 'classe' and chat_classe:
                     user_classe = conn.execute('SELECT classe FROM utenti WHERE id = ?', (user_id,)).fetchone()
                     if user_classe and user_classe['classe'] == chat_classe:
                         should_add = True
-                
+
                 # Chat organizzative per rappresentanti e professori
                 elif chat_tipo == 'organizzativo' and user_role in ['professore', 'admin']:
                     should_add = True
                     ruolo_chat = 'moderatore'
-                
+
                 # Chat ufficiali per tutti, ma solo admin possono scrivere
                 elif chat_tipo == 'ufficiale':
                     should_add = True
                     ruolo_chat = 'admin' if user_role == 'admin' else 'lettore'
-                
+
                 if should_add:
                     conn.execute('''
                         INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
                         VALUES (?, ?, ?)
                     ''', (chat_id, user_id, ruolo_chat))
 
+        conn.commit()
+        conn.close()
         print("✅ Database inizializzato con dati demo")
 
         # Verifica che gli utenti siano stati creati
@@ -467,7 +469,7 @@ def init_db():
 @app.route('/')
 def index():
     if 'user_id' in session:
-        return redirect('/chat')
+        return redirect('/dashboard')
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -522,7 +524,7 @@ def login():
                 try:
                     gamification_system.get_or_create_user_profile(user['id'])
                     streak_info = gamification_system.update_streak(user['id'])
-                    
+
                     if streak_info and streak_info.get('streak_updated'):
                         if streak_info.get('current_streak') == 1 and not streak_info.get('streak_broken', False):
                             gamification_system.award_xp(user['id'], 'first_login_day', description="Primo accesso della giornata!")
@@ -535,7 +537,7 @@ def login():
                     print(f"⚠️ Gamification error durante login: {gamification_error}")
                     # Il login continua anche se gamification fallisce
 
-                return redirect('/chat')
+                return redirect('/dashboard')
             else:
                 print(f"❌ Login failed - Password mismatch or user not active")
         else:
@@ -552,7 +554,7 @@ def register():
         try:
             # Controlla se c'è un codice scuola per registrazione di massa
             school_code = request.form.get('school_code', '')
-            
+
             username = request.form['username']
             email = request.form['email']
             password = request.form['password']
@@ -570,11 +572,11 @@ def register():
                     SELECT nome_scuola FROM school_codes 
                     WHERE code = ? AND attivo = 1 AND expires_at > CURRENT_TIMESTAMP
                 ''', (school_code,)).fetchone()
-                
+
                 if not valid_school:
                     conn.close()
                     return render_template('register.html', error='Codice scuola non valido o scaduto')
-                
+
                 scuola = valid_school['nome_scuola']
 
             # Controlla se utente esiste già
@@ -588,7 +590,7 @@ def register():
                 school_domains = conn.execute('''
                     SELECT authorized_domains FROM schools WHERE nome = ?
                 ''', (scuola,)).fetchone()
-                
+
                 if school_domains and school_domains['authorized_domains']:
                     authorized = any(domain.strip() in email for domain in school_domains['authorized_domains'].split(','))
                     if not authorized and ruolo in ['professore', 'admin']:
@@ -611,7 +613,7 @@ def register():
                 chat_classe = conn.execute('''
                     SELECT id FROM chat WHERE classe = ? AND tipo = 'classe'
                 ''', (classe,)).fetchone()
-                
+
                 if chat_classe:
                     conn.execute('''
                         INSERT INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
@@ -622,7 +624,7 @@ def register():
             chat_generali = conn.execute('''
                 SELECT id FROM chat WHERE tipo IN ('generale', 'tematica') AND privata = 0
             ''').fetchall()
-            
+
             for chat in chat_generali:
                 conn.execute('''
                     INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
@@ -648,7 +650,7 @@ def register():
             session['email'] = email
             session['classe'] = classe
             session['primo_accesso'] = True  # Flag per onboarding
-            
+
             flash('Registrazione completata con successo! 🎉', 'success')
             return redirect('/onboarding')
 
@@ -669,7 +671,7 @@ def admin_bulk_register():
             csv_data = request.form.get('csv_data', '')
             school_name = request.form.get('school_name', '')
             default_password = request.form.get('default_password', 'scuola123')
-            
+
             conn = get_db_connection()
             registered_count = 0
             errors = []
@@ -678,14 +680,14 @@ def admin_bulk_register():
             for line_num, line in enumerate(csv_data.strip().split('\n'), 1):
                 if not line.strip():
                     continue
-                    
+
                 try:
                     parts = [p.strip() for p in line.split(',')]
                     if len(parts) >= 4:
                         nome, cognome, email, classe = parts[:4]
                         ruolo = parts[4] if len(parts) > 4 else 'studente'
                         username = f"{nome.lower()}.{cognome.lower()}"
-                        
+
                         # Controlla duplicati
                         existing = conn.execute('SELECT id FROM utenti WHERE email = ?', (email,)).fetchone()
                         if not existing:
@@ -700,7 +702,7 @@ def admin_bulk_register():
                             errors.append(f"Riga {line_num}: Email {email} già esistente")
                     else:
                         errors.append(f"Riga {line_num}: Formato non valido")
-                        
+
                 except Exception as e:
                     errors.append(f"Riga {line_num}: {str(e)}")
 
@@ -728,12 +730,12 @@ def create_school_invite():
         school_name = data.get('school_name')
         expires_days = data.get('expires_days', 30)
         max_uses = data.get('max_uses', 1000)
-        
+
         import secrets
         invite_code = secrets.token_urlsafe(12).upper()
-        
+
         conn = get_db_connection()
-        
+
         # Crea tabella se non esiste
         conn.execute('''
             CREATE TABLE IF NOT EXISTS school_codes (
@@ -749,15 +751,15 @@ def create_school_invite():
                 FOREIGN KEY (created_by) REFERENCES utenti (id)
             )
         ''')
-        
+
         conn.execute('''
             INSERT INTO school_codes (code, nome_scuola, max_uses, expires_at, created_by)
             VALUES (?, ?, ?, datetime('now', '+{} days'), ?)
         '''.format(expires_days), (invite_code, school_name, max_uses, session['user_id']))
-        
+
         conn.commit()
         conn.close()
-        
+
         return jsonify({
             'invite_code': invite_code,
             'school_name': school_name,
@@ -772,18 +774,18 @@ def create_school_invite():
 def onboarding():
     if 'user_id' not in session:
         return redirect('/login')
-    
+
     # Solo per utenti al primo accesso
     if not session.get('primo_accesso', False):
         return redirect('/chat')
-    
+
     return render_template('onboarding.html', user=session)
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
     if 'user_id' not in session:
         return redirect('/login')
-    
+
     # Aggiorna flag primo accesso
     conn = get_db_connection()
     conn.execute('''
@@ -793,7 +795,7 @@ def complete_onboarding():
     ''', (session['user_id'],))
     conn.commit()
     conn.close()
-    
+
     session['primo_accesso'] = False
     return redirect('/chat')
 
@@ -846,6 +848,18 @@ def gamification_dashboard():
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
     return response
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    # Qui verrebbero caricati i dati specifici della dashboard
+    # Ad esempio, statistiche chiave, notifiche, ecc.
+
+    # Per ora, restituisce un template di base per la dashboard
+    return render_template('dashboard.html', user=session)
+
 
 @app.route('/api/conversations')
 def api_conversations():
@@ -1131,7 +1145,7 @@ def api_purchase_avatar():
     try:
         data = request.get_json()
         avatar_id = data.get('avatar_id')
-        
+
         result = gamification_system.purchase_avatar(session['user_id'], avatar_id)
         return jsonify(result)
 
@@ -1148,7 +1162,7 @@ def api_change_avatar():
     try:
         data = request.get_json()
         avatar_id = data.get('avatar_id')
-        
+
         result = gamification_system.change_avatar(session['user_id'], avatar_id)
         return jsonify(result)
 
@@ -1184,7 +1198,7 @@ def api_create_team_challenge():
         challenge_type = data.get('challenge_type')
         class_a = data.get('class_a')
         class_b = data.get('class_b')
-        
+
         result = gamification_system.create_team_challenge(challenge_type, class_a, class_b)
         return jsonify(result)
 
@@ -1201,7 +1215,7 @@ def api_join_team_challenge():
     try:
         data = request.get_json()
         challenge_id = data.get('challenge_id')
-        
+
         result = gamification_system.join_team_challenge(session['user_id'], challenge_id)
         return jsonify(result)
 
@@ -1236,7 +1250,7 @@ def api_record_activity():
         data = request.get_json()
         activity_type = data.get('activity_type')
         value = data.get('value', 1)
-        
+
         gamification_system.record_daily_activity(session['user_id'], activity_type, value)
         return jsonify({'success': True, 'message': 'Attività registrata'})
 
@@ -1253,7 +1267,7 @@ def api_gamification_leaderboard():
     try:
         period = request.args.get('period', 'weekly')
         class_filter = request.args.get('class_filter', session.get('classe'))
-        
+
         leaderboard_data = gamification_system.get_leaderboard(
             session['user_id'], 
             period, 
@@ -1283,7 +1297,7 @@ def api_award_xp():
             bonus_multiplier, 
             description
         )
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1320,7 +1334,7 @@ def api_update_challenge_progress():
             challenge_type, 
             increment
         )
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1335,10 +1349,10 @@ def api_gamification_profile():
 
     try:
         profile = gamification_system.get_or_create_user_profile(session['user_id'])
-        
+
         # Aggiungi informazioni di livello
         profile['level_title'] = gamification_system.level_titles[profile['current_level']]
-        
+
         next_level = profile['current_level'] + 1 if profile['current_level'] < 10 else 10
         next_level_xp = gamification_system.level_thresholds.get(next_level, gamification_system.level_thresholds[10])
         profile['next_level_xp'] = next_level_xp
@@ -1383,7 +1397,7 @@ def api_ai_profile():
 
         # Convert Row to dict
         profile_dict = dict(profile)
-        
+
         profile_data = {
             'bot_name': profile_dict['bot_name'] or 'SKAILA Assistant',
             'bot_avatar': profile_dict['bot_avatar'] or '🤖',
@@ -1464,16 +1478,16 @@ def api_ai_chat():
         ''', (session['user_id'],)).fetchone()
 
         profile_dict = dict(profile) if profile else {}
-        
+
         # Ottimizzazione costi AI
         from ai_cost_manager import optimize_ai_costs, cost_manager
-        
+
         cached_response, estimated_cost = optimize_ai_costs(
             message, 
             profile_dict, 
             session['user_id']
         )
-        
+
         if cached_response and estimated_cost == 0.0:
             # Risposta dalla cache
             response = cached_response
@@ -1486,12 +1500,12 @@ def api_ai_chat():
                 session['ruolo'],
                 session['user_id']
             )
-            
+
             # Cache la risposta per future richieste
             if ai_bot.openai_available:
                 user_context = f"{profile_dict.get('conversation_style', '')}{profile_dict.get('learning_preferences', '')}"
                 cost_manager.cache_response(message, response, user_context, 'gpt-3.5-turbo')
-                
+
                 # Traccia il costo se non era cached
                 if estimated_cost > 0:
                     input_tokens = cost_manager.estimate_tokens(message)
@@ -1534,7 +1548,7 @@ def api_ai_chat():
             'ai_question', 
             description=f"Domanda AI su {subject_detected}"
         )
-        
+
         # Aggiorna progresso sfide giornaliere
         gamification_system.update_challenge_progress(session['user_id'], 'ai_questions')
 
@@ -1565,7 +1579,7 @@ def api_ai_usage_stats():
 
     try:
         from ai_cost_manager import cost_manager
-        
+
         stats = cost_manager.get_usage_stats(session['user_id'])
         return jsonify(stats)
 
@@ -1799,12 +1813,12 @@ if __name__ == '__main__':
         init_db()
     else:
         print("✅ Database esistente trovato - riutilizzo")
-    
+
     # Usa porta fissa per development
     port = int(os.environ.get('PORT', 5000))
-    
+
     print(f"🚀 SKAILA Server starting on port {port}")
     print(f"🌐 URL: http://0.0.0.0:{port}")
-    
+
     # Modalità production per migliore performance
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)

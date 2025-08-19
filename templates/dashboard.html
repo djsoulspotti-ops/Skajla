@@ -1,0 +1,1066 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 Dashboard - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --white: #ffffff;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* LAYOUT STRUCTURE */
+        .dashboard-layout {
+            display: grid;
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar main";
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            grid-area: header;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+            box-shadow: var(--shadow-light);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item a {
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item a:hover,
+        .nav-item a.active {
+            color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notifications {
+            position: relative;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .notifications:hover {
+            background: var(--light);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0.2rem;
+            right: 0.2rem;
+            background: var(--error);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 50px;
+            min-width: 1rem;
+            text-align: center;
+        }
+
+        .user-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .user-dropdown:hover {
+            background: var(--light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.1rem;
+        }
+
+        .user-info p {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            min-width: 200px;
+            padding: 0.5rem;
+            display: none;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: background 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--light);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.5rem 0;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            padding: 1rem 2rem;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-list {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-light);
+        }
+
+        .breadcrumb-item:last-child {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-light);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+
+        .menu-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 1.5rem 1rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: var(--light);
+            color: var(--text);
+        }
+
+        .menu-item.active {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 500;
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 50px;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+
+        .support-button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            width: 100%;
+            transition: background 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-button:hover {
+            background: var(--border);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            grid-area: main;
+            padding: 2rem;
+            overflow-y: auto;
+            background: var(--light);
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .stat-icon.primary { background: var(--gradient-primary); }
+        .stat-icon.success { background: var(--success); }
+        .stat-icon.warning { background: var(--warning); }
+        .stat-icon.accent { background: var(--gradient-accent); }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .stat-trend.positive {
+            color: var(--success);
+        }
+
+        .stat-trend.negative {
+            color: var(--error);
+        }
+
+        /* CONTENT SECTIONS */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .content-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-action {
+            margin-left: auto;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* CALL TO ACTION */
+        .cta-section {
+            background: var(--gradient-primary);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .cta-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* ACTIVITY FEED */
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .activity-content h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-content p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .activity-time {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-areas: 
+                    "header"
+                    "main";
+                grid-template-columns: 1fr;
+                grid-template-rows: var(--header-height) 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: var(--header-height);
+                width: var(--sidebar-width);
+                height: calc(100vh - var(--header-height));
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .breadcrumb {
+                padding: 0.75rem 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">SKAILA</div>
+                <nav class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="/dashboard" class="active">Dashboard</a></li>
+                    <li class="nav-item"><a href="/chat">Chat</a></li>
+                    <li class="nav-item"><a href="/ai-chat">AI Assistant</a></li>
+                    <li class="nav-item"><a href="/gamification">Gamification</a></li>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="notifications" onclick="toggleNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-dropdown" onclick="toggleUserDropdown()">
+                    <div class="user-avatar" id="userAvatar">
+                        {{ user.nome[0] }}{{ user.cognome[0] }}
+                    </div>
+                    <div class="user-info">
+                        <h4>{{ user.nome }} {{ user.cognome }}</h4>
+                        <p>{{ user.ruolo.title() }}</p>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Il mio profilo</span>
+                        </a>
+                        <a href="/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Impostazioni</span>
+                        </a>
+                        <a href="/gamification" class="dropdown-item">
+                            <i class="fas fa-trophy"></i>
+                            <span>Gamification</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Menu Principale</div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">Principale</div>
+                    <a href="/dashboard" class="menu-item active">
+                        <i class="fas fa-home menu-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/chat" class="menu-item">
+                        <i class="fas fa-comments menu-icon"></i>
+                        <span>Chat & Messaggi</span>
+                        <span class="menu-badge">5</span>
+                    </a>
+                    <a href="/ai-chat" class="menu-item">
+                        <i class="fas fa-robot menu-icon"></i>
+                        <span>AI Assistant</span>
+                    </a>
+                    <a href="/gamification" class="menu-item">
+                        <i class="fas fa-trophy menu-icon"></i>
+                        <span>Gamification</span>
+                    </a>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-section-title">Progetti & Lavoro</div>
+                    <a href="/projects" class="menu-item">
+                        <i class="fas fa-folder menu-icon"></i>
+                        <span>I miei Progetti</span>
+                    </a>
+                    <a href="/assignments" class="menu-item">
+                        <i class="fas fa-tasks menu-icon"></i>
+                        <span>Compiti</span>
+                        <span class="menu-badge">3</span>
+                    </a>
+                    <a href="/calendar" class="menu-item">
+                        <i class="fas fa-calendar menu-icon"></i>
+                        <span>Calendario</span>
+                    </a>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-section-title">Analytics & Reports</div>
+                    <a href="/analytics" class="menu-item">
+                        <i class="fas fa-chart-line menu-icon"></i>
+                        <span>Analytics</span>
+                    </a>
+                    <a href="/progress" class="menu-item">
+                        <i class="fas fa-chart-bar menu-icon"></i>
+                        <span>Progressi</span>
+                    </a>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-section-title">Gestione</div>
+                    <a href="/settings" class="menu-item">
+                        <i class="fas fa-cog menu-icon"></i>
+                        <span>Impostazioni</span>
+                    </a>
+                    <a href="/profile" class="menu-item">
+                        <i class="fas fa-user menu-icon"></i>
+                        <span>Profilo</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/support" class="support-button">
+                    <i class="fas fa-headset"></i>
+                    <span>Supporto</span>
+                </a>
+                <a href="/logout" class="support-button">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- BREADCRUMB -->
+            <nav class="breadcrumb">
+                <ol class="breadcrumb-list">
+                    <li class="breadcrumb-item">SKAILA</li>
+                    <li class="breadcrumb-separator">/</li>
+                    <li class="breadcrumb-item">Dashboard</li>
+                </ol>
+            </nav>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1 class="page-title">🏠 Benvenuto, {{ user.nome }}!</h1>
+                <p class="page-subtitle">Ecco un riepilogo delle tue attività e progressi su SKAILA</p>
+            </div>
+
+            <!-- STATS CARDS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Messaggi Inviati</div>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="messageCount">247</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12% questa settimana</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Punti XP</div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="xpPoints">1,420</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+85 XP oggi</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Progetti Attivi</div>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="activeProjects">8</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+2 nuovi</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Livello Attuale</div>
+                        <div class="stat-icon accent">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="currentLevel">5</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>75% al livello 6</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CALL TO ACTION -->
+            <div class="cta-section">
+                <h2 class="cta-title">🚀 Inizia la tua Giornata di Studio!</h2>
+                <p class="cta-subtitle">Scopri le nuove funzionalità di SKAILA e migliora la tua esperienza di apprendimento</p>
+                <div class="cta-buttons">
+                    <a href="/ai-chat" class="btn btn-primary">
+                        <i class="fas fa-robot"></i>
+                        Chatta con AI
+                    </a>
+                    <a href="/chat" class="btn btn-outline">
+                        <i class="fas fa-users"></i>
+                        Unisciti alla Chat
+                    </a>
+                    <a href="/gamification" class="btn btn-outline">
+                        <i class="fas fa-gamepad"></i>
+                        Sfide & Premi
+                    </a>
+                </div>
+            </div>
+
+            <!-- CONTENT GRID -->
+            <div class="content-grid">
+                <!-- ATTIVITÀ RECENTI -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📈 Attività Recenti</h3>
+                        <a href="/activity" class="card-action">Vedi tutte</a>
+                    </div>
+                    <div class="activity-feed" id="activityFeed">
+                        <div class="activity-item">
+                            <div class="activity-avatar">ML</div>
+                            <div class="activity-content">
+                                <h4>Hai completato una sfida giornaliera</h4>
+                                <p>+50 XP • Matematica: Equazioni di secondo grado</p>
+                            </div>
+                            <div class="activity-time">2 ore fa</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-avatar">🤖</div>
+                            <div class="activity-content">
+                                <h4>Conversazione con AI Assistant</h4>
+                                <p>Aiuto con esercizio di fisica sui vettori</p>
+                            </div>
+                            <div class="activity-time">4 ore fa</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-avatar">GV</div>
+                            <div class="activity-content">
+                                <h4>Messaggio ricevuto da Giulia V.</h4>
+                                <p>Chat Classe 3A: "Qualcuno ha fatto l'esercizio 15?"</p>
+                            </div>
+                            <div class="activity-time">6 ore fa</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚡ Azioni Rapide</h3>
+                    </div>
+                    <div class="quick-actions">
+                        <a href="/chat" class="quick-action-item">
+                            <i class="fas fa-comments"></i>
+                            <span>Apri Chat</span>
+                        </a>
+                        <a href="/ai-chat" class="quick-action-item">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Assistant</span>
+                        </a>
+                        <a href="/gamification" class="quick-action-item">
+                            <i class="fas fa-trophy"></i>
+                            <span>Sfide</span>
+                        </a>
+                        <a href="/calendar" class="quick-action-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Calendario</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle User Dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Toggle Notifications
+        function toggleNotifications() {
+            // Implementa logica notifiche
+            console.log('Notifiche clicked');
+        }
+
+        // Toggle Sidebar (mobile)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.getElementById('userDropdown');
+            const userDropdownTrigger = document.querySelector('.user-dropdown');
+            
+            if (!userDropdownTrigger.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load gamification data
+                const gamificationResponse = await fetch('/api/gamification/profile');
+                if (gamificationResponse.ok) {
+                    const gamificationData = await gamificationResponse.json();
+                    
+                    document.getElementById('xpPoints').textContent = gamificationData.total_xp.toLocaleString();
+                    document.getElementById('currentLevel').textContent = gamificationData.current_level;
+                    
+                    // Update level progress
+                    const levelProgress = Math.min(100, (gamificationData.total_xp / gamificationData.next_level_xp) * 100);
+                    document.querySelector('#currentLevel').nextElementSibling.querySelector('span').textContent = 
+                        `${Math.round(levelProgress)}% al livello ${gamificationData.current_level + 1}`;
+                }
+
+                // Load conversations count
+                const conversationsResponse = await fetch('/api/conversations');
+                if (conversationsResponse.ok) {
+                    const conversations = await conversationsResponse.json();
+                    // Update message count based on user's activity
+                }
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            
+            // Auto-refresh dashboard data every 30 seconds
+            setInterval(loadDashboardData, 30000);
+        });
+
+        // Add mobile menu toggle if needed
+        if (window.innerWidth <= 1024) {
+            const headerLeft = document.querySelector('.header-left');
+            const menuToggle = document.createElement('button');
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            menuToggle.className = 'menu-toggle';
+            menuToggle.onclick = toggleSidebar;
+            headerLeft.insertBefore(menuToggle, headerLeft.firstChild);
+        }
+    </script>
+
+    <style>
+        /* Additional styles for quick actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .quick-action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.5rem 1rem;
+            background: var(--light);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-item:hover {
+            background: var(--gradient-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quick-action-item i {
+            font-size: 1.5rem;
+        }
+
+        .quick-action-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Mobile menu toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            background: var(--light);
+        }
+
+        @media (max-width: 1024px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</body>
+</html>
