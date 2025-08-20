@@ -15,54 +15,112 @@ import random
 
 class SKAILAGamification:
     def __init__(self):
-        # Sistema di punti XP
+        # Sistema di punti XP - ESTESO CON NUOVE AZIONI
         self.xp_actions = {
+            # Login e streak
             'login_daily': 10,
             'first_login_day': 25,
-            'message_sent': 5,
-            'ai_question': 15,
-            'ai_correct_answer': 30,
-            'quiz_completed': 25,
-            'study_session_15min': 20,
-            'study_session_30min': 40,
-            'help_classmate': 35,
-            'create_study_group': 50,
             'week_streak': 100,
             'month_streak': 300,
-            # NUOVE AZIONI COLLABORATIVE
+            
+            # Lezioni e corsi (nuovi)
+            'lesson_completion_easy': 50,
+            'lesson_completion_medium': 100,
+            'lesson_completion_hard': 200,
+            'course_completion': 750,
+            'bonus_challenge': 250,
+            
+            # Quiz e valutazioni (migliorati)
+            'quiz_completed': 25,
+            'quiz_perfect_score_easy': 100,
+            'quiz_perfect_score_medium': 200,
+            'quiz_perfect_score_hard': 300,
+            'assignment_submit': 100,
+            'milestone_achievement': 350,
+            
+            # Interazioni AI
+            'ai_question': 15,
+            'ai_correct_answer': 30,
+            
+            # Social learning (migliorati)
+            'message_sent': 5,
+            'help_classmate': 60,
+            'peer_tutoring_session': 120,
+            'create_study_group': 80,
+            'join_study_group': 30,
+            
+            # Studio e tempo
+            'study_session_15min': 20,
+            'study_session_30min': 40,
+            'study_session_60min': 80,
+            'focus_session_completed': 50,
+            
+            # Collaborative e team
             'team_challenge_completed': 150,
             'team_challenge_contributed': 75,
             'inter_class_victory': 200,
             'mentorship_session': 100,
-            'collaborative_project': 120
+            'collaborative_project': 120,
+            
+            # Special achievements
+            'perfect_week': 400,
+            'knowledge_master': 500,
+            'community_leader': 300
         }
 
-        # Livelli e soglie XP
-        self.level_thresholds = {
-            1: 0,      # Novizio
-            2: 100,    # Apprendista
-            3: 250,    # Studente
-            4: 500,    # Studioso
-            5: 1000,   # Esperto
-            6: 2000,   # Maestro
-            7: 3500,   # Genio
-            8: 5500,   # Leggenda
-            9: 8000,   # Prodigio
-            10: 12000  # SKAILA Master
-        }
+        # Livelli e soglie XP - FORMULA MIGLIORATA
+        # Level 1-10: 100 * level
+        # Level 11-25: 150 * level  
+        # Level 26-50: 200 * level
+        # Level 51+: 300 * level
+        self.level_thresholds = self._calculate_level_thresholds()
 
-        # Titoli per livelli
+    def _calculate_level_thresholds(self):
+        """Calcola soglie XP con formula scalabile"""
+        thresholds = {1: 0}
+        total_xp = 0
+        
+        for level in range(2, 101):  # Supporta fino a livello 100
+            if level <= 10:
+                xp_needed = 100 * level
+            elif level <= 25:
+                xp_needed = 150 * level
+            elif level <= 50:
+                xp_needed = 200 * level
+            else:
+                xp_needed = 300 * level
+            
+            total_xp += xp_needed
+            thresholds[level] = total_xp
+        
+        return thresholds
+
+        # Titoli per livelli - ESTESI FINO A LIVELLO 50+
         self.level_titles = {
-            1: "🌱 Novizio SKAILA",
-            2: "📚 Apprendista",
-            3: "🎓 Studente Attivo", 
-            4: "⭐ Studioso Dedicato",
-            5: "🏆 Esperto Learner",
-            6: "👑 Maestro del Sapere",
-            7: "🧠 Genio Accademico",
-            8: "🚀 Leggenda di SKAILA",
-            9: "💎 Prodigio Supremo",
-            10: "🌟 SKAILA Master"
+            1: "🌱 Novizio SKAILA", 2: "📚 Apprendista", 3: "🎓 Studente Attivo", 4: "⭐ Studioso Dedicato", 5: "🏆 Esperto Learner",
+            6: "👑 Maestro del Sapere", 7: "🧠 Genio Accademico", 8: "🚀 Leggenda di SKAILA", 9: "💎 Prodigio Supremo", 10: "🌟 SKAILA Master",
+            11: "🔥 Elite Scholar", 12: "⚡ Knowledge Lightning", 13: "🎯 Precision Learner", 14: "🌊 Wave Rider", 15: "🔮 Mystic Mind",
+            16: "🗡️ Knowledge Warrior", 17: "🏔️ Peak Performer", 18: "🌪️ Study Storm", 19: "🏆 Grand Champion", 20: "👑 Royal Master",
+            21: "🌌 Cosmic Scholar", 22: "🔱 Knowledge Titan", 23: "🌟 Stellar Achiever", 24: "⚔️ Academic Gladiator", 25: "🏰 Knowledge Emperor",
+            26: "🌠 Shooting Star", 27: "🌋 Eruption Force", 28: "🌈 Spectrum Master", 29: "🎆 Firework Genius", 30: "👑 Elite Emperor",
+            31: "🌍 World Shaker", 32: "🌙 Lunar Legend", 33: "☀️ Solar Scholar", 34: "⭐ Star Commander", 35: "🌌 Galaxy Guardian",
+            36: "🔥 Phoenix Rising", 37: "🌊 Tsunami Force", 38: "⚡ Thunder Master", 39: "🌪️ Hurricane Hero", 40: "🌋 Volcano Lord",
+            41: "🎭 Mythical Mind", 42: "🗿 Ancient Wisdom", 43: "🔮 Oracle of Knowledge", 44: "👑 Supreme Overlord", 45: "🌟 Transcendent",
+            46: "🚀 Space Explorer", 47: "🌌 Universe Walker", 48: "⚡ Energy Master", 49: "🌠 Comet Chaser", 50: "🌟 SKAILA LEGEND"
+        }
+        
+        # Rewards per livello specifici
+        self.level_rewards = {
+            5: {"unlock": "avatar_customization", "description": "🎨 Sblocca personalizzazione avatar!", "bonus_coins": 100},
+            10: {"unlock": "study_groups", "description": "👥 Sblocca creazione gruppi di studio!", "bonus_coins": 200},
+            15: {"unlock": "advanced_analytics", "description": "📊 Sblocca analytics avanzate!", "bonus_coins": 300},
+            20: {"unlock": "mentor_mode", "description": "👨‍🏫 Sblocca modalità mentore!", "bonus_coins": 500},
+            25: {"unlock": "course_creation", "description": "🎯 Sblocca strumenti creazione corsi!", "bonus_coins": 750},
+            30: {"unlock": "elite_status", "description": "👑 Status Elite + Contenuti esclusivi!", "bonus_coins": 1000},
+            35: {"unlock": "ai_tutor_advanced", "description": "🤖 AI Tutor Avanzato personalizzato!", "bonus_coins": 1500},
+            40: {"unlock": "global_challenges", "description": "🌍 Accesso sfide globali SKAILA!", "bonus_coins": 2000},
+            45: {"unlock": "knowledge_oracle", "description": "🔮 Diventa Oracolo della Conoscenza!", "bonus_coins": 3000},
+            50: {"unlock": "legend_status", "description": "🌟 Status LEGGENDA SKAILA!", "bonus_coins": 5000}
         }
 
         # 🎨 SISTEMA AVATAR E RICOMPENSE VISIVE
@@ -263,13 +321,62 @@ class SKAILAGamification:
             }
         ]
 
-        # Premi speciali
+        # Sistema multiplier XP dinamico
+        self.xp_multipliers = {
+            'base': 1.0,
+            'streak_7_days': 1.2,
+            'streak_14_days': 1.4,
+            'streak_30_days': 1.6,
+            'streak_60_days': 1.8,
+            'streak_100_days': 2.0,
+            'perfect_week': 1.5,
+            'weekend_warrior': 1.3,
+            'early_bird': 1.2,
+            'night_owl': 1.2,
+            'combo_master': 2.0,
+            'team_synergy': 1.8,
+            'mentor_bonus': 1.4,
+            'elite_status': 1.25
+        }
+
+        # Premi speciali con condizioni
         self.special_rewards = {
-            'weekend_warrior': {'name': '⚡ Weekend Warrior', 'bonus_xp': 1.5},
-            'early_bird': {'name': '🌅 Early Bird', 'bonus_xp': 1.2},
-            'night_owl': {'name': '🦉 Night Owl', 'bonus_xp': 1.2},
-            'combo_master': {'name': '🔥 Combo Master', 'bonus_xp': 2.0},
-            'team_synergy': {'name': '🤝 Team Synergy', 'bonus_xp': 1.8}
+            'weekend_warrior': {
+                'name': '⚡ Weekend Warrior', 
+                'bonus_xp': 1.3,
+                'condition': 'weekend_activity',
+                'description': 'Attivo nel weekend!'
+            },
+            'early_bird': {
+                'name': '🌅 Early Bird', 
+                'bonus_xp': 1.2,
+                'condition': 'morning_activity',
+                'description': 'Prima delle 8:00!'
+            },
+            'night_owl': {
+                'name': '🦉 Night Owl', 
+                'bonus_xp': 1.2,
+                'condition': 'night_activity',
+                'description': 'Dopo le 22:00!'
+            },
+            'combo_master': {
+                'name': '🔥 Combo Master', 
+                'bonus_xp': 2.0,
+                'condition': 'activity_combo',
+                'description': '5+ azioni in 30 minuti!'
+            },
+            'team_synergy': {
+                'name': '🤝 Team Synergy', 
+                'bonus_xp': 1.8,
+                'condition': 'team_participation',
+                'description': 'Collaborazione attiva!'
+            },
+            'perfect_streak': {
+                'name': '🎯 Perfect Streak', 
+                'bonus_xp': 1.5,
+                'condition': 'daily_goals_met',
+                'description': 'Obiettivi giornalieri raggiunti!'
+            }
         }
 
     def init_gamification_tables(self):
@@ -1033,13 +1140,59 @@ class SKAILAGamification:
         return insights[:5]  # Massimo 5 insights
 
     # Resto delle funzioni esistenti (award_xp, check_level_up, etc.)
+    def calculate_dynamic_multiplier(self, user_id: int, action_type: str) -> float:
+        """Calcola multiplier XP dinamico basato su condizioni utente"""
+        profile = self.get_or_create_user_profile(user_id)
+        current_time = datetime.now()
+        multiplier = 1.0
+        
+        # Streak bonus
+        streak = profile['current_streak']
+        if streak >= 100:
+            multiplier *= self.xp_multipliers['streak_100_days']
+        elif streak >= 60:
+            multiplier *= self.xp_multipliers['streak_60_days']
+        elif streak >= 30:
+            multiplier *= self.xp_multipliers['streak_30_days']
+        elif streak >= 14:
+            multiplier *= self.xp_multipliers['streak_14_days']
+        elif streak >= 7:
+            multiplier *= self.xp_multipliers['streak_7_days']
+        
+        # Time-based bonus
+        hour = current_time.hour
+        if hour < 8:  # Early bird
+            multiplier *= self.xp_multipliers['early_bird']
+        elif hour >= 22:  # Night owl
+            multiplier *= self.xp_multipliers['night_owl']
+        
+        # Weekend bonus
+        if current_time.weekday() >= 5:  # Saturday or Sunday
+            multiplier *= self.xp_multipliers['weekend_warrior']
+        
+        # Level-based bonus per utenti elite
+        if profile['current_level'] >= 30:
+            multiplier *= self.xp_multipliers['elite_status']
+        
+        return multiplier
+
     def award_xp(self, user_id: int, action_type: str, bonus_multiplier: float = 1.0, description: str = "") -> Dict[str, Any]:
         """Assegna XP per un'azione e controlla achievement e livelli"""
         if action_type not in self.xp_actions:
             return {'success': False, 'error': 'Azione non riconosciuta'}
 
         base_xp = self.xp_actions[action_type]
-        final_xp = int(base_xp * bonus_multiplier)
+        
+        # Calcola multiplier dinamico
+        dynamic_multiplier = self.calculate_dynamic_multiplier(user_id, action_type)
+        total_multiplier = bonus_multiplier * dynamic_multiplier
+        
+        final_xp = int(base_xp * total_multiplier)
+        
+        # Log del multiplier per trasparenza
+        if total_multiplier > 1.0:
+            multiplier_info = f" (Multiplier: {total_multiplier:.1f}x)"
+            description = description + multiplier_info if description else f"Bonus multiplier {total_multiplier:.1f}x"
 
         conn = sqlite3.connect('skaila.db')
         cursor = conn.cursor()
@@ -1146,16 +1299,35 @@ class SKAILAGamification:
                         INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
                         VALUES (?, 'theme', ?, 'level')
                     ''', (user_id, theme_id))
+                    
+            # Applica reward specifici del livello
+            level_reward = self.level_rewards.get(new_level)
+            unlock_message = ""
+            if level_reward:
+                # Aggiungi monete bonus
+                bonus_coins = level_reward.get('bonus_coins', 0)
+                if bonus_coins > 0:
+                    cursor.execute('''
+                        UPDATE user_gamification 
+                        SET avatar_coins = avatar_coins + ?
+                        WHERE user_id = ?
+                    ''', (bonus_coins, user_id))
+                
+                unlock_message = level_reward.get('description', '')
             
             conn.commit()
             conn.close()
 
+            level_reward = self.level_rewards.get(new_level, {})
             return {
                 'leveled_up': True,
                 'old_level': current_level,
                 'new_level': new_level,
-                'new_title': self.level_titles[new_level],
-                'bonus_xp': 50 * new_level  # Bonus XP per level up
+                'new_title': self.level_titles.get(new_level, f"Livello {new_level}"),
+                'bonus_xp': 50 * new_level,  # Bonus XP per level up
+                'special_reward': level_reward.get('description', ''),
+                'bonus_coins': level_reward.get('bonus_coins', 0),
+                'unlock_feature': level_reward.get('unlock', '')
             }
 
         return {'leveled_up': False}

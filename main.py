@@ -1361,6 +1361,158 @@ def api_award_xp():
         print(f"❌ Error awarding XP: {e}")
         return jsonify({'error': str(e)}), 500
 
+# ========== NUOVE API PER AZIONI SPECIFICHE ==========
+
+@app.route('/api/gamification/lesson-completed', methods=['POST'])
+def api_lesson_completed():
+    """Registra completamento lezione con difficoltà"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        difficulty = data.get('difficulty', 'medium')  # easy, medium, hard
+        lesson_id = data.get('lesson_id')
+        
+        action_map = {
+            'easy': 'lesson_completion_easy',
+            'medium': 'lesson_completion_medium', 
+            'hard': 'lesson_completion_hard'
+        }
+        
+        action_type = action_map.get(difficulty, 'lesson_completion_medium')
+        description = f"Lezione completata ({difficulty}): {lesson_id}"
+        
+        result = gamification_system.award_xp(session['user_id'], action_type, 1.0, description)
+        
+        # Aggiorna sfide giornaliere
+        gamification_system.update_challenge_progress(session['user_id'], 'lessons')
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error in lesson completion: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/quiz-perfect', methods=['POST'])
+def api_quiz_perfect():
+    """Registra quiz con punteggio perfetto"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        difficulty = data.get('difficulty', 'medium')
+        quiz_id = data.get('quiz_id')
+        
+        action_map = {
+            'easy': 'quiz_perfect_score_easy',
+            'medium': 'quiz_perfect_score_medium',
+            'hard': 'quiz_perfect_score_hard'
+        }
+        
+        action_type = action_map.get(difficulty, 'quiz_perfect_score_medium')
+        description = f"Quiz perfetto ({difficulty}): {quiz_id}"
+        
+        result = gamification_system.award_xp(session['user_id'], action_type, 1.0, description)
+        
+        # Aggiorna sfide giornaliere
+        gamification_system.update_challenge_progress(session['user_id'], 'quiz_success')
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error in quiz perfect: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/assignment-submit', methods=['POST'])
+def api_assignment_submit():
+    """Registra consegna assignment"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        assignment_id = data.get('assignment_id')
+        on_time = data.get('on_time', True)
+        
+        multiplier = 1.2 if on_time else 1.0
+        description = f"Assignment consegnato: {assignment_id}"
+        if on_time:
+            description += " (in tempo!)"
+        
+        result = gamification_system.award_xp(session['user_id'], 'assignment_submit', multiplier, description)
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error in assignment submit: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/study-session', methods=['POST'])
+def api_study_session():
+    """Registra sessione di studio"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        duration_minutes = data.get('duration_minutes', 15)
+        focused = data.get('focused', True)
+        
+        # Determina tipo azione based su durata
+        if duration_minutes >= 60:
+            action_type = 'study_session_60min'
+        elif duration_minutes >= 30:
+            action_type = 'study_session_30min'
+        else:
+            action_type = 'study_session_15min'
+            
+        multiplier = 1.2 if focused else 1.0
+        description = f"Sessione studio: {duration_minutes} min"
+        if focused:
+            description += " (concentrata!)"
+        
+        result = gamification_system.award_xp(session['user_id'], action_type, multiplier, description)
+        
+        # Registra per analytics
+        gamification_system.record_daily_activity(session['user_id'], 'study_minutes', duration_minutes)
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error in study session: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/gamification/peer-help', methods=['POST'])
+def api_peer_help():
+    """Registra aiuto a un compagno"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    try:
+        data = request.get_json()
+        helped_user_id = data.get('helped_user_id')
+        help_type = data.get('help_type', 'general')  # tutoring, question, general
+        
+        if help_type == 'tutoring':
+            action_type = 'peer_tutoring_session'
+        else:
+            action_type = 'help_classmate'
+            
+        description = f"Aiuto fornito ({help_type})"
+        
+        result = gamification_system.award_xp(session['user_id'], action_type, 1.0, description)
+        
+        # Aggiorna sfide giornaliere
+        gamification_system.update_challenge_progress(session['user_id'], 'team_help')
+        
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"❌ Error in peer help: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/gamification/challenges')
 def api_daily_challenges():
     """Ottieni sfide giornaliere dell'utente"""
