@@ -173,6 +173,14 @@ def return_db_connection(conn):
 
 # Inizializzazione database
 def init_db():
+    # Auto-migrate to PostgreSQL if DATABASE_URL is set
+    database_url = os.getenv('DATABASE_URL')
+    if database_url and 'postgresql' in database_url:
+        print("🔄 PostgreSQL detected - running auto-migration...")
+        from database_upgrade import migrate_to_postgresql
+        migrate_to_postgresql()
+        return
+    
     conn = get_db_connection()
 
     # Tabella utenti
