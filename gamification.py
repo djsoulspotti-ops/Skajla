@@ -95,8 +95,9 @@ class SKAILAGamification:
         
         return thresholds
 
-        # Titoli per livelli - ESTESI FINO A LIVELLO 50+
-        self.level_titles = {
+    def _init_level_titles(self):
+        """Inizializza titoli per livelli"""
+        return {
             1: "🌱 Novizio SKAILA", 2: "📚 Apprendista", 3: "🎓 Studente Attivo", 4: "⭐ Studioso Dedicato", 5: "🏆 Esperto Learner",
             6: "👑 Maestro del Sapere", 7: "🧠 Genio Accademico", 8: "🚀 Leggenda di SKAILA", 9: "💎 Prodigio Supremo", 10: "🌟 SKAILA Master",
             11: "🔥 Elite Scholar", 12: "⚡ Knowledge Lightning", 13: "🎯 Precision Learner", 14: "🌊 Wave Rider", 15: "🔮 Mystic Mind",
@@ -108,6 +109,9 @@ class SKAILAGamification:
             41: "🎭 Mythical Mind", 42: "🗿 Ancient Wisdom", 43: "🔮 Oracle of Knowledge", 44: "👑 Supreme Overlord", 45: "🌟 Transcendent",
             46: "🚀 Space Explorer", 47: "🌌 Universe Walker", 48: "⚡ Energy Master", 49: "🌠 Comet Chaser", 50: "🌟 SKAILA LEGEND"
         }
+
+        # Inizializza titoli livelli
+        self.level_titles = self._init_level_titles()
         
         # Rewards per livello specifici
         self.level_rewards = {
@@ -193,6 +197,193 @@ class SKAILAGamification:
                 'reward_participant': 75
             }
         ]
+
+        # 🏆 SISTEMA BADGE COMPLETO
+        self.badge_system = {
+            # 🎯 Performance Badges
+            'perfect_score_10': {
+                'name': '🎯 Perfect Score Master',
+                'description': '10 quiz con punteggio perfetto',
+                'category': 'performance',
+                'condition': lambda stats: stats.get('perfect_quizzes', 0) >= 10,
+                'xp_reward': 500,
+                'badge_icon': '🎯',
+                'rarity': 'rare'
+            },
+            'speed_learner': {
+                'name': '⚡ Speed Learner',
+                'description': 'Completa 5 lezioni in tempo record',
+                'category': 'performance',
+                'condition': lambda stats: stats.get('speed_completions', 0) >= 5,
+                'xp_reward': 300,
+                'badge_icon': '⚡',
+                'rarity': 'uncommon'
+            },
+            'consistency_king': {
+                'name': '👑 Consistency King',
+                'description': '30 giorni di studio consecutivi',
+                'category': 'performance',
+                'condition': lambda stats: stats.get('max_streak', 0) >= 30,
+                'xp_reward': 1000,
+                'badge_icon': '👑',
+                'rarity': 'epic'
+            },
+            'knowledge_master': {
+                'name': '🧠 Knowledge Master',
+                'description': 'Supera tutti i test di un corso',
+                'category': 'performance',
+                'condition': lambda stats: stats.get('courses_mastered', 0) >= 1,
+                'xp_reward': 750,
+                'badge_icon': '🧠',
+                'rarity': 'rare'
+            },
+
+            # 🤝 Social Badges
+            'helper_badge': {
+                'name': '🤝 Helper',
+                'description': 'Aiuta 50 studenti',
+                'category': 'social',
+                'condition': lambda stats: stats.get('help_given', 0) >= 50,
+                'xp_reward': 600,
+                'badge_icon': '🤝',
+                'rarity': 'rare'
+            },
+            'popular_teacher': {
+                'name': '⭐ Popular Teacher',
+                'description': 'Ricevi 100 likes su risposte',
+                'category': 'social',
+                'condition': lambda stats: stats.get('likes_received', 0) >= 100,
+                'xp_reward': 800,
+                'badge_icon': '⭐',
+                'rarity': 'epic'
+            },
+            'community_leader': {
+                'name': '🏛️ Community Leader',
+                'description': 'Modera 20 discussioni',
+                'category': 'social',
+                'condition': lambda stats: stats.get('discussions_moderated', 0) >= 20,
+                'xp_reward': 900,
+                'badge_icon': '🏛️',
+                'rarity': 'epic'
+            },
+            'mentor_badge': {
+                'name': '👨‍🏫 Mentor',
+                'description': 'Guida 10 studenti junior',
+                'category': 'social',
+                'condition': lambda stats: stats.get('mentorship_sessions', 0) >= 10,
+                'xp_reward': 1200,
+                'badge_icon': '👨‍🏫',
+                'rarity': 'legendary'
+            },
+
+            # 🔥 Challenge Badges
+            'early_bird': {
+                'name': '🌅 Early Bird',
+                'description': 'Studia prima delle 8:00 per 7 giorni',
+                'category': 'challenge',
+                'condition': lambda stats: stats.get('early_morning_sessions', 0) >= 7,
+                'xp_reward': 400,
+                'badge_icon': '🌅',
+                'rarity': 'uncommon'
+            },
+            'night_owl': {
+                'name': '🦉 Night Owl',
+                'description': 'Studia dopo le 22:00 per 7 giorni',
+                'category': 'challenge',
+                'condition': lambda stats: stats.get('late_night_sessions', 0) >= 7,
+                'xp_reward': 400,
+                'badge_icon': '🦉',
+                'rarity': 'uncommon'
+            },
+            'weekend_warrior': {
+                'name': '⚔️ Weekend Warrior',
+                'description': 'Completa sfide weekend per 4 settimane',
+                'category': 'challenge',
+                'condition': lambda stats: stats.get('weekend_challenges_completed', 0) >= 4,
+                'xp_reward': 600,
+                'badge_icon': '⚔️',
+                'rarity': 'rare'
+            },
+            'marathon_runner': {
+                'name': '🏃‍♂️ Marathon Runner',
+                'description': '6+ ore di studio in un giorno',
+                'category': 'challenge',
+                'condition': lambda stats: stats.get('longest_study_session', 0) >= 360,
+                'xp_reward': 500,
+                'badge_icon': '🏃‍♂️',
+                'rarity': 'rare'
+            },
+
+            # ⭐ Special Badges
+            'first_steps': {
+                'name': '🌱 First Steps',
+                'description': 'Prima lezione completata',
+                'category': 'special',
+                'condition': lambda stats: stats.get('lessons_completed', 0) >= 1,
+                'xp_reward': 50,
+                'badge_icon': '🌱',
+                'rarity': 'common'
+            },
+            'veteran': {
+                'name': '🎖️ Veteran',
+                'description': '1 anno sulla piattaforma',
+                'category': 'special',
+                'condition': lambda stats: stats.get('days_on_platform', 0) >= 365,
+                'xp_reward': 2000,
+                'badge_icon': '🎖️',
+                'rarity': 'legendary'
+            },
+            'explorer': {
+                'name': '🗺️ Explorer',
+                'description': 'Esplora tutti i corsi disponibili',
+                'category': 'special',
+                'condition': lambda stats: stats.get('courses_explored', 0) >= stats.get('total_courses_available', 10),
+                'xp_reward': 1500,
+                'badge_icon': '🗺️',
+                'rarity': 'epic'
+            },
+            'innovator': {
+                'name': '💡 Innovator',
+                'description': 'Suggerisci feature implementata',
+                'category': 'special',
+                'condition': lambda stats: stats.get('features_suggested_implemented', 0) >= 1,
+                'xp_reward': 3000,
+                'badge_icon': '💡',
+                'rarity': 'legendary'
+            }
+        }
+
+        # 🔥 SISTEMA STREAK AVANZATO
+        self.streak_system = {
+            'daily_bonuses': {
+                3: {'xp_multiplier': 1.2, 'description': '+20% XP bonus'},
+                7: {'xp_multiplier': 1.35, 'description': '+35% XP bonus'},
+                14: {'xp_multiplier': 1.5, 'description': '+50% XP bonus'},
+                30: {'xp_multiplier': 1.75, 'description': '+75% XP bonus + Badge speciale', 'special_badge': 'streak_master_30'},
+                100: {'xp_multiplier': 2.0, 'description': 'Status Legend + Rewards esclusivi', 'special_status': 'legend'}
+            },
+            'protection_items': {
+                'freeze_card': {
+                    'name': '❄️ Freeze Card',
+                    'description': '1 giorno gratis al mese',
+                    'monthly_limit': 1,
+                    'cost_coins': 0
+                },
+                'weekend_pass': {
+                    'name': '🎫 Weekend Pass',
+                    'description': 'Weekend non rompe streak',
+                    'duration_days': 7,
+                    'cost_coins': 500
+                }
+            },
+            'streak_milestones': {
+                7: {'reward': 'badge', 'badge_id': 'week_warrior', 'bonus_coins': 100},
+                30: {'reward': 'badge', 'badge_id': 'streak_master_30', 'bonus_coins': 500},
+                60: {'reward': 'special_avatar', 'avatar_id': 'streak_master', 'bonus_coins': 1000},
+                100: {'reward': 'legend_status', 'status': 'legend', 'bonus_coins': 2500},
+                365: {'reward': 'immortal_status', 'status': 'immortal', 'bonus_coins': 10000}
+            }
+        }
 
         # Achievement dinamici (estesi)
         self.achievements = {
@@ -539,6 +730,58 @@ class SKAILAGamification:
                 reward_type TEXT,
                 earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 bonus_applied REAL,
+                FOREIGN KEY (user_id) REFERENCES utenti (id)
+            )
+        ''')
+
+        # Tabella badge utenti
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_badges (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                badge_id TEXT,
+                earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                xp_earned INTEGER DEFAULT 0,
+                rarity TEXT,
+                FOREIGN KEY (user_id) REFERENCES utenti (id),
+                UNIQUE(user_id, badge_id)
+            )
+        ''')
+
+        # Tabella protezioni streak
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS streak_protections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                protection_type TEXT, -- 'freeze_card', 'weekend_pass'
+                used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP,
+                active BOOLEAN DEFAULT 1,
+                FOREIGN KEY (user_id) REFERENCES utenti (id)
+            )
+        ''')
+
+        # Tabella statistiche avanzate per badge
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_advanced_stats (
+                user_id INTEGER PRIMARY KEY,
+                perfect_quizzes INTEGER DEFAULT 0,
+                speed_completions INTEGER DEFAULT 0,
+                courses_mastered INTEGER DEFAULT 0,
+                likes_received INTEGER DEFAULT 0,
+                discussions_moderated INTEGER DEFAULT 0,
+                early_morning_sessions INTEGER DEFAULT 0,
+                late_night_sessions INTEGER DEFAULT 0,
+                weekend_challenges_completed INTEGER DEFAULT 0,
+                longest_study_session INTEGER DEFAULT 0,
+                lessons_completed INTEGER DEFAULT 0,
+                days_on_platform INTEGER DEFAULT 0,
+                courses_explored INTEGER DEFAULT 0,
+                features_suggested_implemented INTEGER DEFAULT 0,
+                total_courses_available INTEGER DEFAULT 10,
+                freeze_cards_used_this_month INTEGER DEFAULT 0,
+                weekend_passes_active INTEGER DEFAULT 0,
+                last_freeze_card_reset DATE DEFAULT (DATE('now', 'start of month')),
                 FOREIGN KEY (user_id) REFERENCES utenti (id)
             )
         ''')
@@ -1626,13 +1869,25 @@ class SKAILAGamification:
         next_level_xp = self.level_thresholds.get(next_level, self.level_thresholds[10])
         level_progress = min(100, (current_xp / next_level_xp) * 100) if next_level_xp > 0 else 100
 
+        # Ottieni badge sbloccati
+        unlocked_badges = cursor.execute('''
+            SELECT ub.badge_id, ub.earned_at, ub.xp_earned, ub.rarity
+            FROM user_badges ub
+            WHERE ub.user_id = ?
+            ORDER BY ub.earned_at DESC
+        ''', (user_id,)).fetchall()
+
+        # Ottieni statistiche avanzate per badge
+        advanced_stats = self.get_or_create_advanced_stats(user_id)
+
         return {
             'profile': {
                 **profile,
                 'level_title': self.level_titles[current_level],
                 'next_level_xp': next_level_xp,
                 'level_progress': level_progress,
-                'current_avatar_data': self.available_avatars.get(profile['current_avatar'], self.available_avatars['default'])
+                'current_avatar_data': self.available_avatars.get(profile['current_avatar'], self.available_avatars['default']),
+                'streak_bonus_active': self.streak_system['daily_bonuses'].get(profile['current_streak'], {}).get('xp_multiplier', 1.0)
             },
             'achievements': {
                 'unlocked': [
@@ -1670,14 +1925,222 @@ class SKAILAGamification:
             'leaderboard_position': self.get_leaderboard(user_id, 'weekly'),
             'analytics': self.get_user_analytics(user_id, 30),
             'available_avatars': self.get_available_avatars(user_id),
+            'badges': {
+                'unlocked': [
+                    {
+                        'id': row[0],
+                        'name': self.badge_system[row[0]]['name'] if row[0] in self.badge_system else 'Unknown Badge',
+                        'description': self.badge_system[row[0]]['description'] if row[0] in self.badge_system else '',
+                        'category': self.badge_system[row[0]]['category'] if row[0] in self.badge_system else 'unknown',
+                        'rarity': row[3],
+                        'badge_icon': self.badge_system[row[0]]['badge_icon'] if row[0] in self.badge_system else '🏆',
+                        'earned_at': row[1],
+                        'xp_earned': row[2]
+                    } for row in unlocked_badges if row[0] in self.badge_system
+                ],
+                'available': [
+                    {
+                        'id': badge_id,
+                        'name': badge['name'],
+                        'description': badge['description'],
+                        'category': badge['category'],
+                        'xp_reward': badge['xp_reward'],
+                        'rarity': badge['rarity'],
+                        'badge_icon': badge['badge_icon'],
+                        'progress': self.calculate_badge_progress(badge_id, {**profile, **advanced_stats})
+                    } for badge_id, badge in self.badge_system.items() 
+                    if badge_id not in [row[0] for row in unlocked_badges]
+                ]
+            },
+            'streak_system': {
+                'current_streak': profile['current_streak'],
+                'max_streak': profile['max_streak'],
+                'current_bonus': self.streak_system['daily_bonuses'].get(profile['current_streak'], {}).get('description', 'Nessun bonus'),
+                'next_milestone': self.get_next_streak_milestone(profile['current_streak']),
+                'protections_available': self.get_available_protections(user_id),
+                'freeze_cards_remaining': max(0, 1 - advanced_stats.get('freeze_cards_used_this_month', 0)),
+                'weekend_passes_active': advanced_stats.get('weekend_passes_active', 0)
+            },
             'statistics': {
                 'total_achievements': len(unlocked_achievements),
-                'completion_rate': (len(unlocked_achievements) / len(self.achievements)) * 100,
+                'total_badges': len(unlocked_badges),
+                'badge_completion_rate': (len(unlocked_badges) / len(self.badge_system)) * 100,
+                'achievement_completion_rate': (len(unlocked_achievements) / len(self.achievements)) * 100,
                 'daily_streak': profile['current_streak'],
                 'best_streak': profile['max_streak'],
                 'avatar_coins': profile['avatar_coins']
             }
         }
+
+    def get_or_create_advanced_stats(self, user_id: int) -> Dict[str, Any]:
+        """Ottieni o crea statistiche avanzate per badge"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+
+        stats = cursor.execute('''
+            SELECT * FROM user_advanced_stats WHERE user_id = ?
+        ''', (user_id,)).fetchone()
+
+        if not stats:
+            # Crea nuovo record statistiche
+            cursor.execute('''
+                INSERT INTO user_advanced_stats (user_id)
+                VALUES (?)
+            ''', (user_id,))
+            conn.commit()
+            
+            stats = cursor.execute('''
+                SELECT * FROM user_advanced_stats WHERE user_id = ?
+            ''', (user_id,)).fetchone()
+
+        conn.close()
+
+        if stats:
+            return dict(stats)
+        return {}
+
+    def check_new_badges(self, user_id: int) -> List[Dict[str, Any]]:
+        """Controlla e sblocca nuovi badge"""
+        advanced_stats = self.get_or_create_advanced_stats(user_id)
+        profile = self.get_or_create_user_profile(user_id)
+        
+        # Combina statistiche per controllo badge
+        combined_stats = {**profile, **advanced_stats}
+        
+        # Ottieni badge già sbloccati
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        unlocked_badges = cursor.execute('''
+            SELECT badge_id FROM user_badges WHERE user_id = ?
+        ''', (user_id,)).fetchall()
+        unlocked_badge_ids = [row[0] for row in unlocked_badges]
+
+        new_badges = []
+
+        # Controlla ogni badge
+        for badge_id, badge in self.badge_system.items():
+            if badge_id not in unlocked_badge_ids:
+                if badge['condition'](combined_stats):
+                    # Sblocca badge
+                    cursor.execute('''
+                        INSERT INTO user_badges (user_id, badge_id, xp_earned, rarity)
+                        VALUES (?, ?, ?, ?)
+                    ''', (user_id, badge_id, badge['xp_reward'], badge['rarity']))
+                    
+                    # Assegna XP bonus
+                    cursor.execute('''
+                        UPDATE user_gamification 
+                        SET total_xp = total_xp + ? 
+                        WHERE user_id = ?
+                    ''', (badge['xp_reward'], user_id))
+
+                    new_badges.append({
+                        'id': badge_id,
+                        'name': badge['name'],
+                        'description': badge['description'],
+                        'category': badge['category'],
+                        'xp_reward': badge['xp_reward'],
+                        'rarity': badge['rarity'],
+                        'badge_icon': badge['badge_icon']
+                    })
+
+        conn.commit()
+        conn.close()
+        return new_badges
+
+    def apply_streak_bonus(self, user_id: int, base_xp: int) -> int:
+        """Applica bonus streak all'XP"""
+        profile = self.get_or_create_user_profile(user_id)
+        current_streak = profile.get('current_streak', 0)
+        
+        # Trova il bonus appropriato
+        applicable_bonus = 1.0
+        for streak_days, bonus_data in self.streak_system['daily_bonuses'].items():
+            if current_streak >= streak_days:
+                applicable_bonus = bonus_data['xp_multiplier']
+        
+        return int(base_xp * applicable_bonus)
+
+    def use_streak_protection(self, user_id: int, protection_type: str) -> Dict[str, Any]:
+        """Usa una protezione streak"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        advanced_stats = self.get_or_create_advanced_stats(user_id)
+        current_month = datetime.now().strftime('%Y-%m')
+        
+        if protection_type == 'freeze_card':
+            # Controlla se può usare freeze card questo mese
+            if advanced_stats.get('freeze_cards_used_this_month', 0) >= 1:
+                conn.close()
+                return {'success': False, 'error': 'Freeze Card già usata questo mese'}
+            
+            # Usa freeze card
+            cursor.execute('''
+                INSERT INTO streak_protections (user_id, protection_type, expires_at)
+                VALUES (?, ?, DATETIME('now', '+1 day'))
+            ''', (user_id, protection_type))
+            
+            cursor.execute('''
+                UPDATE user_advanced_stats 
+                SET freeze_cards_used_this_month = freeze_cards_used_this_month + 1
+                WHERE user_id = ?
+            ''', (user_id,))
+            
+            conn.commit()
+            conn.close()
+            return {'success': True, 'message': '❄️ Freeze Card attivata! Streak protetta per 1 giorno.'}
+            
+        elif protection_type == 'weekend_pass':
+            # Controlla se ha abbastanza monete
+            profile = self.get_or_create_user_profile(user_id)
+            if profile.get('avatar_coins', 0) < 500:
+                conn.close()
+                return {'success': False, 'error': 'Monete insufficienti (richieste: 500)'}
+            
+            # Acquista weekend pass
+            cursor.execute('''
+                INSERT INTO streak_protections (user_id, protection_type, expires_at)
+                VALUES (?, ?, DATETIME('now', '+7 days'))
+            ''', (user_id, protection_type))
+            
+            cursor.execute('''
+                UPDATE user_gamification 
+                SET avatar_coins = avatar_coins - 500
+                WHERE user_id = ?
+            ''', (user_id,))
+            
+            cursor.execute('''
+                UPDATE user_advanced_stats 
+                SET weekend_passes_active = weekend_passes_active + 1
+                WHERE user_id = ?
+            ''', (user_id,))
+            
+            conn.commit()
+            conn.close()
+            return {'success': True, 'message': '🎫 Weekend Pass attivato! Streak protetta nei weekend per 1 settimana.'}
+        
+        conn.close()
+        return {'success': False, 'error': 'Tipo di protezione non valido'}
+
+    def update_advanced_stat(self, user_id: int, stat_name: str, increment: int = 1):
+        """Aggiorna una statistica avanzata"""
+        conn = sqlite3.connect('skaila.db')
+        cursor = conn.cursor()
+        
+        # Assicura che il record esista
+        self.get_or_create_advanced_stats(user_id)
+        
+        # Aggiorna la statistica
+        cursor.execute(f'''
+            UPDATE user_advanced_stats 
+            SET {stat_name} = {stat_name} + ?
+            WHERE user_id = ?
+        ''', (increment, user_id))
+        
+        conn.commit()
+        conn.close()
 
     def calculate_achievement_progress(self, achievement_id: str, profile: Dict[str, Any]) -> float:
         """Calcola il progresso verso un achievement"""
@@ -1701,6 +2164,89 @@ class SKAILAGamification:
             return min(100, (profile['mentorship_sessions'] / 10) * 100)
         
         return 0.0
+
+    def calculate_badge_progress(self, badge_id: str, combined_stats: Dict[str, Any]) -> float:
+        """Calcola il progresso verso un badge"""
+        if badge_id == 'perfect_score_10':
+            return min(100, (combined_stats.get('perfect_quizzes', 0) / 10) * 100)
+        elif badge_id == 'speed_learner':
+            return min(100, (combined_stats.get('speed_completions', 0) / 5) * 100)
+        elif badge_id == 'consistency_king':
+            return min(100, (combined_stats.get('max_streak', 0) / 30) * 100)
+        elif badge_id == 'helper_badge':
+            return min(100, (combined_stats.get('help_given', 0) / 50) * 100)
+        elif badge_id == 'popular_teacher':
+            return min(100, (combined_stats.get('likes_received', 0) / 100) * 100)
+        elif badge_id == 'early_bird':
+            return min(100, (combined_stats.get('early_morning_sessions', 0) / 7) * 100)
+        elif badge_id == 'night_owl':
+            return min(100, (combined_stats.get('late_night_sessions', 0) / 7) * 100)
+        elif badge_id == 'weekend_warrior':
+            return min(100, (combined_stats.get('weekend_challenges_completed', 0) / 4) * 100)
+        elif badge_id == 'marathon_runner':
+            return min(100, (combined_stats.get('longest_study_session', 0) / 360) * 100)
+        elif badge_id == 'veteran':
+            return min(100, (combined_stats.get('days_on_platform', 0) / 365) * 100)
+        elif badge_id == 'explorer':
+            total_courses = combined_stats.get('total_courses_available', 10)
+            explored = combined_stats.get('courses_explored', 0)
+            return min(100, (explored / total_courses) * 100)
+        
+        return 0.0
+
+    def get_next_streak_milestone(self, current_streak: int) -> Dict[str, Any]:
+        """Ottieni prossima milestone streak"""
+        milestones = [3, 7, 14, 30, 100]
+        
+        for milestone in milestones:
+            if current_streak < milestone:
+                days_remaining = milestone - current_streak
+                bonus_info = self.streak_system['daily_bonuses'].get(milestone, {})
+                return {
+                    'days': milestone,
+                    'days_remaining': days_remaining,
+                    'reward': bonus_info.get('description', 'Bonus speciale'),
+                    'xp_multiplier': bonus_info.get('xp_multiplier', 1.0)
+                }
+        
+        return {
+            'days': 365,
+            'days_remaining': 365 - current_streak,
+            'reward': 'Status Immortale',
+            'xp_multiplier': 3.0
+        }
+
+    def get_available_protections(self, user_id: int) -> List[Dict[str, Any]]:
+        """Ottieni protezioni streak disponibili"""
+        advanced_stats = self.get_or_create_advanced_stats(user_id)
+        profile = self.get_or_create_user_profile(user_id)
+        
+        protections = []
+        
+        # Freeze Card
+        freeze_cards_used = advanced_stats.get('freeze_cards_used_this_month', 0)
+        if freeze_cards_used < 1:
+            protections.append({
+                'type': 'freeze_card',
+                'name': '❄️ Freeze Card',
+                'description': '1 giorno gratis al mese',
+                'available': True,
+                'cost': 0,
+                'remaining': 1 - freeze_cards_used
+            })
+        
+        # Weekend Pass
+        avatar_coins = profile.get('avatar_coins', 0)
+        protections.append({
+            'type': 'weekend_pass',
+            'name': '🎫 Weekend Pass',
+            'description': 'Weekend non rompe streak (7 giorni)',
+            'available': avatar_coins >= 500,
+            'cost': 500,
+            'currency': 'monete'
+        })
+        
+        return protections
 
 
 # Istanza globale del sistema di gamification

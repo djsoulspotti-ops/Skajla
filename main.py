@@ -130,12 +130,12 @@ class DatabasePool:
         self.max_connections = max_connections
         self.pool = Queue(maxsize=max_connections)
         self.lock = threading.Lock()
-        
+
         # Pre-crea le connessioni
         for _ in range(max_connections):
             conn = self._create_connection()
             self.pool.put(conn)
-    
+
     def _create_connection(self):
         conn = sqlite3.connect('skaila.db', timeout=30.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
@@ -147,14 +147,14 @@ class DatabasePool:
         conn.execute('PRAGMA busy_timeout=30000') # Timeout per operazioni concorrenti
         conn.execute('PRAGMA wal_autocheckpoint=1000') # Auto-checkpoint WAL
         return conn
-    
+
     def get_connection(self):
         try:
             return self.pool.get(timeout=5)
         except:
             # Fallback se pool esaurito
             return self._create_connection()
-    
+
     def return_connection(self, conn):
         try:
             self.pool.put(conn, timeout=1)
@@ -180,7 +180,7 @@ def init_db():
         from database_upgrade import migrate_to_postgresql
         migrate_to_postgresql()
         return
-    
+
     conn = get_db_connection()
 
     # Tabella utenti
@@ -962,7 +962,7 @@ def api_conversations():
 
         return_db_connection(conn)
         conversations_list = [dict(conv) for conv in conversations]
-        
+
         # Cache risultato per 30 secondi per ridurre carico DB
         response = jsonify(conversations_list)
         response.cache_control.max_age = 30
@@ -1373,21 +1373,21 @@ def api_lesson_completed():
         data = request.get_json()
         difficulty = data.get('difficulty', 'medium')  # easy, medium, hard
         lesson_id = data.get('lesson_id')
-        
+
         action_map = {
             'easy': 'lesson_completion_easy',
             'medium': 'lesson_completion_medium', 
             'hard': 'lesson_completion_hard'
         }
-        
+
         action_type = action_map.get(difficulty, 'lesson_completion_medium')
         description = f"Lezione completata ({difficulty}): {lesson_id}"
-        
+
         result = gamification_system.award_xp(session['user_id'], action_type, 1.0, description)
-        
+
         # Aggiorna sfide giornaliere
         gamification_system.update_challenge_progress(session['user_id'], 'lessons')
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1404,21 +1404,21 @@ def api_quiz_perfect():
         data = request.get_json()
         difficulty = data.get('difficulty', 'medium')
         quiz_id = data.get('quiz_id')
-        
+
         action_map = {
             'easy': 'quiz_perfect_score_easy',
             'medium': 'quiz_perfect_score_medium',
             'hard': 'quiz_perfect_score_hard'
         }
-        
+
         action_type = action_map.get(difficulty, 'quiz_perfect_score_medium')
         description = f"Quiz perfetto ({difficulty}): {quiz_id}"
-        
+
         result = gamification_system.award_xp(session['user_id'], action_type, 1.0, description)
-        
+
         # Aggiorna sfide giornaliere
         gamification_system.update_challenge_progress(session['user_id'], 'quiz_success')
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1435,14 +1435,14 @@ def api_assignment_submit():
         data = request.get_json()
         assignment_id = data.get('assignment_id')
         on_time = data.get('on_time', True)
-        
+
         multiplier = 1.2 if on_time else 1.0
         description = f"Assignment consegnato: {assignment_id}"
         if on_time:
             description += " (in tempo!)"
-        
+
         result = gamification_system.award_xp(session['user_id'], 'assignment_submit', multiplier, description)
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1459,7 +1459,7 @@ def api_study_session():
         data = request.get_json()
         duration_minutes = data.get('duration_minutes', 15)
         focused = data.get('focused', True)
-        
+
         # Determina tipo azione based su durata
         if duration_minutes >= 60:
             action_type = 'study_session_60min'
@@ -1467,17 +1467,17 @@ def api_study_session():
             action_type = 'study_session_30min'
         else:
             action_type = 'study_session_15min'
-            
+
         multiplier = 1.2 if focused else 1.0
         description = f"Sessione studio: {duration_minutes} min"
         if focused:
             description += " (concentrata!)"
-        
+
         result = gamification_system.award_xp(session['user_id'], action_type, multiplier, description)
-        
+
         # Registra per analytics
         gamification_system.record_daily_activity(session['user_id'], 'study_minutes', duration_minutes)
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1494,19 +1494,19 @@ def api_peer_help():
         data = request.get_json()
         helped_user_id = data.get('helped_user_id')
         help_type = data.get('help_type', 'general')  # tutoring, question, general
-        
+
         if help_type == 'tutoring':
             action_type = 'peer_tutoring_session'
         else:
             action_type = 'help_classmate'
-            
+
         description = f"Aiuto fornito ({help_type})"
-        
+
         result = gamification_system.award_xp(session['user_id'], action_type, 1.0, description)
-        
+
         # Aggiorna sfide giornaliere
         gamification_system.update_challenge_progress(session['user_id'], 'team_help')
-        
+
         return jsonify(result)
 
     except Exception as e:
@@ -1978,6 +1978,9 @@ def handle_send_message(data):
     # Gamification - Messaggio inviato
     gamification_system.award_xp(session['user_id'], 'message_sent', description="Messaggio in chat")
     gamification_system.update_challenge_progress(session['user_id'], 'messages')
+
+    # Controlla badge correlati ai messaggi
+    gamification_system.check_new_badges(session['user_id'])
 
     # Invia a tutti nella chat
     emit('new_message', dict(messaggio), room=f"chat_{conversation_id}")
