@@ -39,10 +39,15 @@ def after_request(response):
 
 socketio = SocketIO(app, 
                    cors_allowed_origins="*",
-                   logger=True, 
-                   engineio_logger=True,
+                   logger=False,  # Disabilita per performance
+                   engineio_logger=False,
                    allow_upgrades=True,
-                   transports=['websocket', 'polling'])
+                   transports=['websocket', 'polling'],
+                   # Ottimizzazioni per alta concorrenza
+                   async_mode='threading',
+                   ping_timeout=60,
+                   ping_interval=25,
+                   max_http_buffer_size=1000000)
 
 # Inizializza il chatbot AI personalizzato
 ai_bot = AISkailaBot()
@@ -115,16 +120,56 @@ def log_login_attempt(email, success, ip_address):
     conn.commit()
     conn.close()
 
-# Database connection ottimizzata
+# Database connection ottimizzata per alta concorrenza
+import threading
+from queue import Queue
+
+# Pool di connessioni per gestire 30+ utenti simultanei
+class DatabasePool:
+    def __init__(self, max_connections=15):
+        self.max_connections = max_connections
+        self.pool = Queue(maxsize=max_connections)
+        self.lock = threading.Lock()
+        
+        # Pre-crea le connessioni
+        for _ in range(max_connections):
+            conn = self._create_connection()
+            self.pool.put(conn)
+    
+    def _create_connection(self):
+        conn = sqlite3.connect('skaila.db', timeout=30.0, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        # Ottimizzazioni SQLite per alta concorrenza
+        conn.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging
+        conn.execute('PRAGMA synchronous=NORMAL')  # Bilanciamento sicurezza/velocità
+        conn.execute('PRAGMA cache_size=20000')   # Cache più grande per concorrenza
+        conn.execute('PRAGMA temp_store=memory')  # Tabelle temporanee in RAM
+        conn.execute('PRAGMA busy_timeout=30000') # Timeout per operazioni concorrenti
+        conn.execute('PRAGMA wal_autocheckpoint=1000') # Auto-checkpoint WAL
+        return conn
+    
+    def get_connection(self):
+        try:
+            return self.pool.get(timeout=5)
+        except:
+            # Fallback se pool esaurito
+            return self._create_connection()
+    
+    def return_connection(self, conn):
+        try:
+            self.pool.put(conn, timeout=1)
+        except:
+            # Se pool pieno, chiudi connessione
+            conn.close()
+
+# Pool globale di connessioni
+db_pool = DatabasePool()
+
 def get_db_connection():
-    conn = sqlite3.connect('skaila.db', timeout=20.0, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    # Ottimizzazioni SQLite per performance
-    conn.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging
-    conn.execute('PRAGMA synchronous=NORMAL')  # Bilanciamento sicurezza/velocità
-    conn.execute('PRAGMA cache_size=10000')   # Cache più grande
-    conn.execute('PRAGMA temp_store=memory')  # Tabelle temporanee in RAM
-    return conn
+    return db_pool.get_connection()
+
+def return_db_connection(conn):
+    db_pool.return_connection(conn)
 
 # Inizializzazione database
 def init_db():
@@ -868,12 +913,9 @@ def dashboard():
 @app.route('/api/conversations')
 def api_conversations():
     if 'user_id' not in session:
-        print(f"❌ API /api/conversations - No user_id in session")
-        print(f"🔍 Session contents: {dict(session)}")
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
-        print(f"✅ API /api/conversations - User: {session.get('nome', 'Unknown')}")
         conn = get_db_connection()
 
         # Ottieni chat dell'utente
@@ -910,10 +952,13 @@ def api_conversations():
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
             ''', (session['user_id'], session.get('classe', ''))).fetchall()
 
-        conn.close()
+        return_db_connection(conn)
         conversations_list = [dict(conv) for conv in conversations]
-        print(f"🔍 Found {len(conversations_list)} conversations for user")
-        return jsonify(conversations_list)
+        
+        # Cache risultato per 30 secondi per ridurre carico DB
+        response = jsonify(conversations_list)
+        response.cache_control.max_age = 30
+        return response
 
     except Exception as e:
         print(f"❌ Error in /api/conversations: {e}")

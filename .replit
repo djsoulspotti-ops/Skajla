@@ -62,3 +62,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 main.py"
+
+[[workflows.workflow]]
+name = "SKAILA Production Scalable"
+author = 42788612
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --workers 4 --worker-class gevent --worker-connections 200 --bind 0.0.0.0:5000 --timeout 120 --max-requests 1000 --max-requests-jitter 100 main:app"
