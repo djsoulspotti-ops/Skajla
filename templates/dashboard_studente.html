@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎒 Dashboard Studente - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            padding: 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="welcome-section">
+                <h1>🎒 Ciao {{ user.nome }}!</h1>
+                <p>Benvenuto nella tua dashboard studente</p>
+            </div>
+            <div class="nav-links">
+                <a href="/chat" class="nav-link">💬 Chat</a>
+                <a href="/ai-chat" class="nav-link">🤖 AI Tutor</a>
+                <a href="/gamification" class="nav-link">🏆 XP & Badge</a>
+                <a href="/logout" class="nav-link">🚪 Esci</a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-number">{{ stats.messaggi_inviati }}</div>
+                <div class="stat-label">Messaggi Inviati</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">{{ stats.chat_partecipate }}</div>
+                <div class="stat-label">Chat Attive</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🤖</div>
+                <div class="stat-number">{{ stats.conversazioni_ai }}</div>
+                <div class="stat-label">Domande AI</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2 class="section-title">🚀 Azioni Rapide</h2>
+            <div class="actions-grid">
+                <div class="action-card" onclick="window.location.href='/chat'">
+                    <div class="action-icon">💬</div>
+                    <h3>Chat Classe</h3>
+                    <p>Parla con i compagni</p>
+                </div>
+                <div class="action-card" onclick="window.location.href='/ai-chat'">
+                    <div class="action-icon">🎓</div>
+                    <h3>Chiedi Aiuto AI</h3>
+                    <p>Tutor personale 24/7</p>
+                </div>
+                <div class="action-card" onclick="window.location.href='/gamification'">
+                    <div class="action-icon">⭐</div>
+                    <h3>Guadagna XP</h3>
+                    <p>Completa sfide</p>
+                </div>
+                <div class="action-card" onclick="startStudySession()">
+                    <div class="action-icon">📚</div>
+                    <h3>Sessione Studio</h3>
+                    <p>Inizia a studiare</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+            <h2 class="section-title">📊 Attività Recente</h2>
+            {% if chat_classe %}
+                {% for chat in chat_classe %}
+                <div class="activity-item">
+                    <i class="fas fa-comments" style="color: var(--primary);"></i>
+                    <div>
+                        <strong>{{ chat.nome }}</strong>
+                        <p>{{ chat.descrizione }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-light); text-align: center; padding: 2rem;">
+                    🌟 Inizia a partecipare alle chat per vedere l'attività qui!
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function startStudySession() {
+            // Gamification - Sessione di studio
+            fetch('/api/gamification/study-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ duration_minutes: 25, focused: true })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      alert('🎉 Sessione di studio avviata! +' + data.xp_gained + ' XP guadagnati!');
+                  }
+              });
+        }
+
+        // Auto-refresh stats ogni 30 secondi
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

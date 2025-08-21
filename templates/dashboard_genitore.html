@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍👩‍👧‍👦 Dashboard Genitore - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ea580c;
+            --secondary: #f97316;
+            --accent: #fb923c;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --gradient-primary: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .features-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .coming-soon {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            border: 2px solid #fed7aa;
+            border-radius: 12px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .coming-soon-badge {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 1px solid #60a5fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            color: #1e40af;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            color: #1e40af;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="welcome-section">
+                <h1>👨‍👩‍👧‍👦 Benvenuto {{ user.nome }}!</h1>
+                <p>Segui i progressi di tuo figlio su SKAILA</p>
+            </div>
+            <div class="nav-links">
+                <a href="/chat" class="nav-link">💬 Chat</a>
+                <a href="/ai-chat" class="nav-link">🤖 AI Assistant</a>
+                <a href="/logout" class="nav-link">🚪 Esci</a>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3>
+                <i class="fas fa-info-circle"></i>
+                Funzionalità Genitore
+            </h3>
+            <p>
+                Le funzionalità specifiche per i genitori sono attualmente in fase di sviluppo. 
+                Al momento puoi utilizzare le chat generali per comunicare con la scuola e 
+                l'AI Assistant per supporto educativo.
+            </p>
+        </div>
+
+        <!-- Current Stats -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-number">{{ stats.messaggi_inviati }}</div>
+                <div class="stat-label">Messaggi Inviati</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">{{ stats.chat_partecipate }}</div>
+                <div class="stat-label">Chat Partecipate</div>
+            </div>
+        </div>
+
+        <!-- Coming Soon Features -->
+        <div class="features-section">
+            <h2 class="section-title">
+                <i class="fas fa-rocket"></i>
+                Prossime Funzionalità
+            </h2>
+            <div class="coming-soon">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="feature-title">Progressi Figlio/a</h3>
+                    <p class="feature-description">
+                        Monitora i progressi scolastici, voti e partecipazione in tempo reale
+                    </p>
+                    <span class="coming-soon-badge">Presto</span>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <h3 class="feature-title">Calendario Scolastico</h3>
+                    <p class="feature-description">
+                        Visualizza compiti, verifiche e eventi scolastici programmati
+                    </p>
+                    <span class="coming-soon-badge">Presto</span>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                    <h3 class="feature-title">Chat con Professori</h3>
+                    <p class="feature-description">
+                        Comunicazione diretta con i docenti del tuo figlio/figlia
+                    </p>
+                    <span class="coming-soon-badge">Presto</span>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                    <h3 class="feature-title">Notifiche Smart</h3>
+                    <p class="feature-description">
+                        Ricevi aggiornamenti su assenze, voti e comunicazioni importanti
+                    </p>
+                    <span class="coming-soon-badge">Presto</span>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
+                    <h3 class="feature-title">Report Mensili</h3>
+                    <p class="feature-description">
+                        Report dettagliati sui progressi e partecipazione mensile
+                    </p>
+                    <span class="coming-soon-badge">Presto</span>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="feature-title">Rete Genitori</h3>
+                    <p class="feature-description">
+                        Connettiti con altri genitori della classe per organizzare attività
+                    </p>
+                    <span class="coming-soon-badge">Presto</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funzionalità placeholder per future implementazioni
+        console.log('🚀 Dashboard Genitore - Funzionalità in sviluppo');
+        
+        // Mostra messaggio informativo
+        setTimeout(() => {
+            if (confirm('👨‍👩‍👧‍👦 Vuoi essere notificato quando le nuove funzionalità per genitori saranno disponibili?')) {
+                alert('📧 Ti invieremo una email quando le funzionalità saranno pronte!');
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

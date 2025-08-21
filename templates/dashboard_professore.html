@@ -1,0 +1,455 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍🏫 Dashboard Professore - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #059669;
+            --secondary: #0d9488;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --gradient-primary: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .students-panel, .quick-actions {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .student-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .student-item:hover {
+            border-color: var(--primary);
+            background: #f0fdf4;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .student-status {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .status-online {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .status-offline {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .action-button {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-bottom: 0.75rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .management-tools {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .tool-card {
+            padding: 1.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            border-color: var(--primary);
+            background: #f0fdf4;
+        }
+
+        .tool-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="welcome-section">
+                <h1>👨‍🏫 Prof. {{ user.nome }} {{ user.cognome }}</h1>
+                <p>Gestisci la tua classe {{ user.classe or 'e monitora i progressi' }}</p>
+            </div>
+            <div class="nav-links">
+                <a href="/chat" class="nav-link">💬 Chat Classe</a>
+                <a href="/ai-chat" class="nav-link">🤖 AI Assistant</a>
+                <a href="/admin/bulk-register" class="nav-link">👥 Gestione</a>
+                <a href="/logout" class="nav-link">🚪 Esci</a>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon">👨‍🎓</div>
+                <div class="stat-number">{{ stats.studenti_classe }}</div>
+                <div class="stat-label">Studenti in Classe</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-number">{{ stats.chat_moderate }}</div>
+                <div class="stat-label">Chat Moderate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number">{{ stats.messaggi_studenti_oggi }}</div>
+                <div class="stat-label">Messaggi Oggi</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Students Panel -->
+            <div class="students-panel">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Studenti della Classe
+                </h2>
+                <div class="student-list">
+                    {% if studenti %}
+                        {% for studente in studenti %}
+                        <div class="student-item">
+                            <div class="student-info">
+                                <div class="student-name">{{ studente.nome }} {{ studente.cognome }}</div>
+                                <div class="student-status">
+                                    {% if studente.status_online %}
+                                        Online ora
+                                        <span class="status-online"></span>
+                                    {% else %}
+                                        Ultimo accesso: {{ studente.ultimo_accesso or 'Mai' }}
+                                        <span class="status-offline"></span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+                            📚 Nessuno studente trovato per la classe {{ user.classe or 'assegnata' }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">
+                    <i class="fas fa-bolt"></i>
+                    Azioni Rapide
+                </h2>
+                <button class="action-button" onclick="createAssignment()">
+                    <i class="fas fa-plus"></i>
+                    Nuovo Compito
+                </button>
+                <button class="action-button" onclick="sendAnnouncement()">
+                    <i class="fas fa-bullhorn"></i>
+                    Annuncio Classe
+                </button>
+                <button class="action-button" onclick="viewProgress()">
+                    <i class="fas fa-chart-line"></i>
+                    Progressi Studenti
+                </button>
+                <button class="action-button" onclick="manageChat()">
+                    <i class="fas fa-comments"></i>
+                    Modera Chat
+                </button>
+            </div>
+        </div>
+
+        <!-- Management Tools -->
+        <div class="management-tools">
+            <h2 class="section-title">
+                <i class="fas fa-tools"></i>
+                Strumenti di Gestione
+            </h2>
+            <div class="tools-grid">
+                <div class="tool-card" onclick="window.location.href='/admin/bulk-register'">
+                    <div class="tool-icon"><i class="fas fa-user-plus"></i></div>
+                    <h3>Aggiungi Studenti</h3>
+                    <p>Registrazione di massa</p>
+                </div>
+                <div class="tool-card" onclick="exportData()">
+                    <div class="tool-icon"><i class="fas fa-download"></i></div>
+                    <h3>Esporta Dati</h3>
+                    <p>Report e statistiche</p>
+                </div>
+                <div class="tool-card" onclick="createTeamChallenge()">
+                    <div class="tool-icon"><i class="fas fa-trophy"></i></div>
+                    <h3>Sfida Classe</h3>
+                    <p>Gamification di gruppo</p>
+                </div>
+                <div class="tool-card" onclick="viewAnalytics()">
+                    <div class="tool-icon"><i class="fas fa-chart-bar"></i></div>
+                    <h3>Analytics</h3>
+                    <p>Metriche avanzate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createAssignment() {
+            alert('🚀 Funzionalità in sviluppo: Creazione compiti!');
+        }
+
+        function sendAnnouncement() {
+            const message = prompt('📢 Inserisci l\'annuncio per la classe:');
+            if (message) {
+                // TODO: Implementare invio annuncio
+                alert('📢 Annuncio inviato a tutti gli studenti!');
+            }
+        }
+
+        function viewProgress() {
+            window.open('/gamification', '_blank');
+        }
+
+        function manageChat() {
+            window.location.href = '/chat';
+        }
+
+        function exportData() {
+            alert('📊 Funzionalità in sviluppo: Export dati classe!');
+        }
+
+        function createTeamChallenge() {
+            fetch('/api/gamification/team-challenge/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    challenge_type: 'class_activity',
+                    class_a: '{{ user.classe }}',
+                    class_b: 'ALL'
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  alert('🏆 Sfida di classe creata!');
+              });
+        }
+
+        function viewAnalytics() {
+            alert('📈 Funzionalità in sviluppo: Analytics avanzate!');
+        }
+
+        // Auto-refresh ogni minuto
+        setInterval(() => {
+            location.reload();
+        }, 60000);
+    </script>
+</body>
+</html>

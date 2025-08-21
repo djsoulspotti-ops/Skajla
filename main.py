@@ -911,11 +911,157 @@ def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
 
-    # Qui verrebbero caricati i dati specifici della dashboard
-    # Ad esempio, statistiche chiave, notifiche, ecc.
+    # Redirect to role-specific dashboard
+    user_role = session.get('ruolo', 'studente')
+    
+    if user_role == 'admin':
+        return redirect('/dashboard/admin')
+    elif user_role == 'professore':
+        return redirect('/dashboard/professore')
+    elif user_role == 'genitore':
+        return redirect('/dashboard/genitore')
+    else:
+        return redirect('/dashboard/studente')
 
-    # Per ora, restituisce un template di base per la dashboard
-    return render_template('dashboard.html', user=session)
+@app.route('/dashboard/studente')
+def dashboard_studente():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    if session.get('ruolo') != 'studente':
+        return redirect('/dashboard')
+    
+    # Carica dati specifici per studenti
+    conn = get_db_connection()
+    
+    # Statistiche studente
+    student_stats = {
+        'messaggi_inviati': conn.execute('SELECT COUNT(*) FROM messaggi WHERE utente_id = ?', (session['user_id'],)).fetchone()[0],
+        'chat_partecipate': conn.execute('SELECT COUNT(*) FROM partecipanti_chat WHERE utente_id = ?', (session['user_id'],)).fetchone()[0],
+        'conversazioni_ai': conn.execute('SELECT COUNT(*) FROM ai_conversations WHERE utente_id = ?', (session['user_id'],)).fetchone()[0]
+    }
+    
+    # Chat di classe
+    chat_classe = conn.execute('''
+        SELECT c.* FROM chat c
+        JOIN partecipanti_chat pc ON c.id = pc.chat_id
+        WHERE pc.utente_id = ? AND c.tipo = 'classe'
+        LIMIT 5
+    ''', (session['user_id'],)).fetchall()
+    
+    conn.close()
+    
+    return render_template('dashboard_studente.html', 
+                         user=session, 
+                         stats=student_stats,
+                         chat_classe=chat_classe)
+
+@app.route('/dashboard/professore')
+def dashboard_professore():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    if session.get('ruolo') != 'professore':
+        return redirect('/dashboard')
+    
+    conn = get_db_connection()
+    
+    # Statistiche professore
+    prof_stats = {
+        'studenti_classe': conn.execute('SELECT COUNT(*) FROM utenti WHERE classe = ? AND ruolo = "studente"', (session.get('classe', ''),)).fetchone()[0],
+        'chat_moderate': conn.execute('SELECT COUNT(*) FROM partecipanti_chat WHERE utente_id = ? AND ruolo_chat IN ("admin", "moderatore")', (session['user_id'],)).fetchone()[0],
+        'messaggi_studenti_oggi': conn.execute('''
+            SELECT COUNT(*) FROM messaggi m
+            JOIN utenti u ON m.utente_id = u.id
+            WHERE u.classe = ? AND u.ruolo = "studente" 
+            AND DATE(m.timestamp) = DATE('now')
+        ''', (session.get('classe', ''),)).fetchone()[0]
+    }
+    
+    # Studenti della classe
+    studenti = conn.execute('''
+        SELECT nome, cognome, ultimo_accesso, status_online
+        FROM utenti 
+        WHERE classe = ? AND ruolo = "studente"
+        ORDER BY status_online DESC, ultimo_accesso DESC
+        LIMIT 10
+    ''', (session.get('classe', ''),)).fetchall()
+    
+    conn.close()
+    
+    return render_template('dashboard_professore.html',
+                         user=session,
+                         stats=prof_stats,
+                         studenti=studenti)
+
+@app.route('/dashboard/admin')
+def dashboard_admin():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    if session.get('ruolo') != 'admin':
+        return redirect('/dashboard')
+    
+    conn = get_db_connection()
+    
+    # Statistiche amministrative
+    admin_stats = {
+        'totale_utenti': conn.execute('SELECT COUNT(*) FROM utenti WHERE attivo = 1').fetchone()[0],
+        'studenti_attivi': conn.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "studente" AND attivo = 1').fetchone()[0],
+        'professori_attivi': conn.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "professore" AND attivo = 1').fetchone()[0],
+        'messaggi_oggi': conn.execute('SELECT COUNT(*) FROM messaggi WHERE DATE(timestamp) = DATE("now")').fetchone()[0],
+        'utenti_online': conn.execute('SELECT COUNT(*) FROM utenti WHERE status_online = 1').fetchone()[0]
+    }
+    
+    # Attività recente
+    recent_activity = conn.execute('''
+        SELECT u.nome, u.cognome, u.ruolo, u.ultimo_accesso, u.status_online
+        FROM utenti u
+        WHERE u.attivo = 1
+        ORDER BY u.ultimo_accesso DESC
+        LIMIT 15
+    ''').fetchall()
+    
+    # Chat più attive
+    active_chats = conn.execute('''
+        SELECT c.nome, COUNT(m.id) as messaggi_count
+        FROM chat c
+        LEFT JOIN messaggi m ON c.id = m.chat_id AND DATE(m.timestamp) = DATE('now')
+        GROUP BY c.id, c.nome
+        ORDER BY messaggi_count DESC
+        LIMIT 10
+    ''').fetchall()
+    
+    conn.close()
+    
+    return render_template('dashboard_admin.html',
+                         user=session,
+                         stats=admin_stats,
+                         recent_activity=recent_activity,
+                         active_chats=active_chats)
+
+@app.route('/dashboard/genitore')
+def dashboard_genitore():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    if session.get('ruolo') != 'genitore':
+        return redirect('/dashboard')
+    
+    conn = get_db_connection()
+    
+    # Per ora, dashboard base per genitori
+    # TODO: Implementare collegamento genitore-figlio
+    genitore_stats = {
+        'chat_partecipate': conn.execute('SELECT COUNT(*) FROM partecipanti_chat WHERE utente_id = ?', (session['user_id'],)).fetchone()[0],
+        'messaggi_inviati': conn.execute('SELECT COUNT(*) FROM messaggi WHERE utente_id = ?', (session['user_id'],)).fetchone()[0]
+    }
+    
+    conn.close()
+    
+    return render_template('dashboard_genitore.html',
+                         user=session,
+                         stats=genitore_stats)
 
 
 @app.route('/api/conversations')

@@ -15,6 +15,9 @@ import random
 
 class SKAILAGamification:
     def __init__(self):
+        # Inizializza titoli dei livelli
+        self._init_level_titles()
+        
         # Sistema di punti XP - ESTESO CON NUOVE AZIONI
         self.xp_actions = {
             # Login e streak
