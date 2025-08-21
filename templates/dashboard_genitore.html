@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ea580c;
-            --secondary: #f97316;
-            --accent: #fb923c;
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
             --success: #10b981;
             --warning: #f59e0b;
             --error: #ef4444;
@@ -19,7 +19,7 @@
             --light: #f8fafc;
             --text: #1e293b;
             --text-light: #64748b;
-            --gradient-primary: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
         }
 
@@ -31,7 +31,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
             color: var(--text);
         }
@@ -143,10 +143,16 @@
 
         .feature-card {
             padding: 1.5rem;
-            border: 2px solid #fed7aa;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
             text-align: center;
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
         }
 
         .feature-icon {
