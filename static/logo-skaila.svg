@@ -1,0 +1,41 @@
+
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skailaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Lettera S stilizzata -->
+  <path d="M50 40 
+           C30 40, 20 50, 20 70
+           C20 90, 35 100, 55 100
+           L120 100
+           C140 100, 150 110, 150 130
+           C150 150, 135 160, 115 160
+           L50 160
+           C30 160, 20 150, 20 140
+           L20 120
+           L50 120
+           L50 140
+           C50 145, 55 150, 60 150
+           L115 150
+           C125 150, 130 145, 130 135
+           C130 125, 125 120, 115 120
+           L55 120
+           C35 120, 20 105, 20 85
+           C20 65, 35 50, 55 50
+           L120 50
+           C140 50, 150 40, 150 20
+           L150 0
+           L120 0
+           L120 20
+           C120 25, 115 30, 110 30
+           L55 30
+           C45 30, 40 35, 40 45
+           C40 55, 45 60, 55 60
+           Z" 
+        fill="url(#skailaGradient)" />
+</svg>

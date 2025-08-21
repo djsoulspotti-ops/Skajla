@@ -102,19 +102,41 @@
         }
 
         .logo {
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             text-decoration: none;
-            letter-spacing: -2px;
             transition: transform 0.3s ease;
         }
 
         .logo:hover {
             transform: scale(1.05);
+        }
+
+        .logo-image {
+            width: 45px;
+            height: 45px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+        }
+
+        .logo:hover .logo-image {
+            transform: rotate(5deg) scale(1.1);
+            filter: drop-shadow(0 6px 12px rgba(102, 126, 234, 0.5));
+        }
+
+        .logo-image path {
+            transition: all 0.3s ease;
+        }
+
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
         }
 
         .nav-links {
@@ -1137,7 +1159,43 @@
 
     <header id="header">
         <nav class="container">
-            <a href="/" class="logo">SKAILA</a>
+            <a href="/" class="logo">
+                <svg class="logo-image" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="skailaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M60 30 
+                             C30 30, 15 45, 15 70
+                             C15 95, 35 110, 65 110
+                             L120 110
+                             C140 110, 155 125, 155 150
+                             C155 175, 135 190, 105 190
+                             L50 190
+                             C20 190, 5 175, 5 150
+                             L30 150
+                             C30 160, 40 170, 50 170
+                             L105 170
+                             C115 170, 125 160, 125 150
+                             C125 140, 115 130, 105 130
+                             L65 130
+                             C35 130, 15 115, 15 90
+                             C15 65, 35 50, 65 50
+                             L120 50
+                             C150 50, 165 35, 165 10
+                             L140 10
+                             C140 20, 130 30, 120 30
+                             L65 30
+                             C55 30, 45 40, 45 50
+                             C45 60, 55 70, 65 70
+                             Z" 
+                          fill="url(#skailaGradient)" />
+                </svg>
+                <span class="logo-text">SKAILA</span>
+            </a>
             <ul class="nav-links">
                 <li><a href="#features">Funzionalità</a></li>
                 <li><a href="#stats">Statistiche</a></li>
@@ -1362,7 +1420,43 @@
             <div class="footer-main">
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <a href="/" class="logo-text">SKAILA</a>
+                        <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                            <svg width="40" height="40" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="skailaGradientFooter" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#667eea;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M60 30 
+                                         C30 30, 15 45, 15 70
+                                         C15 95, 35 110, 65 110
+                                         L120 110
+                                         C140 110, 155 125, 155 150
+                                         C155 175, 135 190, 105 190
+                                         L50 190
+                                         C20 190, 5 175, 5 150
+                                         L30 150
+                                         C30 160, 40 170, 50 170
+                                         L105 170
+                                         C115 170, 125 160, 125 150
+                                         C125 140, 115 130, 105 130
+                                         L65 130
+                                         C35 130, 15 115, 15 90
+                                         C15 65, 35 50, 65 50
+                                         L120 50
+                                         C150 50, 165 35, 165 10
+                                         L140 10
+                                         C140 20, 130 30, 120 30
+                                         L65 30
+                                         C55 30, 45 40, 45 50
+                                         C45 60, 55 70, 65 70
+                                         Z" 
+                                      fill="url(#skailaGradientFooter)" />
+                            </svg>
+                            <span class="logo-text">SKAILA</span>
+                        </a>
                         <span class="logo-tagline">La comunicazione scolastica, rivoluzionata.</span>
                     </div>
                     <p class="footer-description">Siamo un team appassionato di innovazione educativa, dedicato a creare strumenti che migliorano l'apprendimento e la collaborazione a scuola.</p>
