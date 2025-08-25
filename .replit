@@ -71,3 +71,28 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "gunicorn --workers 4 --worker-class gevent --worker-connections 200 --bind 0.0.0.0:5000 --timeout 120 --max-requests 1000 --max-requests-jitter 100 main:app"
+
+[[workflows.workflow]]
+name = "SKAILA Production Optimized"
+author = 42788612
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "# Inizializza indici database"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 -c \"from database_manager import db_manager; db_manager.create_optimized_indexes(); print('✅ Database ottimizzato')\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = ""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "# Avvia server produzione con Gunicorn"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --workers 4 --worker-class gevent --worker-connections 250 --bind 0.0.0.0:5000 --timeout 120 --max-requests 1000 --max-requests-jitter 100 --preload main:app"

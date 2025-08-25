@@ -120,56 +120,45 @@ def log_login_attempt(email, success, ip_address):
     conn.commit()
     conn.close()
 
-# Database connection ottimizzata per alta concorrenza
-import threading
-from queue import Queue
-
-# Pool di connessioni per gestire 30+ utenti simultanei
-class DatabasePool:
-    def __init__(self, max_connections=15):
-        self.max_connections = max_connections
-        self.pool = Queue(maxsize=max_connections)
-        self.lock = threading.Lock()
-
-        # Pre-crea le connessioni
-        for _ in range(max_connections):
-            conn = self._create_connection()
-            self.pool.put(conn)
-
-    def _create_connection(self):
-        conn = sqlite3.connect('skaila.db', timeout=30.0, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        # Ottimizzazioni SQLite per alta concorrenza
-        conn.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging
-        conn.execute('PRAGMA synchronous=NORMAL')  # Bilanciamento sicurezza/velocità
-        conn.execute('PRAGMA cache_size=20000')   # Cache più grande per concorrenza
-        conn.execute('PRAGMA temp_store=memory')  # Tabelle temporanee in RAM
-        conn.execute('PRAGMA busy_timeout=30000') # Timeout per operazioni concorrenti
-        conn.execute('PRAGMA wal_autocheckpoint=1000') # Auto-checkpoint WAL
-        return conn
-
-    def get_connection(self):
-        try:
-            return self.pool.get(timeout=5)
-        except:
-            # Fallback se pool esaurito
-            return self._create_connection()
-
-    def return_connection(self, conn):
-        try:
-            self.pool.put(conn, timeout=1)
-        except:
-            # Se pool pieno, chiudi connessione
-            conn.close()
-
-# Pool globale di connessioni
-db_pool = DatabasePool()
+# Sistema database e cache avanzato per alta performance
+from database_manager import db_manager
+from cache_manager import cache_manager
+from performance_monitor import perf_monitor
 
 def get_db_connection():
-    return db_pool.get_connection()
+    """Wrapper per compatibilità con codice esistente"""
+    return db_manager.get_connection()
 
-def return_db_connection(conn):
-    db_pool.return_connection(conn)
+def execute_cached_query(query, params=None, cache_key=None, ttl=120, fetch_one=False, fetch_all=False):
+    """Esegue query con caching automatico per performance"""
+    
+    # Prova cache se disponibile chiave
+    if cache_key:
+        cached_result = cache_manager.get_query_result(query, params)
+        if cached_result is not None:
+            return cached_result
+    
+    # Registra metriche
+    perf_monitor.record_db_query()
+    start_time = time.time()
+    
+    try:
+        # Esegui query
+        result = db_manager.execute_query(query, params, fetch_one, fetch_all)
+        
+        # Cache risultato
+        if cache_key:
+            cache_manager.cache_query_result(query, params, result, ttl)
+        
+        # Registra tempo risposta
+        response_time = (time.time() - start_time) * 1000
+        perf_monitor.record_response_time(response_time)
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Database error: {e}")
+        raise e
 
 # Inizializzazione database
 def init_db():
@@ -1070,11 +1059,20 @@ def api_conversations():
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
-        conn = get_db_connection()
+        # Controlla cache utente prima
+        user_id = session['user_id']
+        user_role = session['ruolo']
+        cache_key = f"conversations_{user_id}_{user_role}"
+        
+        cached_conversations = cache_manager.get_user_data(user_id, 'conversations')
+        if cached_conversations:
+            response = jsonify(cached_conversations)
+            response.cache_control.max_age = 30
+            return response
 
-        # Ottieni chat dell'utente
-        if session['ruolo'] == 'admin':
-            conversations = conn.execute('''
+        # Query ottimizzata con cache
+        if user_role == 'admin':
+            query = '''
                 SELECT c.*, 
                        COUNT(DISTINCT pc.utente_id) as partecipanti_count,
                        m.contenuto as ultimo_messaggio,
@@ -1087,9 +1085,10 @@ def api_conversations():
                 LEFT JOIN utenti u ON m.utente_id = u.id
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
-            ''').fetchall()
+            '''
+            conversations = execute_cached_query(query, cache_key=cache_key, ttl=60, fetch_all=True)
         else:
-            conversations = conn.execute('''
+            query = '''
                 SELECT c.*, 
                        COUNT(DISTINCT pc.utente_id) as partecipanti_count,
                        m.contenuto as ultimo_messaggio,
@@ -1104,12 +1103,15 @@ def api_conversations():
                 WHERE pc.utente_id = ? OR c.classe = ?
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
-            ''', (session['user_id'], session.get('classe', ''))).fetchall()
+            '''
+            params = (user_id, session.get('classe', ''))
+            conversations = execute_cached_query(query, params, cache_key=cache_key, ttl=60, fetch_all=True)
 
-        return_db_connection(conn)
         conversations_list = [dict(conv) for conv in conversations]
+        
+        # Cache per utente specifico
+        cache_manager.cache_user_data(user_id, 'conversations', conversations_list, ttl=30)
 
-        # Cache risultato per 30 secondi per ridurre carico DB
         response = jsonify(conversations_list)
         response.cache_control.max_age = 30
         return response
@@ -2163,6 +2165,54 @@ def reset_database():
         print("🗑️ Database rimosso")
     init_db()
     print("🔄 Database ricreato completamente")
+
+@app.route('/api/admin/performance')
+def api_performance_stats():
+    """API per monitoring performance (solo admin)"""
+    if 'user_id' not in session or session.get('ruolo') != 'admin':
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        # Combina statistiche da tutti i sistemi
+        stats = {
+            'system': perf_monitor.get_stats(),
+            'cache': cache_manager.get_stats(),
+            'database': {
+                'type': db_manager.db_type,
+                'pool_size': 20 if db_manager.db_type == 'postgresql' else 10,
+                'connection_status': 'healthy'
+            },
+            'timestamp': time.time(),
+            'recommendations': []
+        }
+        
+        # Genera raccomandazioni automatiche
+        if stats['cache']['hit_rate'] < 50:
+            stats['recommendations'].append("Cache hit rate basso - considera di aumentare TTL")
+        
+        if stats['system']['memory_usage'] > 80:
+            stats['recommendations'].append("Uso memoria elevato - considera ottimizzazioni")
+        
+        if stats['system']['queries_per_second'] > 100:
+            stats['recommendations'].append("Carico DB elevato - attiva più cache")
+        
+        return jsonify(stats)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/cache/clear', methods=['POST'])
+def api_clear_cache():
+    """Svuota cache (solo admin)"""
+    if 'user_id' not in session or session.get('ruolo') != 'admin':
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    try:
+        cache_manager.memory_cache.clear()
+        cache_manager.user_cache.clear()
+        return jsonify({'success': True, 'message': 'Cache svuotata'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Inizializza database solo se non esiste
