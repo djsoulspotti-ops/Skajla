@@ -9,3 +9,4 @@ python-dotenv==1.0.0
 bcrypt==4.0.1
 eventlet>=0.24.1
 psutil==7.0.0
+gunicorn==21.2.0

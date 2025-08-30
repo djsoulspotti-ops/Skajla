@@ -34,7 +34,7 @@ localPort = 58003
 externalPort = 3002
 
 [workflows]
-runButton = "SKAILA Fast"
+runButton = "SKAILA Refactored"
 
 [[workflows.workflow]]
 name = "Run SKAILA"
@@ -96,3 +96,12 @@ args = "# Avvia server produzione con Gunicorn"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "gunicorn --workers 4 --worker-class gevent --worker-connections 250 --bind 0.0.0.0:5000 --timeout 120 --max-requests 1000 --max-requests-jitter 100 --preload main:app"
+
+[[workflows.workflow]]
+name = "SKAILA Refactored"
+author = 42788612
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 main.py"
