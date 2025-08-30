@@ -13,6 +13,116 @@ from flask import request, session, render_template
 from database_manager import db_manager
 
 class AuthService:
+    def __init__(self):
+        self.login_attempts = {}
+        self.max_attempts = 5
+        self.lockout_duration = 300  # 5 minuti
+
+    def hash_password(self, password: str) -> str:
+        """Hash password con bcrypt"""
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    def verify_password(self, password: str, hashed: str) -> bool:
+        """Verifica password"""
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+    def is_locked_out(self, email: str) -> bool:
+        """Controlla se account è bloccato"""
+        if email not in self.login_attempts:
+            return False
+        
+        attempts = self.login_attempts[email]
+        if attempts['count'] >= self.max_attempts:
+            time_diff = time.time() - attempts['last_attempt']
+            return time_diff < self.lockout_duration
+        
+        return False
+
+    def record_failed_attempt(self, email: str):
+        """Registra tentativo fallito"""
+        if email not in self.login_attempts:
+            self.login_attempts[email] = {'count': 0, 'last_attempt': 0}
+        
+        self.login_attempts[email]['count'] += 1
+        self.login_attempts[email]['last_attempt'] = time.time()
+
+    def reset_attempts(self, email: str):
+        """Reset tentativi dopo login riuscito"""
+        if email in self.login_attempts:
+            del self.login_attempts[email]
+
+    def authenticate_user(self, email: str, password: str) -> dict:
+        """Autentica utente"""
+        if self.is_locked_out(email):
+            return None
+
+        with db_manager.get_connection() as conn:
+            user = conn.execute('''
+                SELECT id, username, email, password_hash, nome, cognome, 
+                       classe, ruolo, attivo, avatar
+                FROM utenti 
+                WHERE email = ? AND attivo = 1
+            ''', (email,)).fetchone()
+
+            if user and self.verify_password(password, user[3]):
+                self.reset_attempts(email)
+                
+                # Aggiorna ultimo accesso
+                conn.execute('''
+                    UPDATE utenti 
+                    SET ultimo_accesso = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ''', (user[0],))
+                conn.commit()
+
+                return {
+                    'id': user[0],
+                    'username': user[1],
+                    'email': user[2],
+                    'nome': user[4],
+                    'cognome': user[5],
+                    'classe': user[6],
+                    'ruolo': user[7],
+                    'avatar': user[9] or 'default.jpg'
+                }
+            else:
+                self.record_failed_attempt(email)
+                return None
+
+    def create_user(self, username: str, email: str, password: str, 
+                   nome: str, cognome: str, ruolo: str, classe: str = '') -> dict:
+        """Crea nuovo utente"""
+        try:
+            with db_manager.get_connection() as conn:
+                # Verifica se email/username esistono
+                existing = conn.execute('''
+                    SELECT COUNT(*) FROM utenti 
+                    WHERE email = ? OR username = ?
+                ''', (email, username)).fetchone()[0]
+
+                if existing > 0:
+                    return {'success': False, 'message': 'Email o username già esistenti'}
+
+                # Hash password
+                password_hash = self.hash_password(password)
+
+                # Crea utente
+                conn.execute('''
+                    INSERT INTO utenti 
+                    (username, email, password_hash, nome, cognome, classe, ruolo)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                
+                conn.commit()
+                return {'success': True, 'message': 'Utente creato con successo'}
+
+        except Exception as e:
+            return {'success': False, 'message': f'Errore: {str(e)}'}
+
+# Istanza globale
+auth_service = AuthService()
+
+class AuthService:
     
     @staticmethod
     def hash_password(password):

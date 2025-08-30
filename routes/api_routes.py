@@ -172,3 +172,110 @@ def gamification_leaderboard():
         return jsonify(leaderboard_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+"""
+SKAILA - API Routes
+Endpoints API per AJAX e comunicazioni frontend
+"""
+
+from flask import Blueprint, jsonify, request, session
+from database_manager import db_manager
+from gamification import gamification_system
+from ai_chatbot import AISkailaBot
+
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+@api_bp.route('/user/profile')
+def get_user_profile():
+    """Ottieni profilo utente corrente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+    
+    user_id = session['user_id']
+    gamification_data = gamification_system.get_user_dashboard(user_id)
+    
+    return jsonify({
+        'user': {
+            'id': session['user_id'],
+            'nome': session['nome'],
+            'ruolo': session['ruolo'],
+            'avatar': session.get('avatar', 'default.jpg')
+        },
+        'gamification': {
+            'xp': gamification_data['profile']['total_xp'],
+            'level': gamification_data['profile']['current_level'],
+            'streak': gamification_data['profile']['current_streak']
+        }
+    })
+
+@api_bp.route('/gamification/award-xp', methods=['POST'])
+def award_xp():
+    """Assegna XP per azione"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+    
+    data = request.get_json()
+    action_type = data.get('action_type')
+    
+    result = gamification_system.award_xp(
+        session['user_id'], 
+        action_type, 
+        description=data.get('description', '')
+    )
+    
+    return jsonify(result)
+
+@api_bp.route('/ai/chat', methods=['POST'])
+def ai_chat():
+    """Endpoint per chat AI"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+    
+    data = request.get_json()
+    message = data.get('message', '')
+    
+    ai_bot = AISkailaBot()
+    response = ai_bot.generate_response(
+        message, 
+        session['nome'], 
+        session['ruolo'], 
+        session['user_id']
+    )
+    
+    # Salva conversazione
+    with db_manager.get_connection() as conn:
+        conn.execute('''
+            INSERT INTO ai_conversations (utente_id, message, response)
+            VALUES (?, ?, ?)
+        ''', (session['user_id'], message, response))
+        conn.commit()
+    
+    # Award XP per interazione AI
+    gamification_system.award_xp(session['user_id'], 'ai_question')
+    
+    return jsonify({
+        'response': response,
+        'timestamp': '2024-01-01T12:00:00'  # Da implementare con timestamp reale
+    })
+
+@api_bp.route('/leaderboard/<period>')
+def get_leaderboard(period):
+    """Ottieni classifica per periodo"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+    
+    leaderboard = gamification_system.get_leaderboard(
+        session['user_id'], 
+        period, 
+        session.get('classe')
+    )
+    
+    return jsonify(leaderboard)
+
+@api_bp.route('/health')
+def health_check():
+    """Health check per monitoring"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': '2024-01-01T12:00:00',
+        'version': '2.0.0'
+    })
