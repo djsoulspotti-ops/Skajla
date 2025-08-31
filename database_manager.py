@@ -16,25 +16,38 @@ class DatabaseManager:
         self.pool = None
         self.sqlite_pool = None
         
-        if self.db_type == 'postgresql':
-            self.setup_postgresql_pool()
-        else:
+        try:
+            if self.db_type == 'postgresql':
+                self.setup_postgresql_pool()
+            else:
+                self.setup_sqlite_pool()
+        except Exception as e:
+            print(f"Database connection failed: {e}")
+            print("Falling back to SQLite...")
+            self.db_type = 'sqlite'
             self.setup_sqlite_pool()
     
     def setup_postgresql_pool(self):
         """Configura connection pool PostgreSQL per alta concorrenza"""
         database_url = os.getenv('DATABASE_URL')
+        if not database_url:
+            raise Exception("DATABASE_URL environment variable not found")
+        
         # Usa connection pooler per migliori performance
         pooled_url = database_url.replace('.us-east-2', '-pooler.us-east-2')
         
-        self.pool = psycopg2.pool.ThreadedConnectionPool(
-            minconn=5,
-            maxconn=20,
-            dsn=pooled_url,
-            # Ottimizzazioni per alta concorrenza
-            options='-c statement_timeout=30000'
-        )
-        print("✅ PostgreSQL pool configurato per produzione")
+        try:
+            self.pool = psycopg2.pool.ThreadedConnectionPool(
+                minconn=5,
+                maxconn=20,
+                dsn=pooled_url,
+                # Ottimizzazioni per alta concorrenza
+                options='-c statement_timeout=30000'
+            )
+            print("✅ PostgreSQL pool configurato per produzione")
+        except Exception as e:
+            print(f"Failed to create PostgreSQL connection pool: {e}")
+            raise
     
     def setup_sqlite_pool(self):
         """Connection pool SQLite ottimizzato"""
