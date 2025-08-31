@@ -152,119 +152,245 @@ class SkailaApp:
 
     def init_database(self):
         """Inizializzazione database con dati demo"""
-        if not os.path.exists('skaila.db'):
-            print("🔧 Creazione database iniziale...")
-            self.create_database_schema()
-            self.create_demo_data()
+        if db_manager.db_type == 'postgresql':
+            # Per PostgreSQL, verifica se le tabelle esistono
+            try:
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'utenti'")
+                    table_exists = cursor.fetchone()[0] > 0
+                    
+                    if not table_exists:
+                        print("🔧 Creazione schema PostgreSQL...")
+                        self.create_database_schema()
+                        self.create_demo_data()
+                    else:
+                        print("✅ Database PostgreSQL esistente trovato")
+            except Exception as e:
+                print(f"🔧 Inizializzazione database PostgreSQL: {e}")
+                self.create_database_schema()
+                self.create_demo_data()
         else:
-            print("✅ Database esistente trovato")
+            # Per SQLite, controllo file
+            if not os.path.exists('skaila.db'):
+                print("🔧 Creazione database SQLite iniziale...")
+                self.create_database_schema()
+                self.create_demo_data()
+            else:
+                print("✅ Database SQLite esistente trovato")
 
     def create_database_schema(self):
         """Crea schema database"""
         with db_manager.get_connection() as conn:
-            # Tabella utenti
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS utenti (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE NOT NULL,
-                    email TEXT UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    nome TEXT NOT NULL,
-                    cognome TEXT NOT NULL,
-                    classe TEXT,
-                    ruolo TEXT DEFAULT 'studente',
-                    attivo BOOLEAN DEFAULT 1,
-                    primo_accesso BOOLEAN DEFAULT 1,
-                    ultimo_accesso TIMESTAMP,
-                    status_online BOOLEAN DEFAULT 0,
-                    avatar TEXT DEFAULT 'default.jpg',
-                    data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
+            cursor = conn.cursor()
+            
+            # Tabella utenti - compatibile PostgreSQL/SQLite
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS utenti (
+                        id SERIAL PRIMARY KEY,
+                        username TEXT UNIQUE NOT NULL,
+                        email TEXT UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        nome TEXT NOT NULL,
+                        cognome TEXT NOT NULL,
+                        classe TEXT,
+                        ruolo TEXT DEFAULT 'studente',
+                        attivo BOOLEAN DEFAULT TRUE,
+                        primo_accesso BOOLEAN DEFAULT TRUE,
+                        ultimo_accesso TIMESTAMP,
+                        status_online BOOLEAN DEFAULT FALSE,
+                        avatar TEXT DEFAULT 'default.jpg',
+                        data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+            else:
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS utenti (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE NOT NULL,
+                        email TEXT UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        nome TEXT NOT NULL,
+                        cognome TEXT NOT NULL,
+                        classe TEXT,
+                        ruolo TEXT DEFAULT 'studente',
+                        attivo BOOLEAN DEFAULT 1,
+                        primo_accesso BOOLEAN DEFAULT 1,
+                        ultimo_accesso TIMESTAMP,
+                        status_online BOOLEAN DEFAULT 0,
+                        avatar TEXT DEFAULT 'default.jpg',
+                        data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
 
             # Tabelle chat
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS chat (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nome TEXT NOT NULL,
-                    descrizione TEXT,
-                    tipo TEXT DEFAULT 'classe',
-                    classe TEXT,
-                    privata BOOLEAN DEFAULT 0,
-                    creatore_id INTEGER,
-                    data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (creatore_id) REFERENCES utenti (id)
-                )
-            ''')
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS chat (
+                        id SERIAL PRIMARY KEY,
+                        nome TEXT NOT NULL,
+                        descrizione TEXT,
+                        tipo TEXT DEFAULT 'classe',
+                        classe TEXT,
+                        privata BOOLEAN DEFAULT FALSE,
+                        creatore_id INTEGER,
+                        data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (creatore_id) REFERENCES utenti (id)
+                    )
+                ''')
+                
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS messaggi (
+                        id SERIAL PRIMARY KEY,
+                        chat_id INTEGER,
+                        utente_id INTEGER,
+                        contenuto TEXT NOT NULL,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        tipo TEXT DEFAULT 'testo',
+                        file_allegato TEXT,
+                        modificato BOOLEAN DEFAULT FALSE,
+                        FOREIGN KEY (chat_id) REFERENCES chat (id),
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
 
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS messaggi (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    chat_id INTEGER,
-                    utente_id INTEGER,
-                    contenuto TEXT NOT NULL,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    tipo TEXT DEFAULT 'testo',
-                    file_allegato TEXT,
-                    modificato BOOLEAN DEFAULT 0,
-                    FOREIGN KEY (chat_id) REFERENCES chat (id),
-                    FOREIGN KEY (utente_id) REFERENCES utenti (id)
-                )
-            ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS partecipanti_chat (
+                        chat_id INTEGER,
+                        utente_id INTEGER,
+                        ruolo_chat TEXT DEFAULT 'membro',
+                        data_aggiunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (chat_id, utente_id),
+                        FOREIGN KEY (chat_id) REFERENCES chat (id),
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
 
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS partecipanti_chat (
-                    chat_id INTEGER,
-                    utente_id INTEGER,
-                    ruolo_chat TEXT DEFAULT 'membro',
-                    data_aggiunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (chat_id, utente_id),
-                    FOREIGN KEY (chat_id) REFERENCES chat (id),
-                    FOREIGN KEY (utente_id) REFERENCES utenti (id)
-                )
-            ''')
+                # Tabelle AI
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS ai_profiles (
+                        id SERIAL PRIMARY KEY,
+                        utente_id INTEGER UNIQUE,
+                        bot_name TEXT DEFAULT 'SKAILA Assistant',
+                        bot_avatar TEXT DEFAULT '🤖',
+                        conversation_style TEXT DEFAULT 'friendly',
+                        learning_preferences TEXT DEFAULT 'adaptive',
+                        difficulty_preference TEXT DEFAULT 'medium',
+                        subject_strengths TEXT,
+                        subject_weaknesses TEXT,
+                        personality_traits TEXT,
+                        study_schedule TEXT,
+                        preferred_examples TEXT DEFAULT 'mixed',
+                        interaction_goals TEXT,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        total_interactions INTEGER DEFAULT 0,
+                        success_rate REAL DEFAULT 0.0,
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
 
-            # Tabelle AI
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS ai_profiles (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    utente_id INTEGER UNIQUE,
-                    bot_name TEXT DEFAULT 'SKAILA Assistant',
-                    bot_avatar TEXT DEFAULT '🤖',
-                    conversation_style TEXT DEFAULT 'friendly',
-                    learning_preferences TEXT DEFAULT 'adaptive',
-                    difficulty_preference TEXT DEFAULT 'medium',
-                    subject_strengths TEXT,
-                    subject_weaknesses TEXT,
-                    personality_traits TEXT,
-                    study_schedule TEXT,
-                    preferred_examples TEXT DEFAULT 'mixed',
-                    interaction_goals TEXT,
-                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    total_interactions INTEGER DEFAULT 0,
-                    success_rate REAL DEFAULT 0.0,
-                    FOREIGN KEY (utente_id) REFERENCES utenti (id)
-                )
-            ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS ai_conversations (
+                        id SERIAL PRIMARY KEY,
+                        utente_id INTEGER,
+                        message TEXT NOT NULL,
+                        response TEXT NOT NULL,
+                        subject_detected TEXT,
+                        difficulty_level TEXT,
+                        sentiment_analysis TEXT,
+                        learning_objective TEXT,
+                        success_metric REAL,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        feedback_rating INTEGER,
+                        interaction_duration INTEGER,
+                        follow_up_needed BOOLEAN DEFAULT FALSE,
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
+            else:
+                # SQLite schema (original)
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS chat (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nome TEXT NOT NULL,
+                        descrizione TEXT,
+                        tipo TEXT DEFAULT 'classe',
+                        classe TEXT,
+                        privata BOOLEAN DEFAULT 0,
+                        creatore_id INTEGER,
+                        data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (creatore_id) REFERENCES utenti (id)
+                    )
+                ''')
 
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS ai_conversations (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    utente_id INTEGER,
-                    message TEXT NOT NULL,
-                    response TEXT NOT NULL,
-                    subject_detected TEXT,
-                    difficulty_level TEXT,
-                    sentiment_analysis TEXT,
-                    learning_objective TEXT,
-                    success_metric REAL,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    feedback_rating INTEGER,
-                    interaction_duration INTEGER,
-                    follow_up_needed BOOLEAN DEFAULT 0,
-                    FOREIGN KEY (utente_id) REFERENCES utenti (id)
-                )
-            ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS messaggi (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        chat_id INTEGER,
+                        utente_id INTEGER,
+                        contenuto TEXT NOT NULL,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        tipo TEXT DEFAULT 'testo',
+                        file_allegato TEXT,
+                        modificato BOOLEAN DEFAULT 0,
+                        FOREIGN KEY (chat_id) REFERENCES chat (id),
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
+
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS partecipanti_chat (
+                        chat_id INTEGER,
+                        utente_id INTEGER,
+                        ruolo_chat TEXT DEFAULT 'membro',
+                        data_aggiunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (chat_id, utente_id),
+                        FOREIGN KEY (chat_id) REFERENCES chat (id),
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
+
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS ai_profiles (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        utente_id INTEGER UNIQUE,
+                        bot_name TEXT DEFAULT 'SKAILA Assistant',
+                        bot_avatar TEXT DEFAULT '🤖',
+                        conversation_style TEXT DEFAULT 'friendly',
+                        learning_preferences TEXT DEFAULT 'adaptive',
+                        difficulty_preference TEXT DEFAULT 'medium',
+                        subject_strengths TEXT,
+                        subject_weaknesses TEXT,
+                        personality_traits TEXT,
+                        study_schedule TEXT,
+                        preferred_examples TEXT DEFAULT 'mixed',
+                        interaction_goals TEXT,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        total_interactions INTEGER DEFAULT 0,
+                        success_rate REAL DEFAULT 0.0,
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
+
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS ai_conversations (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        utente_id INTEGER,
+                        message TEXT NOT NULL,
+                        response TEXT NOT NULL,
+                        subject_detected TEXT,
+                        difficulty_level TEXT,
+                        sentiment_analysis TEXT,
+                        learning_objective TEXT,
+                        success_metric REAL,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        feedback_rating INTEGER,
+                        interaction_duration INTEGER,
+                        follow_up_needed BOOLEAN DEFAULT 0,
+                        FOREIGN KEY (utente_id) REFERENCES utenti (id)
+                    )
+                ''')
 
     def create_demo_data(self):
         """Crea dati demo per testing"""
