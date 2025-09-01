@@ -42,7 +42,7 @@ class DatabaseManager:
                 maxconn=20,
                 dsn=pooled_url,
                 # Ottimizzazioni per alta concorrenza
-                options='-c statement_timeout=30000'
+                options='-c statement_timeout=30000 -c client_encoding=UTF8'
             )
             print("✅ PostgreSQL pool configurato per produzione")
         except Exception as e:

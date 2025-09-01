@@ -273,7 +273,7 @@ class SkailaApp:
                         id SERIAL PRIMARY KEY,
                         utente_id INTEGER UNIQUE,
                         bot_name TEXT DEFAULT 'SKAILA Assistant',
-                        bot_avatar TEXT DEFAULT '🤖',
+                        bot_avatar TEXT DEFAULT 'bot',
                         conversation_style TEXT DEFAULT 'friendly',
                         learning_preferences TEXT DEFAULT 'adaptive',
                         difficulty_preference TEXT DEFAULT 'medium',
