@@ -33,7 +33,22 @@ class DatabaseManager:
         if not database_url:
             raise Exception("DATABASE_URL environment variable not found")
         
-        # Usa connection pooler per migliori performance
+        # CRITICO: Fix PostgreSQL per Neon SNI - metodo diretto
+        if 'neon.tech' in database_url:
+            # Estrai endpoint dal nome dominio (es: ep-noisy-salad-ae8vg6i0)
+            import re
+            match = re.search(r'ep-[^@.]+', database_url)
+            if match:
+                endpoint_id = match.group(0)
+                print(f"⚙️ PostgreSQL: Found endpoint {endpoint_id}")
+                
+                # Aggiungi SNI endpoint come richiesto da Neon
+                if '?' in database_url:
+                    database_url += f'&options=endpoint%3D{endpoint_id}'
+                else:
+                    database_url += f'?options=endpoint%3D{endpoint_id}'
+                    
+        # Usa connection pooler per performance
         pooled_url = database_url.replace('.us-east-2', '-pooler.us-east-2')
         
         try:
@@ -41,6 +56,10 @@ class DatabaseManager:
                 minconn=5,
                 maxconn=20,
                 dsn=pooled_url,
+                # CRITICO: Parametri SNI richiesti da Neon per produzione
+                sslmode='require',
+                connect_timeout=10,
+                application_name='SKAILA_Production',
                 # Ottimizzazioni per alta concorrenza
                 options='-c statement_timeout=30000 -c client_encoding=UTF8'
             )
@@ -144,8 +163,9 @@ class DatabaseManager:
             "CREATE INDEX IF NOT EXISTS idx_utenti_status_classe ON utenti(status_online, classe)",
             "CREATE INDEX IF NOT EXISTS idx_messaggi_chat_timestamp ON messaggi(chat_id, timestamp DESC)",
             "CREATE INDEX IF NOT EXISTS idx_partecipanti_user_chat ON partecipanti_chat(utente_id, chat_id)",
-            "CREATE INDEX IF NOT EXISTS idx_ai_conversations_user_subject ON ai_conversations(utente_id, subject_detected)",
-            "CREATE INDEX IF NOT EXISTS idx_gamification_user_timestamp ON user_gamification(user_id, last_updated)"
+            "CREATE INDEX IF NOT EXISTS idx_ai_conversations_user_subject ON ai_conversations(utente_id, subject_detected)"
+            # FIXME: user_gamification table non esiste ancora - commentato per evitare errori
+            # "CREATE INDEX IF NOT EXISTS idx_gamification_user_timestamp ON user_gamification(user_id, last_updated)"
         ]
         
         for index_sql in indexes:

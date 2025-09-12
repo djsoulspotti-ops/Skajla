@@ -17,8 +17,7 @@ from performance_cache import (
     cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
     invalidate_user_cache, get_cache_health
 )
-from gamification import gamification_system
-from ai_chatbot import AISkailaBot
+from production_monitor import production_monitor, monitor_request
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
@@ -29,6 +28,10 @@ from routes.socket_routes import register_socket_events
 # Import services
 from services.auth_service import auth_service
 from services.user_service import user_service
+
+# Import AI and gamification systems
+from ai_chatbot import AISkailaBot
+from gamification import SKAILAGamification
 
 class SkailaApp:
     """Classe principale per l'applicazione SKAILA"""
@@ -44,7 +47,15 @@ class SkailaApp:
 
     def setup_app(self):
         """Configurazione base Flask"""
-        self.app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_secret_key_change_in_production')
+        # CRITICO: Secret key deve essere fornita tramite variabile ambiente
+        secret_key = os.getenv('SECRET_KEY')
+        if not secret_key:
+            # Per testing/sviluppo, genera una chiave temporanea con warning
+            import secrets
+            secret_key = secrets.token_hex(32)
+            print("⚠️ SECURITY WARNING: SECRET_KEY non trovata, usando chiave temporanea!")
+            print("⚠️ PRODUZIONE: Imposta SECRET_KEY nelle variabili ambiente!")
+        self.app.config['SECRET_KEY'] = secret_key
         self.app.config['UPLOAD_FOLDER'] = 'static/uploads'
         self.app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -72,12 +83,19 @@ class SkailaApp:
 
         # Route principali
         @self.app.route('/')
+        @monitor_request
         def index():
             if 'user_id' in session:
                 return redirect('/dashboard')
             return render_template('index.html')
+        
+        # Health check endpoint per monitoring
+        @self.app.route('/health')
+        def health_check():
+            return production_monitor.get_health_status()
 
         @self.app.route('/chat')
+        @monitor_request  # Monitoring produzione
         def chat():
             if 'user_id' not in session:
                 return redirect('/login')
@@ -161,10 +179,21 @@ class SkailaApp:
     def init_systems(self):
         """Inizializza sistemi ausiliari"""
         # Inizializza AI Bot
-        self.ai_bot = AISkailaBot()
+        try:
+            self.ai_bot = AISkailaBot()
+            print("✅ AI Bot inizializzato")
+        except Exception as e:
+            print(f"⚠️ Errore inizializzazione AI Bot: {e}")
+            self.ai_bot = None
 
         # Inizializza gamification
-        gamification_system.init_gamification_tables()
+        try:
+            self.gamification_system = SKAILAGamification()
+            self.gamification_system.init_gamification_tables()
+            print("✅ Sistema gamification inizializzato")
+        except Exception as e:
+            print(f"⚠️ Errore inizializzazione gamification: {e}")
+            self.gamification_system = None
 
         # Crea indici database ottimizzati
         db_manager.create_optimized_indexes()
