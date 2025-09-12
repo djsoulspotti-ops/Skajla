@@ -14,7 +14,15 @@ Preferred communication style: Simple, everyday language.
 The application uses Flask as the primary web framework with a modular architecture pattern. The main application is structured around separate blueprints for authentication, dashboard, and API routes, promoting clean separation of concerns and maintainability.
 
 ## Database Layer
-The system implements a flexible database architecture with support for both SQLite (development) and PostgreSQL (production). A custom DatabaseManager class handles connection pooling and provides fallback mechanisms, ensuring scalability for 1000+ concurrent users. The database schema includes comprehensive tables for users, chat rooms, messages, gamification data, and AI interaction tracking.
+The system implements a flexible database architecture with support for both SQLite (development) and PostgreSQL (production). A custom DatabaseManager class handles connection pooling and provides fallback mechanisms, ensuring scalability for 1000+ concurrent users. The database schema includes comprehensive tables for users, chat rooms, messages, gamification data, AI interaction tracking, and **multi-tenant school management**.
+
+## Multi-Tenant School System
+**NEW:** SKAILA now features a comprehensive school-class-teacher management system:
+- **School Organization**: Multiple schools with unique codes and teacher invite systems
+- **Class Management**: Dynamic class creation and automatic student-teacher associations  
+- **Role-Based Registration**: Intelligent registration flow that assigns student/teacher roles based on invite codes
+- **Automated Group Creation**: System automatically creates school, class, and teacher chat rooms
+- **Scalable Architecture**: Supports unlimited schools with isolated data and communication channels
 
 ## Real-time Communication
 Socket.IO integration enables real-time messaging functionality with automatic reconnection and room-based chat organization. The system supports multiple chat types including class-based, thematic, and administrative channels.
