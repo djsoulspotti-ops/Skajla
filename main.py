@@ -12,8 +12,11 @@ from flask_socketio import SocketIO
 
 # Import moduli personalizzati
 from database_manager import db_manager
-from cache_manager import cache_manager
-from performance_monitor import perf_monitor
+from performance_cache import (
+    user_cache, chat_cache, message_cache, ai_cache, gamification_cache,
+    cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
+    invalidate_user_cache, get_cache_health
+)
 from gamification import gamification_system
 from ai_chatbot import AISkailaBot
 
@@ -79,27 +82,35 @@ class SkailaApp:
             if 'user_id' not in session:
                 return redirect('/login')
 
-            with db_manager.get_connection() as conn:
-                cursor = conn.cursor()
-                if session['ruolo'] == 'admin':
-                    cursor.execute('SELECT * FROM chat ORDER BY nome')
-                    chats = cursor.fetchall()
-                else:
-                    if db_manager.db_type == 'postgresql':
-                        cursor.execute('''
-                            SELECT c.* FROM chat c
-                            JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                            WHERE pc.utente_id = %s OR c.classe = %s
-                            ORDER BY c.nome
-                        ''', (session['user_id'], session.get('classe', '')))
+            # Ottimizzazione produzione: usa cache per chat frequenti
+            cache_key = f"user_chats_{session['user_id']}_{session['ruolo']}"
+            chats = chat_cache.get(cache_key)
+            
+            if chats is None:
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    if session['ruolo'] == 'admin':
+                        cursor.execute('SELECT * FROM chat ORDER BY nome')
+                        chats = cursor.fetchall()
                     else:
-                        cursor.execute('''
-                            SELECT c.* FROM chat c
-                            JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                            WHERE pc.utente_id = ? OR c.classe = ?
-                            ORDER BY c.nome
-                        ''', (session['user_id'], session.get('classe', '')))
-                    chats = cursor.fetchall()
+                        if db_manager.db_type == 'postgresql':
+                            cursor.execute('''
+                                SELECT c.* FROM chat c
+                                JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                                WHERE pc.utente_id = %s OR c.classe = %s
+                                ORDER BY c.nome
+                            ''', (session['user_id'], session.get('classe', '')))
+                        else:
+                            cursor.execute('''
+                                SELECT c.* FROM chat c
+                                JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                                WHERE pc.utente_id = ? OR c.classe = ?
+                                ORDER BY c.nome
+                            ''', (session['user_id'], session.get('classe', '')))
+                        chats = cursor.fetchall()
+                
+                # Cache per performance
+                chat_cache.set(cache_key, chats)
 
                 utenti_online = user_service.get_online_users(session['user_id'])
 

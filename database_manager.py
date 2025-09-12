@@ -2,7 +2,7 @@
 import os
 import sqlite3
 import psycopg2
-from psycopg2 import pool
+import psycopg2.pool
 import threading
 from queue import Queue
 import time
