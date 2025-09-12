@@ -12,8 +12,13 @@ from flask_socketio import SocketIO
 
 # Import moduli personalizzati
 from database_manager import db_manager
-from cache_manager import cache_manager
-from performance_monitor import perf_monitor
+from performance_cache import (
+    user_cache, chat_cache, message_cache, ai_cache, gamification_cache,
+    cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
+    invalidate_user_cache, get_cache_health
+)
+from production_monitor import production_monitor, monitor_request
+from school_system import school_system
 from gamification import gamification_system
 from ai_chatbot import AISkailaBot
 
@@ -42,7 +47,14 @@ class SkailaApp:
 
     def setup_app(self):
         """Configurazione base Flask"""
-        self.app.config['SECRET_KEY'] = 'skaila_secret_key_super_secure_2024'
+        # Sicurezza produzione: usa SECRET_KEY dall'ambiente
+        secret_key = os.getenv('SECRET_KEY')
+        if not secret_key:
+            print('⚠️ SECURITY WARNING: SECRET_KEY non trovata, usando chiave temporanea!')
+            print('⚠️ PRODUZIONE: Imposta SECRET_KEY nelle variabili ambiente!')
+            import secrets
+            secret_key = secrets.token_hex(32)
+        self.app.config['SECRET_KEY'] = secret_key
         self.app.config['UPLOAD_FOLDER'] = 'static/uploads'
         self.app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 

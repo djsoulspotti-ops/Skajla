@@ -113,7 +113,8 @@ class AuthService:
                 return None
 
     def create_user(self, username: str, email: str, password: str, 
-                   nome: str, cognome: str, ruolo: str, classe: str = '') -> dict:
+                   nome: str, cognome: str, ruolo: str, classe: str = '', 
+                   scuola_id: int = None, classe_id: int = None) -> dict:
         """Crea nuovo utente"""
         try:
             with db_manager.get_connection() as conn:
@@ -139,22 +140,25 @@ class AuthService:
                 # Hash password
                 password_hash = self.hash_password(password)
 
-                # Crea utente
+                # Crea utente con supporto scuola
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('''
                         INSERT INTO utenti 
-                        (username, email, password_hash, nome, cognome, classe, ruolo)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                        (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    ''', (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id))
+                    user_id = cursor.fetchone()[0]
                 else:
                     cursor.execute('''
                         INSERT INTO utenti 
-                        (username, email, password_hash, nome, cognome, classe, ruolo)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                        (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id))
+                    user_id = cursor.lastrowid
                 
                 conn.commit()
-                return {'success': True, 'message': 'Utente creato con successo'}
+                return {'success': True, 'message': 'Utente creato con successo', 'user_id': user_id}
 
         except Exception as e:
             return {'success': False, 'message': f'Errore: {str(e)}'}
