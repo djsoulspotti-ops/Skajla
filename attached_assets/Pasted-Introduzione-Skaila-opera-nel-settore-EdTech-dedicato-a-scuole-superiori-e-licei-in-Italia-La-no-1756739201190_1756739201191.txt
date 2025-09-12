@@ -1,0 +1,217 @@
+Introduzione
+
+Skaila opera nel settore EdTech dedicato a scuole superiori e licei in Italia. La nostra missione è fornire strumenti digitali educativi efficaci e sicuri, rispettando i diritti fondamentali degli studenti e le normative vigenti in materia di protezione dei dati personali e uso responsabile dell’intelligenza artificiale.
+Questa sezione descrive l’architettura di compliance di Skaila: responsabilità, principi, misure tecniche e organizzative, processi operativi e template per l’applicazione pratica.
+
+⸻
+
+1. Quadri normativi applicabili
+• GDPR — Regolamento (UE) 2016/679: principi generali, diritti degli interessati, obblighi del titolare e del responsabile del trattamento, notifiche data breach, DPIA, ecc.
+• Normativa italiana (Codice privacy D.Lgs. 196/2003 e successive modifiche) e regolamenti applicabili al trattamento di minori e contesti scolastici.
+• AI Act (Regolamento UE sull’intelligenza artificiale): obblighi di trasparenza, gestione del rischio, requisiti per sistemi AI a vario livello di rischio, obbligo di documentazione tecnica e post-market monitoring.
+• Normativa settoriale e linee guida del Garante per la protezione dei dati personali (ove applicabili) per l’ambito scolastico e la tutela dei minori.
+
+⸻
+
+2. Ruoli e responsabilità
+• Titolare del trattamento: Skaila S.r.l. (dati societari e indirizzo da inserire). Decide finalità e mezzi del trattamento.
+• Responsabile del trattamento: eventuali fornitori terzi (hosting, analytics, servizi AI). Devono essere nominati con DPA (Data Processing Agreement).
+• DPO (Data Protection Officer): consigliato/obbligatorio a seconda scala operativa; contatto pubblico per esercizio diritti e segnalazioni.
+• Responsabile AI / AI-Governance Lead: figura interna che sovrintende alla valutazione dei rischi AI, test di bias, DPIA AI e controlli di qualità.
+
+⸻
+
+3. Principi di trattamento (GDPR)
+
+Skaila applica i seguenti principi:
+• Liceità, correttezza, trasparenza — tutte le operazioni di trattamento sono basate su basi giuridiche documentate.
+• Limitazione della finalità — i dati sono raccolti solo per scopi specifici, espliciti e legittimi (erogazione corso, supporto didattico, amministrazione).
+• Minimizzazione dei dati — raccogliamo solo i dati necessari.
+• Precisione — procedure per rettifica e aggiornamento.
+• Limitazione della conservazione — definizione di retention policy.
+• Integrità e riservatezza — misure tecniche e organizzative per la protezione.
+
+⸻
+
+4. Categorie di dati trattati e interessati
+
+Interessi principali: studenti (minorenni), genitori/tutori, personale scolastico, contatti commerciali.
+Tipologie di dati: dati anagrafici (nome, contatti), dati di utilizzo della piattaforma, dati scolastici e di apprendimento (progressi, punteggi), dati di autenticazione, dati tecnici (IP, device), eventuali dati sensibili solo se strettamente necessari e con adeguate basi giuridiche (evitare ove possibile).
+
+⸻
+
+5. Basi giuridiche del trattamento
+• Esecuzione di un contratto / prestazione di servizi (art.6(1)(b) GDPR) — per servizi a scuole e studenti.
+• Consenso esplicito (art.6(1)(a) GDPR) — per finalità non contrattuali (marketing, profilazione non necessaria).
+• Obbligo legale (art.6(1)(c)) — adempimenti amministrativi richiesti da autorità scolastiche.
+• Per i minori: rispetto di art.8 GDPR e normativa nazionale su consenso genitoriale dove applicabile.
+
+⸻
+
+6. Protezione dei minori e processo di consenso
+• Implementiamo un flow di verifica dell’età al momento della registrazione. Per utenti minorenni: richiesta di consenso genitoriale verificabile (email certificata/tesserino, procedura conforme) prima dell’attivazione dell’account.
+• Comunicazioni rivolte ai minori sono formulate in linguaggio semplice e trasparente.
+• Limitazione delle funzionalità automatizzate su profili di minorenni a strumenti informativi e di supporto, non decisioni automatizzate che possano avere impatti rilevanti.
+
+⸻
+
+7. Trasparenza e informative
+• Informativa privacy chiara, facilmente accessibile e distinta per tipologia di utente (studente, genitore, scuola). Deve includere: finalità, base giuridica, categorie dati, conservazione, diritti, contatti DPO, trasferimenti internazionali, uso di AI.
+• Banner cookie conforme e meccanismo di consenso granulare per analytics e terze parti.
+• Informazioni esplicite quando l’utente interagisce con il chatbot AI (es. “stai parlando con un sistema di intelligenza artificiale. Le risposte sono a scopo informativo e supervisionate”).
+
+⸻
+
+8. Specifiche sull’uso dell’AI (conformità AI Act)
+
+Skaila adotta una governance AI strutturata:
+• Classificazione del sistema AI: documentare tipo e livello di rischio (ex. sistema di supporto educativo, rischio limitato).
+• Valutazione preliminare del rischio: analisi dei potenziali impatti (privacy, discriminazione, sicurezza).
+• Documentazione tecnica: modello, versione, dati di training (provenienza), metriche di accuratezza, test di robustezza.
+• Human-in-the-loop: design che permette supervisione umana e intervento quando necessario.
+• Trasparenza verso l’utente: informativa su limiti e probabilità di errore; istruzioni su come contestare/ottenere supporto umano.
+• Post-market monitoring: monitoraggio delle performance in produzione, segnalazione di problematiche e aggiornamento continuo.
+• Mitigazione bias: test periodici per individuare e correggere discriminazioni o errori sistematici.
+• Record keeping e conformity file per eventuali audit o richieste delle autorità.
+
+⸻
+
+9. Misure tecniche e organizzative (TOMs)
+
+Tecniche
+• Trasmissione protetta con TLS 1.2+ / preferibilmente TLS 1.3.
+• Cifratura dati a riposo (es. AES-256 per i database sensibili).
+• Autenticazione forte (MFA) per accessi amministrativi e insegnanti.
+• Monitoraggio e logging centralizzato (SIEM) con retention dei log per scopi di sicurezza e audit.
+• Penetration test e vulnerability scanning periodici.
+• Backup crittografati e procedure di disaster recovery (RTO/RPO definite).
+
+Organizzative
+• Policy interne (access control, password policy, gestione device).
+• Formazione obbligatoria per il personale su privacy e sicurezza (onboarding e refresh annuale).
+• Principle of Least Privilege e segregazione dei ruoli.
+• Procedure per la gestione incidenti e escalation.
+• Valutazioni periodiche (audit interni/esterni, certificazioni consigliate come ISO 27001).
+
+⸻
+
+10. Data Protection Impact Assessment (DPIA)
+
+Per trattamenti complessi e uso di AI sulle categorie protette o sui minori, Skaila esegue DPIA. Elementi chiave della DPIA:
+• Descrizione del trattamento e finalità.
+• Necessità e proporzionalità.
+• Valutazione dei rischi per i diritti e libertà degli interessati.
+• Misure previste per mitigare i rischi.
+• Consulenza e approvazione del DPO (se nominato).
+• Riesame periodico e aggiornamento al cambiare del servizio.
+
+⸻
+
+11. Data breach & procedure di incident response
+
+Skaila mantiene un piano di risposta agli incidenti (IRP) che include:
+1. Identificazione e contenimento immediato dell’incidente.
+2. Valutazione del rischio per i diritti degli interessati.
+3. Notifica al Garante entro 72 ore dal momento in cui l’incidente è stato scoperto (se applicabile).
+4. Comunicazione agli interessati quando il rischio è elevato, in forma chiara e comprensibile.
+5. Post-mortem e misure correttive per evitare recidive.
+(La tempistica 72h è quanto previsto dall’art.33 GDPR.)
+
+Template base di notifica brevemente incluso in appendice.
+
+⸻
+
+12. Trasferimenti internazionali di dati
+• I trasferimenti fuori dallo Spazio Economico Europeo sono regolati da strumenti legalmente validi (es. decisioni di adeguatezza, Standard Contractual Clauses - SCC, eventuali misure supplementari tecniche/organizzative).
+• Inventario dei fornitori esteri e valutazione rischi per ogni trasferimento.
+
+⸻
+
+13. Contratti con Terze Parti (DPA e clausole)
+• Tutti i fornitori che processano dati per conto di Skaila devono sottoscrivere un Data Processing Agreement (DPA) conforme art.28 GDPR: oggetto, durata, natura, scopo, tipologia dati, misure di sicurezza, obbligo di assistenza al Titolare per esercizio diritti e gestione breach, subprocatori autorizzati e condizioni di trasferimento.
+• Due diligence sulla sicurezza e privacy dei fornitori (questionario, certificazioni, audit on-site se necessario).
+
+⸻
+
+14. Diritti degli interessati — processi operativi
+
+Skaila garantisce procedure per l’esercizio dei diritti:
+• Accesso, rettifica, cancellazione (“diritto all’oblio”), limitazione, portabilità, opposizione.
+• Tempi di risposta: risposta entro 1 mese dalla ricezione della richiesta, prorogabile dove giustificato (con comunicazione).
+• Canali per presentare richiesta: modulo online dedicato + email privacy@skaila.it + posta raccomandata.
+
+Template di risposta rapida e workflow interno per verificare identità e svolgere le azioni richieste.
+
+⸻
+
+15. Governance, audit e certificazioni
+• Audit interni trimestrali e audit esterni annuali consigliati.
+• Adozione e mantenimento di standard riconosciuti (es. ISO 27001/27701) consigliata per la credibilità verso scuole e investitori.
+• Registro delle attività di trattamento aggiornato, inventario dei sistemi, mappatura dei flussi dati.
+
+⸻
+
+16. Formazione e awareness
+• Programma formativo obbligatorio per tutto il personale: privacy basics, gestione dati dei minori, sicurezza informatica, uso etico dell’AI.
+• Simulazioni breach e test di phishing periodici.
+
+⸻
+
+17. Comunicazione e trasparenza verso scuole e famiglie
+• Materials: FAQ privacy per genitori, brochure informativa per scuole, guida rapida per insegnanti sull’uso sicuro del chatbot.
+• Canale dedicato per richieste/denunce (privacy@skaila.it e numero dedicato, da definire).
+
+⸻
+
+18. Monitoraggio e miglioramento continuo
+• KPI di compliance (tempo medio di risposta a DSAR, numero di incidenti, percentuale patching, completamento formazione).
+• Roadmap per aggiornare policy in funzione di cambi normativi (es. aggiornamenti AI Act) e tecnologie.
+
+⸻
+
+Appendice: Template e checklist pratiche
+
+A — Privacy notice (estratto breve — da adattare)
+
+Informativa privacy (sintesi) — Skaila S.r.l. tratta i tuoi dati per erogare servizi educativi digitali (finalità: gestione account, attività didattiche, supporto). Per dettagli su base giuridica, conservazione, diritti e trasferimenti consultare l’Informativa completa disponibile [link]. Per esercitare i tuoi diritti: privacy@skaila.it.
+
+(Inserire versione stampabile e link all’informativa completa.)
+
+⸻
+
+B — Flusso di consenso per utenti minorenni (sintesi operativa)
+1. Registrazione studente -> verifica età automatica.
+2. Se minorenne -> schermata “Richiesta consenso genitore/tutore” con invio link e istruzioni.
+3. Genitore compila e firma digitalmente (o metodo alternativo verificabile) -> attivazione account.
+4. Log eventi di consenso conservato in modo immodificabile.
+
+⸻
+
+C — Template di notifica di data breach (sintesi)
+
+Oggetto: Notifica di violazione dei dati personali — Skaila S.r.l.
+Corpo: descrizione dell’evento, tipologia dati coinvolti, numero interessati (se stimato), misure immediate adottate, valutazione del rischio, consigli pratici agli interessati, contatti per info (privacy@skaila.it).
+(Mantenere documento dettagliato per Garante e per eventuale comunicazione agli interessati).
+
+⸻
+
+D — Esempio di record dei trattamenti (tabella - da completare)
+• Attività di trattamento | Finalità | Categorie interessati | Categorie dati | Base giuridica | Periodo conservazione | Responsabile interno | Subprocessor
+• (es.) Gestione account studenti | Erogazione corso | Studenti | Nome, email, progressi | Contratto/consenso | Durata contratto + 2 anni | Team Ops | AWS (hosting)
+
+⸻
+
+E — DPIA checklist rapida per progetti AI
+• Descrizione sistema AI e finalità.
+• Mappatura dei dati in ingresso/uscita.
+• Identificazione potenziali impatti sui diritti fondamentali.
+• Misure tecniche per mitigazione (pseudonimizzazione, limitazione accessi).
+• Test bias e accuratezza.
+• Documentazione per audit.
+• Piano di monitoraggio post-deploy.
+
+⸻
+
+F — Esempio sintetico di clausola DPA per subprocessor
+
+“Il Fornitore si impegna a trattare i dati esclusivamente su istruzione documentata di Skaila e ad adottare misure di sicurezza tecniche e organizzative adeguate; il Fornitore assicura che i propri subfornitori siano contrattualmente obbligati agli stessi obblighi. In caso di data breach il Fornitore notificherà Skaila senza ingiustificato ritardo.”
