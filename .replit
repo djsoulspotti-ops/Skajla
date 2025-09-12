@@ -18,7 +18,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 38509
+localPort = 38253
 externalPort = 3000
 
 [[ports]]
@@ -34,7 +34,7 @@ localPort = 58003
 externalPort = 3002
 
 [workflows]
-runButton = "SKAILA Refactored"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Run SKAILA"
@@ -105,6 +105,27 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 main.py"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "SKAILA Server"
+
+[[workflows.workflow]]
+name = "SKAILA Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [agent]
 expertMode = true

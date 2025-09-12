@@ -97,7 +97,9 @@ class AISkailaBot:
     def test_openai_connection(self):
         """Testa la connessione con OpenAI"""
         try:
-            response = openai.ChatCompletion.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=openai.api_key)
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": "test"}],
                 max_tokens=10
@@ -184,7 +186,9 @@ class AISkailaBot:
             messages = self.build_conversation_context(message, user_name, user_profile, user_id)
             
             # Chiamata a OpenAI
-            response = openai.ChatCompletion.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=openai.api_key)
+            response = client.chat.completions.create(
                 model=model,
                 messages=messages,
                 max_tokens=1000,

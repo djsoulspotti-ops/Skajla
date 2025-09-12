@@ -23,8 +23,13 @@ class AuthService:
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def verify_password(self, password: str, hashed: str) -> bool:
-        """Verifica password"""
-        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        """Verifica password con fallback per compatibilità"""
+        try:
+            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        except:
+            # Fallback per hash SHA-256 esistenti (retrocompatibilità)
+            import hashlib
+            return hashlib.sha256(password.encode()).hexdigest() == hashed
 
     def is_locked_out(self, email: str) -> bool:
         """Controlla se account è bloccato"""
@@ -51,28 +56,46 @@ class AuthService:
         if email in self.login_attempts:
             del self.login_attempts[email]
 
-    def authenticate_user(self, email: str, password: str) -> dict:
+    def authenticate_user(self, email: str, password: str):
         """Autentica utente"""
         if self.is_locked_out(email):
             return None
 
         with db_manager.get_connection() as conn:
-            user = conn.execute('''
-                SELECT id, username, email, password_hash, nome, cognome, 
-                       classe, ruolo, attivo, avatar
-                FROM utenti 
-                WHERE email = ? AND attivo = 1
-            ''', (email,)).fetchone()
+            cursor = conn.cursor()
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT id, username, email, password_hash, nome, cognome, 
+                           classe, ruolo, attivo, avatar
+                    FROM utenti 
+                    WHERE email = %s AND attivo = true
+                ''', (email,))
+            else:
+                cursor.execute('''
+                    SELECT id, username, email, password_hash, nome, cognome, 
+                           classe, ruolo, attivo, avatar
+                    FROM utenti 
+                    WHERE email = ? AND attivo = 1
+                ''', (email,))
+            
+            user = cursor.fetchone()
 
             if user and self.verify_password(password, user[3]):
                 self.reset_attempts(email)
                 
                 # Aggiorna ultimo accesso
-                conn.execute('''
-                    UPDATE utenti 
-                    SET ultimo_accesso = CURRENT_TIMESTAMP 
-                    WHERE id = ?
-                ''', (user[0],))
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        UPDATE utenti 
+                        SET ultimo_accesso = CURRENT_TIMESTAMP 
+                        WHERE id = %s
+                    ''', (user[0],))
+                else:
+                    cursor.execute('''
+                        UPDATE utenti 
+                        SET ultimo_accesso = CURRENT_TIMESTAMP 
+                        WHERE id = ?
+                    ''', (user[0],))
                 conn.commit()
 
                 return {
@@ -94,11 +117,21 @@ class AuthService:
         """Crea nuovo utente"""
         try:
             with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
                 # Verifica se email/username esistono
-                existing = conn.execute('''
-                    SELECT COUNT(*) FROM utenti 
-                    WHERE email = ? OR username = ?
-                ''', (email, username)).fetchone()[0]
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        SELECT COUNT(*) FROM utenti 
+                        WHERE email = %s OR username = %s
+                    ''', (email, username))
+                else:
+                    cursor.execute('''
+                        SELECT COUNT(*) FROM utenti 
+                        WHERE email = ? OR username = ?
+                    ''', (email, username))
+                
+                existing = cursor.fetchone()[0]
 
                 if existing > 0:
                     return {'success': False, 'message': 'Email o username già esistenti'}
@@ -107,11 +140,18 @@ class AuthService:
                 password_hash = self.hash_password(password)
 
                 # Crea utente
-                conn.execute('''
-                    INSERT INTO utenti 
-                    (username, email, password_hash, nome, cognome, classe, ruolo)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        INSERT INTO utenti 
+                        (username, email, password_hash, nome, cognome, classe, ruolo)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                else:
+                    cursor.execute('''
+                        INSERT INTO utenti 
+                        (username, email, password_hash, nome, cognome, classe, ruolo)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (username, email, password_hash, nome, cognome, classe, ruolo))
                 
                 conn.commit()
                 return {'success': True, 'message': 'Utente creato con successo'}
@@ -119,46 +159,50 @@ class AuthService:
         except Exception as e:
             return {'success': False, 'message': f'Errore: {str(e)}'}
 
-# Istanza globale
-auth_service = AuthService()
-
-class AuthService:
-    
-    @staticmethod
-    def hash_password(password):
-        """Hash sicuro con salt"""
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    
-    @staticmethod
-    def verify_password(password, hashed):
-        """Verifica password con fallback"""
-        try:
-            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-        except:
-            return hashlib.sha256(password.encode()).hexdigest() == hashed
-    
-    @staticmethod
-    def rate_limit_login(f):
+    def rate_limit_login(self, f):
         """Rate limiting per login"""
         @wraps(f)
         def decorated_function(*args, **kwargs):
             client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
             
             with db_manager.get_connection() as conn:
-                # Crea tabella se non esiste
-                conn.execute('''
-                    CREATE TABLE IF NOT EXISTS login_attempts (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        ip_address TEXT,
-                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        success BOOLEAN
-                    )
-                ''')
+                cursor = conn.cursor()
                 
-                recent_attempts = conn.execute('''
-                    SELECT COUNT(*) FROM login_attempts 
-                    WHERE ip_address = ? AND timestamp > datetime('now', '-15 minutes')
-                ''', (client_ip,)).fetchone()[0]
+                # Crea tabella se non esiste
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        CREATE TABLE IF NOT EXISTS login_attempts (
+                            id SERIAL PRIMARY KEY,
+                            email TEXT,
+                            ip_address TEXT,
+                            user_agent TEXT,
+                            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            success BOOLEAN
+                        )
+                    ''')
+                    
+                    cursor.execute('''
+                        SELECT COUNT(*) FROM login_attempts 
+                        WHERE ip_address = %s AND timestamp > NOW() - INTERVAL '15 minutes'
+                    ''', (client_ip,))
+                else:
+                    cursor.execute('''
+                        CREATE TABLE IF NOT EXISTS login_attempts (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            email TEXT,
+                            ip_address TEXT,
+                            user_agent TEXT,
+                            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            success BOOLEAN
+                        )
+                    ''')
+                    
+                    cursor.execute('''
+                        SELECT COUNT(*) FROM login_attempts 
+                        WHERE ip_address = ? AND timestamp > datetime('now', '-15 minutes')
+                    ''', (client_ip,))
+                
+                recent_attempts = cursor.fetchone()[0]
                 
                 if recent_attempts >= 10:
                     return render_template('login.html', 
@@ -167,29 +211,23 @@ class AuthService:
             return f(*args, **kwargs)
         return decorated_function
     
-    @staticmethod
-    def log_login_attempt(email, success, ip_address):
+    def log_login_attempt(self, email, success, ip_address):
         """Log tentativi di login"""
         with db_manager.get_connection() as conn:
-            conn.execute('''
-                INSERT INTO login_attempts (email, success, ip_address, user_agent)
-                VALUES (?, ?, ?, ?)
-            ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
+            cursor = conn.cursor()
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO login_attempts (email, success, ip_address, user_agent)
+                    VALUES (%s, %s, %s, %s)
+                ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
+            else:
+                cursor.execute('''
+                    INSERT INTO login_attempts (email, success, ip_address, user_agent)
+                    VALUES (?, ?, ?, ?)
+                ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
+            conn.commit()
     
-    @staticmethod
-    def create_user_session(user_data):
-        """Crea sessione utente sicura"""
-        session.permanent = True
-        session['user_id'] = user_data['id']
-        session['username'] = user_data['username']
-        session['nome'] = user_data['nome']
-        session['cognome'] = user_data['cognome']
-        session['ruolo'] = user_data['ruolo']
-        session['email'] = user_data['email']
-        session['classe'] = user_data['classe']
-    
-    @staticmethod
-    def require_auth(f):
+    def require_auth(self, f):
         """Decorator per route protette"""
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -198,8 +236,7 @@ class AuthService:
             return f(*args, **kwargs)
         return decorated_function
     
-    @staticmethod
-    def require_role(required_role):
+    def require_role(self, required_role):
         """Decorator per controllo ruoli"""
         def decorator(f):
             @wraps(f)

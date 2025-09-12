@@ -41,7 +41,7 @@ class SkailaApp:
 
     def setup_app(self):
         """Configurazione base Flask"""
-        self.app.config['SECRET_KEY'] = 'skaila_secret_key_super_secure_2024'
+        self.app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_secret_key_change_in_production')
         self.app.config['UPLOAD_FOLDER'] = 'static/uploads'
         self.app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -80,15 +80,26 @@ class SkailaApp:
                 return redirect('/login')
 
             with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
                 if session['ruolo'] == 'admin':
-                    chats = conn.execute('SELECT * FROM chat ORDER BY nome').fetchall()
+                    cursor.execute('SELECT * FROM chat ORDER BY nome')
+                    chats = cursor.fetchall()
                 else:
-                    chats = conn.execute('''
-                        SELECT c.* FROM chat c
-                        JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                        WHERE pc.utente_id = ? OR c.classe = ?
-                        ORDER BY c.nome
-                    ''', (session['user_id'], session.get('classe', ''))).fetchall()
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute('''
+                            SELECT c.* FROM chat c
+                            JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                            WHERE pc.utente_id = %s OR c.classe = %s
+                            ORDER BY c.nome
+                        ''', (session['user_id'], session.get('classe', '')))
+                    else:
+                        cursor.execute('''
+                            SELECT c.* FROM chat c
+                            JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                            WHERE pc.utente_id = ? OR c.classe = ?
+                            ORDER BY c.nome
+                        ''', (session['user_id'], session.get('classe', '')))
+                    chats = cursor.fetchall()
 
                 utenti_online = user_service.get_online_users(session['user_id'])
 
@@ -442,14 +453,16 @@ class SkailaApp:
         print(f"🚀 SKAILA Server starting on port {port}")
         print(f"🌐 URL: http://{host}:{port}")
         print(f"📊 Database: {db_manager.db_type}")
-        print(f"🤖 AI Bot: {'✅ Attivo' if self.ai_bot.openai_available else '⚠️ Mock mode'}")
+        print(f"🤖 AI Bot: {'✅ Attivo' if self.ai_bot and self.ai_bot.openai_available else '⚠️ Mock mode'}")
 
         self.socketio.run(
             self.app, 
             host=host, 
             port=port, 
             debug=debug, 
-            allow_unsafe_werkzeug=True
+            allow_unsafe_werkzeug=True,
+            use_reloader=False,
+            log_output=True
         )
 
 # Inizializzazione e avvio applicazione
