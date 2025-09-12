@@ -1,0 +1,97 @@
+
+"""
+SKAILA - Routes Crediti
+Gestione visualizzazione crediti e monete utente
+"""
+
+from flask import Blueprint, render_template, session, redirect, jsonify
+from database_manager import db_manager
+from gamification import gamification_system
+
+credits_bp = Blueprint('credits', __name__)
+
+@credits_bp.route('/crediti')
+def view_credits():
+    """Visualizza crediti utente"""
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    user_id = session['user_id']
+    
+    # Ottieni profilo gamification
+    profile = gamification_system.get_or_create_user_profile(user_id)
+    
+    # Ottieni statistiche dettagliate
+    with db_manager.get_connection() as conn:
+        # XP guadagnati oggi
+        today_xp = conn.execute('''
+            SELECT COALESCE(SUM(xp_earned), 0) 
+            FROM xp_activity_log 
+            WHERE user_id = ? AND DATE(timestamp) = DATE('now')
+        ''', (user_id,)).fetchone()[0]
+        
+        # XP questa settimana
+        week_xp = conn.execute('''
+            SELECT COALESCE(SUM(xp_earned), 0) 
+            FROM xp_activity_log 
+            WHERE user_id = ? AND DATE(timestamp) > DATE('now', '-7 days')
+        ''', (user_id,)).fetchone()[0]
+        
+        # Attività recenti che hanno dato XP
+        recent_activities = conn.execute('''
+            SELECT action_type, xp_earned, description, timestamp
+            FROM xp_activity_log
+            WHERE user_id = ?
+            ORDER BY timestamp DESC
+            LIMIT 10
+        ''', (user_id,)).fetchall()
+    
+    # Calcola livello successivo e progresso
+    current_level = profile['current_level']
+    current_xp = profile['total_xp']
+    
+    # Trova soglia prossimo livello
+    next_level_xp = None
+    for level, threshold in gamification_system.level_thresholds.items():
+        if level > current_level:
+            next_level_xp = threshold
+            break
+    
+    if next_level_xp:
+        xp_needed = next_level_xp - current_xp
+        progress_percentage = (current_xp / next_level_xp) * 100
+    else:
+        xp_needed = 0
+        progress_percentage = 100
+    
+    credits_data = {
+        'avatar_coins': profile['avatar_coins'],
+        'total_xp': current_xp,
+        'current_level': current_level,
+        'level_title': gamification_system.level_titles.get(current_level, f"Livello {current_level}"),
+        'xp_today': today_xp,
+        'xp_this_week': week_xp,
+        'xp_needed_next_level': xp_needed,
+        'level_progress': round(progress_percentage, 1),
+        'recent_activities': recent_activities
+    }
+    
+    return render_template('credits_page.html', 
+                         user=session, 
+                         credits=credits_data)
+
+@credits_bp.route('/api/crediti')
+def api_credits():
+    """API per ottenere crediti in formato JSON"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    user_id = session['user_id']
+    profile = gamification_system.get_or_create_user_profile(user_id)
+    
+    return jsonify({
+        'avatar_coins': profile['avatar_coins'],
+        'total_xp': profile['total_xp'],
+        'current_level': profile['current_level'],
+        'current_streak': profile['current_streak']
+    })

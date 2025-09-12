@@ -1,0 +1,423 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 I Miei Crediti - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .credits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .credit-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .credit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .credit-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .credit-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .credit-label {
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-text {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .activity-log {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-description {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-timestamp {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .activity-xp {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 1.1rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .credits-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Torna alla Dashboard
+        </a>
+
+        <div class="header">
+            <h1>💰 I Miei Crediti</h1>
+            <p>Gestisci i tuoi XP, monete avatar e progressi su SKAILA</p>
+        </div>
+
+        <div class="credits-grid">
+            <!-- Avatar Coins -->
+            <div class="credit-card">
+                <div class="credit-icon">🪙</div>
+                <div class="credit-value">{{ credits.avatar_coins }}</div>
+                <div class="credit-label">Avatar Coins</div>
+                <p style="color: var(--text-light); font-size: 0.9rem;">
+                    Usa per comprare avatar e temi personalizzati
+                </p>
+            </div>
+
+            <!-- Total XP -->
+            <div class="credit-card">
+                <div class="credit-icon">⚡</div>
+                <div class="credit-value">{{ credits.total_xp }}</div>
+                <div class="credit-label">Punti Esperienza Totali</div>
+                <p style="color: var(--text-light); font-size: 0.9rem;">
+                    {{ credits.level_title }}
+                </p>
+            </div>
+
+            <!-- Level Progress -->
+            <div class="credit-card">
+                <div class="credit-icon">📈</div>
+                <div class="credit-value">{{ credits.current_level }}</div>
+                <div class="credit-label">Livello Attuale</div>
+                {% if credits.xp_needed_next_level > 0 %}
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ credits.level_progress }}%"></div>
+                </div>
+                <p style="color: var(--text-light); font-size: 0.9rem;">
+                    {{ credits.xp_needed_next_level }} XP al prossimo livello
+                </p>
+                {% else %}
+                <p style="color: var(--success); font-size: 0.9rem; font-weight: 600;">
+                    🌟 Livello Massimo Raggiunto!
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i>
+                Statistiche Rapide
+            </h2>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ credits.xp_today }}</div>
+                    <div class="stat-text">XP Guadagnati Oggi</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ credits.xp_this_week }}</div>
+                    <div class="stat-text">XP Questa Settimana</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ credits.level_progress }}%</div>
+                    <div class="stat-text">Progresso Livello</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="activity-log">
+            <h2 class="section-title">
+                <i class="fas fa-history"></i>
+                Attività Recenti
+            </h2>
+            {% if credits.recent_activities %}
+                {% for activity in credits.recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        {% if 'message' in activity[0] %}
+                            <i class="fas fa-comment"></i>
+                        {% elif 'ai' in activity[0] %}
+                            <i class="fas fa-robot"></i>
+                        {% elif 'quiz' in activity[0] %}
+                            <i class="fas fa-brain"></i>
+                        {% elif 'login' in activity[0] %}
+                            <i class="fas fa-sign-in-alt"></i>
+                        {% else %}
+                            <i class="fas fa-star"></i>
+                        {% endif %}
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-description">
+                            {{ activity[2] or activity[0] }}
+                        </div>
+                        <div class="activity-timestamp">
+                            {{ activity[3] }}
+                        </div>
+                    </div>
+                    <div class="activity-xp">
+                        +{{ activity[1] }} XP
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+                    🌟 Inizia ad essere attivo su SKAILA per vedere le tue attività qui!
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Aggiorna i crediti ogni 30 secondi
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/crediti');
+                const data = await response.json();
+                
+                // Aggiorna i valori visualizzati
+                document.querySelectorAll('.credit-value').forEach((el, index) => {
+                    if (index === 0) el.textContent = data.avatar_coins;
+                    if (index === 1) el.textContent = data.total_xp;
+                    if (index === 2) el.textContent = data.current_level;
+                });
+            } catch (error) {
+                console.error('Errore aggiornamento crediti:', error);
+            }
+        }, 30000);
+
+        // Animazione contatori
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.credit-value, .stat-number');
+            counters.forEach(counter => {
+                const target = parseInt(counter.textContent);
+                const duration = 1000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        counter.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.textContent = Math.floor(current);
+                    }
+                }, 16);
+            });
+        });
+    </script>
+</body>
+</html>

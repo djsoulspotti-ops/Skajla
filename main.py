@@ -12,26 +12,21 @@ from flask_socketio import SocketIO
 
 # Import moduli personalizzati
 from database_manager import db_manager
-from performance_cache import (
-    user_cache, chat_cache, message_cache, ai_cache, gamification_cache,
-    cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
-    invalidate_user_cache, get_cache_health
-)
-from production_monitor import production_monitor, monitor_request
+from cache_manager import cache_manager
+from performance_monitor import perf_monitor
+from gamification import gamification_system
+from ai_chatbot import AISkailaBot
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.api_routes import api_bp
+from routes.credits_routes import credits_bp
 from routes.socket_routes import register_socket_events
 
 # Import services
 from services.auth_service import auth_service
 from services.user_service import user_service
-
-# Import AI and gamification systems
-from ai_chatbot import AISkailaBot
-from gamification import SKAILAGamification
 
 class SkailaApp:
     """Classe principale per l'applicazione SKAILA"""
@@ -47,15 +42,7 @@ class SkailaApp:
 
     def setup_app(self):
         """Configurazione base Flask"""
-        # CRITICO: Secret key deve essere fornita tramite variabile ambiente
-        secret_key = os.getenv('SECRET_KEY')
-        if not secret_key:
-            # Per testing/sviluppo, genera una chiave temporanea con warning
-            import secrets
-            secret_key = secrets.token_hex(32)
-            print("⚠️ SECURITY WARNING: SECRET_KEY non trovata, usando chiave temporanea!")
-            print("⚠️ PRODUZIONE: Imposta SECRET_KEY nelle variabili ambiente!")
-        self.app.config['SECRET_KEY'] = secret_key
+        self.app.config['SECRET_KEY'] = 'skaila_secret_key_super_secure_2024'
         self.app.config['UPLOAD_FOLDER'] = 'static/uploads'
         self.app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -83,52 +70,26 @@ class SkailaApp:
 
         # Route principali
         @self.app.route('/')
-        @monitor_request
         def index():
             if 'user_id' in session:
                 return redirect('/dashboard')
             return render_template('index.html')
-        
-        # Health check endpoint per monitoring
-        @self.app.route('/health')
-        def health_check():
-            return production_monitor.get_health_status()
 
         @self.app.route('/chat')
-        @monitor_request  # Monitoring produzione
         def chat():
             if 'user_id' not in session:
                 return redirect('/login')
 
-            # Ottimizzazione produzione: usa cache per chat frequenti
-            cache_key = f"user_chats_{session['user_id']}_{session['ruolo']}"
-            chats = chat_cache.get(cache_key)
-            
-            if chats is None:
-                with db_manager.get_connection() as conn:
-                    cursor = conn.cursor()
-                    if session['ruolo'] == 'admin':
-                        cursor.execute('SELECT * FROM chat ORDER BY nome')
-                        chats = cursor.fetchall()
-                    else:
-                        if db_manager.db_type == 'postgresql':
-                            cursor.execute('''
-                                SELECT c.* FROM chat c
-                                JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                                WHERE pc.utente_id = %s OR c.classe = %s
-                                ORDER BY c.nome
-                            ''', (session['user_id'], session.get('classe', '')))
-                        else:
-                            cursor.execute('''
-                                SELECT c.* FROM chat c
-                                JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                                WHERE pc.utente_id = ? OR c.classe = ?
-                                ORDER BY c.nome
-                            ''', (session['user_id'], session.get('classe', '')))
-                        chats = cursor.fetchall()
-                
-                # Cache per performance
-                chat_cache.set(cache_key, chats)
+            with db_manager.get_connection() as conn:
+                if session['ruolo'] == 'admin':
+                    chats = conn.execute('SELECT * FROM chat ORDER BY nome').fetchall()
+                else:
+                    chats = conn.execute('''
+                        SELECT c.* FROM chat c
+                        JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                        WHERE pc.utente_id = ? OR c.classe = ?
+                        ORDER BY c.nome
+                    ''', (session['user_id'], session.get('classe', ''))).fetchall()
 
                 utenti_online = user_service.get_online_users(session['user_id'])
 
@@ -157,6 +118,7 @@ class SkailaApp:
         self.app.register_blueprint(auth_bp)
         self.app.register_blueprint(dashboard_bp)
         self.app.register_blueprint(api_bp)
+        self.app.register_blueprint(credits_bp)
 
     def setup_socketio(self):
         """Configurazione Socket.IO"""
@@ -179,21 +141,10 @@ class SkailaApp:
     def init_systems(self):
         """Inizializza sistemi ausiliari"""
         # Inizializza AI Bot
-        try:
-            self.ai_bot = AISkailaBot()
-            print("✅ AI Bot inizializzato")
-        except Exception as e:
-            print(f"⚠️ Errore inizializzazione AI Bot: {e}")
-            self.ai_bot = None
+        self.ai_bot = AISkailaBot()
 
         # Inizializza gamification
-        try:
-            self.gamification_system = SKAILAGamification()
-            self.gamification_system.init_gamification_tables()
-            print("✅ Sistema gamification inizializzato")
-        except Exception as e:
-            print(f"⚠️ Errore inizializzazione gamification: {e}")
-            self.gamification_system = None
+        gamification_system.init_gamification_tables()
 
         # Crea indici database ottimizzati
         db_manager.create_optimized_indexes()
@@ -210,7 +161,7 @@ class SkailaApp:
                     cursor = conn.cursor()
                     cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'utenti'")
                     table_exists = cursor.fetchone()[0] > 0
-                    
+
                     if not table_exists:
                         print("🔧 Creazione schema PostgreSQL...")
                         self.create_database_schema()
@@ -234,7 +185,7 @@ class SkailaApp:
         """Crea schema database"""
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Tabella utenti - compatibile PostgreSQL/SQLite
             if db_manager.db_type == 'postgresql':
                 cursor.execute('''
@@ -290,7 +241,7 @@ class SkailaApp:
                         FOREIGN KEY (creatore_id) REFERENCES utenti (id)
                     )
                 ''')
-                
+
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS messaggi (
                         id SERIAL PRIMARY KEY,
@@ -493,16 +444,14 @@ class SkailaApp:
         print(f"🚀 SKAILA Server starting on port {port}")
         print(f"🌐 URL: http://{host}:{port}")
         print(f"📊 Database: {db_manager.db_type}")
-        print(f"🤖 AI Bot: {'✅ Attivo' if self.ai_bot and self.ai_bot.openai_available else '⚠️ Mock mode'}")
+        print(f"🤖 AI Bot: {'✅ Attivo' if self.ai_bot.openai_available else '⚠️ Mock mode'}")
 
         self.socketio.run(
             self.app, 
             host=host, 
             port=port, 
             debug=debug, 
-            allow_unsafe_werkzeug=True,
-            use_reloader=False,
-            log_output=True
+            allow_unsafe_werkzeug=True
         )
 
 # Inizializzazione e avvio applicazione
