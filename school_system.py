@@ -27,6 +27,7 @@ class SchoolSystem:
                         codice_pubblico TEXT UNIQUE NOT NULL,
                         dominio_email TEXT,
                         codice_invito_docenti TEXT UNIQUE,
+                        codice_dirigente TEXT UNIQUE,
                         attiva BOOLEAN DEFAULT true,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
@@ -39,6 +40,7 @@ class SchoolSystem:
                         codice_pubblico TEXT UNIQUE NOT NULL,
                         dominio_email TEXT,
                         codice_invito_docenti TEXT UNIQUE,
+                        codice_dirigente TEXT UNIQUE,
                         attiva BOOLEAN DEFAULT 1,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
@@ -161,15 +163,15 @@ class SchoolSystem:
                 # Crea scuola predefinita
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('''
-                        INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti)
-                        VALUES (%s, %s, %s) RETURNING id
-                    ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code()))
+                        INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, codice_dirigente)
+                        VALUES (%s, %s, %s, %s) RETURNING id
+                    ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code(), 'DIR2024'))
                     default_school_id = cursor.fetchone()[0]
                 else:
                     cursor.execute('''
-                        INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti)
-                        VALUES (?, ?, ?)
-                    ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code()))
+                        INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, codice_dirigente)
+                        VALUES (?, ?, ?, ?)
+                    ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code(), 'DIR2024'))
                     default_school_id = cursor.lastrowid
                 
                 # Migra utenti esistenti alla scuola predefinita

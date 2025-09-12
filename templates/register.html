@@ -537,18 +537,34 @@
                 <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">💡 Se la classe non esiste, verrà creata automaticamente</small>
             </div>
 
-            <!-- Campo Codice Docente (opzionale) -->
-            <div class="form-group full-width">
-                <label for="codice_docente">🔑 Codice Docente (opzionale)</label>
-                <div class="input-wrapper">
-                    <i class="input-icon fas fa-key"></i>
-                    <input type="text" id="codice_docente" name="codice_docente" 
-                           placeholder="Solo se sei un professore - lascia vuoto se sei studente" 
-                           pattern="[A-Z0-9]{6,12}" 
-                           title="Il codice deve essere di 6-12 caratteri maiuscoli/numeri">
+            <!-- Codici Accesso -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="codice_docente">👨‍🏫 Codice Professore</label>
+                    <div class="input-wrapper">
+                        <i class="input-icon fas fa-chalkboard-teacher"></i>
+                        <input type="text" id="codice_docente" name="codice_docente" 
+                               placeholder="Se sei professore" 
+                               pattern="[A-Z0-9]{6,12}" 
+                               title="Codice fornito dalla scuola">
+                    </div>
                 </div>
-                <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">🎓 <strong>Studenti:</strong> lasciate vuoto | <strong>Professori:</strong> inserite il codice della scuola</small>
+
+                <div class="form-group">
+                    <label for="codice_dirigente">🏆 Codice Dirigente</label>
+                    <div class="input-wrapper">
+                        <i class="input-icon fas fa-crown"></i>
+                        <input type="text" id="codice_dirigente" name="codice_dirigente" 
+                               placeholder="Se sei dirigente scolastico" 
+                               pattern="[A-Z0-9]{6,12}" 
+                               title="Codice dirigente della scuola">
+                    </div>
+                </div>
             </div>
+            
+            <small style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; display: block; text-align: center;">
+                💡 <strong>Studenti:</strong> lasciate entrambi vuoti | <strong>Staff:</strong> utilizzate il codice appropriato
+            </small>
 
             <button type="submit" class="btn">
                 <i class="fas fa-rocket"></i> Inizia l'Avventura

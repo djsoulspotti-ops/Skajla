@@ -79,9 +79,28 @@ def register():
             # Security: Ruolo assegnato in base al tipo registrazione
             ruolo = 'studente'  # Default studente
             codice_docente = request.form.get('codice_docente', '').strip()
+            codice_dirigente = request.form.get('codice_dirigente', '').strip()
             
-            # Verifica se è un docente (codice invito valido)
-            if codice_docente:
+            # Verifica se è un dirigente (priorità massima)
+            if codice_dirigente:
+                # Verifica codice dirigente valido per la scuola
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute('SELECT id FROM scuole WHERE id = %s AND codice_dirigente = %s', 
+                                     (scuola_id, codice_dirigente))
+                    else:
+                        cursor.execute('SELECT id FROM scuole WHERE id = ? AND codice_dirigente = ?', 
+                                     (scuola_id, codice_dirigente))
+                    
+                    if cursor.fetchone():
+                        ruolo = 'dirigente'
+                    else:
+                        flash('Codice dirigente non valido per questa scuola', 'error')
+                        return render_template('register.html', scuole=school_system.get_user_schools())
+            
+            # Verifica se è un docente (solo se non è già dirigente)
+            elif codice_docente:
                 # Verifica codice docente valido per la scuola
                 with db_manager.get_connection() as conn:
                     cursor = conn.cursor()
