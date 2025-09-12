@@ -32,6 +32,8 @@ def login():
             session['ruolo'] = user['ruolo']
             session['classe'] = user.get('classe', '')
             session['avatar'] = user.get('avatar', 'default.jpg')
+            session['scuola_id'] = user.get('scuola_id')
+            session['classe_id'] = user.get('classe_id')
             session.permanent = True
             
             # Aggiorna gamification

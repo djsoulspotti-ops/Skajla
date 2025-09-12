@@ -66,14 +66,14 @@ class AuthService:
             if db_manager.db_type == 'postgresql':
                 cursor.execute('''
                     SELECT id, username, email, password_hash, nome, cognome, 
-                           classe, ruolo, attivo, avatar
+                           classe, ruolo, attivo, avatar, scuola_id, classe_id
                     FROM utenti 
                     WHERE email = %s AND attivo = true
                 ''', (email,))
             else:
                 cursor.execute('''
                     SELECT id, username, email, password_hash, nome, cognome, 
-                           classe, ruolo, attivo, avatar
+                           classe, ruolo, attivo, avatar, scuola_id, classe_id
                     FROM utenti 
                     WHERE email = ? AND attivo = 1
                 ''', (email,))
@@ -106,7 +106,9 @@ class AuthService:
                     'cognome': user[5],
                     'classe': user[6],
                     'ruolo': user[7],
-                    'avatar': user[9] or 'default.jpg'
+                    'avatar': user[9] or 'default.jpg',
+                    'scuola_id': user[10],
+                    'classe_id': user[11]
                 }
             else:
                 self.record_failed_attempt(email)
@@ -114,7 +116,7 @@ class AuthService:
 
     def create_user(self, username: str, email: str, password: str, 
                    nome: str, cognome: str, ruolo: str, classe: str = '', 
-                   scuola_id: int = None, classe_id: int = None) -> dict:
+                   scuola_id: int | None = None, classe_id: int | None = None) -> dict:
         """Crea nuovo utente"""
         try:
             with db_manager.get_connection() as conn:
