@@ -537,43 +537,17 @@
                 <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">💡 Se la classe non esiste, verrà creata automaticamente</small>
             </div>
 
-            <!-- Sezione Professori -->
-            <div id="teacher-section" style="display: none;">
-                <div class="form-group full-width">
-                    <label for="codice_docente">🔑 Codice Docente</label>
-                    <div class="input-wrapper">
-                        <i class="input-icon fas fa-key"></i>
-                        <input type="text" id="codice_docente" name="codice_docente" 
-                               placeholder="Inserisci il codice fornito dalla scuola" 
-                               pattern="[A-Z0-9]{6,12}" 
-                               title="Il codice deve essere di 6-12 caratteri maiuscoli/numeri">
-                    </div>
-                    <small style="color: var(--cyber-green); font-size: 0.85rem; margin-top: 0.5rem; display: block;">🎓 Chiedi il codice docente alla segreteria della tua scuola</small>
-                </div>
-            </div>
-
-            <!-- Selezione Ruolo Semplificata -->
+            <!-- Campo Codice Docente (opzionale) -->
             <div class="form-group full-width">
-                <label>🎯 Sono un:</label>
-                <div class="role-grid">
-                    <div class="role-option">
-                        <input type="radio" id="studente" name="tipo_utente" value="studente" required>
-                        <label for="studente" class="role-label">
-                            <div class="role-icon">🎓</div>
-                            <div class="role-name">Studente</div>
-                            <div class="role-desc">Imparo e cresco</div>
-                        </label>
-                    </div>
-
-                    <div class="role-option">
-                        <input type="radio" id="professore" name="tipo_utente" value="professore" required>
-                        <label for="professore" class="role-label">
-                            <div class="role-icon">👨‍🏫</div>
-                            <div class="role-name">Professore</div>
-                            <div class="role-desc">Insegno e guido</div>
-                        </label>
-                    </div>
+                <label for="codice_docente">🔑 Codice Docente (opzionale)</label>
+                <div class="input-wrapper">
+                    <i class="input-icon fas fa-key"></i>
+                    <input type="text" id="codice_docente" name="codice_docente" 
+                           placeholder="Solo se sei un professore - lascia vuoto se sei studente" 
+                           pattern="[A-Z0-9]{6,12}" 
+                           title="Il codice deve essere di 6-12 caratteri maiuscoli/numeri">
                 </div>
+                <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">🎓 <strong>Studenti:</strong> lasciate vuoto | <strong>Professori:</strong> inserite il codice della scuola</small>
             </div>
 
             <button type="submit" class="btn">
@@ -636,40 +610,11 @@
             });
         });
 
-        // Role selection effects
-        document.querySelectorAll('input[name="tipo_utente"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.role-label').forEach(label => {
-                    label.style.transform = 'scale(1)';
-                });
-                
-                if (this.checked) {
-                    this.nextElementSibling.style.transform = 'scale(1.05)';
-                }
-
-                // Mostra/nascondi sezione codice docente
-                const teacherSection = document.getElementById('teacher-section');
-                const codiceDocenteInput = document.getElementById('codice_docente');
-                
-                if (this.value === 'professore') {
-                    teacherSection.style.display = 'block';
-                    teacherSection.style.animation = 'slideInScale 0.5s ease-out';
-                    codiceDocenteInput.required = true;
-                } else {
-                    teacherSection.style.display = 'none';
-                    codiceDocenteInput.required = false;
-                    codiceDocenteInput.value = '';
-                }
-            });
-        });
-
-        // Form validation aggiornata
+        // Form validation semplificata
         document.querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
-            const tipoUtente = document.querySelector('input[name="tipo_utente"]:checked')?.value;
             const scuolaId = document.getElementById('scuola_id').value;
-            const codiceDocente = document.getElementById('codice_docente').value;
             
             // Validazione password
             if (password !== confirmPassword) {
@@ -688,13 +633,6 @@
             if (!scuolaId) {
                 e.preventDefault();
                 alert('🏫 Seleziona una scuola!');
-                return;
-            }
-
-            // Validazione codice docente per professori
-            if (tipoUtente === 'professore' && !codiceDocente) {
-                e.preventDefault();
-                alert('🔑 I professori devono inserire il codice docente!');
                 return;
             }
             
