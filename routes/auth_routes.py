@@ -5,6 +5,7 @@ Gestisce login, logout, registrazione e sessioni
 """
 
 from flask import Blueprint, render_template, request, redirect, session, flash
+from csrf_protection import csrf_protect
 
 from services.auth_service import auth_service
 from gamification import gamification_system  
@@ -14,6 +15,7 @@ from database_manager import db_manager
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@csrf_protect
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -47,6 +49,7 @@ def login():
     return render_template('login.html')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@csrf_protect
 def register():
     if request.method == 'POST':
         try:
@@ -80,9 +83,30 @@ def register():
             ruolo = 'studente'  # Default studente
             codice_docente = request.form.get('codice_docente', '').strip()
             codice_dirigente = request.form.get('codice_dirigente', '').strip()
+            personal_code = request.form.get('personal_code', '').strip()
+            personal_code_id = None
             
-            # Verifica se è un dirigente (priorità massima)
-            if codice_dirigente:
+            # PRIORITÀ 1: Verifica codice personale (nuovo sistema automatico)
+            if personal_code:
+                validation = school_system.verify_personal_code(personal_code)
+                if not validation['success']:
+                    flash(validation['message'], 'error')
+                    return render_template('register.html', scuole=school_system.get_user_schools())
+                
+                # Email deve corrispondere al codice personale
+                if email != validation['email']:
+                    flash('Email non corrisponde al codice personale', 'error')
+                    return render_template('register.html', scuole=school_system.get_user_schools())
+                
+                # Imposta ruolo e scuola dal codice personale
+                ruolo = validation['role']
+                scuola_id = validation['school_id']
+                personal_code_id = validation['code_id']
+                
+                flash(f'Codice personale validato! Registrazione come {ruolo} per {validation["school_name"]}', 'success')
+            
+            # PRIORITÀ 2: Verifica se è un dirigente (solo se non ha codice personale)
+            elif codice_dirigente and not personal_code:
                 # Verifica codice dirigente valido per la scuola
                 with db_manager.get_connection() as conn:
                     cursor = conn.cursor()
@@ -99,8 +123,8 @@ def register():
                         flash('Codice dirigente non valido per questa scuola', 'error')
                         return render_template('register.html', scuole=school_system.get_user_schools())
             
-            # Verifica se è un docente (solo se non è già dirigente)
-            elif codice_docente:
+            # PRIORITÀ 3: Verifica se è un docente (solo se non è già dirigente o personal code)
+            elif codice_docente and not personal_code:
                 # Verifica codice docente valido per la scuola
                 with db_manager.get_connection() as conn:
                     cursor = conn.cursor()
@@ -135,11 +159,16 @@ def register():
                                             classe_nome, scuola_id, classe_id)
             
             if result['success']:
+                # IMPORTANTE: Marca codice personale come usato se utilizzato
+                if personal_code_id is not None:
+                    school_system.mark_personal_code_used(personal_code_id, result['user_id'])
+                    flash(f'Registrazione completata! Codice personale {personal_code} consumato.', 'success')
+                else:
+                    flash('Registrazione completata! Effettua il login.', 'success')
+                
                 # Se è un professore, associalo alla classe
                 if ruolo == 'professore' and classe_id and 'user_id' in result:
                     school_system.assign_teacher_to_class(result['user_id'], classe_id)
-                
-                flash('Registrazione completata! Effettua il login.', 'success')
                 return redirect('/login')
             else:
                 flash(result['message'], 'error')

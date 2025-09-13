@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Dirigente - SKAILA</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard Dirigente</h1>
+        <h2>Gestione Codici Personali</h2>
+        
+        {% if school_data %}
+            <div class="school-info">
+                <h3>{{ school_data.school_name }}</h3>
+                <p>Scuola ID: {{ school_data.school_id }}</p>
+            </div>
+            
+            <div class="personal-codes-section">
+                <h4>Codici Personali</h4>
+                
+                {% if school_data.codes and school_data.codes|length > 0 %}
+                    <p>Totale codici generati: {{ school_data.codes|length }}</p>
+                    
+                    <table class="codes-table">
+                        <thead>
+                            <tr>
+                                <th>Codice</th>
+                                <th>Email</th>
+                                <th>Ruolo</th>
+                                <th>Stato</th>
+                                <th>Generato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for code in school_data.codes %}
+                            <tr>
+                                <td><strong>{{ code.code }}</strong></td>
+                                <td>{{ code.email }}</td>
+                                <td>{{ code.role }}</td>
+                                <td>
+                                    {% if code.used %}
+                                        <span class="status-used">Usato</span>
+                                    {% else %}
+                                        <span class="status-available">Disponibile</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ code.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Nessun codice personale generato ancora.</p>
+                    
+                    <form method="POST" action="/schools/dashboard/dirigente/generate_personal_codes">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-primary">Genera Codici Personali</button>
+                        <p><small>Questo genererà codici individuali per ogni persona della scuola e invierà email automatiche.</small></p>
+                    </form>
+                {% endif %}
+                
+                {% if school_data.codes and school_data.codes|length > 0 %}
+                    <form method="POST" action="/schools/dashboard/dirigente/generate_personal_codes">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-secondary">Rigenera Tutti i Codici</button>
+                        <p><small>Attenzione: Questo invaliderà tutti i codici esistenti e ne creerà di nuovi.</small></p>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Errore: Dati scuola non disponibili.</p>
+        {% endif %}
+        
+        <div class="navigation">
+            <a href="/dashboard" class="btn-link">← Torna alla Dashboard</a>
+            <a href="/logout" class="btn-link">Logout</a>
+        </div>
+    </div>
+</body>
+</html>

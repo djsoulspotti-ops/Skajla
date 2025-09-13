@@ -133,6 +133,10 @@ class SkailaApp:
         self.app.register_blueprint(api_bp)
         self.app.register_blueprint(school_bp)
         self.app.register_blueprint(credits_bp)
+        
+        # Aggiungi CSRF protection context processor
+        from csrf_protection import inject_csrf_token
+        self.app.context_processor(inject_csrf_token)
 
     def setup_socketio(self):
         """Configurazione Socket.IO"""

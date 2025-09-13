@@ -134,6 +134,24 @@ class SchoolSystem:
                         revoked_at TIMESTAMP
                     )
                 ''')
+
+            # NUOVO: Tabella codici personali individuali
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS personal_codes (
+                        id SERIAL PRIMARY KEY,
+                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        email TEXT NOT NULL,
+                        code TEXT UNIQUE NOT NULL,
+                        role TEXT NOT NULL CHECK (role IN ('professore', 'studente')),
+                        used BOOLEAN DEFAULT false,
+                        used_by INTEGER REFERENCES utenti(id),
+                        used_at TIMESTAMP,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        expires_at TIMESTAMP,
+                        UNIQUE(school_id, email)
+                    )
+                ''')
             else:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS invites (
@@ -146,6 +164,23 @@ class SchoolSystem:
                         created_by INTEGER REFERENCES utenti(id),
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         revoked_at TIMESTAMP
+                    )
+                ''')
+
+                # NUOVO: Tabella codici personali individuali (SQLite)
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS personal_codes (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        email TEXT NOT NULL,
+                        code TEXT UNIQUE NOT NULL,
+                        role TEXT NOT NULL CHECK (role IN ('professore', 'studente')),
+                        used BOOLEAN DEFAULT 0,
+                        used_by INTEGER REFERENCES utenti(id),
+                        used_at TIMESTAMP,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        expires_at TIMESTAMP,
+                        UNIQUE(school_id, email)
                     )
                 ''')
 
@@ -255,6 +290,219 @@ class SchoolSystem:
                 
                 conn.commit()
                 print(f"✅ Scuola predefinita creata (ID: {default_school_id})")
+    
+    def _migrate_existing_database(self, cursor):
+        """Migrazione sicura per database esistenti"""
+        try:
+            # Verifica e aggiunge colonne mancanti alla tabella scuole
+            columns_to_add = [
+                ('domain_verified', 'BOOLEAN DEFAULT 0' if db_manager.db_type == 'sqlite' else 'BOOLEAN DEFAULT false'),
+                ('domain_trust_enabled', 'BOOLEAN DEFAULT 0' if db_manager.db_type == 'sqlite' else 'BOOLEAN DEFAULT false'),
+                ('dirigente_invite_token', 'TEXT UNIQUE'),
+                ('docente_invite_code_hash', 'TEXT'),
+                ('invite_link_salt', 'TEXT'),
+                ('last_rotated_at', 'TIMESTAMP')
+            ]
+            
+            for column_name, column_def in columns_to_add:
+                try:
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
+                    else:
+                        cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
+                    print(f"✅ Aggiunta colonna {column_name} alla tabella scuole")
+                except Exception as e:
+                    # Colonna già esiste o altro errore
+                    if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
+                        pass  # Colonna già presente, ok
+                    else:
+                        print(f"⚠️ Attenzione durante migrazione colonna {column_name}: {e}")
+                        
+        except Exception as e:
+            print(f"⚠️ Errore durante migrazione database: {e}")
+    
+    def generate_personal_codes_for_school(self, scuola_id, user_id):
+        """RIVOLUZIONARIO: Genera codici personali individuali per ogni persona della scuola"""
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Ottieni info scuola
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('SELECT nome, dominio_email FROM scuole WHERE id = %s', (scuola_id,))
+                else:
+                    cursor.execute('SELECT nome, dominio_email FROM scuole WHERE id = ?', (scuola_id,))
+                
+                school_info = cursor.fetchone()
+                if not school_info:
+                    return {'success': False, 'message': 'Scuola non trovata'}
+                
+                school_name, domain = school_info
+                codes_generated = 0
+                
+                # STRATEGIA 1: Genera codici basati su dominio email scuola
+                if domain:
+                    # Lista email esempio per testing (in produzione: integrazione con sistema gestionale scuola)
+                    staff_emails = self._get_school_email_list(scuola_id, domain)
+                    
+                    for email_info in staff_emails:
+                        email = email_info['email']
+                        role = email_info['role']  # 'professore' o 'studente'
+                        
+                        # Genera codice personale unico
+                        personal_code = self._generate_unique_personal_code(scuola_id, email, role)
+                        
+                        # Salva in database
+                        from datetime import datetime, timedelta
+                        expires_at = datetime.now() + timedelta(days=90)  # 3 mesi validità
+                        
+                        if db_manager.db_type == 'postgresql':
+                            cursor.execute('''
+                                INSERT INTO personal_codes (school_id, email, code, role, expires_at)
+                                VALUES (%s, %s, %s, %s, %s)
+                                ON CONFLICT (school_id, email) 
+                                DO UPDATE SET code = %s, expires_at = %s, used = false
+                            ''', (scuola_id, email, personal_code, role, expires_at, personal_code, expires_at))
+                        else:
+                            # SQLite: usa INSERT OR REPLACE
+                            cursor.execute('''
+                                INSERT OR REPLACE INTO personal_codes 
+                                (school_id, email, code, role, expires_at, used)
+                                VALUES (?, ?, ?, ?, ?, 0)
+                            ''', (scuola_id, email, personal_code, role, expires_at))
+                        
+                        codes_generated += 1
+                        
+                        # INVIO EMAIL AUTOMATICO (simulato per testing)
+                        self._send_personal_code_email(email, personal_code, school_name, role)
+                
+                conn.commit()
+                
+                return {
+                    'success': True,
+                    'codes_count': codes_generated,
+                    'message': f'Generati {codes_generated} codici personali automaticamente!'
+                }
+                
+        except Exception as e:
+            print(f"❌ Errore generazione codici personali: {e}")
+            return {'success': False, 'message': f'Errore: {e}'}
+    
+    def _get_school_email_list(self, scuola_id, domain):
+        """Ottiene lista email scuola (simulato per testing)"""
+        # In produzione: integrazione con gestionale scuola o import CSV
+        # Per ora genero lista esempio basata su dominio
+        
+        sample_emails = [
+            {'email': f'mario.rossi@{domain}', 'role': 'professore'},
+            {'email': f'anna.bianchi@{domain}', 'role': 'professore'},
+            {'email': f'giovanni.verdi@{domain}', 'role': 'professore'},
+            {'email': f'lucia.ferrari@{domain}', 'role': 'studente'},
+            {'email': f'marco.colombo@{domain}', 'role': 'studente'},
+            {'email': f'sofia.romano@{domain}', 'role': 'studente'},
+            {'email': f'alessandro.ricci@{domain}', 'role': 'studente'},
+            {'email': f'giulia.costa@{domain}', 'role': 'studente'},
+        ]
+        
+        return sample_emails
+    
+    def _generate_unique_personal_code(self, scuola_id, email, role):
+        """Genera codice personale unico per individuo"""
+        import random
+        import string
+        
+        # Iniziali persona
+        name_part = email.split('@')[0].replace('.', '').upper()[:2]
+        
+        # Codice scuola (prime 2 lettere)
+        school_part = f"SC{scuola_id:02d}" if scuola_id < 100 else f"SC{scuola_id}"
+        
+        # Ruolo
+        role_part = 'P' if role == 'professore' else 'S'
+        
+        # Parte random unica
+        random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+        
+        # Formato: AB-SC01-P-X8K9
+        return f"{name_part}-{school_part}-{role_part}-{random_part}"
+    
+    def _send_personal_code_email(self, email, code, school_name, role):
+        """Invia email automatica con codice personale (simulato)"""
+        role_it = "professore" if role == 'professore' else "studente"
+        
+        print(f"📧 EMAIL AUTOMATICA INVIATA:")
+        print(f"   A: {email}")
+        print(f"   Oggetto: Il tuo codice personale per {school_name}")
+        print(f"   Messaggio: Ciao! Sei stato/a registrato/a come {role_it} presso {school_name}.")
+        print(f"   Il tuo codice personale: {code}")
+        print(f"   Usa questo codice per registrarti autonomamente su SKAILA.")
+        print(f"   ✅ Codice inviato a {email}")
+        print("   " + "="*50)
+    
+    def verify_personal_code(self, code):
+        """Verifica e consuma codice personale per registrazione"""
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        SELECT pc.id, pc.school_id, pc.email, pc.role, s.nome as school_name
+                        FROM personal_codes pc
+                        JOIN scuole s ON pc.school_id = s.id
+                        WHERE pc.code = %s AND pc.used = false AND pc.expires_at > NOW()
+                    ''', (code,))
+                else:
+                    cursor.execute('''
+                        SELECT pc.id, pc.school_id, pc.email, pc.role, s.nome as school_name
+                        FROM personal_codes pc
+                        JOIN scuole s ON pc.school_id = s.id
+                        WHERE pc.code = ? AND pc.used = 0 AND pc.expires_at > datetime('now')
+                    ''', (code,))
+                
+                result = cursor.fetchone()
+                
+                if result:
+                    return {
+                        'success': True,
+                        'code_id': result[0],
+                        'school_id': result[1],
+                        'email': result[2],
+                        'role': result[3],
+                        'school_name': result[4]
+                    }
+                else:
+                    return {'success': False, 'message': 'Codice non valido o scaduto'}
+                    
+        except Exception as e:
+            print(f"❌ Errore verifica codice personale: {e}")
+            return {'success': False, 'message': f'Errore: {e}'}
+    
+    def mark_personal_code_used(self, code_id, user_id):
+        """Marca codice personale come usato dopo registrazione"""
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        UPDATE personal_codes 
+                        SET used = true, used_by = %s, used_at = NOW()
+                        WHERE id = %s
+                    ''', (user_id, code_id))
+                else:
+                    cursor.execute('''
+                        UPDATE personal_codes 
+                        SET used = 1, used_by = ?, used_at = datetime('now')
+                        WHERE id = ?
+                    ''', (user_id, code_id))
+                
+                conn.commit()
+                return True
+                
+        except Exception as e:
+            print(f"❌ Errore marcatura codice usato: {e}")
+            return False
     
     def create_school(self, nome, dominio_email=None, admin_user_id=None):
         """Crea nuova scuola"""

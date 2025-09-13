@@ -39,6 +39,7 @@
             {% endwith %}
 
             <form method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <!-- Informazioni Scuola -->
                 <div class="form-section">
                     <h3>📋 Informazioni Scuola</h3>
