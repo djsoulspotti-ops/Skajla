@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Registrazione Scuola - SKAILA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🏫 Registra la tua Scuola</h1>
+                <p>Sistema automatico per l'attivazione di scuole su SKAILA</p>
+            </div>
+
+            <!-- Messagi Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash flash-{{ category }}">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif category == 'error' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% elif category == 'info' %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" class="auth-form">
+                <!-- Informazioni Scuola -->
+                <div class="form-section">
+                    <h3>📋 Informazioni Scuola</h3>
+                    
+                    <div class="form-group">
+                        <label for="nome_scuola">🏫 Nome Scuola</label>
+                        <div class="input-wrapper">
+                            <i class="input-icon fas fa-university"></i>
+                            <input type="text" id="nome_scuola" name="nome_scuola" 
+                                   placeholder="Es: Liceo Scientifico Giuseppe Verdi"
+                                   required maxlength="100">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dominio_email">🌐 Dominio Email Istituzionale</label>
+                        <div class="input-wrapper">
+                            <i class="input-icon fas fa-globe"></i>
+                            <input type="text" id="dominio_email" name="dominio_email" 
+                                   placeholder="es: liceoVerdi.edu.it"
+                                   required pattern="[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}">
+                        </div>
+                        <small>Solo il dominio (senza @). Es: liceoVerdi.edu.it</small>
+                    </div>
+                </div>
+
+                <!-- Informazioni Dirigente -->
+                <div class="form-section">
+                    <h3>👑 Dirigente Scolastico</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="dirigente_nome">👤 Nome</label>
+                            <div class="input-wrapper">
+                                <i class="input-icon fas fa-user"></i>
+                                <input type="text" id="dirigente_nome" name="dirigente_nome" 
+                                       placeholder="Nome" required maxlength="50">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dirigente_cognome">👤 Cognome</label>
+                            <div class="input-wrapper">
+                                <i class="input-icon fas fa-user"></i>
+                                <input type="text" id="dirigente_cognome" name="dirigente_cognome" 
+                                       placeholder="Cognome" required maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dirigente_email">📧 Email Dirigente</label>
+                        <div class="input-wrapper">
+                            <i class="input-icon fas fa-envelope"></i>
+                            <input type="email" id="dirigente_email" name="dirigente_email" 
+                                   placeholder="dirigente@liceoVerdi.edu.it"
+                                   required>
+                        </div>
+                        <small>Deve essere del dominio della scuola</small>
+                    </div>
+                </div>
+
+                <!-- Processo Automatico -->
+                <div class="form-info">
+                    <h4>⚡ Processo Automatico</h4>
+                    <div class="process-steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Registrazione immediata</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Email di verifica al dirigente</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Attivazione automatica scuola</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Codici generati automaticamente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    🚀 Registra Scuola
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Hai già una scuola registrata? <a href="/login">Accedi qui</a></p>
+                <p>Sei uno studente o professore? <a href="/register">Registrati qui</a></p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-section h3 {
+            margin: 0 0 1rem 0;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .form-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-info h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .process-steps {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .step-number {
+            background: rgba(255,255,255,0.2);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

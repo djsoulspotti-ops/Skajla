@@ -26,6 +26,7 @@ from ai_chatbot import AISkailaBot
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.api_routes import api_bp
+from routes.school_routes import school_bp
 from routes.credits_routes import credits_bp
 from routes.socket_routes import register_socket_events
 
@@ -130,6 +131,7 @@ class SkailaApp:
         self.app.register_blueprint(auth_bp)
         self.app.register_blueprint(dashboard_bp)
         self.app.register_blueprint(api_bp)
+        self.app.register_blueprint(school_bp)
         self.app.register_blueprint(credits_bp)
 
     def setup_socketio(self):

@@ -18,6 +18,9 @@ class SchoolSystem:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
             
+            # CRITICO: Migrazione per colonne mancanti su DB esistenti
+            self._migrate_existing_database(cursor)
+            
             # Tabella scuole
             if db_manager.db_type == 'postgresql':
                 cursor.execute('''
@@ -26,8 +29,14 @@ class SchoolSystem:
                         nome TEXT NOT NULL,
                         codice_pubblico TEXT UNIQUE NOT NULL,
                         dominio_email TEXT,
+                        domain_verified BOOLEAN DEFAULT false,
+                        domain_trust_enabled BOOLEAN DEFAULT false,
                         codice_invito_docenti TEXT UNIQUE,
                         codice_dirigente TEXT UNIQUE,
+                        dirigente_invite_token TEXT UNIQUE,
+                        docente_invite_code_hash TEXT,
+                        invite_link_salt TEXT,
+                        last_rotated_at TIMESTAMP,
                         attiva BOOLEAN DEFAULT true,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
@@ -39,8 +48,14 @@ class SchoolSystem:
                         nome TEXT NOT NULL,
                         codice_pubblico TEXT UNIQUE NOT NULL,
                         dominio_email TEXT,
+                        domain_verified BOOLEAN DEFAULT 0,
+                        domain_trust_enabled BOOLEAN DEFAULT 0,
                         codice_invito_docenti TEXT UNIQUE,
                         codice_dirigente TEXT UNIQUE,
+                        dirigente_invite_token TEXT UNIQUE,
+                        docente_invite_code_hash TEXT,
+                        invite_link_salt TEXT,
+                        last_rotated_at TIMESTAMP,
                         attiva BOOLEAN DEFAULT 1,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
@@ -76,6 +91,64 @@ class SchoolSystem:
                     )
                 ''')
             
+            # Tabella verifica email per auto-registrazione
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS email_verifications (
+                        id SERIAL PRIMARY KEY,
+                        email TEXT NOT NULL,
+                        purpose TEXT NOT NULL,
+                        token TEXT UNIQUE NOT NULL,
+                        expires_at TIMESTAMP NOT NULL,
+                        consumed_at TIMESTAMP,
+                        metadata JSONB,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+            else:
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS email_verifications (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        email TEXT NOT NULL,
+                        purpose TEXT NOT NULL,
+                        token TEXT UNIQUE NOT NULL,
+                        expires_at TIMESTAMP NOT NULL,
+                        consumed_at TIMESTAMP,
+                        metadata TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+
+            # Tabella inviti automatici 
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS invites (
+                        id SERIAL PRIMARY KEY,
+                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        role TEXT NOT NULL CHECK (role IN ('dirigente', 'professore', 'studente')),
+                        token TEXT UNIQUE NOT NULL,
+                        expires_at TIMESTAMP,
+                        uses_remaining INTEGER,
+                        created_by INTEGER REFERENCES utenti(id),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        revoked_at TIMESTAMP
+                    )
+                ''')
+            else:
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS invites (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        role TEXT NOT NULL CHECK (role IN ('dirigente', 'professore', 'studente')),
+                        token TEXT UNIQUE NOT NULL,
+                        expires_at TIMESTAMP,
+                        uses_remaining INTEGER,
+                        created_by INTEGER REFERENCES utenti(id),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        revoked_at TIMESTAMP
+                    )
+                ''')
+
             # Tabella associazione docenti-classi
             if db_manager.db_type == 'postgresql':
                 cursor.execute('''
@@ -361,6 +434,198 @@ class SchoolSystem:
     def generate_invite_code(self):
         """Genera codice invito sicuro"""
         return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+    def generate_secure_token(self, length=32):
+        """Genera token sicuro per inviti e verifiche"""
+        return secrets.token_urlsafe(length)
+    
+    def register_school_auto(self, nome, dominio_email, dirigente_email, dirigente_nome, dirigente_cognome):
+        """Auto-registrazione scuola con verifica email dirigente"""
+        import hashlib
+        from datetime import datetime, timedelta
+        
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Verifica se scuola già esiste
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('SELECT id FROM scuole WHERE dominio_email = %s OR nome = %s', 
+                                 (dominio_email, nome))
+                else:
+                    cursor.execute('SELECT id FROM scuole WHERE dominio_email = ? OR nome = ?', 
+                                 (dominio_email, nome))
+                
+                if cursor.fetchone():
+                    return {'success': False, 'message': 'Scuola già registrata con questo nome o dominio'}
+                
+                # Genera codici e token
+                codice_pubblico = self.generate_school_code(nome)
+                codice_docenti = self.generate_invite_code()
+                codice_dirigente = f"DIR{secrets.choice(string.digits + string.ascii_uppercase)}{secrets.choice(string.digits + string.ascii_uppercase)}{datetime.now().year}"
+                dirigente_token = self.generate_secure_token()
+                salt = self.generate_secure_token(16)
+                
+                # Hash del codice docenti per sicurezza
+                docente_hash = hashlib.sha256((codice_docenti + salt).encode()).hexdigest()
+                
+                # Crea scuola (disabilitata fino a verifica)
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        INSERT INTO scuole 
+                        (nome, codice_pubblico, dominio_email, codice_invito_docenti, 
+                         codice_dirigente, dirigente_invite_token, docente_invite_code_hash, 
+                         invite_link_salt, attiva)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, false) RETURNING id
+                    ''', (nome, codice_pubblico, dominio_email, codice_docenti, 
+                          codice_dirigente, dirigente_token, docente_hash, salt))
+                    school_id = cursor.fetchone()[0]
+                else:
+                    cursor.execute('''
+                        INSERT INTO scuole 
+                        (nome, codice_pubblico, dominio_email, codice_invito_docenti, 
+                         codice_dirigente, dirigente_invite_token, docente_invite_code_hash, 
+                         invite_link_salt, attiva)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+                    ''', (nome, codice_pubblico, dominio_email, codice_docenti, 
+                          codice_dirigente, dirigente_token, docente_hash, salt))
+                    school_id = cursor.lastrowid
+                
+                # Crea verifica email per dirigente
+                expires_at = datetime.now() + timedelta(hours=24)
+                verification_token = self.generate_secure_token()
+                
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        INSERT INTO email_verifications 
+                        (email, purpose, token, expires_at, metadata)
+                        VALUES (%s, %s, %s, %s, %s)
+                    ''', (dirigente_email, 'dirigente_school_verification', verification_token, 
+                          expires_at, f'{{"school_id": {school_id}, "nome": "{dirigente_nome}", "cognome": "{dirigente_cognome}"}}'))
+                else:
+                    cursor.execute('''
+                        INSERT INTO email_verifications 
+                        (email, purpose, token, expires_at, metadata)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (dirigente_email, 'dirigente_school_verification', verification_token, 
+                          expires_at, f'{{"school_id": {school_id}, "nome": "{dirigente_nome}", "cognome": "{dirigente_cognome}"}}'))
+                
+                conn.commit()
+                
+                return {
+                    'success': True, 
+                    'school_id': school_id,
+                    'verification_token': verification_token,
+                    'dirigente_email': dirigente_email,
+                    'message': 'Email di verifica inviata al dirigente'
+                }
+                
+        except Exception as e:
+            print(f"Errore auto-registrazione scuola: {e}")
+            return {'success': False, 'message': f'Errore durante la registrazione: {str(e)}'}
+    
+    def verify_dirigente_email(self, token):
+        """Verifica email dirigente e attiva scuola"""
+        import json
+        from datetime import datetime
+        
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Trova verifica email
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        SELECT email, metadata, expires_at FROM email_verifications 
+                        WHERE token = %s AND purpose = %s AND consumed_at IS NULL
+                    ''', (token, 'dirigente_school_verification'))
+                else:
+                    cursor.execute('''
+                        SELECT email, metadata, expires_at FROM email_verifications 
+                        WHERE token = ? AND purpose = ? AND consumed_at IS NULL
+                    ''', (token, 'dirigente_school_verification'))
+                
+                verification = cursor.fetchone()
+                if not verification:
+                    return {'success': False, 'message': 'Token di verifica non valido o già utilizzato'}
+                
+                email, metadata_str, expires_at = verification
+                
+                # Verifica scadenza
+                if datetime.now() > datetime.fromisoformat(expires_at.replace('Z', '+00:00') if 'Z' in str(expires_at) else str(expires_at)):
+                    return {'success': False, 'message': 'Token di verifica scaduto'}
+                
+                # Parse metadata
+                metadata = json.loads(metadata_str)
+                school_id = metadata['school_id']
+                dirigente_nome = metadata['nome']
+                dirigente_cognome = metadata['cognome']
+                
+                # Attiva scuola
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('UPDATE scuole SET attiva = true, domain_verified = true WHERE id = %s', (school_id,))
+                else:
+                    cursor.execute('UPDATE scuole SET attiva = 1, domain_verified = 1 WHERE id = ?', (school_id,))
+                
+                # Marca verifica come consumata
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('UPDATE email_verifications SET consumed_at = CURRENT_TIMESTAMP WHERE token = %s', (token,))
+                else:
+                    cursor.execute('UPDATE email_verifications SET consumed_at = CURRENT_TIMESTAMP WHERE token = ?', (token,))
+                
+                conn.commit()
+                
+                return {
+                    'success': True,
+                    'school_id': school_id,
+                    'email': email,
+                    'dirigente_nome': dirigente_nome,
+                    'dirigente_cognome': dirigente_cognome,
+                    'message': 'Scuola attivata con successo!'
+                }
+                
+        except Exception as e:
+            print(f"Errore verifica dirigente: {e}")
+            return {'success': False, 'message': f'Errore durante la verifica: {str(e)}'}
+    
+    def get_school_codes(self, school_id, user_id):
+        """Ottieni codici scuola per dirigente (dashboard)"""
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Verifica che l'utente sia dirigente della scuola
+                if db_manager.db_type == 'postgresql':
+                    cursor.execute('''
+                        SELECT u.ruolo, s.nome, s.codice_invito_docenti, s.codice_dirigente,
+                               s.domain_trust_enabled, s.dominio_email
+                        FROM utenti u JOIN scuole s ON u.scuola_id = s.id 
+                        WHERE u.id = %s AND s.id = %s AND u.ruolo = 'dirigente'
+                    ''', (user_id, school_id))
+                else:
+                    cursor.execute('''
+                        SELECT u.ruolo, s.nome, s.codice_invito_docenti, s.codice_dirigente,
+                               s.domain_trust_enabled, s.dominio_email
+                        FROM utenti u JOIN scuole s ON u.scuola_id = s.id 
+                        WHERE u.id = ? AND s.id = ? AND u.ruolo = 'dirigente'
+                    ''', (user_id, school_id))
+                
+                result = cursor.fetchone()
+                if not result:
+                    return {'success': False, 'message': 'Accesso non autorizzato'}
+                
+                return {
+                    'success': True,
+                    'school_name': result[1],
+                    'teacher_code': result[2],
+                    'director_code': result[3],
+                    'domain_trust': bool(result[4]),
+                    'school_domain': result[5]
+                }
+                
+        except Exception as e:
+            print(f"Errore recupero codici: {e}")
+            return {'success': False, 'message': f'Errore: {str(e)}'}
 
 # Istanza globale sistema scolastico
 school_system = SchoolSystem()
