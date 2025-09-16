@@ -6,7 +6,7 @@ hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cargo", "libiconv", "rustc"]
+packages = ["cargo", "iana-etc", "libiconv", "rustc"]
 
 [deployment]
 run = ["gunicorn", "--worker-class", "eventlet", "--workers", "4", "--bind", "0.0.0.0:5000", "--timeout", "120", "--keep-alive", "5", "--max-requests", "1000", "--preload", "main:app"]
@@ -18,15 +18,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 39361
-externalPort = 3001
-
-[[ports]]
-localPort = 40293
-externalPort = 4200
-
-[[ports]]
-localPort = 45619
+localPort = 35337
 externalPort = 3000
 
 [[ports]]
@@ -123,13 +115,13 @@ args = "SKAILA Server"
 name = "SKAILA Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python main.py"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --config gunicorn.conf.py wsgi:socketio_app"
+waitForPort = 5000
 
 [agent]
 expertMode = true

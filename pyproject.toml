@@ -16,6 +16,7 @@ bcrypt = "^4.3.0"
 psycopg2-binary = "2.9.9"
 redis = "^6.4.0"
 psutil = "^7.0.0"
+eventlet = "^0.40.3"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

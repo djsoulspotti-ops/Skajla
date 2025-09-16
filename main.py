@@ -169,7 +169,7 @@ class SkailaApp:
             engineio_logger=False,
             allow_upgrades=True,
             transports=['websocket', 'polling'],
-            async_mode='threading',
+            async_mode='eventlet',  # Production-ready per Gunicorn
             ping_timeout=60,
             ping_interval=25,
             max_http_buffer_size=1000000
