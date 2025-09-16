@@ -298,7 +298,7 @@ class SchoolSystem:
             columns_to_add = [
                 ('domain_verified', 'BOOLEAN DEFAULT 0' if db_manager.db_type == 'sqlite' else 'BOOLEAN DEFAULT false'),
                 ('domain_trust_enabled', 'BOOLEAN DEFAULT 0' if db_manager.db_type == 'sqlite' else 'BOOLEAN DEFAULT false'),
-                ('dirigente_invite_token', 'TEXT UNIQUE'),
+                ('dirigente_invite_token', 'TEXT'),  # Rimosso UNIQUE - sarà gestito con INDEX
                 ('docente_invite_code_hash', 'TEXT'),
                 ('invite_link_salt', 'TEXT'),
                 ('last_rotated_at', 'TIMESTAMP')
@@ -318,8 +318,71 @@ class SchoolSystem:
                     else:
                         print(f"⚠️ Attenzione durante migrazione colonna {column_name}: {e}")
                         
+            # Gestione speciale per UNIQUE constraint su dirigente_invite_token
+            self._ensure_dirigente_invite_token_unique(cursor)
+                        
         except Exception as e:
             print(f"⚠️ Errore durante migrazione database: {e}")
+    
+    def _ensure_dirigente_invite_token_unique(self, cursor):
+        """Crea UNIQUE INDEX per dirigente_invite_token in modo sicuro - SENZA DELETE PERICOLOSI"""
+        try:
+            # CRITICO: NON CANCELLARE MAI RIGHE - Solo gestisce duplicati in modo sicuro
+            if db_manager.db_type == 'postgresql':
+                # PostgreSQL: SAFE - Imposta NULL sui duplicati, mantenendo MIN(id)
+                result = cursor.execute('''
+                    UPDATE scuole 
+                    SET dirigente_invite_token = NULL 
+                    WHERE id NOT IN (
+                        SELECT MIN(id) 
+                        FROM scuole 
+                        WHERE dirigente_invite_token IS NOT NULL 
+                        GROUP BY dirigente_invite_token
+                    ) AND dirigente_invite_token IS NOT NULL
+                ''')
+                affected_rows = cursor.rowcount
+                if affected_rows > 0:
+                    print(f"🔧 SAFE FIX: Impostato dirigente_invite_token = NULL per {affected_rows} duplicati (PostgreSQL)")
+                
+                # Crea UNIQUE INDEX se non esiste
+                cursor.execute('''
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_scuole_dirigente_invite_token 
+                    ON scuole (dirigente_invite_token) 
+                    WHERE dirigente_invite_token IS NOT NULL
+                ''')
+                
+            else:
+                # SQLite: SAFE - Imposta NULL sui duplicati, mantenendo MIN(rowid)
+                cursor.execute('''
+                    UPDATE scuole 
+                    SET dirigente_invite_token = NULL 
+                    WHERE rowid NOT IN (
+                        SELECT MIN(rowid) 
+                        FROM scuole 
+                        WHERE dirigente_invite_token IS NOT NULL 
+                        GROUP BY dirigente_invite_token
+                    ) AND dirigente_invite_token IS NOT NULL
+                ''')
+                affected_rows = cursor.rowcount
+                if affected_rows > 0:
+                    print(f"🔧 SAFE FIX: Impostato dirigente_invite_token = NULL per {affected_rows} duplicati (SQLite)")
+                
+                # Crea UNIQUE INDEX se non esiste (SQLite usa CREATE UNIQUE INDEX IF NOT EXISTS)
+                cursor.execute('''
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_scuole_dirigente_invite_token 
+                    ON scuole (dirigente_invite_token) 
+                    WHERE dirigente_invite_token IS NOT NULL
+                ''')
+            
+            print("✅ UNIQUE constraint su dirigente_invite_token creato con successo - NESSUN DATO CANCELLATO")
+            
+        except Exception as e:
+            # Se l'index esiste già, è OK
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                print("✅ UNIQUE index su dirigente_invite_token già esistente")
+            else:
+                print(f"⚠️ Impossibile creare UNIQUE constraint su dirigente_invite_token: {e}")
+                # Non è un errore fatale - il sistema può funzionare senza
     
     def generate_personal_codes_for_school(self, scuola_id, user_id):
         """RIVOLUZIONARIO: Genera codici personali individuali per ogni persona della scuola"""
