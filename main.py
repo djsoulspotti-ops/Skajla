@@ -7,11 +7,12 @@ Applicazione Flask modulare e scalabile
 import os
 import time
 from datetime import timedelta
-from flask import Flask, render_template, redirect, session, make_response
+from flask import Flask, render_template, redirect, session, make_response, request
 from flask_socketio import SocketIO
 
 # Import moduli personalizzati
 from database_manager import db_manager
+from environment_manager import env_manager
 from performance_cache import (
     user_cache, chat_cache, message_cache, ai_cache, gamification_cache,
     cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
@@ -47,30 +48,43 @@ class SkailaApp:
         self.init_systems()
 
     def setup_app(self):
-        """Configurazione base Flask"""
-        # Sicurezza produzione: usa SECRET_KEY dall'ambiente
-        secret_key = os.getenv('SECRET_KEY')
-        if not secret_key:
-            print('⚠️ SECURITY WARNING: SECRET_KEY non trovata, usando chiave temporanea!')
-            print('⚠️ PRODUZIONE: Imposta SECRET_KEY nelle variabili ambiente!')
-            import secrets
-            secret_key = secrets.token_hex(32)
-        self.app.config['SECRET_KEY'] = secret_key
-        self.app.config['UPLOAD_FOLDER'] = 'static/uploads'
-        self.app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
+        """Configurazione base Flask con gestione sicura environment"""
+        # Usa environment manager per configurazione sicura
+        flask_config = env_manager.get_flask_config()
+        self.app.config.update(flask_config)
+        
         # Sessioni permanenti
         self.app.permanent_session_lifetime = timedelta(days=30)
+        
+        # Status info per monitoring
+        print(f"🔐 Environment: {'Production' if env_manager.is_production() else 'Development'}")
+        ai_status = env_manager.get_ai_status()
+        db_status = env_manager.get_database_status()
+        print(f"🤖 AI Mode: {ai_status['mode']}")
+        print(f"🗄️ Database: {db_status['primary']}")
 
-        # Headers per Replit
+        # Headers per Replit e sicurezza produzione
         @self.app.after_request
         def after_request(response):
             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
             response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
-            response.headers['Access-Control-Allow-Origin'] = '*'
+            
+            # CORS sicuro: restrictive in produzione, permissive in development
+            if self.app.debug:
+                response.headers['Access-Control-Allow-Origin'] = '*'
+            else:
+                # Produzione: limita origini consentite (no ACAO se origin non allowed)
+                allowed_origins = env_manager.get_allowed_origins()
+                origin = request.headers.get('Origin', '')
+                if origin and any(origin.endswith(allowed.strip()) for allowed in allowed_origins):
+                    response.headers['Access-Control-Allow-Origin'] = origin
+                # Non impostare ACAO se origin non allowed (più sicuro di "null")
+                    
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, X-CSRF-Token'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
 
+            # Cache control per development
             if self.app.debug:
                 response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
                 response.headers['Pragma'] = 'no-cache'
