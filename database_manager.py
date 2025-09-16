@@ -33,7 +33,8 @@ class DatabaseManager:
         if not database_url:
             raise Exception("DATABASE_URL environment variable not found")
         
-        # CRITICO: Fix PostgreSQL per Neon SNI - metodo diretto
+        # CRITICO: Fix PostgreSQL per Neon SNI - metodo combinato corretto
+        endpoint_id = None
         if 'neon.tech' in database_url:
             # Estrai endpoint dal nome dominio (es: ep-noisy-salad-ae8vg6i0)
             import re
@@ -42,14 +43,17 @@ class DatabaseManager:
                 endpoint_id = match.group(0)
                 print(f"⚙️ PostgreSQL: Found endpoint {endpoint_id}")
                 
-                # Aggiungi SNI endpoint come richiesto da Neon
+                # Rimuovi options esistenti dall'URL per evitare conflitti
                 if '?' in database_url:
-                    database_url += f'&options=endpoint%3D{endpoint_id}'
-                else:
-                    database_url += f'?options=endpoint%3D{endpoint_id}'
+                    database_url = database_url.split('?')[0]
                     
         # Usa connection pooler per performance
         pooled_url = database_url.replace('.us-east-2', '-pooler.us-east-2')
+        
+        # Combina endpoint SNI con altre opzioni PostgreSQL
+        combined_options = '-c statement_timeout=30000 -c client_encoding=UTF8'
+        if endpoint_id:
+            combined_options = f'endpoint={endpoint_id} {combined_options}'
         
         try:
             self.pool = psycopg2.pool.ThreadedConnectionPool(
@@ -60,10 +64,10 @@ class DatabaseManager:
                 sslmode='require',
                 connect_timeout=10,
                 application_name='SKAILA_Production',
-                # Ottimizzazioni per alta concorrenza
-                options='-c statement_timeout=30000 -c client_encoding=UTF8'
+                # Ottimizzazioni combinate con endpoint SNI
+                options=combined_options
             )
-            print("✅ PostgreSQL pool configurato per produzione")
+            print("✅ PostgreSQL pool Neon SNI configurato per produzione")
         except Exception as e:
             print(f"Failed to create PostgreSQL connection pool: {e}")
             raise
