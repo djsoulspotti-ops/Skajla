@@ -7,7 +7,7 @@ Applicazione Flask modulare e scalabile
 import os
 import time
 from datetime import timedelta
-from flask import Flask, render_template, redirect, session, make_response, request
+from flask import Flask, render_template, redirect, session, make_response, request, g
 from flask_socketio import SocketIO
 
 # Import moduli personalizzati
@@ -18,7 +18,11 @@ from performance_cache import (
     cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
     invalidate_user_cache, get_cache_health
 )
-from production_monitor import production_monitor, monitor_request
+# New structured monitoring system
+from services.monitoring_service import (
+    ProductionLogger, MetricsCollector, PerformanceMonitor,
+    RequestMonitor, DatabaseMonitor
+)
 from school_system import school_system
 from gamification import gamification_system
 from ai_chatbot import AISkailaBot
@@ -42,10 +46,17 @@ class SkailaApp:
         self.app = Flask(__name__)
         self.socketio = None
         self.ai_bot = None
+        
+        # Initialize new monitoring system (delayed to avoid blocking during eventlet init)
+        self.production_logger = None
+        self.metrics_collector = None
+        self.performance_monitor = None
+        
         self.setup_app()
         self.register_routes()
         self.setup_socketio()
         self.init_systems()
+        self.init_monitoring_delayed()
 
     def setup_app(self):
         """Configurazione base Flask con gestione sicura environment"""
@@ -63,9 +74,19 @@ class SkailaApp:
         print(f"🤖 AI Mode: {ai_status['mode']}")
         print(f"🗄️ Database: {db_status['primary']}")
 
+        # TEMPORARILY DISABLED - Request monitoring hooks causing eventlet mainloop blocking
+        # Will re-enable after implementing proper eventlet-compatible monitoring
+        # @self.app.before_request
+        # def before_request():
+        #     pass  # Monitoring temporarily disabled
+        
+        # @self.app.after_request  
+        # def after_request(response):
+        #     pass  # Monitoring temporarily disabled
+        
         # Headers per Replit e sicurezza produzione
         @self.app.after_request
-        def after_request(response):
+        def after_request_headers(response):
             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
             response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
             
@@ -147,6 +168,10 @@ class SkailaApp:
         self.app.register_blueprint(api_bp)
         self.app.register_blueprint(school_bp)
         self.app.register_blueprint(credits_bp)
+        
+        # Production monitoring routes
+        from routes.monitoring_routes import monitoring_bp
+        self.app.register_blueprint(monitoring_bp)
         
         # Aggiungi CSRF protection context processor
         from csrf_protection import inject_csrf_token
@@ -234,6 +259,21 @@ class SkailaApp:
 
         # Inizializza database se necessario
         self.init_database()
+    
+    def init_monitoring_delayed(self):
+        """TEMPORARILY DISABLED - Monitoring system causing eventlet mainloop blocking"""
+        print("⚠️ Monitoring system temporarily disabled to fix eventlet mainloop blocking")
+        # Will re-enable after implementing proper eventlet-compatible monitoring
+        # try:
+        #     self.production_logger = ProductionLogger()
+        #     self.metrics_collector = MetricsCollector()
+        #     self.performance_monitor = PerformanceMonitor(
+        #         self.metrics_collector, self.production_logger
+        #     )
+        #     print("✅ New monitoring system initialized successfully")
+        # except Exception as e:
+        #     print(f"⚠️ Monitoring system initialization failed: {e}")
+        #     # Continue without monitoring rather than failing
 
     def init_database(self):
         """Inizializzazione database con dati demo"""

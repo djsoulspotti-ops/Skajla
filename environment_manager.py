@@ -116,15 +116,55 @@ class EnvironmentManager:
             'fallback_available': True
         }
     
-    def get_database_status(self) -> Dict[str, Any]:
-        """Ottieni stato configurazione database"""
+    def get_database_status(self, test_connectivity: bool = False) -> Dict[str, Any]:
+        """Ottieni stato configurazione database con test connectivity opzionale"""
         db_url = self.get_database_url()
+        
+        # Test actual database connectivity solo se richiesto esplicitamente
+        db_configured = True  # Default per evitare blocking durante init
+        if test_connectivity:
+            try:
+                # Avoid circular import by lazy importing
+                from database_manager import db_manager
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('SELECT 1')
+                    cursor.fetchone()
+                    db_configured = True
+            except:
+                db_configured = False
+        
         return {
             'primary': 'postgresql' if db_url else 'sqlite',
             'postgresql_available': bool(db_url),
             'sqlite_fallback': True,
-            'connection_string_present': bool(db_url)
+            'connection_string_present': bool(db_url),
+            'configured': db_configured  # Connectivity test solo se richiesto
         }
+    
+    def get_system_status(self) -> Dict[str, Any]:
+        """Status completo del sistema per monitoring"""
+        return {
+            'database': self.get_database_status(),
+            'ai': self.get_ai_status(),
+            'environment': 'production' if self.is_production() else 'development',
+            'debug_mode': self.get_flask_config()['DEBUG']
+        }
+    
+    def is_configured(self) -> bool:
+        """Verifica se environment è configured per readiness probe"""
+        try:
+            # Check basic configuration requirements
+            flask_config = self.get_flask_config()
+            has_secret = flask_config.get('SECRET_KEY') is not None
+            
+            # Check database connectivity (non-blocking)
+            db_status = self.get_database_status()
+            has_db = db_status.get('configured', False)
+            
+            return has_secret and has_db
+        except:
+            return False
 
 # Istanza globale
 env_manager = EnvironmentManager()

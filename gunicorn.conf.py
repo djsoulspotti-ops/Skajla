@@ -9,10 +9,11 @@ import multiprocessing
 # Server socket
 bind = "0.0.0.0:5000"
 
-# Worker configuration per SocketIO + eventlet
-workers = 1  # SocketIO richiede un solo worker con eventlet
-worker_class = "eventlet"
-worker_connections = 1000
+# TEMPORARY FIX: Switch to sync worker to resolve eventlet mainloop blocking
+# Will revert to eventlet after resolving compatibility issues
+workers = 1  # Single worker for now 
+worker_class = "sync"  # Changed from eventlet to sync temporarily
+# worker_connections = 1000  # Not needed for sync worker
 
 # Application - module specified in command line
 # module = "wsgi:socketio_app"  # Specificato nel comando

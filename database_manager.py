@@ -3,8 +3,8 @@ import os
 import sqlite3
 import psycopg2
 import psycopg2.pool
-import threading
-from queue import Queue
+import eventlet
+from eventlet import Queue
 import time
 from contextlib import contextmanager
 
@@ -78,7 +78,7 @@ class DatabaseManager:
             def __init__(self, max_connections=10):
                 self.max_connections = max_connections
                 self.pool = Queue(maxsize=max_connections)
-                self.lock = threading.Lock()
+                self.lock = eventlet.semaphore.Semaphore(1)
                 
                 # Pre-crea connessioni ottimizzate
                 for _ in range(max_connections):
@@ -97,14 +97,16 @@ class DatabaseManager:
             
             def getconn(self):
                 try:
-                    return self.pool.get(timeout=5)
+                    # Use eventlet-compatible non-blocking get
+                    return self.pool.get(block=True, timeout=5)
                 except:
                     # Crea connessione temporanea se pool esaurito
                     return self._create_connection()
             
             def putconn(self, conn):
                 try:
-                    self.pool.put(conn, timeout=1)
+                    # Use eventlet-compatible non-blocking put
+                    self.pool.put(conn, block=True, timeout=1)
                 except:
                     conn.close()
             

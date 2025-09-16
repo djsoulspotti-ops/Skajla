@@ -4,6 +4,11 @@ WSGI entry point per production deployment con Gunicorn + eventlet
 SKAILA Platform - Production WSGI Application
 """
 
+# TEMPORARILY DISABLED: Eventlet monkey patch causing mainloop blocking with sync worker
+# Will re-enable after fixing eventlet compatibility issues
+# import eventlet
+# eventlet.monkey_patch()
+
 import os
 import sys
 
