@@ -70,13 +70,13 @@ class SkailaApp:
             response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
             
             # CORS sicuro: restrictive in produzione, permissive in development
-            if self.app.debug:
+            if env_manager.is_development():
                 response.headers['Access-Control-Allow-Origin'] = '*'
             else:
                 # Produzione: limita origini consentite (no ACAO se origin non allowed)
                 allowed_origins = env_manager.get_allowed_origins()
                 origin = request.headers.get('Origin', '')
-                if origin and any(origin.endswith(allowed.strip()) for allowed in allowed_origins):
+                if origin and self._is_origin_allowed(origin, allowed_origins):
                     response.headers['Access-Control-Allow-Origin'] = origin
                 # Non impostare ACAO se origin non allowed (più sicuro di "null")
                     
@@ -85,7 +85,7 @@ class SkailaApp:
             response.headers['Access-Control-Allow-Credentials'] = 'true'
 
             # Cache control per development
-            if self.app.debug:
+            if env_manager.is_development():
                 response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
                 response.headers['Pragma'] = 'no-cache'
                 response.headers['Expires'] = '0'
@@ -153,10 +153,18 @@ class SkailaApp:
         self.app.context_processor(inject_csrf_token)
 
     def setup_socketio(self):
-        """Configurazione Socket.IO"""
+        """Configurazione Socket.IO con CORS sicuro"""
+        # CORS Socket.IO: restrictive in produzione, permissive in development
+        if env_manager.is_development():
+            cors_origins = "*"
+        else:
+            # Produzione: usa le stesse origini allowed del CORS HTTP
+            allowed_origins = env_manager.get_allowed_origins()
+            cors_origins = self._generate_socketio_cors_origins(allowed_origins)
+        
         self.socketio = SocketIO(
             self.app,
-            cors_allowed_origins="*",
+            cors_allowed_origins=cors_origins,
             logger=False,
             engineio_logger=False,
             allow_upgrades=True,
@@ -169,6 +177,49 @@ class SkailaApp:
 
         # Registra eventi Socket.IO
         register_socket_events(self.socketio)
+
+    def _is_origin_allowed(self, origin: str, allowed_origins: list) -> bool:
+        """Verifica se un'origine è consentita con supporto wildcard"""
+        for allowed in allowed_origins:
+            allowed = allowed.strip()
+            
+            # Pattern wildcard (es: *.replit.com)
+            if allowed.startswith('*.'):
+                domain = allowed[2:]  # Rimuovi '*.' dall'inizio
+                # Controlla se l'origine termina con .domain o è esattamente domain
+                if origin.endswith(f'.{domain}') or origin.endswith(f'://{domain}'):
+                    return True
+            # Match esatto
+            elif origin.endswith(f'://{allowed}'):
+                return True
+                
+        return False
+
+    def _generate_socketio_cors_origins(self, allowed_origins: list) -> list:
+        """Genera pattern CORS validi per Socket.IO"""
+        cors_origins = []
+        
+        for origin in allowed_origins:
+            origin = origin.strip()
+            
+            # Normalizza pattern wildcard
+            if origin.startswith('*.'):
+                base_domain = origin[2:]  # Rimuovi '*.' dall'inizio
+                # Aggiungi pattern per subdomini e dominio principale
+                cors_origins.extend([
+                    f'https://{base_domain}',      # Match esatto
+                    f'https://*.{base_domain}',    # Match subdomini
+                    f'http://{base_domain}',       # HTTP fallback per development
+                    f'http://*.{base_domain}'      # HTTP subdomini fallback
+                ])
+            else:
+                # Pattern esatto senza wildcard
+                cors_origins.extend([
+                    f'https://{origin}',
+                    f'http://{origin}'  # HTTP fallback
+                ])
+                
+        return cors_origins
 
     def init_systems(self):
         """Inizializza sistemi ausiliari"""
