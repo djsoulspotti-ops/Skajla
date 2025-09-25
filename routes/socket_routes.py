@@ -17,8 +17,7 @@ def register_socket_events(socketio):
         if 'user_id' in session:
             join_room(f"user_{session['user_id']}")
 
-            with db_manager.get_connection() as conn:
-                conn.execute('UPDATE utenti SET status_online = 1 WHERE id = ?', (session['user_id'],))
+            db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (True, session['user_id']))
 
             emit('user_connected', {
                 'nome': session['nome'],
@@ -31,8 +30,7 @@ def register_socket_events(socketio):
         if 'user_id' in session:
             leave_room(f"user_{session['user_id']}")
 
-            with db_manager.get_connection() as conn:
-                conn.execute('UPDATE utenti SET status_online = 0 WHERE id = ?', (session['user_id'],))
+            db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (False, session['user_id']))
 
             emit('user_disconnected', {
                 'nome': session['nome'],
