@@ -22,30 +22,29 @@ class UserService:
             return cached
 
         # Query database
-        with db_manager.get_connection() as conn:
-            user = conn.execute('''
-                SELECT id, username, email, nome, cognome, 
-                       classe, ruolo, avatar, ultimo_accesso
-                FROM utenti 
-                WHERE id = ? AND attivo = 1
-            ''', (user_id,)).fetchone()
+        user = db_manager.query('''
+            SELECT id, username, email, nome, cognome, 
+                   classe, ruolo, avatar, ultimo_accesso
+            FROM utenti 
+            WHERE id = ? AND attivo = ?
+        ''', (user_id, True), one=True)
 
-            if user:
-                user_data = {
-                    'id': user[0],
-                    'username': user[1],
-                    'email': user[2],
-                    'nome': user[3],
-                    'cognome': user[4],
-                    'classe': user[5],
-                    'ruolo': user[6],
-                    'avatar': user[7] or 'default.jpg',
-                    'ultimo_accesso': user[8]
-                }
-                
-                # Cache per 5 minuti
-                cache_manager.set(cache_key, user_data, 300)
-                return user_data
+        if user:
+            user_data = {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'nome': user['nome'],
+                'cognome': user['cognome'],
+                'classe': user['classe'],
+                'ruolo': user['ruolo'],
+                'avatar': user['avatar'] or 'default.jpg',
+                'ultimo_accesso': user['ultimo_accesso']
+            }
+            
+            # Cache per 5 minuti
+            cache_manager.set(cache_key, user_data, 300)
+            return user_data
 
         return None
 
@@ -53,25 +52,21 @@ class UserService:
         """Imposta utente come online"""
         self.online_users.add(user_id)
         
-        with db_manager.get_connection() as conn:
-            conn.execute('''
-                UPDATE utenti 
-                SET status_online = 1, ultimo_accesso = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (user_id,))
-            conn.commit()
+        db_manager.execute('''
+            UPDATE utenti 
+            SET status_online = ?, ultimo_accesso = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (True, user_id))
 
     def set_user_offline(self, user_id: int):
         """Imposta utente come offline"""
         self.online_users.discard(user_id)
         
-        with db_manager.get_connection() as conn:
-            conn.execute('''
-                UPDATE utenti 
-                SET status_online = 0
-                WHERE id = ?
-            ''', (user_id,))
-            conn.commit()
+        db_manager.execute('''
+            UPDATE utenti 
+            SET status_online = ?
+            WHERE id = ?
+        ''', (False, user_id))
 
     def get_online_users(self, exclude_user_id: int = None) -> list:
         """Ottieni lista utenti online"""

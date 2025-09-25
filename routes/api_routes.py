@@ -31,40 +31,39 @@ def conversations():
         if cached:
             return jsonify(cached)
 
-        with db_manager.get_connection() as conn:
-            if user_role == 'admin':
-                conversations = conn.execute('''
-                    SELECT c.*, 
-                           COUNT(DISTINCT pc.utente_id) as partecipanti_count,
-                           m.contenuto as ultimo_messaggio,
-                           m.timestamp as ultimo_messaggio_data,
-                           u.nome || ' ' || u.cognome as ultimo_mittente
-                    FROM chat c
-                    LEFT JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                    LEFT JOIN messaggi m ON c.id = m.chat_id 
-                        AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
-                    LEFT JOIN utenti u ON m.utente_id = u.id
-                    GROUP BY c.id
-                    ORDER BY ultimo_messaggio_data DESC NULLS LAST
-                ''').fetchall()
-            else:
-                conversations = conn.execute('''
-                    SELECT c.*, 
-                           COUNT(DISTINCT pc.utente_id) as partecipanti_count,
-                           m.contenuto as ultimo_messaggio,
-                           m.timestamp as ultimo_messaggio_data,
-                           u.nome || ' ' || u.cognome as ultimo_mittente
-                    FROM chat c
-                    JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                    LEFT JOIN messaggi m ON c.id = m.chat_id 
-                        AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
-                    LEFT JOIN utenti u ON m.utente_id = u.id
-                    WHERE pc.utente_id = ? OR c.classe = ?
-                    GROUP BY c.id
-                    ORDER BY ultimo_messaggio_data DESC NULLS LAST
-                ''', (user_id, session.get('classe', ''))).fetchall()
+        if user_role == 'admin':
+            conversations = db_manager.query('''
+                SELECT c.*, 
+                       COUNT(DISTINCT pc.utente_id) as partecipanti_count,
+                       m.contenuto as ultimo_messaggio,
+                       m.timestamp as ultimo_messaggio_data,
+                       u.nome || ' ' || u.cognome as ultimo_mittente
+                FROM chat c
+                LEFT JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                LEFT JOIN messaggi m ON c.id = m.chat_id 
+                    AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
+                LEFT JOIN utenti u ON m.utente_id = u.id
+                GROUP BY c.id
+                ORDER BY ultimo_messaggio_data DESC NULLS LAST
+            ''')
+        else:
+            conversations = db_manager.query('''
+                SELECT c.*, 
+                       COUNT(DISTINCT pc.utente_id) as partecipanti_count,
+                       m.contenuto as ultimo_messaggio,
+                       m.timestamp as ultimo_messaggio_data,
+                       u.nome || ' ' || u.cognome as ultimo_mittente
+                FROM chat c
+                JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                LEFT JOIN messaggi m ON c.id = m.chat_id 
+                    AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
+                LEFT JOIN utenti u ON m.utente_id = u.id
+                WHERE pc.utente_id = ? OR c.classe = ?
+                GROUP BY c.id
+                ORDER BY ultimo_messaggio_data DESC NULLS LAST
+            ''', (user_id, session.get('classe', '')))
 
-        conversations_list = [dict(conv) for conv in conversations]
+        conversations_list = conversations
         
         # Cache risultato
         cache_manager.cache_user_data(user_id, 'conversations', conversations_list, ttl=30)
@@ -79,18 +78,17 @@ def messages(conversation_id):
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
-        with db_manager.get_connection() as conn:
-            messages = conn.execute('''
-                SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
-                       m.timestamp as data_invio
-                FROM messaggi m
-                JOIN utenti u ON m.utente_id = u.id
-                WHERE m.chat_id = ?
-                ORDER BY m.timestamp ASC
-                LIMIT 100
-            ''', (conversation_id,)).fetchall()
+        messages = db_manager.query('''
+            SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
+                   m.timestamp as data_invio
+            FROM messaggi m
+            JOIN utenti u ON m.utente_id = u.id
+            WHERE m.chat_id = ?
+            ORDER BY m.timestamp ASC
+            LIMIT 100
+        ''', (conversation_id,))
 
-        return jsonify([dict(msg) for msg in messages])
+        return jsonify(messages)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -116,15 +114,14 @@ def ai_chat():
         )
 
         # Salva conversazione
-        with db_manager.get_connection() as conn:
-            subject_detected = ai_bot.detect_subject(message)
-            sentiment_analysis = ','.join(ai_bot.analyze_user_sentiment(message))
-            
-            conn.execute('''
-                INSERT INTO ai_conversations 
-                (utente_id, message, response, subject_detected, sentiment_analysis, timestamp)
-                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            ''', (session['user_id'], message, response, subject_detected, sentiment_analysis))
+        subject_detected = ai_bot.detect_subject(message)
+        sentiment_analysis = ','.join(ai_bot.analyze_user_sentiment(message))
+        
+        db_manager.execute('''
+            INSERT INTO ai_conversations 
+            (utente_id, message, response, subject_detected, sentiment_analysis, timestamp)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ''', (session['user_id'], message, response, subject_detected, sentiment_analysis))
 
         # Gamification
         gamification_system.award_xp(

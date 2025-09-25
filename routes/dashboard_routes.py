@@ -45,16 +45,15 @@ def dashboard_studente():
     gamification_data = gamification_system.get_user_dashboard(user_id)
     
     # Statistiche recenti
-    with db_manager.get_connection() as conn:
-        recent_messages = conn.execute('''
-            SELECT COUNT(*) FROM messaggi 
-            WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
-        ''', (user_id,)).fetchone()[0]
-        
-        ai_interactions = conn.execute('''
-            SELECT COUNT(*) FROM ai_conversations 
-            WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
-        ''', (user_id,)).fetchone()[0]
+    recent_messages = db_manager.query('''
+        SELECT COUNT(*) as count FROM messaggi 
+        WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
+    ''', (user_id,), one=True)['count']
+    
+    ai_interactions = db_manager.query('''
+        SELECT COUNT(*) as count FROM ai_conversations 
+        WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
+    ''', (user_id,), one=True)['count']
     
     dashboard_stats = {
         'messages_today': recent_messages,
@@ -76,22 +75,21 @@ def dashboard_professore():
     if session.get('ruolo') != 'professore':
         return redirect('/dashboard')
     
-    with db_manager.get_connection() as conn:
-        # Statistiche classe
-        students_count = conn.execute('''
-            SELECT COUNT(*) FROM utenti 
-            WHERE ruolo = 'studente' AND classe = ? AND attivo = 1
-        ''', (session.get('classe', ''),)).fetchone()[0]
-        
-        # Messaggi recenti
-        recent_activity = conn.execute('''
-            SELECT u.nome, u.cognome, m.contenuto, m.timestamp
-            FROM messaggi m
-            JOIN utenti u ON m.utente_id = u.id
-            WHERE u.classe = ? AND DATE(m.timestamp) = DATE('now')
-            ORDER BY m.timestamp DESC
-            LIMIT 10
-        ''', (session.get('classe', ''),)).fetchall()
+    # Statistiche classe
+    students_count = db_manager.query('''
+        SELECT COUNT(*) as count FROM utenti 
+        WHERE ruolo = ? AND classe = ? AND attivo = ?
+    ''', ('studente', session.get('classe', ''), True), one=True)['count']
+    
+    # Messaggi recenti
+    recent_activity = db_manager.query('''
+        SELECT u.nome, u.cognome, m.contenuto, m.timestamp
+        FROM messaggi m
+        JOIN utenti u ON m.utente_id = u.id
+        WHERE u.classe = ? AND DATE(m.timestamp) = DATE('now')
+        ORDER BY m.timestamp DESC
+        LIMIT 10
+    ''', (session.get('classe', ''),))
     
     stats = {
         'students_count': students_count,
@@ -119,19 +117,18 @@ def dashboard_admin():
     if session.get('ruolo') != 'admin':
         return redirect('/dashboard')
     
-    with db_manager.get_connection() as conn:
-        # Statistiche generali
-        total_users = conn.execute('SELECT COUNT(*) FROM utenti WHERE attivo = 1').fetchone()[0]
-        total_messages = conn.execute('SELECT COUNT(*) FROM messaggi WHERE DATE(timestamp) = DATE("now")').fetchone()[0]
-        active_chats = conn.execute('SELECT COUNT(*) FROM chat').fetchone()[0]
-        
-        # Utenti per ruolo
-        role_stats = conn.execute('''
-            SELECT ruolo, COUNT(*) as count 
-            FROM utenti 
-            WHERE attivo = 1 
-            GROUP BY ruolo
-        ''').fetchall()
+    # Statistiche generali
+    total_users = db_manager.query('SELECT COUNT(*) as count FROM utenti WHERE attivo = ?', (True,), one=True)['count']
+    total_messages = db_manager.query('SELECT COUNT(*) as count FROM messaggi WHERE DATE(timestamp) = DATE(?)', ('now',), one=True)['count']
+    active_chats = db_manager.query('SELECT COUNT(*) as count FROM chat', one=True)['count']
+    
+    # Utenti per ruolo
+    role_stats = db_manager.query('''
+        SELECT ruolo, COUNT(*) as count 
+        FROM utenti 
+        WHERE attivo = ? 
+        GROUP BY ruolo
+    ''', (True,))
     
     admin_stats = {
         'total_users': total_users,
