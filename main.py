@@ -520,8 +520,13 @@ class SkailaApp:
     def create_demo_data(self):
         """Crea dati demo per testing"""
         with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
             # Verifica se esistono già utenti admin
-            admin_exists = conn.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "admin"').fetchone()[0]
+            if db_manager.db_type == 'postgresql':
+                cursor.execute("SELECT COUNT(*) FROM utenti WHERE ruolo = 'admin'")
+            else:
+                cursor.execute('SELECT COUNT(*) FROM utenti WHERE ruolo = "admin"')
+            admin_exists = cursor.fetchone()[0]
 
             if admin_exists == 0:
                 print("🔧 Creazione utenti demo...")
@@ -539,11 +544,19 @@ class SkailaApp:
                 for username, email, password, nome, cognome, classe, ruolo in demo_users:
                     password_hash = auth_service.hash_password(password)
 
-                    conn.execute('''
-                        INSERT OR REPLACE INTO utenti 
-                        (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
-                    ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute('''
+                            INSERT INTO utenti 
+                            (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, false)
+                            ON CONFLICT (username) DO NOTHING
+                        ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                    else:
+                        cursor.execute('''
+                            INSERT OR REPLACE INTO utenti 
+                            (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                        ''', (username, email, password_hash, nome, cognome, classe, ruolo))
 
                 # Crea chat demo
                 chat_rooms = [

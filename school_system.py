@@ -124,12 +124,12 @@ class SchoolSystem:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS invites (
                         id SERIAL PRIMARY KEY,
-                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        school_id INTEGER NOT NULL,
                         role TEXT NOT NULL CHECK (role IN ('dirigente', 'professore', 'studente')),
                         token TEXT UNIQUE NOT NULL,
                         expires_at TIMESTAMP,
                         uses_remaining INTEGER,
-                        created_by INTEGER REFERENCES utenti(id),
+                        created_by INTEGER,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         revoked_at TIMESTAMP
                     )
@@ -140,12 +140,12 @@ class SchoolSystem:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS personal_codes (
                         id SERIAL PRIMARY KEY,
-                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        school_id INTEGER NOT NULL,
                         email TEXT NOT NULL,
                         code TEXT UNIQUE NOT NULL,
                         role TEXT NOT NULL CHECK (role IN ('professore', 'studente')),
                         used BOOLEAN DEFAULT false,
-                        used_by INTEGER REFERENCES utenti(id),
+                        used_by INTEGER,
                         used_at TIMESTAMP,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         expires_at TIMESTAMP,
@@ -156,12 +156,12 @@ class SchoolSystem:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS invites (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        school_id INTEGER NOT NULL,
                         role TEXT NOT NULL CHECK (role IN ('dirigente', 'professore', 'studente')),
                         token TEXT UNIQUE NOT NULL,
                         expires_at TIMESTAMP,
                         uses_remaining INTEGER,
-                        created_by INTEGER REFERENCES utenti(id),
+                        created_by INTEGER,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         revoked_at TIMESTAMP
                     )
@@ -171,12 +171,12 @@ class SchoolSystem:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS personal_codes (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        school_id INTEGER NOT NULL REFERENCES scuole(id) ON DELETE CASCADE,
+                        school_id INTEGER NOT NULL,
                         email TEXT NOT NULL,
                         code TEXT UNIQUE NOT NULL,
                         role TEXT NOT NULL CHECK (role IN ('professore', 'studente')),
                         used BOOLEAN DEFAULT 0,
-                        used_by INTEGER REFERENCES utenti(id),
+                        used_by INTEGER,
                         used_at TIMESTAMP,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         expires_at TIMESTAMP,
@@ -189,8 +189,8 @@ class SchoolSystem:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS docenti_classi (
                         id SERIAL PRIMARY KEY,
-                        docente_id INTEGER NOT NULL REFERENCES utenti(id) ON DELETE CASCADE,
-                        classe_id INTEGER NOT NULL REFERENCES classi(id) ON DELETE CASCADE,
+                        docente_id INTEGER NOT NULL,
+                        classe_id INTEGER NOT NULL,
                         materia TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         UNIQUE(docente_id, classe_id)
@@ -200,8 +200,8 @@ class SchoolSystem:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS docenti_classi (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        docente_id INTEGER NOT NULL REFERENCES utenti(id) ON DELETE CASCADE,
-                        classe_id INTEGER NOT NULL REFERENCES classi(id) ON DELETE CASCADE,
+                        docente_id INTEGER NOT NULL,
+                        classe_id INTEGER NOT NULL,
                         materia TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         UNIQUE(docente_id, classe_id)
@@ -261,6 +261,18 @@ class SchoolSystem:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
             
+            # Prima verifica se la tabella scuole esiste
+            if db_manager.db_type == 'postgresql':
+                cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'scuole'")
+                table_exists = cursor.fetchone()[0] > 0
+            else:
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='scuole'")
+                table_exists = cursor.fetchone() is not None
+            
+            if not table_exists:
+                print("📦 Tabella scuole non esiste ancora, skip setup scuola predefinita")
+                return
+            
             # Verifica se scuola predefinita esiste
             if db_manager.db_type == 'postgresql':
                 cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
@@ -294,6 +306,18 @@ class SchoolSystem:
     def _migrate_existing_database(self, cursor):
         """Migrazione sicura per database esistenti"""
         try:
+            # Prima verifica se la tabella scuole esiste
+            if db_manager.db_type == 'postgresql':
+                cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'scuole'")
+                table_exists = cursor.fetchone()[0] > 0
+            else:
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='scuole'")
+                table_exists = cursor.fetchone() is not None
+            
+            if not table_exists:
+                print("📦 Tabella scuole non esiste ancora, skip migrazione")
+                return
+            
             # Verifica e aggiunge colonne mancanti alla tabella scuole
             columns_to_add = [
                 ('domain_verified', 'BOOLEAN DEFAULT 0' if db_manager.db_type == 'sqlite' else 'BOOLEAN DEFAULT false'),

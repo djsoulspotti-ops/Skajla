@@ -1,6 +1,6 @@
 run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 entrypoint = "main.py"
-modules = ["python-3.11"]
+modules = ["python-3.11", "postgresql-16"]
 
 hidden = [".pythonlibs"]
 
@@ -16,6 +16,10 @@ build = ["pip", "install", "-r", "requirements.txt"]
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 36401
+externalPort = 3000
 
 [[ports]]
 localPort = 53849

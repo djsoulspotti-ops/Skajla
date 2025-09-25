@@ -47,8 +47,8 @@ class DatabaseManager:
                 if '?' in database_url:
                     database_url = database_url.split('?')[0]
                     
-        # Usa connection pooler per performance
-        pooled_url = database_url.replace('.us-east-2', '-pooler.us-east-2')
+        # Use the original DATABASE_URL directly for better compatibility
+        connection_url = database_url
         
         # Combina endpoint SNI con altre opzioni PostgreSQL
         combined_options = '-c statement_timeout=30000 -c client_encoding=UTF8'
@@ -59,7 +59,7 @@ class DatabaseManager:
             self.pool = psycopg2.pool.ThreadedConnectionPool(
                 minconn=5,
                 maxconn=20,
-                dsn=pooled_url,
+                dsn=connection_url,
                 # CRITICO: Parametri SNI richiesti da Neon per produzione
                 sslmode='require',
                 connect_timeout=10,
