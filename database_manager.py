@@ -162,6 +162,67 @@ class DatabaseManager:
             cursor.executemany(query, params_list)
             return cursor.rowcount
     
+    def _adapt_params(self, query, params):
+        """Adatta parametri per compatibilità PostgreSQL/SQLite"""
+        if not params:
+            return query, params
+            
+        if self.db_type == 'postgresql':
+            # Converti ? in %s per PostgreSQL
+            adapted_query = query.replace('?', '%s')
+            return adapted_query, params
+        else:
+            # SQLite usa ? - nessuna modifica necessaria
+            return query, params
+    
+    def query(self, sql, params=None, one=False, many=True):
+        """Wrapper unificato per SELECT con risultati dict-like"""
+        adapted_sql, adapted_params = self._adapt_params(sql, params)
+        
+        with self.get_connection() as conn:
+            if self.db_type == 'postgresql':
+                # Usa DictCursor per PostgreSQL
+                from psycopg2.extras import DictCursor
+                cursor = conn.cursor(cursor_factory=DictCursor)
+            else:
+                # SQLite ha già Row factory configurata
+                cursor = conn.cursor()
+            
+            cursor.execute(adapted_sql, adapted_params or ())
+            
+            if one:
+                result = cursor.fetchone()
+                return dict(result) if result else None
+            elif many:
+                results = cursor.fetchall()
+                return [dict(row) for row in results] if results else []
+            else:
+                return cursor.fetchall()
+    
+    def execute(self, sql, params=None):
+        """Wrapper unificato per INSERT/UPDATE/DELETE"""
+        adapted_sql, adapted_params = self._adapt_params(sql, params)
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(adapted_sql, adapted_params or ())
+            
+            # Restituisce ID per INSERT, row count per UPDATE/DELETE
+            if self.db_type == 'postgresql':
+                if adapted_sql.strip().upper().startswith('INSERT'):
+                    try:
+                        # Se la query non ha RETURNING, non cercare lastrowid
+                        if 'RETURNING' not in adapted_sql.upper():
+                            return True
+                        else:
+                            result = cursor.fetchone()
+                            return result[0] if result else None
+                    except:
+                        return True
+                return cursor.rowcount
+            else:
+                return cursor.lastrowid if cursor.lastrowid else cursor.rowcount
+    
     def create_optimized_indexes(self):
         """Crea indici per performance ottimali"""
         indexes = [
