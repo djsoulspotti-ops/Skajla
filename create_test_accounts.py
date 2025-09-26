@@ -39,6 +39,15 @@ def create_test_accounts():
             'cognome': 'Verdi',
             'ruolo': 'admin',
             'classe': 'Dirigente'
+        },
+        {
+            'username': 'dev_support',
+            'email': 'dev.support@skaila.it',
+            'password': 'dev2024!',
+            'nome': 'Alex',
+            'cognome': 'Developer',
+            'ruolo': 'admin',
+            'classe': 'Sviluppatore'
         }
     ]
     
@@ -114,6 +123,7 @@ def create_test_accounts():
     print("👨‍🎓 Studente: studente.test@skaila.it / test123")
     print("👩‍🏫 Professore: prof.test@skaila.it / prof123") 
     print("👨‍💼 Admin: admin.test@skaila.it / admin123")
+    print("👨‍💻 Sviluppatore: dev.support@skaila.it / dev2024!")
 
 if __name__ == "__main__":
     create_test_accounts()
