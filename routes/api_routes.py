@@ -9,6 +9,7 @@ from database_manager import db_manager
 from cache_manager import cache_manager
 from gamification import gamification_system
 from ai_chatbot import AISkailaBot
+from services.tenant_guard import get_current_school_id, verify_chat_belongs_to_school, TenantGuardException
 import time
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -22,9 +23,12 @@ def conversations():
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
+        # SECURITY: Tenant guard
+        school_id = get_current_school_id()
+        
         user_id = session['user_id']
         user_role = session['ruolo']
-        cache_key = f"conversations_{user_id}_{user_role}"
+        cache_key = f"conversations_{user_id}_{user_role}_{school_id}"
         
         # Controlla cache
         cached = cache_manager.get_user_data(user_id, 'conversations')
@@ -32,6 +36,7 @@ def conversations():
             return jsonify(cached)
 
         if user_role == 'admin':
+            # SECURITY: Admin vede solo chat della sua scuola
             conversations = db_manager.query('''
                 SELECT c.*, 
                        COUNT(DISTINCT pc.utente_id) as partecipanti_count,
@@ -43,10 +48,12 @@ def conversations():
                 LEFT JOIN messaggi m ON c.id = m.chat_id 
                     AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
                 LEFT JOIN utenti u ON m.utente_id = u.id
+                WHERE c.scuola_id = ?
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
-            ''')
+            ''', (school_id,))
         else:
+            # SECURITY: Utenti vedono solo chat della loro scuola + membership
             conversations = db_manager.query('''
                 SELECT c.*, 
                        COUNT(DISTINCT pc.utente_id) as partecipanti_count,
@@ -58,10 +65,10 @@ def conversations():
                 LEFT JOIN messaggi m ON c.id = m.chat_id 
                     AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
                 LEFT JOIN utenti u ON m.utente_id = u.id
-                WHERE pc.utente_id = ? OR c.classe = ?
+                WHERE c.scuola_id = ? AND (pc.utente_id = ? OR c.classe = ?)
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
-            ''', (user_id, session.get('classe', '')))
+            ''', (school_id, user_id, session.get('classe', '')))
 
         conversations_list = conversations
         
@@ -69,6 +76,8 @@ def conversations():
         cache_manager.cache_user_data(user_id, 'conversations', conversations_list, ttl=30)
         return jsonify(conversations_list)
 
+    except TenantGuardException as e:
+        return jsonify({'error': 'Accesso non autorizzato alla scuola'}), 403
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -78,18 +87,26 @@ def messages(conversation_id):
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
+        # SECURITY: Tenant guard - verifica che chat appartenga alla scuola
+        school_id = get_current_school_id()
+        if not verify_chat_belongs_to_school(conversation_id, school_id):
+            return jsonify({'error': 'Accesso non autorizzato a questa conversazione'}), 403
+        
         messages = db_manager.query('''
             SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
                    m.timestamp as data_invio
             FROM messaggi m
             JOIN utenti u ON m.utente_id = u.id
-            WHERE m.chat_id = ?
+            JOIN chat c ON m.chat_id = c.id
+            WHERE m.chat_id = ? AND c.scuola_id = ?
             ORDER BY m.timestamp ASC
             LIMIT 100
-        ''', (conversation_id,))
+        ''', (conversation_id, school_id))
 
         return jsonify(messages)
 
+    except TenantGuardException:
+        return jsonify({'error': 'Accesso non autorizzato alla scuola'}), 403
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
