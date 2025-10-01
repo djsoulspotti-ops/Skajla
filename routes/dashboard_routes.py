@@ -7,6 +7,7 @@ Routes per dashboard specifiche per ruolo
 from flask import Blueprint, render_template, session, redirect
 from database_manager import db_manager
 from gamification import gamification_system
+from services.tenant_guard import get_school_stats, get_current_school_id
 from ai_chatbot import AISkailaBot
 
 dashboard_bp = Blueprint('dashboard', __name__)
@@ -75,21 +76,26 @@ def dashboard_professore():
     if session.get('ruolo') != 'professore':
         return redirect('/dashboard')
     
-    # Statistiche classe
+    # SECURITY: Tenant guard - filtra per school_id
+    school_id = get_current_school_id()
+    
+    # Statistiche classe (con school_id)
     students_count = db_manager.query('''
         SELECT COUNT(*) as count FROM utenti 
-        WHERE ruolo = ? AND classe = ? AND attivo = ?
-    ''', ('studente', session.get('classe', ''), True), one=True)['count']
+        WHERE ruolo = ? AND classe = ? AND school_id = ? AND attivo = ?
+    ''', ('studente', session.get('classe', ''), school_id, True), one=True)['count']
     
-    # Messaggi recenti
+    # Messaggi recenti (con school_id)
     recent_activity = db_manager.query('''
         SELECT u.nome, u.cognome, m.contenuto, m.timestamp
         FROM messaggi m
         JOIN utenti u ON m.utente_id = u.id
-        WHERE u.classe = ? AND DATE(m.timestamp) = DATE('now')
+        JOIN chat c ON m.chat_id = c.id
+        WHERE u.classe = ? AND u.school_id = ? AND c.school_id = ? 
+        AND DATE(m.timestamp) = DATE('now')
         ORDER BY m.timestamp DESC
         LIMIT 10
-    ''', (session.get('classe', ''),))
+    ''', (session.get('classe', ''), school_id, school_id))
     
     stats = {
         'students_count': students_count,
@@ -117,23 +123,29 @@ def dashboard_admin():
     if session.get('ruolo') != 'admin':
         return redirect('/dashboard')
     
-    # Statistiche generali
-    total_users = db_manager.query('SELECT COUNT(*) as count FROM utenti WHERE attivo = ?', (True,), one=True)['count']
-    total_messages = db_manager.query('SELECT COUNT(*) as count FROM messaggi WHERE DATE(timestamp) = DATE(?)', ('now',), one=True)['count']
-    active_chats = db_manager.query('SELECT COUNT(*) as count FROM chat', one=True)['count']
+    # SECURITY: Usa tenant guard per statistiche filtrate per scuola
+    school_id = get_current_school_id()
+    school_stats = get_school_stats(school_id)
     
-    # Utenti per ruolo
+    # Messaggi di oggi (filtrati per scuola)
+    messages_today = db_manager.query('''
+        SELECT COUNT(*) as count FROM messaggi m
+        JOIN chat c ON m.chat_id = c.id
+        WHERE c.school_id = ? AND DATE(m.timestamp) = DATE('now')
+    ''', (school_id,), one=True)['count']
+    
+    # Utenti per ruolo (filtrati per scuola)
     role_stats = db_manager.query('''
         SELECT ruolo, COUNT(*) as count 
         FROM utenti 
-        WHERE attivo = ? 
+        WHERE school_id = ? AND attivo = ? 
         GROUP BY ruolo
-    ''', (True,))
+    ''', (school_id, True))
     
     admin_stats = {
-        'total_users': total_users,
-        'messages_today': total_messages,
-        'active_chats': active_chats,
+        'total_users': school_stats['total_users'],
+        'messages_today': messages_today,
+        'active_chats': school_stats['active_chats'],
         'role_distribution': {row[0]: row[1] for row in role_stats}
     }
     

@@ -8,6 +8,7 @@ from flask_socketio import emit, join_room, leave_room
 from flask import session
 from database_manager import db_manager
 from gamification import gamification_system
+from services.tenant_guard import verify_chat_belongs_to_school, get_current_school_id, TenantGuardException
 
 def register_socket_events(socketio):
     """Registra tutti gli eventi Socket.IO"""
@@ -17,25 +18,43 @@ def register_socket_events(socketio):
         if 'user_id' in session:
             join_room(f"user_{session['user_id']}")
 
-            db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (True, session['user_id']))
+            # SECURITY: Join school-scoped room per tenant isolation
+            try:
+                school_id = get_current_school_id()
+                join_room(f"school_{school_id}")
+                
+                db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (True, session['user_id']))
 
-            emit('user_connected', {
-                'nome': session['nome'],
-                'cognome': session['cognome'],
-                'ruolo': session['ruolo']
-            }, broadcast=True)
+                # Emit solo alla scuola dell'utente, NON broadcast globale
+                emit('user_connected', {
+                    'nome': session['nome'],
+                    'cognome': session['cognome'],
+                    'ruolo': session['ruolo']
+                }, room=f"school_{school_id}")
+            except TenantGuardException:
+                # User senza school_id, skip presence broadcast
+                pass
 
     @socketio.on('disconnect')
     def handle_disconnect():
         if 'user_id' in session:
             leave_room(f"user_{session['user_id']}")
 
-            db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (False, session['user_id']))
+            # SECURITY: Emit solo alla scuola dell'utente, NON broadcast globale
+            try:
+                school_id = get_current_school_id()
+                
+                db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (False, session['user_id']))
 
-            emit('user_disconnected', {
-                'nome': session['nome'],
-                'cognome': session['cognome']
-            }, broadcast=True)
+                emit('user_disconnected', {
+                    'nome': session['nome'],
+                    'cognome': session['cognome']
+                }, room=f"school_{school_id}")
+                
+                leave_room(f"school_{school_id}")
+            except TenantGuardException:
+                # User senza school_id, skip presence broadcast
+                pass
 
     @socketio.on('join_conversation')
     def handle_join_conversation(data):
@@ -46,6 +65,16 @@ def register_socket_events(socketio):
         conversation_id = data.get('conversation_id')
         if not conversation_id:
             emit('error', {'message': 'conversation_id mancante'})
+            return
+
+        # SECURITY: Tenant guard - verifica che la chat appartenga alla scuola
+        try:
+            school_id = get_current_school_id()
+            if not verify_chat_belongs_to_school(conversation_id, school_id):
+                emit('error', {'message': 'Chat non appartiene alla tua scuola'})
+                return
+        except TenantGuardException:
+            emit('error', {'message': 'Errore di autenticazione scuola'})
             return
 
         # SECURITY: Verifica che l'utente sia membro della chat
@@ -79,6 +108,16 @@ def register_socket_events(socketio):
 
         if not contenuto.strip():
             emit('error', {'message': 'Messaggio vuoto'})
+            return
+
+        # SECURITY: Tenant guard - verifica che la chat appartenga alla scuola
+        try:
+            school_id = get_current_school_id()
+            if not verify_chat_belongs_to_school(conversation_id, school_id):
+                emit('error', {'message': 'Chat non appartiene alla tua scuola'})
+                return
+        except TenantGuardException:
+            emit('error', {'message': 'Errore di autenticazione scuola'})
             return
 
         # SECURITY: Verifica che l'utente sia membro della chat
@@ -121,6 +160,14 @@ def register_socket_events(socketio):
         if not conversation_id:
             return
 
+        # SECURITY: Tenant guard
+        try:
+            school_id = get_current_school_id()
+            if not verify_chat_belongs_to_school(conversation_id, school_id):
+                return
+        except TenantGuardException:
+            return
+
         # SECURITY: Verifica che l'utente sia membro della chat
         is_member = db_manager.query('''
             SELECT 1 FROM partecipanti_chat 
@@ -143,6 +190,14 @@ def register_socket_events(socketio):
 
         conversation_id = data.get('conversation_id')
         if not conversation_id:
+            return
+
+        # SECURITY: Tenant guard
+        try:
+            school_id = get_current_school_id()
+            if not verify_chat_belongs_to_school(conversation_id, school_id):
+                return
+        except TenantGuardException:
             return
 
         # SECURITY: Verifica che l'utente sia membro della chat
