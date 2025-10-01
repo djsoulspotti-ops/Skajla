@@ -1,0 +1,101 @@
+⚙️ PostgreSQL: Found endpoint ep-noisy-salad-ae8vg6i0
+✅ PostgreSQL pool Neon SNI configurato per produzione
+✅ Sistema caching produzione inizializzato
+✅ UNIQUE constraint su dirigente_invite_token creato con successo - NESSUN DATO CANCELLATO
+✅ Sistema scuole-classi-professori inizializzato
+✅ Sistema gestione codici scuole inizializzato
+======================================================================
+SKAILA - CODICI SCUOLE PARTNER (PRIME 10 SCUOLE)
+======================================================================
+
+SCUOLA #1: Scuola Partner 1
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL01904
+👨‍🏫 Codice Docenti:     PROF01THH9
+🎯 Codice Dirigente:   DIR016FS87J
+
+💡 Note: Codice premium per scuola partner #1
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #2: Scuola Partner 2
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL02572
+👨‍🏫 Codice Docenti:     PROF022HXL
+🎯 Codice Dirigente:   DIR02VD5QM4
+
+💡 Note: Codice premium per scuola partner #2
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #3: Scuola Partner 3
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL03829
+👨‍🏫 Codice Docenti:     PROF037J5Y
+🎯 Codice Dirigente:   DIR037CNLK6
+
+💡 Note: Codice premium per scuola partner #3
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #4: Scuola Partner 4
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL04650
+👨‍🏫 Codice Docenti:     PROF04QZHZ
+🎯 Codice Dirigente:   DIR04OZA1WA
+
+💡 Note: Codice premium per scuola partner #4
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #5: Scuola Partner 5
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL05245
+👨‍🏫 Codice Docenti:     PROF05UI9M
+🎯 Codice Dirigente:   DIR05UWVSZE
+
+💡 Note: Codice premium per scuola partner #5
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #6: Scuola Partner 6
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL06502
+👨‍🏫 Codice Docenti:     PROF06VZ53
+🎯 Codice Dirigente:   DIR060M9OGU
+
+💡 Note: Codice premium per scuola partner #6
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #7: Scuola Partner 7
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL07509
+👨‍🏫 Codice Docenti:     PROF07ZQ1S
+🎯 Codice Dirigente:   DIR07HVE6DC
+
+💡 Note: Codice premium per scuola partner #7
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #8: Scuola Partner 8
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL08715
+👨‍🏫 Codice Docenti:     PROF08LKIC
+🎯 Codice Dirigente:   DIR08JE52Y9
+
+💡 Note: Codice premium per scuola partner #8
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #9: Scuola Partner 9
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL09716
+👨‍🏫 Codice Docenti:     PROF096FHL
+🎯 Codice Dirigente:   DIR09TGZHYU
+
+💡 Note: Codice premium per scuola partner #9
+══════════════════════════════════════════════════════════════════════
+
+SCUOLA #10: Scuola Partner 10
+──────────────────────────────────────────────────────────────────────
+📚 Codice Scuola:     SKAIL10473
+👨‍🏫 Codice Docenti:     PROF1013VL
+🎯 Codice Dirigente:   DIR10EXNA1O
+
+💡 Note: Codice premium per scuola partner #10
+══════════════════════════════════════════════════════════════════════
+
+
