@@ -251,6 +251,9 @@ class SkailaApp:
         # Inizializza AI Bot
         self.ai_bot = AISkailaBot()
 
+        # CRITICO: Inizializza sistema scuole multi-tenant
+        school_system.init_school_tables()
+
         # Inizializza gamification
         gamification_system.init_gamification_tables()
 

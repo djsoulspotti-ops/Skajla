@@ -304,7 +304,7 @@ class SchoolSystem:
                 print(f"✅ Scuola predefinita creata (ID: {default_school_id})")
     
     def _migrate_existing_database(self, cursor):
-        """Migrazione sicura per database esistenti"""
+        """Migrazione sicura per database esistenti con SAVEPOINT per PostgreSQL"""
         try:
             # Prima verifica se la tabella scuole esiste
             if db_manager.db_type == 'postgresql':
@@ -330,17 +330,32 @@ class SchoolSystem:
             
             for column_name, column_def in columns_to_add:
                 try:
+                    # SAVEPOINT per PostgreSQL: permette rollback parziale senza abortire transazione
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute(f'SAVEPOINT before_alter_{column_name}')
+                    
                     if db_manager.db_type == 'postgresql':
                         cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
                     else:
                         cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
                     print(f"✅ Aggiunta colonna {column_name} alla tabella scuole")
                 except Exception as e:
+                    # Rollback al savepoint invece di abortire intera transazione
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute(f'ROLLBACK TO SAVEPOINT before_alter_{column_name}')
+                    
                     # Colonna già esiste o altro errore
                     if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
                         pass  # Colonna già presente, ok
                     else:
                         print(f"⚠️ Attenzione durante migrazione colonna {column_name}: {e}")
+                finally:
+                    # Release savepoint se tutto ok
+                    if db_manager.db_type == 'postgresql':
+                        try:
+                            cursor.execute(f'RELEASE SAVEPOINT before_alter_{column_name}')
+                        except:
+                            pass
                         
             # Gestione speciale per UNIQUE constraint su dirigente_invite_token
             self._ensure_dirigente_invite_token_unique(cursor)
