@@ -40,9 +40,24 @@ def register_socket_events(socketio):
     @socketio.on('join_conversation')
     def handle_join_conversation(data):
         if 'user_id' not in session:
+            emit('error', {'message': 'Non autorizzato'})
             return
 
-        conversation_id = data['conversation_id']
+        conversation_id = data.get('conversation_id')
+        if not conversation_id:
+            emit('error', {'message': 'conversation_id mancante'})
+            return
+
+        # SECURITY: Verifica che l'utente sia membro della chat
+        is_member = db_manager.query('''
+            SELECT 1 FROM partecipanti_chat 
+            WHERE chat_id = ? AND utente_id = ?
+        ''', (conversation_id, session['user_id']), one=True)
+
+        if not is_member:
+            emit('error', {'message': 'Non autorizzato ad accedere a questa chat'})
+            return
+
         join_room(f"chat_{conversation_id}")
 
         emit('joined_conversation', {
@@ -52,12 +67,28 @@ def register_socket_events(socketio):
     @socketio.on('send_message')
     def handle_send_message(data):
         if 'user_id' not in session:
+            emit('error', {'message': 'Non autorizzato'})
             return
 
-        conversation_id = data['conversation_id']
+        conversation_id = data.get('conversation_id')
         contenuto = data.get('contenuto', '')
 
+        if not conversation_id:
+            emit('error', {'message': 'conversation_id mancante'})
+            return
+
         if not contenuto.strip():
+            emit('error', {'message': 'Messaggio vuoto'})
+            return
+
+        # SECURITY: Verifica che l'utente sia membro della chat
+        is_member = db_manager.query('''
+            SELECT 1 FROM partecipanti_chat 
+            WHERE chat_id = ? AND utente_id = ?
+        ''', (conversation_id, session['user_id']), one=True)
+
+        if not is_member:
+            emit('error', {'message': 'Non autorizzato a inviare messaggi in questa chat'})
             return
 
         with db_manager.get_connection() as conn:
@@ -86,7 +117,19 @@ def register_socket_events(socketio):
         if 'user_id' not in session:
             return
 
-        conversation_id = data['conversation_id']
+        conversation_id = data.get('conversation_id')
+        if not conversation_id:
+            return
+
+        # SECURITY: Verifica che l'utente sia membro della chat
+        is_member = db_manager.query('''
+            SELECT 1 FROM partecipanti_chat 
+            WHERE chat_id = ? AND utente_id = ?
+        ''', (conversation_id, session['user_id']), one=True)
+
+        if not is_member:
+            return
+
         emit('user_typing', {
             'conversation_id': conversation_id,
             'user_name': session['nome'],
@@ -98,7 +141,19 @@ def register_socket_events(socketio):
         if 'user_id' not in session:
             return
 
-        conversation_id = data['conversation_id']
+        conversation_id = data.get('conversation_id')
+        if not conversation_id:
+            return
+
+        # SECURITY: Verifica che l'utente sia membro della chat
+        is_member = db_manager.query('''
+            SELECT 1 FROM partecipanti_chat 
+            WHERE chat_id = ? AND utente_id = ?
+        ''', (conversation_id, session['user_id']), one=True)
+
+        if not is_member:
+            return
+
         emit('user_typing', {
             'conversation_id': conversation_id,
             'user_name': session['nome'],
