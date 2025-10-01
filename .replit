@@ -6,7 +6,7 @@ hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cargo", "iana-etc", "libiconv", "rustc"]
+packages = ["cargo", "iana-etc", "libiconv", "rustc", "imagemagick"]
 
 [deployment]
 run = ["gunicorn", "--worker-class", "eventlet", "--workers", "4", "--bind", "0.0.0.0:5000", "--timeout", "120", "--keep-alive", "5", "--max-requests", "1000", "--preload", "main:app"]
@@ -16,10 +16,6 @@ build = ["pip", "install", "-r", "requirements.txt"]
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 36371
-externalPort = 3001
 
 [[ports]]
 localPort = 37545
