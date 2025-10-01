@@ -76,35 +76,40 @@ def dashboard_professore():
     if session.get('ruolo') != 'professore':
         return redirect('/dashboard')
     
-    # SECURITY: Tenant guard - filtra per school_id
-    school_id = get_current_school_id()
-    
-    # Statistiche classe (con school_id)
-    students_count = db_manager.query('''
-        SELECT COUNT(*) as count FROM utenti 
-        WHERE ruolo = ? AND classe = ? AND school_id = ? AND attivo = ?
-    ''', ('studente', session.get('classe', ''), school_id, True), one=True)['count']
-    
-    # Messaggi recenti (con school_id)
-    recent_activity = db_manager.query('''
-        SELECT u.nome, u.cognome, m.contenuto, m.timestamp
-        FROM messaggi m
-        JOIN utenti u ON m.utente_id = u.id
-        JOIN chat c ON m.chat_id = c.id
-        WHERE u.classe = ? AND u.school_id = ? AND c.school_id = ? 
-        AND DATE(m.timestamp) = DATE('now')
-        ORDER BY m.timestamp DESC
-        LIMIT 10
-    ''', (session.get('classe', ''), school_id, school_id))
-    
-    stats = {
-        'students_count': students_count,
-        'recent_activity': recent_activity
-    }
-    
-    return render_template('dashboard_professore.html', 
-                         user=session, 
-                         stats=stats)
+    try:
+        # SECURITY: Tenant guard - filtra per school_id
+        school_id = get_current_school_id()
+        
+        # Statistiche classe (con school_id)
+        students_count = db_manager.query('''
+            SELECT COUNT(*) as count FROM utenti 
+            WHERE ruolo = ? AND classe = ? AND scuola_id = ? AND attivo = ?
+        ''', ('studente', session.get('classe', ''), school_id, True), one=True)['count']
+        
+        # Messaggi recenti (con school_id)
+        recent_activity = db_manager.query('''
+            SELECT u.nome, u.cognome, m.contenuto, m.timestamp
+            FROM messaggi m
+            JOIN utenti u ON m.utente_id = u.id
+            JOIN chat c ON m.chat_id = c.id
+            WHERE u.classe = ? AND u.scuola_id = ? AND c.scuola_id = ? 
+            AND DATE(m.timestamp) = DATE('now')
+            ORDER BY m.timestamp DESC
+            LIMIT 10
+        ''', (session.get('classe', ''), school_id, school_id))
+        
+        stats = {
+            'students_count': students_count,
+            'recent_activity': recent_activity
+        }
+        
+        return render_template('dashboard_professore.html', 
+                             user=session, 
+                             stats=stats)
+    except TenantGuardException:
+        # Session mancante o corrotta - redirect a login
+        session.clear()
+        return redirect('/login')
 
 @dashboard_bp.route('/dashboard/genitore')
 @require_login
@@ -123,9 +128,14 @@ def dashboard_admin():
     if session.get('ruolo') != 'admin':
         return redirect('/dashboard')
     
-    # SECURITY: Usa tenant guard per statistiche filtrate per scuola
-    school_id = get_current_school_id()
-    school_stats = get_school_stats(school_id)
+    try:
+        # SECURITY: Usa tenant guard per statistiche filtrate per scuola
+        school_id = get_current_school_id()
+        school_stats = get_school_stats(school_id)
+    except TenantGuardException:
+        # Session mancante o corrotta - redirect a login
+        session.clear()
+        return redirect('/login')
     
     # Messaggi di oggi (filtrati per scuola)
     messages_today = db_manager.query('''
