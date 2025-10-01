@@ -9,8 +9,8 @@ channel = "stable-24_05"
 packages = ["cargo", "iana-etc", "libiconv", "rustc", "imagemagick"]
 
 [deployment]
-run = ["gunicorn", "--worker-class", "eventlet", "--workers", "4", "--bind", "0.0.0.0:5000", "--timeout", "120", "--keep-alive", "5", "--max-requests", "1000", "--preload", "main:app"]
-deploymentTarget = "autoscale"
+run = ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:socketio_app"]
+deploymentTarget = "vm"
 build = ["pip", "install", "-r", "requirements.txt"]
 
 [[ports]]
