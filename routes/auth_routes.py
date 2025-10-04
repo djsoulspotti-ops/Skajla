@@ -18,13 +18,16 @@ auth_bp = Blueprint('auth', __name__)
 @csrf_protect
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        
+        print(f"🔐 Login attempt: {email}")
         
         # Verifica credenziali
         user = auth_service.authenticate_user(email, password)
         
         if user:
+            print(f"✅ Login successful: {email}")
             # Crea sessione
             session['user_id'] = user['id']
             session['username'] = user['username']
@@ -44,7 +47,8 @@ def login():
             
             return redirect('/dashboard')
         else:
-            flash('Email o password errati', 'error')
+            print(f"❌ Login failed: {email}")
+            flash('Email o password errati. Verifica le credenziali.', 'error')
     
     return render_template('login.html')
 

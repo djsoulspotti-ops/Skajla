@@ -377,6 +377,11 @@
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if not csrf_token() %}
+            <div class="error">
+                <i class="fas fa-exclamation-triangle"></i> Errore CSRF: ricarica la pagina
+            </div>
+            {% endif %}
             <div class="form-group">
                 <label for="email">📧 Email</label>
                 <div class="input-wrapper">
