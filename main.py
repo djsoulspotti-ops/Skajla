@@ -178,6 +178,15 @@ class SkailaApp:
         # Aggiungi CSRF protection context processor
         from csrf_protection import inject_csrf_token
         self.app.context_processor(inject_csrf_token)
+        
+        # Error handlers personalizzati
+        @self.app.errorhandler(404)
+        def page_not_found(e):
+            return render_template('404.html'), 404
+        
+        @self.app.errorhandler(500)
+        def internal_server_error(e):
+            return render_template('500.html'), 500
 
     def setup_socketio(self):
         """Configurazione Socket.IO con CORS sicuro"""
