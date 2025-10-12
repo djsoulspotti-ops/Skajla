@@ -120,17 +120,57 @@ class DatabaseManager:
     
     @contextmanager
     def get_connection(self):
-        """Context manager per gestione automatica connessioni"""
+        """Context manager per gestione automatica connessioni con retry per Neon sleep"""
         if self.db_type == 'postgresql':
-            conn = self.pool.getconn()
-            try:
-                yield conn
-                conn.commit()
-            except Exception as e:
-                conn.rollback()
-                raise e
-            finally:
-                self.pool.putconn(conn)
+            max_retries = 3
+            retry_count = 0
+            
+            while retry_count < max_retries:
+                conn = None
+                try:
+                    conn = self.pool.getconn()
+                    
+                    # Test connessione prima dell'uso (wake up Neon se necessario)
+                    cursor = conn.cursor()
+                    cursor.execute('SELECT 1')
+                    cursor.close()
+                    
+                    yield conn
+                    conn.commit()
+                    break  # Success
+                    
+                except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+                    retry_count += 1
+                    print(f"⚠️ Database connection error (attempt {retry_count}/{max_retries}): {e}")
+                    
+                    # Chiudi connessione corrotta
+                    if conn:
+                        try:
+                            conn.close()
+                        except:
+                            pass
+                    
+                    # Ultimo tentativo fallito - solleva errore
+                    if retry_count >= max_retries:
+                        raise
+                    
+                    # Attendi prima di retry (Neon wake-up time)
+                    import time
+                    time.sleep(1)
+                    
+                except Exception as e:
+                    if conn:
+                        try:
+                            conn.rollback()
+                        except:
+                            pass
+                    raise e
+                finally:
+                    if conn:
+                        try:
+                            self.pool.putconn(conn)
+                        except:
+                            pass
         else:
             conn = self.sqlite_pool.getconn()
             try:
