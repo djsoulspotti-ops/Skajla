@@ -67,7 +67,7 @@ class SKAILABrain:
         classmates_online = self._get_online_classmates(user_id, user_data)
         
         # Daily challenges disponibili
-        daily_challenges = gamification_system.get_available_daily_challenges(user_id)
+        daily_challenges = []  # TODO: Implementare get_available_daily_challenges
         
         # Badge quasi sbloccati
         badges_close = self._get_badges_almost_unlocked(user_id, gamification_data)
