@@ -150,7 +150,7 @@ class DatabaseManager:
                         except:
                             pass
                     
-                    # Se è l'ultimo tentativo, ricrea completamente il pool
+                    # Ricrea pool PRIMA dell'ultimo tentativo (non dopo)
                     if retry_count == max_retries - 1:
                         print("🔄 Ricreazione pool PostgreSQL per wake-up Neon...")
                         try:
@@ -158,14 +158,17 @@ class DatabaseManager:
                         except:
                             pass
                         self.setup_postgresql_pool()
+                        # Attendi 3 secondi dopo ricreazione pool per dare tempo a Neon di svegliarsi
+                        import time
+                        time.sleep(3)
+                    else:
+                        # Attendi 2 secondi tra i primi retry
+                        import time
+                        time.sleep(2)
                     
                     # Ultimo tentativo fallito - solleva errore
                     if retry_count >= max_retries:
                         raise
-                    
-                    # Attendi prima di retry (Neon wake-up time)
-                    import time
-                    time.sleep(2)  # Aumentato a 2 secondi per Neon
                     
                 except Exception as e:
                     if conn:
