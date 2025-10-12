@@ -143,12 +143,21 @@ class DatabaseManager:
                     retry_count += 1
                     print(f"⚠️ Database connection error (attempt {retry_count}/{max_retries}): {e}")
                     
-                    # Chiudi connessione corrotta
+                    # CRITICO: Chiudi e ricrea pool se Neon è in sleep
                     if conn:
                         try:
-                            conn.close()
+                            self.pool.putconn(conn, close=True)  # Force close
                         except:
                             pass
+                    
+                    # Se è l'ultimo tentativo, ricrea completamente il pool
+                    if retry_count == max_retries - 1:
+                        print("🔄 Ricreazione pool PostgreSQL per wake-up Neon...")
+                        try:
+                            self.pool.closeall()
+                        except:
+                            pass
+                        self.setup_postgresql_pool()
                     
                     # Ultimo tentativo fallito - solleva errore
                     if retry_count >= max_retries:
@@ -156,7 +165,7 @@ class DatabaseManager:
                     
                     # Attendi prima di retry (Neon wake-up time)
                     import time
-                    time.sleep(1)
+                    time.sleep(2)  # Aumentato a 2 secondi per Neon
                     
                 except Exception as e:
                     if conn:
