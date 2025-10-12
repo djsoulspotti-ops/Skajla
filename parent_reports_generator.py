@@ -50,10 +50,9 @@ class ParentReportsGenerator:
         # Homework/Lessons this week
         lessons_week = db_manager.query('''
             SELECT rcl.* FROM registro_calendario_lezioni rcl
-            JOIN utenti u ON ? = ?
             WHERE rcl.class = ? AND rcl.lesson_date >= ? AND rcl.homework IS NOT NULL
             ORDER BY rcl.lesson_date DESC
-        ''', (student_id, student_id, student['classe'], week_start))
+        ''', (student['classe'], week_start))
         
         # Overall averages
         averages = registro.get_subject_averages(student_id)

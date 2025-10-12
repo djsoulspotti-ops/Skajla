@@ -83,7 +83,7 @@ def get_quiz():
         if not quiz:
             return jsonify({'error': 'Nessun quiz disponibile'}), 404
         
-        # Salva quiz in sessione per verifica risposta
+        # Salva TUTTO in sessione server-side (inclusa risposta corretta)
         session['current_quiz'] = {
             'id': quiz['id'],
             'correct_answer': quiz['correct_answer'],
@@ -95,10 +95,16 @@ def get_quiz():
             'start_time': datetime.now().isoformat()
         }
         
-        # Rimuovi risposta corretta dalla response
-        quiz_response = quiz.copy()
-        del quiz_response['correct_answer']
-        del quiz_response['explanation']
+        # CRITICO: NON inviare MAI correct_answer e explanation al client!
+        quiz_response = {
+            'id': quiz['id'],
+            'subject': quiz['subject'],
+            'topic': quiz['topic'],
+            'difficulty': quiz['difficulty'],
+            'question': quiz['question'],
+            'options': quiz['options'],
+            'xp_reward': quiz['xp_reward']
+        }
         
         return jsonify({
             'success': True,
