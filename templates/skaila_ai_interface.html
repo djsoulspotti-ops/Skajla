@@ -1,0 +1,831 @@
+<!-- SKAILA AI Interface - Complete Integration -->
+<style>
+:root {
+    --primary: #00d4ff;
+    --secondary: #7c3aed;
+    --accent: #ff006e;
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --error: #ff0066;
+    --dark: #0a0a0f;
+    --darker: #050508;
+    --light: #1a1a2e;
+    --text: #ffffff;
+    --text-light: #94a3b8;
+    --border: rgba(0, 212, 255, 0.2);
+    --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+    --gradient-accent: linear-gradient(135deg, #00ff88 0%, #0099ff 100%);
+    --shadow-neon: 0 0 30px rgba(0, 212, 255, 0.5);
+    --shadow-glow: 0 0 50px rgba(124, 58, 237, 0.3);
+}
+
+/* AI Chat Modal */
+.skaila-ai-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+}
+
+.skaila-ai-container {
+    background: var(--light);
+    border-radius: 20px;
+    width: 95%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-glow);
+    border: 2px solid var(--primary);
+    display: flex;
+    flex-direction: column;
+}
+
+.skaila-ai-header {
+    background: var(--gradient-primary);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ai-header-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ai-avatar-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.ai-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.ai-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.close-ai-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 0.7rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.close-ai-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+.skaila-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: var(--darker);
+    max-height: 500px;
+}
+
+.skaila-message {
+    margin-bottom: 1.5rem;
+    animation: slideIn 0.3s ease;
+}
+
+.message-ai {
+    background: var(--dark);
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 12px;
+    max-width: 85%;
+}
+
+.message-user {
+    background: var(--primary);
+    padding: 1rem;
+    border-radius: 12px;
+    max-width: 85%;
+    margin-left: auto;
+    text-align: right;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.quiz-card {
+    background: var(--light);
+    border: 2px solid var(--accent);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: var(--shadow-neon);
+}
+
+.quiz-question {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.quiz-option {
+    background: var(--darker);
+    border: 2px solid var(--border);
+    padding: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.quiz-option:hover {
+    border-color: var(--primary);
+    transform: translateX(5px);
+    background: var(--dark);
+}
+
+.quiz-option.selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: white;
+}
+
+.quiz-option.correct {
+    border-color: var(--success);
+    background: var(--success);
+    color: white;
+}
+
+.quiz-option.wrong {
+    border-color: var(--error);
+    background: var(--error);
+    color: white;
+}
+
+.option-letter {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.quiz-submit-btn {
+    background: var(--gradient-accent);
+    color: var(--text);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.quiz-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-neon);
+}
+
+.quiz-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quiz-result {
+    background: var(--dark);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border-left: 4px solid var(--success);
+}
+
+.xp-earned {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--success);
+    margin-bottom: 1rem;
+}
+
+.xp-animation {
+    animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.skaila-input-area {
+    background: var(--dark);
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.skaila-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--darker);
+    border-radius: 30px;
+    padding: 0.5rem;
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.skaila-input-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-neon);
+}
+
+.skaila-input-wrapper input {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+}
+
+.skaila-send-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.skaila-send-btn:hover {
+    background: var(--primary);
+    transform: scale(1.05);
+}
+
+.quick-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.quick-action-btn {
+    background: var(--darker);
+    border: 1px solid var(--border);
+    color: var(--text-light);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.quick-action-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--dark);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.typing-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: scale(1); opacity: 0.5; }
+    30% { transform: scale(1.3); opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Leaderboard Styles */
+.leaderboard-card {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--darker);
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.rank-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.leaderboard-xp {
+    margin-left: auto;
+    font-weight: bold;
+    color: var(--success);
+}
+</style>
+
+<!-- SKAILA AI Modal -->
+<div id="skailaAIModal" class="skaila-ai-modal">
+    <div class="skaila-ai-container">
+        <!-- Header -->
+        <div class="skaila-ai-header">
+            <div class="ai-header-info">
+                <div class="ai-avatar-circle">🤖</div>
+                <div>
+                    <h3 id="skailaBotName" style="margin: 0;">SKAILA AI Brain</h3>
+                    <div class="ai-stats">
+                        <div class="ai-stat">
+                            <span>⭐</span>
+                            <span id="studentXP">0 XP</span>
+                        </div>
+                        <div class="ai-stat">
+                            <span>📊</span>
+                            <span id="studentLevel">Livello 1</span>
+                        </div>
+                        <div class="ai-stat">
+                            <span>🔥</span>
+                            <span id="studentStreak">0 giorni</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="close-ai-btn" onclick="closeSkailaAI()">✕</button>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="skailaChatMessages" class="skaila-chat-messages">
+            <div class="skaila-message message-ai">
+                <div class="message-header">
+                    <span>🤖</span>
+                    <strong>SKAILA AI Brain</strong>
+                </div>
+                <div>
+                    Ciao! Sono il tuo assistente AI personale. Posso aiutarti con:
+                    <br><br>
+                    📚 <strong>Studio e ripasso</strong> - Spiegazioni semplici<br>
+                    🎯 <strong>Quiz adattivi</strong> - Allenamento personalizzato<br>
+                    📊 <strong>Progressi</strong> - Analisi performance<br>
+                    👥 <strong>Aiuto tra compagni</strong> - Trova esperti in classe<br>
+                    <br>
+                    Come posso aiutarti oggi?
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="skaila-input-area">
+            <form id="skailaChatForm" onsubmit="sendSkailaMessage(event)">
+                <div class="skaila-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="skailaMessageInput" 
+                        placeholder="Scrivi un messaggio o chiedi un quiz..." 
+                        autocomplete="off"
+                    />
+                    <button type="submit" class="skaila-send-btn">Invia 📤</button>
+                </div>
+            </form>
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Fammi un quiz di matematica')">
+                    🧮 Quiz Matematica
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Come sto andando?')">
+                    📊 Miei Progressi
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Ho bisogno di aiuto in italiano')">
+                    🆘 Aiuto Italiano
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Trova un compagno che può aiutarmi')">
+                    👥 Peer Help
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// SKAILA AI Global State
+let currentQuiz = null;
+let selectedAnswer = null;
+let skailaProfile = {
+    xp: 0,
+    level: 1,
+    streak: 0
+};
+
+// Open/Close SKAILA AI Modal
+function openSkailaAI() {
+    document.getElementById('skailaAIModal').style.display = 'flex';
+    loadSkailaProfile();
+}
+
+function closeSkailaAI() {
+    document.getElementById('skailaAIModal').style.display = 'none';
+}
+
+// Load Student Profile
+async function loadSkailaProfile() {
+    try {
+        const response = await fetch('/api/gamification/profile');
+        if (response.ok) {
+            const data = await response.json();
+            skailaProfile = {
+                xp: data.xp || 0,
+                level: data.livello || 1,
+                streak: data.streak || 0
+            };
+            
+            document.getElementById('studentXP').textContent = `${skailaProfile.xp} XP`;
+            document.getElementById('studentLevel').textContent = `Livello ${skailaProfile.level}`;
+            document.getElementById('studentStreak').textContent = `${skailaProfile.streak} giorni`;
+        }
+    } catch (error) {
+        console.error('❌ Error loading profile:', error);
+    }
+}
+
+// Send Message to SKAILA AI Brain
+async function sendSkailaMessage(event) {
+    event.preventDefault();
+    
+    const input = document.getElementById('skailaMessageInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message
+    addSkailaMessage(message, 'user');
+    input.value = '';
+    
+    // Show typing
+    showSkailaTyping();
+    
+    try {
+        const response = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        });
+        
+        const data = await response.json();
+        hideSkailaTyping();
+        
+        if (response.ok) {
+            // Add AI response
+            addSkailaMessage(data.ai_response, 'ai');
+            
+            // Check if quiz was suggested
+            if (data.quiz_suggested && data.quiz) {
+                displayQuiz(data.quiz);
+            }
+            
+            // Check if peer help was suggested
+            if (data.peer_help && data.peer_suggestions) {
+                displayPeerHelp(data.peer_suggestions);
+            }
+            
+            // Update XP if changed
+            if (data.xp_earned) {
+                skailaProfile.xp += data.xp_earned;
+                document.getElementById('studentXP').textContent = `${skailaProfile.xp} XP`;
+            }
+        } else {
+            addSkailaMessage('Mi dispiace, c\'è stato un errore. Riprova! 😅', 'ai');
+        }
+    } catch (error) {
+        hideSkailaTyping();
+        addSkailaMessage('Errore di connessione. Controlla la tua rete! 📡', 'ai');
+        console.error('❌ AI Error:', error);
+    }
+}
+
+// Quick Message Shortcut
+function sendQuickSkailaMsg(msg) {
+    document.getElementById('skailaMessageInput').value = msg;
+    document.getElementById('skailaChatForm').dispatchEvent(new Event('submit'));
+}
+
+// Add Message to Chat
+function addSkailaMessage(content, sender) {
+    const container = document.getElementById('skailaChatMessages');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `skaila-message message-${sender}`;
+    
+    if (sender === 'ai') {
+        msgDiv.innerHTML = `
+            <div class="message-header">
+                <span>🤖</span>
+                <strong>SKAILA AI</strong>
+            </div>
+            <div>${content}</div>
+        `;
+    } else {
+        msgDiv.innerHTML = `<div>${content}</div>`;
+    }
+    
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+// Typing Indicator
+function showSkailaTyping() {
+    const container = document.getElementById('skailaChatMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'skailaTyping';
+    typingDiv.className = 'typing-indicator';
+    typingDiv.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <span style="margin-left: 0.5rem;">SKAILA sta pensando...</span>
+    `;
+    container.appendChild(typingDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+function hideSkailaTyping() {
+    const typing = document.getElementById('skailaTyping');
+    if (typing) typing.remove();
+}
+
+// Display Quiz
+function displayQuiz(quiz) {
+    currentQuiz = quiz;
+    selectedAnswer = null;
+    
+    const container = document.getElementById('skailaChatMessages');
+    const quizDiv = document.createElement('div');
+    quizDiv.className = 'quiz-card';
+    quizDiv.id = 'currentQuizCard';
+    
+    const letters = ['A', 'B', 'C', 'D'];
+    const optionsHTML = quiz.options.map((opt, idx) => `
+        <div class="quiz-option" onclick="selectQuizOption(${idx})">
+            <div class="option-letter">${letters[idx]}</div>
+            <div>${opt}</div>
+        </div>
+    `).join('');
+    
+    quizDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <span style="color: var(--accent); font-weight: 600;">
+                📚 ${quiz.subject} - ${quiz.topic}
+            </span>
+            <span style="background: var(--primary); padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.9rem;">
+                ${quiz.difficulty}
+            </span>
+        </div>
+        <div class="quiz-question">${quiz.question}</div>
+        <div class="quiz-options" id="quizOptions">
+            ${optionsHTML}
+        </div>
+        <button class="quiz-submit-btn" id="quizSubmitBtn" onclick="submitQuizAnswer()" disabled>
+            Conferma Risposta
+        </button>
+    `;
+    
+    container.appendChild(quizDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+// Select Quiz Option
+function selectQuizOption(index) {
+    selectedAnswer = index;
+    
+    // Update UI
+    document.querySelectorAll('.quiz-option').forEach((opt, idx) => {
+        opt.classList.remove('selected');
+        if (idx === index) {
+            opt.classList.add('selected');
+        }
+    });
+    
+    // Enable submit button
+    document.getElementById('quizSubmitBtn').disabled = false;
+}
+
+// Submit Quiz Answer
+async function submitQuizAnswer() {
+    if (selectedAnswer === null || !currentQuiz) return;
+    
+    const submitBtn = document.getElementById('quizSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verifico...';
+    
+    try {
+        const response = await fetch('/api/ai/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                quiz_id: currentQuiz.id,
+                answer: selectedAnswer,
+                time_taken: 30
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showQuizResult(data);
+        }
+    } catch (error) {
+        console.error('❌ Quiz submit error:', error);
+        submitBtn.textContent = 'Errore - Riprova';
+        submitBtn.disabled = false;
+    }
+}
+
+// Show Quiz Result
+function showQuizResult(result) {
+    const quizCard = document.getElementById('currentQuizCard');
+    
+    // Mark correct/wrong options
+    document.querySelectorAll('.quiz-option').forEach((opt, idx) => {
+        opt.style.pointerEvents = 'none';
+        if (idx === result.correct_answer) {
+            opt.classList.add('correct');
+        } else if (idx === selectedAnswer && !result.correct) {
+            opt.classList.add('wrong');
+        }
+    });
+    
+    // Add result card
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'quiz-result';
+    resultDiv.innerHTML = `
+        <div class="xp-earned">
+            <span class="xp-animation">⭐ +${result.xp_earned} XP</span>
+            ${result.correct ? '✅ Corretto!' : '❌ Sbagliato'}
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <strong>Spiegazione:</strong><br>
+            ${result.explanation}
+        </div>
+        ${result.badge_unlocked ? `
+            <div style="background: var(--success); padding: 1rem; border-radius: 10px; text-align: center;">
+                🏆 Hai sbloccato: <strong>${result.badge_unlocked}</strong>!
+            </div>
+        ` : ''}
+        ${result.next_quiz_available ? `
+            <button class="quiz-submit-btn" onclick="requestNextQuiz()">
+                Quiz Successivo 🎯
+            </button>
+        ` : ''}
+    `;
+    
+    quizCard.appendChild(resultDiv);
+    
+    // Update XP
+    skailaProfile.xp += result.xp_earned;
+    document.getElementById('studentXP').textContent = `${skailaProfile.xp} XP`;
+    
+    // Scroll to result
+    const container = document.getElementById('skailaChatMessages');
+    container.scrollTop = container.scrollHeight;
+}
+
+// Request Next Quiz
+async function requestNextQuiz() {
+    showSkailaTyping();
+    
+    try {
+        const response = await fetch('/api/ai/quiz/get', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        
+        const data = await response.json();
+        hideSkailaTyping();
+        
+        if (response.ok && data.quiz) {
+            displayQuiz(data.quiz);
+        }
+    } catch (error) {
+        hideSkailaTyping();
+        addSkailaMessage('Errore nel caricamento del quiz. Riprova! 🎯', 'ai');
+    }
+}
+
+// Display Peer Help Suggestions
+function displayPeerHelp(peers) {
+    const container = document.getElementById('skailaChatMessages');
+    const peerDiv = document.createElement('div');
+    peerDiv.className = 'leaderboard-card';
+    
+    const peersHTML = peers.map((peer, idx) => `
+        <div class="leaderboard-item">
+            <div class="rank-badge">${idx + 1}</div>
+            <div>
+                <strong>${peer.nome}</strong>
+                <div style="font-size: 0.9rem; color: var(--text-light);">
+                    ${peer.accuracy}% accuratezza - ${peer.completed_quizzes} quiz
+                </div>
+            </div>
+            <div class="leaderboard-xp">${peer.subject_xp} XP</div>
+        </div>
+    `).join('');
+    
+    peerDiv.innerHTML = `
+        <h4 style="margin-bottom: 1rem; color: var(--primary);">
+            👥 Compagni che possono aiutarti:
+        </h4>
+        ${peersHTML}
+    `;
+    
+    container.appendChild(peerDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadSkailaProfile();
+});
+
+// Close modal on outside click
+document.getElementById('skailaAIModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSkailaAI();
+    }
+});
+
+console.log('✅ SKAILA AI Interface loaded');
+</script>
