@@ -118,58 +118,44 @@ class DatabaseManager:
         self.sqlite_pool = SQLitePool()
         print("✅ SQLite pool ottimizzato configurato")
     
-    def _test_and_fix_pool(self):
-        """Testa pool e ricrea se necessario (preventivo per Neon sleep)"""
-        try:
-            test_conn = self.pool.getconn()
-            cursor = test_conn.cursor()
-            cursor.execute('SELECT 1')
-            cursor.fetchone()
-            cursor.close()
-            self.pool.putconn(test_conn)
-            return True  # Pool OK
-        except Exception as e:
-            print(f"🔍 Pool test failed: {e} - ricreazione...")
-            try:
-                self.pool.closeall()
-            except:
-                pass
-            self.setup_postgresql_pool()
-            import time
-            time.sleep(2)  # Attendi wake-up Neon
-            return False  # Pool ricreato
-    
     @contextmanager
     def get_connection(self):
-        """Context manager per gestione automatica connessioni con retry per Neon sleep"""
+        """Context manager per gestione automatica connessioni con retry atomico per Neon sleep"""
         if self.db_type == 'postgresql':
-            max_retries = 6  # Più tentativi per garantire successo
+            max_retries = 8  # Più tentativi per gestire Neon sleep
             retry_count = 0
             conn = None
-            
-            # PREVENTIVO: Testa pool prima di iniziare
-            self._test_and_fix_pool()
+            last_error = None
             
             while retry_count < max_retries:
                 conn = None
                 try:
+                    # Ottieni connessione dal pool
                     conn = self.pool.getconn()
                     
-                    # Test connessione prima dell'uso
+                    # TEST ATOMICO: Verifica connessione subito prima dell'uso
+                    # Questo garantisce che sia valida nel momento esatto della query
                     cursor = conn.cursor()
                     cursor.execute('SELECT 1')
                     cursor.fetchone()
                     cursor.close()
                     
+                    # Connessione verificata - procedi con operazione utente
                     yield conn
                     conn.commit()
-                    return  # Success - esci dal context manager
+                    
+                    # Restituisci connessione al pool
+                    self.pool.putconn(conn)
+                    return  # Success
                     
                 except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
                     retry_count += 1
-                    print(f"⚠️ Database error (attempt {retry_count}/{max_retries}): {e}")
+                    last_error = e
+                    error_msg = str(e).lower()
                     
-                    # CRITICO: Chiudi connessione fallita
+                    print(f"⚠️ Database error (attempt {retry_count}/{max_retries}): {error_msg[:100]}")
+                    
+                    # IMPORTANTE: Chiudi connessione fallita
                     if conn:
                         try:
                             self.pool.putconn(conn, close=True)
@@ -177,38 +163,41 @@ class DatabaseManager:
                             pass
                         conn = None
                     
-                    # Ricrea pool e riprova
-                    print("🔄 Ricreazione pool PostgreSQL...")
-                    try:
-                        self.pool.closeall()
-                    except:
-                        pass
+                    # Ricrea pool SOLO se errore di connessione/SSL
+                    if any(keyword in error_msg for keyword in ['ssl', 'connection', 'closed', 'eof', 'timeout']):
+                        print("🔄 Neon sleep rilevato - ricreazione pool...")
+                        try:
+                            self.pool.closeall()
+                        except:
+                            pass
+                        
+                        self.setup_postgresql_pool()
+                        
+                        # Attendi wake-up Neon (2s fissi per primo tentativo, poi progressivo)
+                        import time
+                        if retry_count == 1:
+                            time.sleep(2)  # Primo tentativo: attendi wake-up
+                        else:
+                            wait_time = min(retry_count * 0.3, 2)  # Max 2 secondi
+                            time.sleep(wait_time)
+                    else:
+                        # Errore non di connessione - attendi breve
+                        import time
+                        time.sleep(0.5)
                     
-                    self.setup_postgresql_pool()
-                    
-                    # Attendi progressivamente più tempo
-                    import time
-                    wait_time = min(retry_count * 0.5, 3)  # Max 3 secondi
-                    time.sleep(wait_time)
-                    
-                    # Ultimo tentativo fallito - solleva errore
+                    # Ultimo tentativo fallito
                     if retry_count >= max_retries:
-                        print(f"❌ Database connection failed dopo {max_retries} tentativi")
-                        raise
+                        print(f"❌ Database connection failed definitivamente")
+                        raise last_error if last_error else Exception("Database unavailable")
                     
                 except Exception as e:
                     if conn:
                         try:
                             conn.rollback()
-                        except:
-                            pass
-                    raise e
-                finally:
-                    if conn:
-                        try:
                             self.pool.putconn(conn)
                         except:
                             pass
+                    raise e
         else:
             conn = self.sqlite_pool.getconn()
             try:
