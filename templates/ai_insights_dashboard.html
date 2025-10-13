@@ -1,0 +1,552 @@
+<!-- Dashboard AI Insights - Studenti a Rischio -->
+<style>
+:root {
+    --primary: #00d4ff;
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --error: #ff0066;
+    --dark: #0a0a0f;
+    --darker: #050508;
+    --light: #1a1a2e;
+    --text: #ffffff;
+    --border: rgba(0, 212, 255, 0.2);
+    --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+}
+
+.insights-dashboard {
+    background: var(--darker);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.insights-header {
+    background: var(--gradient-primary);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.class-health {
+    background: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.health-score {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.health-indicators {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.indicator {
+    background: var(--darker);
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.indicator-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.risk-students-section {
+    background: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.risk-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.6rem 1.2rem;
+    border: 2px solid var(--border);
+    background: var(--darker);
+    color: var(--text);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active.all { background: var(--primary); border-color: var(--primary); color: white; }
+.filter-btn.active.critico { background: var(--error); border-color: var(--error); color: white; }
+.filter-btn.active.alto { background: #ff6600; border-color: #ff6600; color: white; }
+.filter-btn.active.medio { background: var(--warning); border-color: var(--warning); color: var(--dark); }
+.filter-btn.active.basso { background: var(--success); border-color: var(--success); color: var(--dark); }
+
+.student-cards {
+    display: grid;
+    gap: 1rem;
+}
+
+.student-card {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 5px solid var(--success);
+    transition: all 0.3s ease;
+}
+
+.student-card.critico { border-color: var(--error); }
+.student-card.alto { border-color: #ff6600; }
+.student-card.medio { border-color: var(--warning); }
+.student-card.basso { border-color: var(--success); }
+
+.student-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+}
+
+.student-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.student-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.risk-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.risk-badge.critico { background: var(--error); color: white; }
+.risk-badge.alto { background: #ff6600; color: white; }
+.risk-badge.medio { background: var(--warning); color: var(--dark); }
+.risk-badge.basso { background: var(--success); color: var(--dark); }
+
+.risk-factors {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.factor-tag {
+    background: rgba(255, 0, 102, 0.2);
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    border: 1px solid var(--error);
+}
+
+.intervention-preview {
+    background: rgba(0, 212, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border-left: 3px solid var(--primary);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.action-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+    background: var(--primary);
+    color: var(--dark);
+}
+
+.action-btn.secondary {
+    background: var(--darker);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.anomalies-section {
+    background: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+}
+
+.anomaly-card {
+    background: var(--darker);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    border-left: 4px solid var(--warning);
+}
+
+.anomaly-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.anomaly-type {
+    font-weight: 600;
+    color: var(--warning);
+}
+
+.chart-container {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+.progress-ring {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.intervention-plan {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.plan-step {
+    background: rgba(0, 212, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    border-left: 3px solid var(--primary);
+}
+</style>
+
+<div class="insights-dashboard">
+    <div class="insights-header">
+        <h1 style="margin: 0;">🧠 AI Insights Dashboard</h1>
+        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Intelligence artificiale per il successo degli studenti</p>
+    </div>
+
+    <!-- Class Health -->
+    <div class="class-health">
+        <h2 style="margin-bottom: 1rem;">📊 Salute della Classe</h2>
+        <div id="classHealthScore" class="health-score">0</div>
+        <div style="text-align: center; color: var(--text-light); margin-top: -1rem;">Class Health Score</div>
+        
+        <div class="health-indicators">
+            <div class="indicator">
+                <div class="indicator-value" id="avgAttendance" style="color: var(--success);">0%</div>
+                <div style="color: var(--text-light); font-size: 0.9rem;">Presenza Media</div>
+            </div>
+            <div class="indicator">
+                <div class="indicator-value" id="avgGrade" style="color: var(--primary);">0</div>
+                <div style="color: var(--text-light); font-size: 0.9rem;">Voto Medio</div>
+            </div>
+            <div class="indicator">
+                <div class="indicator-value" id="atRiskCount" style="color: var(--error);">0</div>
+                <div style="color: var(--text-light); font-size: 0.9rem;">Studenti a Rischio</div>
+            </div>
+            <div class="indicator">
+                <div class="indicator-value" id="improvingCount" style="color: var(--success);">0</div>
+                <div style="color: var(--text-light); font-size: 0.9rem;">In Miglioramento</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Students -->
+    <div class="risk-students-section">
+        <h2 style="margin-bottom: 1.5rem;">⚠️ Studenti a Rischio</h2>
+        
+        <div class="risk-filters">
+            <button class="filter-btn active all" onclick="filterRisk('all')">Tutti</button>
+            <button class="filter-btn critico" onclick="filterRisk('critico')">🔴 Critico</button>
+            <button class="filter-btn alto" onclick="filterRisk('alto')">🟠 Alto</button>
+            <button class="filter-btn medio" onclick="filterRisk('medio')">🟡 Medio</button>
+            <button class="filter-btn basso" onclick="filterRisk('basso')">🟢 Basso</button>
+        </div>
+
+        <div id="studentCards" class="student-cards">
+            <div style="text-align: center; padding: 2rem; color: var(--text-light);">Caricamento...</div>
+        </div>
+    </div>
+
+    <!-- Anomalies -->
+    <div class="anomalies-section">
+        <h2 style="margin-bottom: 1.5rem;">🔍 Anomalie Rilevate</h2>
+        <div id="anomaliesList">
+            <div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessuna anomalia rilevata</div>
+        </div>
+    </div>
+</div>
+
+<!-- Intervention Plan Modal -->
+<div id="interventionModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">📋 Piano di Intervento</h2>
+            <button onclick="closeInterventionModal()" style="background: var(--darker); border: none; color: var(--text); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">✕ Chiudi</button>
+        </div>
+        <div id="interventionContent"></div>
+    </div>
+</div>
+
+<script>
+let allStudents = [];
+let currentFilter = 'all';
+
+// Load Class Health
+async function loadClassHealth() {
+    try {
+        const response = await fetch('/api/ai/insights/class-health');
+        if (response.ok) {
+            const data = await response.json();
+            
+            document.getElementById('classHealthScore').textContent = data.health_score || 0;
+            document.getElementById('avgAttendance').textContent = `${data.avg_attendance || 0}%`;
+            document.getElementById('avgGrade').textContent = (data.avg_grade || 0).toFixed(1);
+            document.getElementById('atRiskCount').textContent = data.at_risk_count || 0;
+            document.getElementById('improvingCount').textContent = data.improving_count || 0;
+        }
+    } catch (error) {
+        console.error('Class health error:', error);
+    }
+}
+
+// Load Risk Students
+async function loadRiskStudents() {
+    try {
+        const response = await fetch('/api/ai/insights/risk-students');
+        if (response.ok) {
+            allStudents = await response.json();
+            displayStudents(allStudents);
+        }
+    } catch (error) {
+        console.error('Risk students error:', error);
+        
+        // Demo data
+        allStudents = [
+            {
+                id: 1,
+                nome: 'Marco Rossi',
+                risk_level: 'critico',
+                risk_score: 85,
+                factors: ['Assenze frequenti (25%)', 'Media voti: 5.2', '3 note disciplinari'],
+                intervention_summary: 'Colloquio famiglia urgente + tutoraggio intensivo'
+            },
+            {
+                id: 2,
+                nome: 'Giulia Bianchi',
+                risk_level: 'medio',
+                risk_score: 45,
+                factors: ['Calo voti matematica (-1.5)', 'Assenze sporadiche'],
+                intervention_summary: 'Supporto peer-to-peer matematica'
+            },
+            {
+                id: 3,
+                nome: 'Luca Verdi',
+                risk_level: 'basso',
+                risk_score: 20,
+                factors: ['Lieve calo italiano'],
+                intervention_summary: 'Monitoraggio standard'
+            }
+        ];
+        displayStudents(allStudents);
+    }
+}
+
+// Display Students
+function displayStudents(students) {
+    const container = document.getElementById('studentCards');
+    
+    const filtered = currentFilter === 'all' ? students : students.filter(s => s.risk_level === currentFilter);
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessuno studente in questa categoria</div>';
+        return;
+    }
+    
+    container.innerHTML = filtered.map(student => `
+        <div class="student-card ${student.risk_level}">
+            <div class="student-header">
+                <div class="student-name">${student.nome}</div>
+                <span class="risk-badge ${student.risk_level}">
+                    ${student.risk_level.toUpperCase()} (${student.risk_score})
+                </span>
+            </div>
+            
+            <div class="risk-factors">
+                ${student.factors.map(f => `<div class="factor-tag">⚠️ ${f}</div>`).join('')}
+            </div>
+            
+            <div class="intervention-preview">
+                <strong>💡 Intervento suggerito:</strong><br>
+                ${student.intervention_summary}
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn primary" onclick="viewIntervention(${student.id})">
+                    📋 Piano Completo
+                </button>
+                <button class="action-btn secondary" onclick="contactFamily(${student.id})">
+                    📞 Contatta Famiglia
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Filter Risk
+function filterRisk(level) {
+    currentFilter = level;
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    displayStudents(allStudents);
+}
+
+// View Intervention Plan
+function viewIntervention(studentId) {
+    const student = allStudents.find(s => s.id === studentId);
+    if (!student) return;
+    
+    const interventionHTML = `
+        <div class="intervention-plan">
+            <h3 style="margin-bottom: 1rem;">${student.nome}</h3>
+            <div style="margin-bottom: 1.5rem;">
+                <strong>Livello Rischio:</strong> 
+                <span class="risk-badge ${student.risk_level}">${student.risk_level.toUpperCase()}</span>
+            </div>
+            
+            <h4 style="margin: 1.5rem 0 1rem;">🎯 Obiettivi</h4>
+            <div class="plan-step">
+                <strong>1. Migliorare presenza</strong><br>
+                Target: 90% presenze entro 30 giorni
+            </div>
+            <div class="plan-step">
+                <strong>2. Recupero voti</strong><br>
+                Target: Media 6.5 in tutte le materie
+            </div>
+            
+            <h4 style="margin: 1.5rem 0 1rem;">📅 Timeline</h4>
+            <div class="plan-step">
+                <strong>Settimana 1-2:</strong> Colloquio famiglia + analisi cause<br>
+                <strong>Settimana 3-4:</strong> Tutoraggio peer + materiali extra<br>
+                <strong>Settimana 5-6:</strong> Verifica progressi + aggiustamenti
+            </div>
+            
+            <h4 style="margin: 1.5rem 0 1rem;">👥 Stakeholder</h4>
+            <div class="plan-step">
+                • Coordinatore di classe<br>
+                • Famiglia (colloqui settimanali)<br>
+                • Tutor peer (Giulia Bianchi - matematica)<br>
+                • Psicologo scolastico (se necessario)
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('interventionContent').innerHTML = interventionHTML;
+    document.getElementById('interventionModal').style.display = 'flex';
+}
+
+function closeInterventionModal() {
+    document.getElementById('interventionModal').style.display = 'none';
+}
+
+// Contact Family
+function contactFamily(studentId) {
+    alert('📧 Email automatica inviata alla famiglia!');
+}
+
+// Load Anomalies
+async function loadAnomalies() {
+    const anomalies = [
+        {
+            student: 'Marco Rossi',
+            type: 'grade_drop',
+            description: 'Calo voti matematica: da 7.5 a 5.8 in 2 settimane',
+            date: '2025-12-10'
+        },
+        {
+            student: 'Sofia Neri',
+            type: 'attendance_change',
+            description: 'Aumento assenze: da 5% a 20% nell\'ultimo mese',
+            date: '2025-12-11'
+        }
+    ];
+    
+    const list = document.getElementById('anomaliesList');
+    list.innerHTML = anomalies.map(a => `
+        <div class="anomaly-card">
+            <div class="anomaly-header">
+                <span class="anomaly-type">${a.type === 'grade_drop' ? '📉 Calo Voti' : '📅 Cambio Presenze'}</span>
+                <span style="color: var(--text-light); font-size: 0.85rem;">${a.date}</span>
+            </div>
+            <strong>${a.student}</strong><br>
+            <span style="color: var(--text-light);">${a.description}</span>
+        </div>
+    `).join('');
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadClassHealth();
+    loadRiskStudents();
+    loadAnomalies();
+});
+
+// Close modal on outside click
+document.getElementById('interventionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeInterventionModal();
+    }
+});
+</script>

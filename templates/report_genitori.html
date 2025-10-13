@@ -1,0 +1,564 @@
+<!-- Dashboard Report Genitori -->
+<style>
+:root {
+    --primary: #00d4ff;
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --error: #ff0066;
+    --dark: #0a0a0f;
+    --darker: #050508;
+    --light: #1a1a2e;
+    --text: #ffffff;
+    --border: rgba(0, 212, 255, 0.2);
+    --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+}
+
+.genitori-dashboard {
+    background: var(--darker);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.report-header {
+    background: var(--gradient-primary);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.student-selector {
+    background: var(--light);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.report-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.report-tab {
+    flex: 1;
+    padding: 1rem;
+    background: var(--light);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.report-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--dark);
+}
+
+.report-tab:hover {
+    transform: translateY(-2px);
+}
+
+.weekly-report, .monthly-report {
+    background: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.report-summary {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.summary-stat {
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.stat-label {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+.attendance-calendar {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.calendar-day.present { background: var(--success); color: var(--dark); }
+.calendar-day.absent { background: var(--error); color: white; }
+.calendar-day.late { background: var(--warning); color: var(--dark); }
+.calendar-day.empty { background: transparent; }
+
+.grades-section {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.grade-item {
+    background: var(--light);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grade-badge {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+}
+
+.grade-badge.high { background: var(--success); color: var(--dark); }
+.grade-badge.medium { background: var(--warning); color: var(--dark); }
+.grade-badge.low { background: var(--error); color: white; }
+
+.ai-insights-card {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary);
+}
+
+.insight-item {
+    background: rgba(0, 212, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+}
+
+.insight-icon {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    margin-right: 0.8rem;
+}
+
+.insight-icon.strength { background: var(--success); }
+.insight-icon.weakness { background: var(--error); }
+.insight-icon.suggestion { background: var(--primary); }
+
+.notifications-section {
+    background: var(--light);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.notification-card {
+    background: var(--darker);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    border-left: 4px solid var(--primary);
+}
+
+.notification-card.high { border-color: var(--error); }
+.notification-card.medium { border-color: var(--warning); }
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.priority-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.priority-badge.high { background: var(--error); color: white; }
+.priority-badge.medium { background: var(--warning); color: var(--dark); }
+.priority-badge.low { background: var(--success); color: var(--dark); }
+
+.subject-chart {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.chart-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-label {
+    width: 120px;
+    font-weight: 600;
+}
+
+.chart-progress {
+    flex: 1;
+    background: var(--light);
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.chart-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.8rem;
+    color: white;
+    font-weight: 600;
+    transition: width 0.3s ease;
+}
+
+.download-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+
+<div class="genitori-dashboard">
+    <div class="report-header">
+        <h1 style="margin: 0;">📊 Report Studente</h1>
+        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Monitora i progressi di tuo figlio</p>
+    </div>
+
+    <!-- Student Selector (for parents with multiple children) -->
+    <div class="student-selector">
+        <label style="font-weight: 600; margin-right: 1rem;">Seleziona Studente:</label>
+        <select id="studentSelect" onchange="loadReports()" style="padding: 0.8rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text); min-width: 200px;">
+            <option value="1">Marco Rossi</option>
+            <option value="2">Giulia Rossi</option>
+        </select>
+    </div>
+
+    <!-- Report Tabs -->
+    <div class="report-tabs">
+        <div class="report-tab active" onclick="switchReportTab('weekly')">
+            <div style="font-size: 1.5rem;">📅</div>
+            <div style="font-weight: 600; margin-top: 0.5rem;">Report Settimanale</div>
+        </div>
+        <div class="report-tab" onclick="switchReportTab('monthly')">
+            <div style="font-size: 1.5rem;">📈</div>
+            <div style="font-weight: 600; margin-top: 0.5rem;">Report Mensile</div>
+        </div>
+    </div>
+
+    <!-- WEEKLY REPORT -->
+    <div id="weeklyReport" class="weekly-report">
+        <h2 style="margin-bottom: 1.5rem;">Settimana 9-15 Dicembre 2025</h2>
+
+        <!-- Summary -->
+        <div class="report-summary">
+            <h3 style="margin-bottom: 1rem;">📋 Riepilogo Settimanale</h3>
+            <div class="summary-grid">
+                <div class="summary-stat">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">4/5</div>
+                    <div class="stat-label">Giorni Presenti</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Nuovi Voti</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Compiti Assegnati</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Note Disciplinari</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance -->
+        <div class="attendance-calendar">
+            <h3 style="margin-bottom: 1rem;">📅 Presenze</h3>
+            <div class="calendar-grid">
+                <div class="calendar-day empty">L</div>
+                <div class="calendar-day empty">M</div>
+                <div class="calendar-day empty">M</div>
+                <div class="calendar-day empty">G</div>
+                <div class="calendar-day empty">V</div>
+                <div class="calendar-day empty">S</div>
+                <div class="calendar-day empty">D</div>
+                <div class="calendar-day empty"></div>
+                <div class="calendar-day present">9</div>
+                <div class="calendar-day present">10</div>
+                <div class="calendar-day present">11</div>
+                <div class="calendar-day absent">12</div>
+                <div class="calendar-day present">13</div>
+                <div class="calendar-day empty"></div>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.9rem;">
+                <span><span style="display: inline-block; width: 15px; height: 15px; background: var(--success); border-radius: 3px; margin-right: 0.3rem;"></span> Presente</span>
+                <span><span style="display: inline-block; width: 15px; height: 15px; background: var(--error); border-radius: 3px; margin-right: 0.3rem;"></span> Assente</span>
+                <span><span style="display: inline-block; width: 15px; height: 15px; background: var(--warning); border-radius: 3px; margin-right: 0.3rem;"></span> Ritardo</span>
+            </div>
+        </div>
+
+        <!-- New Grades -->
+        <div class="grades-section">
+            <h3 style="margin-bottom: 1rem;">📊 Nuovi Voti</h3>
+            <div class="grade-item">
+                <div>
+                    <strong>Matematica - Verifica equazioni</strong>
+                    <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">10 Dicembre 2025 | Scritto</div>
+                </div>
+                <div class="grade-badge high">8.5</div>
+            </div>
+            <div class="grade-item">
+                <div>
+                    <strong>Italiano - Interrogazione Manzoni</strong>
+                    <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">11 Dicembre 2025 | Orale</div>
+                </div>
+                <div class="grade-badge high">7.5</div>
+            </div>
+            <div class="grade-item">
+                <div>
+                    <strong>Storia - Quiz Rivoluzione Francese</strong>
+                    <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">13 Dicembre 2025 | Scritto</div>
+                </div>
+                <div class="grade-badge medium">6.5</div>
+            </div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="ai-insights-card">
+            <h3 style="margin-bottom: 1rem;">🤖 Insights AI</h3>
+            <div class="insight-item">
+                <span class="insight-icon strength">💪</span>
+                <strong>Punti di Forza:</strong> Ottima performance in matematica e italiano
+            </div>
+            <div class="insight-item">
+                <span class="insight-icon weakness">⚠️</span>
+                <strong>Attenzione:</strong> Lieve calo in storia, considera ripasso
+            </div>
+            <div class="insight-item">
+                <span class="insight-icon suggestion">💡</span>
+                <strong>Suggerimento:</strong> Giustifica l'assenza del 12 dicembre tramite registro
+            </div>
+        </div>
+
+        <button class="download-btn" onclick="downloadReport('weekly')">
+            📥 Scarica Report PDF
+        </button>
+    </div>
+
+    <!-- MONTHLY REPORT (hidden by default) -->
+    <div id="monthlyReport" class="monthly-report" style="display: none;">
+        <h2 style="margin-bottom: 1.5rem;">Report Mensile - Dicembre 2025</h2>
+
+        <!-- Executive Summary -->
+        <div class="report-summary">
+            <h3 style="margin-bottom: 1rem;">📈 Riepilogo Esecutivo</h3>
+            <div class="summary-grid">
+                <div class="summary-stat">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">7.3</div>
+                    <div class="stat-label">Media Generale</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">92%</div>
+                    <div class="stat-label">Tasso Presenza</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Voti Totali</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value">+0.5</div>
+                    <div class="stat-label">Miglioramento</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Performance -->
+        <div class="subject-chart">
+            <h3 style="margin-bottom: 1.5rem;">📚 Performance per Materia</h3>
+            <div class="chart-bar">
+                <div class="chart-label">Matematica</div>
+                <div class="chart-progress">
+                    <div class="chart-fill" style="width: 85%;">8.5</div>
+                </div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Italiano</div>
+                <div class="chart-progress">
+                    <div class="chart-fill" style="width: 75%;">7.5</div>
+                </div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Storia</div>
+                <div class="chart-progress">
+                    <div class="chart-fill" style="width: 65%;">6.5</div>
+                </div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Scienze</div>
+                <div class="chart-progress">
+                    <div class="chart-fill" style="width: 80%;">8.0</div>
+                </div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Inglese</div>
+                <div class="chart-progress">
+                    <div class="chart-fill" style="width: 70%;">7.0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Risk Assessment -->
+        <div class="ai-insights-card" style="margin-top: 1.5rem;">
+            <h3 style="margin-bottom: 1rem;">🧠 Analisi AI Completa</h3>
+            <div class="insight-item">
+                <span class="insight-icon strength">✅</span>
+                <strong>Stato Generale:</strong> Studente in buona salute accademica (Score: 72/100)
+            </div>
+            <div class="insight-item">
+                <span class="insight-icon suggestion">📈</span>
+                <strong>Trend:</strong> Miglioramento costante (+0.5 punti rispetto a novembre)
+            </div>
+            <div class="insight-item">
+                <span class="insight-icon weakness">⚠️</span>
+                <strong>Attenzione:</strong> Storia necessita rinforzo - considerare tutoraggio peer
+            </div>
+            <div class="insight-item">
+                <span class="insight-icon suggestion">💡</span>
+                <strong>Piano Azione:</strong> Continuare così in matematica, incrementare studio storia (2h/settimana)
+            </div>
+        </div>
+
+        <button class="download-btn" onclick="downloadReport('monthly')">
+            📥 Scarica Report Mensile PDF
+        </button>
+    </div>
+
+    <!-- Real-time Notifications -->
+    <div class="notifications-section">
+        <h2 style="margin-bottom: 1.5rem;">🔔 Notifiche Recenti</h2>
+        <div class="notification-card high">
+            <div class="notification-header">
+                <strong>⚠️ Assenza non giustificata</strong>
+                <span class="priority-badge high">ALTA</span>
+            </div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">
+                Assenza del 12 dicembre richiede giustificazione entro 3 giorni
+            </div>
+            <button style="background: var(--primary); border: none; color: var(--dark); padding: 0.5rem 1rem; border-radius: 8px; margin-top: 0.8rem; cursor: pointer;">
+                Giustifica Ora
+            </button>
+        </div>
+        <div class="notification-card low">
+            <div class="notification-header">
+                <strong>🎉 Nuovo voto eccellente!</strong>
+                <span class="priority-badge low">INFO</span>
+            </div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">
+                Matematica: 8.5 in verifica equazioni - complimenti!
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentReportType = 'weekly';
+
+function switchReportTab(type) {
+    currentReportType = type;
+    
+    // Update tab UI
+    document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.closest('.report-tab').classList.add('active');
+    
+    // Show/hide reports
+    document.getElementById('weeklyReport').style.display = type === 'weekly' ? 'block' : 'none';
+    document.getElementById('monthlyReport').style.display = type === 'monthly' ? 'block' : 'none';
+}
+
+function loadReports() {
+    const studentId = document.getElementById('studentSelect').value;
+    console.log('Loading reports for student:', studentId);
+    // Reload data...
+}
+
+function downloadReport(type) {
+    alert(`📥 Download report ${type} in formato PDF...`);
+    // Trigger PDF download
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadReports();
+});
+</script>
