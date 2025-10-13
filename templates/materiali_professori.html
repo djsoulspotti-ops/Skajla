@@ -1,0 +1,679 @@
+<!-- Dashboard Upload Materiali Professori -->
+<style>
+:root {
+    --primary: #00d4ff;
+    --secondary: #7c3aed;
+    --accent: #ff006e;
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --dark: #0a0a0f;
+    --darker: #050508;
+    --light: #1a1a2e;
+    --text: #ffffff;
+    --border: rgba(0, 212, 255, 0.2);
+    --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+}
+
+.materiali-dashboard {
+    background: var(--darker);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.materiali-header {
+    background: var(--gradient-primary);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.upload-section {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px dashed var(--border);
+}
+
+.drag-drop-zone {
+    border: 3px dashed var(--primary);
+    border-radius: 15px;
+    padding: 3rem;
+    text-align: center;
+    background: var(--darker);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.drag-drop-zone.dragging {
+    border-color: var(--success);
+    background: rgba(0, 255, 136, 0.1);
+    transform: scale(1.02);
+}
+
+.drag-drop-zone:hover {
+    border-color: var(--accent);
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.upload-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.file-input-wrapper {
+    display: none;
+}
+
+.upload-btn {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+}
+
+.upload-form {
+    display: none;
+    background: var(--dark);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-top: 1.5rem;
+    border-left: 4px solid var(--primary);
+}
+
+.upload-form.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--darker);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.filters-section {
+    background: var(--light);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 200px;
+}
+
+.materiali-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.material-card {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.material-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+.material-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+}
+
+.material-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.file-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.material-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: var(--text);
+}
+
+.material-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.meta-tag {
+    background: var(--darker);
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.material-description {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.material-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.download-btn {
+    background: var(--success);
+    color: var(--dark);
+}
+
+.download-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.delete-btn {
+    background: var(--accent);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #ff0066;
+}
+
+.stats-section {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border-left: 4px solid var(--primary);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    color: var(--text-light);
+    margin-top: 0.5rem;
+}
+
+.progress-bar {
+    background: var(--darker);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-fill {
+    background: var(--gradient-primary);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    font-size: 2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-light);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+
+<div class="materiali-dashboard">
+    <!-- Header -->
+    <div class="materiali-header">
+        <div>
+            <h1 style="margin: 0;">📚 Materiali Didattici</h1>
+            <p style="margin: 0.5rem 0 0; opacity: 0.9;">Carica e gestisci i tuoi materiali di insegnamento</p>
+        </div>
+        <button class="upload-btn" onclick="toggleUploadForm()">
+            ➕ Nuovo Materiale
+        </button>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+        <div class="drag-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📁</div>
+            <h3>Trascina i file qui o clicca per selezionare</h3>
+            <p style="color: var(--text-light); margin-top: 0.5rem;">
+                Supportati: PDF, DOC, DOCX, PPT, PPTX, immagini, video, audio<br>
+                Dimensione massima: 50MB
+            </p>
+            <input type="file" id="fileInput" class="file-input-wrapper" onchange="handleFileSelect(event)" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.mp4,.mp3,.wav">
+        </div>
+
+        <!-- Upload Form (hidden by default) -->
+        <div id="uploadForm" class="upload-form">
+            <h3 style="margin-bottom: 1.5rem;">Dettagli Materiale</h3>
+            <form id="materialForm" onsubmit="uploadMaterial(event)">
+                <div class="form-group">
+                    <label>Titolo *</label>
+                    <input type="text" id="materialTitle" required placeholder="Es: Appunti Matematica - Equazioni">
+                </div>
+                
+                <div class="form-group">
+                    <label>Descrizione</label>
+                    <textarea id="materialDescription" rows="3" placeholder="Descrivi brevemente il contenuto..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Materia *</label>
+                    <select id="materialSubject" required>
+                        <option value="">Seleziona materia</option>
+                        <option value="matematica">Matematica</option>
+                        <option value="italiano">Italiano</option>
+                        <option value="storia">Storia</option>
+                        <option value="scienze">Scienze</option>
+                        <option value="inglese">Inglese</option>
+                        <option value="geografia">Geografia</option>
+                        <option value="arte">Arte</option>
+                        <option value="musica">Musica</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Classe</label>
+                    <input type="text" id="materialClass" placeholder="Es: 3A">
+                </div>
+                
+                <div class="form-group">
+                    <label>Visibilità</label>
+                    <select id="materialVisibility">
+                        <option value="class">Solo la mia classe</option>
+                        <option value="school">Tutta la scuola</option>
+                        <option value="public">Pubblico</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="upload-btn" style="flex: 1;">
+                        📤 Carica Materiale
+                    </button>
+                    <button type="button" class="upload-btn" onclick="cancelUpload()" style="background: var(--accent); flex: 1;">
+                        ❌ Annulla
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="filter-item">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">🔍 Cerca</label>
+            <input type="text" id="searchFilter" placeholder="Cerca per titolo..." oninput="filterMaterials()" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text);">
+        </div>
+        <div class="filter-item">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">📚 Materia</label>
+            <select id="subjectFilter" onchange="filterMaterials()" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text);">
+                <option value="">Tutte</option>
+                <option value="matematica">Matematica</option>
+                <option value="italiano">Italiano</option>
+                <option value="storia">Storia</option>
+                <option value="scienze">Scienze</option>
+                <option value="inglese">Inglese</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Materials Grid -->
+    <div id="materialsGrid" class="materiali-grid">
+        <div class="loading-spinner">⏳ Caricamento...</div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="stats-section">
+        <h2 style="margin-bottom: 1rem;">📊 Le Tue Statistiche</h2>
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalMaterials">0</div>
+                <div class="stat-label">Materiali Caricati</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalDownloads">0</div>
+                <div class="stat-label">Download Totali</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="mostDownloaded">-</div>
+                <div class="stat-label">Più Scaricato</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="storageUsed">0 MB</div>
+                <div class="stat-label">Spazio Utilizzato</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allMaterials = [];
+let selectedFiles = [];
+
+// Drag & Drop Handlers
+const dropZone = document.getElementById('dropZone');
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragging');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragging');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragging');
+    handleFileSelect({ target: { files: e.dataTransfer.files } });
+});
+
+// Handle File Selection
+function handleFileSelect(event) {
+    selectedFiles = Array.from(event.target.files);
+    
+    if (selectedFiles.length > 0) {
+        const uploadForm = document.getElementById('uploadForm');
+        uploadForm.classList.add('active');
+        
+        // Auto-fill title if single file
+        if (selectedFiles.length === 1) {
+            document.getElementById('materialTitle').value = selectedFiles[0].name.split('.')[0];
+        }
+    }
+}
+
+// Toggle Upload Form
+function toggleUploadForm() {
+    const uploadForm = document.getElementById('uploadForm');
+    uploadForm.classList.toggle('active');
+}
+
+// Cancel Upload
+function cancelUpload() {
+    document.getElementById('uploadForm').classList.remove('active');
+    document.getElementById('materialForm').reset();
+    document.getElementById('fileInput').value = '';
+    selectedFiles = [];
+}
+
+// Upload Material
+async function uploadMaterial(event) {
+    event.preventDefault();
+    
+    if (selectedFiles.length === 0) {
+        alert('Seleziona almeno un file!');
+        return;
+    }
+    
+    const formData = new FormData();
+    selectedFiles.forEach(file => formData.append('files', file));
+    formData.append('title', document.getElementById('materialTitle').value);
+    formData.append('description', document.getElementById('materialDescription').value);
+    formData.append('subject', document.getElementById('materialSubject').value);
+    formData.append('class', document.getElementById('materialClass').value);
+    formData.append('visibility', document.getElementById('materialVisibility').value);
+    
+    try {
+        const response = await fetch('/api/materials/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            alert('✅ Materiale caricato con successo!');
+            cancelUpload();
+            loadMaterials();
+            loadStats();
+        } else {
+            alert('❌ Errore nel caricamento');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert('❌ Errore di connessione');
+    }
+}
+
+// Load Materials
+async function loadMaterials() {
+    try {
+        const response = await fetch('/api/materials/list');
+        if (response.ok) {
+            allMaterials = await response.json();
+            displayMaterials(allMaterials);
+        }
+    } catch (error) {
+        console.error('Load error:', error);
+        document.getElementById('materialsGrid').innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><p>Errore caricamento materiali</p></div>';
+    }
+}
+
+// Display Materials
+function displayMaterials(materials) {
+    const grid = document.getElementById('materialsGrid');
+    
+    if (materials.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Nessun materiale trovato</p></div>';
+        return;
+    }
+    
+    const fileIcons = {
+        pdf: '📄',
+        doc: '📝',
+        docx: '📝',
+        ppt: '📊',
+        pptx: '📊',
+        jpg: '🖼️',
+        jpeg: '🖼️',
+        png: '🖼️',
+        mp4: '🎥',
+        mp3: '🎵'
+    };
+    
+    grid.innerHTML = materials.map(mat => {
+        const ext = mat.filename.split('.').pop().toLowerCase();
+        const icon = fileIcons[ext] || '📎';
+        
+        return `
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="file-icon">${icon}</div>
+                    <div style="flex: 1;">
+                        <div class="material-title">${mat.title}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-light);">${mat.filename}</div>
+                    </div>
+                </div>
+                
+                <div class="material-meta">
+                    <div class="meta-tag">📚 ${mat.subject}</div>
+                    <div class="meta-tag">👥 ${mat.class || 'Tutte'}</div>
+                    <div class="meta-tag">⬇️ ${mat.downloads || 0}</div>
+                </div>
+                
+                ${mat.description ? `<div class="material-description">${mat.description}</div>` : ''}
+                
+                <div class="material-actions">
+                    <button class="action-btn download-btn" onclick="downloadMaterial(${mat.id})">
+                        ⬇️ Scarica
+                    </button>
+                    <button class="action-btn delete-btn" onclick="deleteMaterial(${mat.id})">
+                        🗑️ Elimina
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Filter Materials
+function filterMaterials() {
+    const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+    const subjectFilter = document.getElementById('subjectFilter').value;
+    
+    let filtered = allMaterials;
+    
+    if (searchTerm) {
+        filtered = filtered.filter(mat => 
+            mat.title.toLowerCase().includes(searchTerm) || 
+            mat.description?.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (subjectFilter) {
+        filtered = filtered.filter(mat => mat.subject === subjectFilter);
+    }
+    
+    displayMaterials(filtered);
+}
+
+// Download Material
+async function downloadMaterial(id) {
+    window.location.href = `/api/materials/download/${id}`;
+}
+
+// Delete Material
+async function deleteMaterial(id) {
+    if (!confirm('Sei sicuro di voler eliminare questo materiale?')) return;
+    
+    try {
+        const response = await fetch(`/api/materials/delete/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('✅ Materiale eliminato');
+            loadMaterials();
+            loadStats();
+        }
+    } catch (error) {
+        alert('❌ Errore eliminazione');
+    }
+}
+
+// Load Stats
+async function loadStats() {
+    try {
+        const response = await fetch('/api/materials/stats');
+        if (response.ok) {
+            const stats = await response.json();
+            document.getElementById('totalMaterials').textContent = stats.total_materials || 0;
+            document.getElementById('totalDownloads').textContent = stats.total_downloads || 0;
+            document.getElementById('mostDownloaded').textContent = stats.most_downloaded || '-';
+            document.getElementById('storageUsed').textContent = `${(stats.storage_used / 1024 / 1024).toFixed(1)} MB`;
+        }
+    } catch (error) {
+        console.error('Stats error:', error);
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadMaterials();
+    loadStats();
+});
+</script>
