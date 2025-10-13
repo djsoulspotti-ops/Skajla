@@ -1,0 +1,811 @@
+<!-- Dashboard Registro Elettronico Professore -->
+<style>
+:root {
+    --primary: #00d4ff;
+    --secondary: #7c3aed;
+    --accent: #ff006e;
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --error: #ff0066;
+    --dark: #0a0a0f;
+    --darker: #050508;
+    --light: #1a1a2e;
+    --text: #ffffff;
+    --border: rgba(0, 212, 255, 0.2);
+    --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+}
+
+.registro-dashboard {
+    background: var(--darker);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.registro-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: var(--light);
+    padding: 0.5rem;
+    border-radius: 15px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.tab-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Presenze */
+.presenze-container {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 2rem;
+}
+
+.class-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
+}
+
+.class-selector select {
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: var(--darker);
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.presenze-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.presenze-table thead {
+    background: var(--darker);
+}
+
+.presenze-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary);
+}
+
+.presenze-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.presenze-table tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.status-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.status-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border);
+    background: var(--darker);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.status-btn.present {
+    border-color: var(--success);
+    background: var(--success);
+    color: var(--dark);
+}
+
+.status-btn.absent {
+    border-color: var(--error);
+    background: var(--error);
+    color: white;
+}
+
+.status-btn.late {
+    border-color: var(--warning);
+    background: var(--warning);
+    color: var(--dark);
+}
+
+.status-btn.early {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--dark);
+}
+
+.save-presenze-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    width: 100%;
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.save-presenze-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Voti */
+.voti-container {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 2rem;
+}
+
+.voto-form {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-group input, .form-group select {
+    padding: 0.8rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--light);
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.voti-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.voto-card {
+    background: var(--darker);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--success);
+}
+
+.voto-card.low {
+    border-color: var(--error);
+}
+
+.voto-card.medium {
+    border-color: var(--warning);
+}
+
+.voto-info {
+    flex: 1;
+}
+
+.voto-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+/* Note Disciplinari */
+.note-container {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 2rem;
+}
+
+.severity-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.severity-btn {
+    padding: 0.6rem 1.2rem;
+    border: 2px solid var(--border);
+    background: var(--darker);
+    color: var(--text);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.severity-btn.active.lieve {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: var(--dark);
+}
+
+.severity-btn.active.media {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.severity-btn.active.grave {
+    background: var(--error);
+    border-color: var(--error);
+    color: white;
+}
+
+.note-list {
+    margin-top: 2rem;
+}
+
+.nota-card {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.nota-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.severity-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.severity-badge.lieve {
+    background: var(--warning);
+    color: var(--dark);
+}
+
+.severity-badge.media {
+    background: var(--accent);
+    color: white;
+}
+
+.severity-badge.grave {
+    background: var(--error);
+    color: white;
+}
+
+/* Calendario Lezioni */
+.calendario-container {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 2rem;
+}
+
+.lezione-card {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary);
+}
+
+.lezione-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.lezione-date {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.lezione-topic {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.lezione-homework {
+    background: rgba(0, 212, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border-left: 3px solid var(--primary);
+}
+
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: var(--darker);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+</style>
+
+<div class="registro-dashboard">
+    <h1 style="margin-bottom: 2rem;">📝 Registro Elettronico</h1>
+
+    <!-- Tabs -->
+    <div class="registro-tabs">
+        <button class="tab-btn active" onclick="switchTab('presenze')">📋 Presenze</button>
+        <button class="tab-btn" onclick="switchTab('voti')">📊 Voti</button>
+        <button class="tab-btn" onclick="switchTab('note')">⚠️ Note Disciplinari</button>
+        <button class="tab-btn" onclick="switchTab('calendario')">📅 Calendario</button>
+    </div>
+
+    <!-- PRESENZE TAB -->
+    <div id="presenzeTab" class="tab-content active">
+        <div class="presenze-container">
+            <div class="class-selector">
+                <label style="font-weight: 600;">Classe:</label>
+                <select id="classePresenze" onchange="loadPresenze()">
+                    <option value="">Seleziona classe</option>
+                    <option value="1A">1A</option>
+                    <option value="2A">2A</option>
+                    <option value="3A">3A</option>
+                </select>
+                <input type="date" id="dataPresenze" onchange="loadPresenze()" style="padding: 0.8rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text);">
+            </div>
+
+            <div id="presenzeContent">
+                <table class="presenze-table">
+                    <thead>
+                        <tr>
+                            <th>Studente</th>
+                            <th>Stato</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody id="presenzeTableBody">
+                        <tr><td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-light);">Seleziona una classe</td></tr>
+                    </tbody>
+                </table>
+
+                <button class="save-presenze-btn" onclick="savePresenze()">
+                    💾 Salva Presenze
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VOTI TAB -->
+    <div id="votiTab" class="tab-content">
+        <div class="voti-container">
+            <div class="voto-form">
+                <h3 style="margin-bottom: 1.5rem;">Inserisci Nuovo Voto</h3>
+                <form id="votoForm" onsubmit="addVoto(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Studente *</label>
+                            <select id="votoStudente" required>
+                                <option value="">Seleziona studente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Materia *</label>
+                            <select id="votoMateria" required>
+                                <option value="matematica">Matematica</option>
+                                <option value="italiano">Italiano</option>
+                                <option value="storia">Storia</option>
+                                <option value="scienze">Scienze</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Voto (1-10) *</label>
+                            <input type="number" id="votoValore" min="1" max="10" step="0.5" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="votoTipo" required>
+                                <option value="scritto">Scritto</option>
+                                <option value="orale">Orale</option>
+                                <option value="pratico">Pratico</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrizione</label>
+                            <input type="text" id="votoDescrizione" placeholder="Es: Verifica equazioni">
+                        </div>
+                    </div>
+                    <button type="submit" class="save-presenze-btn">
+                        ➕ Aggiungi Voto
+                    </button>
+                </form>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem;">Voti Recenti</h3>
+            <div class="voti-list" id="votiList">
+                <div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessun voto inserito</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTE TAB -->
+    <div id="noteTab" class="tab-content">
+        <div class="note-container">
+            <div class="voto-form">
+                <h3 style="margin-bottom: 1.5rem;">Nuova Nota Disciplinare</h3>
+                <form id="notaForm" onsubmit="addNota(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Studente *</label>
+                            <select id="notaStudente" required>
+                                <option value="">Seleziona studente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="notaTipo" required>
+                                <option value="comportamento">Comportamento</option>
+                                <option value="ritardo">Ritardo</option>
+                                <option value="compiti">Compiti non svolti</option>
+                                <option value="altro">Altro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gravità *</label>
+                        <div class="severity-selector">
+                            <button type="button" class="severity-btn active lieve" onclick="selectSeverity('lieve')">Lieve</button>
+                            <button type="button" class="severity-btn media" onclick="selectSeverity('media')">Media</button>
+                            <button type="button" class="severity-btn grave" onclick="selectSeverity('grave')">Grave</button>
+                        </div>
+                        <input type="hidden" id="notaGravita" value="lieve">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descrizione *</label>
+                        <textarea id="notaDescrizione" rows="3" required style="width: 100%; padding: 0.8rem; border: 2px solid var(--border); border-radius: 8px; background: var(--light); color: var(--text); font-family: inherit;"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="save-presenze-btn">
+                        ⚠️ Inserisci Nota
+                    </button>
+                </form>
+            </div>
+
+            <div class="note-list" id="noteList">
+                <div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessuna nota disciplinare</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CALENDARIO TAB -->
+    <div id="calendarioTab" class="tab-content">
+        <div class="calendario-container">
+            <div class="voto-form">
+                <h3 style="margin-bottom: 1.5rem;">Pianifica Lezione</h3>
+                <form id="lezioneForm" onsubmit="addLezione(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data *</label>
+                            <input type="date" id="lezioneData" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ora *</label>
+                            <input type="time" id="lezioneOra" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Classe *</label>
+                            <select id="lezioneClasse" required>
+                                <option value="1A">1A</option>
+                                <option value="2A">2A</option>
+                                <option value="3A">3A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Argomento *</label>
+                        <input type="text" id="lezioneTopic" required placeholder="Es: Equazioni di secondo grado">
+                    </div>
+                    <div class="form-group">
+                        <label>Compiti per casa</label>
+                        <textarea id="lezioneHomework" rows="2" style="width: 100%; padding: 0.8rem; border: 2px solid var(--border); border-radius: 8px; background: var(--light); color: var(--text); font-family: inherit;" placeholder="Es: Esercizi pag. 45, n. 1-10"></textarea>
+                    </div>
+                    <button type="submit" class="save-presenze-btn">
+                        📅 Aggiungi Lezione
+                    </button>
+                </form>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem;">Prossime Lezioni</h3>
+            <div id="calendarioList">
+                <div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessuna lezione pianificata</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTab = 'presenze';
+let presenzeData = {};
+let selectedSeverity = 'lieve';
+
+// Switch Tab
+function switchTab(tab) {
+    currentTab = tab;
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tab + 'Tab').classList.add('active');
+    
+    if (tab === 'presenze') loadPresenze();
+    if (tab === 'voti') loadVoti();
+    if (tab === 'note') loadNote();
+    if (tab === 'calendario') loadCalendario();
+}
+
+// PRESENZE Functions
+async function loadPresenze() {
+    const classe = document.getElementById('classePresenze').value;
+    const data = document.getElementById('dataPresenze').value;
+    
+    if (!classe) return;
+    
+    // Simulate loading students
+    const students = ['Marco Rossi', 'Giulia Bianchi', 'Luca Verdi', 'Sofia Neri', 'Alessandro Russo'];
+    const tbody = document.getElementById('presenzeTableBody');
+    
+    tbody.innerHTML = students.map(student => `
+        <tr>
+            <td><strong>${student}</strong></td>
+            <td>
+                <div class="status-selector">
+                    <button type="button" class="status-btn present" onclick="setStatus('${student}', 'present')">✅ Presente</button>
+                    <button type="button" class="status-btn" onclick="setStatus('${student}', 'absent')">❌ Assente</button>
+                    <button type="button" class="status-btn" onclick="setStatus('${student}', 'late')">⏰ Ritardo</button>
+                    <button type="button" class="status-btn" onclick="setStatus('${student}', 'early')">🚪 Uscita</button>
+                </div>
+            </td>
+            <td><input type="text" id="note_${student.replace(' ', '_')}" placeholder="Note opzionali" style="padding: 0.5rem; background: var(--darker); border: 1px solid var(--border); border-radius: 5px; color: var(--text); width: 100%;"></td>
+        </tr>
+    `).join('');
+    
+    presenzeData = {};
+    students.forEach(s => presenzeData[s] = 'present');
+}
+
+function setStatus(student, status) {
+    presenzeData[student] = status;
+    
+    const row = event.target.closest('tr');
+    row.querySelectorAll('.status-btn').forEach(btn => {
+        btn.className = 'status-btn';
+    });
+    event.target.classList.add(status);
+}
+
+async function savePresenze() {
+    const classe = document.getElementById('classePresenze').value;
+    const data = document.getElementById('dataPresenze').value;
+    
+    if (!classe || !data) {
+        alert('Seleziona classe e data!');
+        return;
+    }
+    
+    const payload = {
+        classe,
+        data,
+        presenze: presenzeData
+    };
+    
+    console.log('Salvando presenze:', payload);
+    alert('✅ Presenze salvate con successo!');
+}
+
+// VOTI Functions
+async function addVoto(e) {
+    e.preventDefault();
+    
+    const voto = {
+        studente: document.getElementById('votoStudente').value,
+        materia: document.getElementById('votoMateria').value,
+        valore: document.getElementById('votoValore').value,
+        tipo: document.getElementById('votoTipo').value,
+        descrizione: document.getElementById('votoDescrizione').value
+    };
+    
+    console.log('Nuovo voto:', voto);
+    alert('✅ Voto inserito con successo!');
+    document.getElementById('votoForm').reset();
+    loadVoti();
+}
+
+function loadVoti() {
+    // Simulate loading recent grades
+    const voti = [
+        { studente: 'Marco Rossi', materia: 'Matematica', valore: 8, tipo: 'scritto', data: '2025-12-10' },
+        { studente: 'Giulia Bianchi', materia: 'Italiano', valore: 9, tipo: 'orale', data: '2025-12-09' }
+    ];
+    
+    const list = document.getElementById('votiList');
+    list.innerHTML = voti.map(v => `
+        <div class="voto-card ${v.valore < 6 ? 'low' : v.valore < 7 ? 'medium' : ''}">
+            <div class="voto-info">
+                <strong>${v.studente}</strong> - ${v.materia}
+                <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">
+                    ${v.tipo} | ${v.data}
+                </div>
+            </div>
+            <div class="voto-value">${v.valore}</div>
+        </div>
+    `).join('');
+}
+
+// NOTE Functions
+function selectSeverity(severity) {
+    selectedSeverity = severity;
+    document.getElementById('notaGravita').value = severity;
+    
+    document.querySelectorAll('.severity-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+async function addNota(e) {
+    e.preventDefault();
+    
+    const nota = {
+        studente: document.getElementById('notaStudente').value,
+        tipo: document.getElementById('notaTipo').value,
+        gravita: selectedSeverity,
+        descrizione: document.getElementById('notaDescrizione').value
+    };
+    
+    console.log('Nuova nota:', nota);
+    alert('⚠️ Nota disciplinare inserita!');
+    document.getElementById('notaForm').reset();
+    loadNote();
+}
+
+function loadNote() {
+    const note = [
+        { studente: 'Luca Verdi', tipo: 'comportamento', gravita: 'media', descrizione: 'Disturbo durante la lezione', data: '2025-12-11' }
+    ];
+    
+    const list = document.getElementById('noteList');
+    list.innerHTML = note.map(n => `
+        <div class="nota-card">
+            <div class="nota-header">
+                <strong>${n.studente}</strong>
+                <span class="severity-badge ${n.gravita}">${n.gravita.toUpperCase()}</span>
+            </div>
+            <div style="color: var(--text-light); margin-bottom: 0.5rem;">${n.tipo} | ${n.data}</div>
+            <div>${n.descrizione}</div>
+        </div>
+    `).join('');
+}
+
+// CALENDARIO Functions
+async function addLezione(e) {
+    e.preventDefault();
+    
+    const lezione = {
+        data: document.getElementById('lezioneData').value,
+        ora: document.getElementById('lezioneOra').value,
+        classe: document.getElementById('lezioneClasse').value,
+        topic: document.getElementById('lezioneTopic').value,
+        homework: document.getElementById('lezioneHomework').value
+    };
+    
+    console.log('Nuova lezione:', lezione);
+    alert('📅 Lezione pianificata!');
+    document.getElementById('lezioneForm').reset();
+    loadCalendario();
+}
+
+function loadCalendario() {
+    const lezioni = [
+        { data: '2025-12-15', ora: '09:00', classe: '3A', topic: 'Equazioni secondo grado', homework: 'Es. pag. 45' }
+    ];
+    
+    const list = document.getElementById('calendarioList');
+    list.innerHTML = lezioni.map(l => `
+        <div class="lezione-card">
+            <div class="lezione-header">
+                <div>
+                    <div class="lezione-date">${l.data} - ${l.ora}</div>
+                    <div style="color: var(--text-light);">Classe: ${l.classe}</div>
+                </div>
+            </div>
+            <div class="lezione-topic">${l.topic}</div>
+            ${l.homework ? `
+                <div class="lezione-homework">
+                    <strong>📝 Compiti:</strong> ${l.homework}
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('dataPresenze').valueAsDate = new Date();
+});
+</script>
