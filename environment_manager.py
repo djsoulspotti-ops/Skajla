@@ -6,6 +6,7 @@ Gestione sicura delle variabili di ambiente e configurazione
 import os
 import secrets
 from typing import Optional, Dict, Any
+from pathlib import Path
 
 class EnvironmentManager:
     """Gestisce le variabili di ambiente e configurazione sicura"""
@@ -23,7 +24,42 @@ class EnvironmentManager:
             'MAX_UPLOAD_SIZE': 'Maximum file upload size in MB'
         }
         self.config_cache = {}
+        self.local_secrets_file = Path('.env.secrets')
         self.validate_environment()
+    
+    def _load_or_generate_secret_key(self) -> str:
+        """Carica SECRET_KEY da file locale o genera nuova (SICURA PER SVILUPPO)
+        
+        IMPORTANTE: In produzione, imposta SECRET_KEY in Replit Secrets!
+        Questo metodo salva la chiave localmente SOLO per sviluppo.
+        """
+        # 1. Prova da environment variables (priorità massima)
+        env_key = os.getenv('SECRET_KEY')
+        if env_key:
+            return env_key
+        
+        # 2. Prova da file locale
+        if self.local_secrets_file.exists():
+            try:
+                content = self.local_secrets_file.read_text().strip()
+                if content and len(content) >= 32:
+                    print(f'✅ SECRET_KEY caricata da file locale (.env.secrets)')
+                    return content
+            except Exception as e:
+                print(f'⚠️ Errore lettura .env.secrets: {e}')
+        
+        # 3. Genera nuova chiave e salvala
+        new_key = secrets.token_hex(32)
+        try:
+            self.local_secrets_file.write_text(new_key)
+            self.local_secrets_file.chmod(0o600)  # Solo owner può leggere
+            print(f'✅ SECRET_KEY generata e salvata in .env.secrets')
+            print(f'⚠️ SVILUPPO OK - PRODUZIONE: Copia questa chiave in Replit Secrets!')
+        except Exception as e:
+            print(f'⚠️ Non posso salvare SECRET_KEY locale: {e}')
+            print(f'⚠️ Usando chiave temporanea - CONFIGURARE SECRET_KEY IN REPLIT SECRETS!')
+        
+        return new_key
     
     def validate_environment(self):
         """Valida e configura le variabili di ambiente"""
@@ -33,11 +69,9 @@ class EnvironmentManager:
             value = os.getenv(key)
             if not value:
                 if key == 'SECRET_KEY':
-                    # Genera SECRET_KEY sicura se mancante
-                    generated_key = secrets.token_hex(32)
+                    # Auto-gestione SECRET_KEY con salvataggio locale
+                    generated_key = self._load_or_generate_secret_key()
                     os.environ[key] = generated_key
-                    print(f'⚠️ {key} generata automaticamente (temporanea)')
-                    print(f'⚠️ PRODUZIONE: Imposta {key} permanente nelle variabili ambiente!')
                 elif key in ['DATABASE_URL', 'OPENAI_API_KEY']:
                     # Keys opzionali con fallback
                     missing_optional.append(f'{key}: {description}')
