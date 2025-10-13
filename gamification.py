@@ -82,6 +82,12 @@ class SKAILAGamification:
         # Level 26-50: 200 * level
         # Level 51+: 300 * level
         self.level_thresholds = self._calculate_level_thresholds()
+        
+        # Inizializza titoli livelli
+        self.level_titles = self._init_level_titles()
+        
+        # Inizializza tutti gli altri attributi necessari
+        self._initialize_all_attributes()
 
     def _calculate_level_thresholds(self):
         """Calcola soglie XP con formula scalabile"""
@@ -118,8 +124,8 @@ class SKAILAGamification:
             46: "🚀 Space Explorer", 47: "🌌 Universe Walker", 48: "⚡ Energy Master", 49: "🌠 Comet Chaser", 50: "🌟 SKAILA LEGEND"
         }
 
-        # Inizializza titoli livelli
-        self.level_titles = self._init_level_titles()
+    def _initialize_all_attributes(self):
+        """Inizializza tutti gli attributi del sistema gamification"""
 
         # Rewards per livello specifici
         self.level_rewards = {

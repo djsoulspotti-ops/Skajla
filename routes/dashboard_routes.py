@@ -42,8 +42,16 @@ def dashboard_studente():
     """Dashboard studente con gamification"""
     user_id = session['user_id']
     
-    # Dati gamification
-    gamification_data = gamification_system.get_user_dashboard(user_id)
+    # Dati gamification (con fallback se profilo non esiste)
+    try:
+        gamification_data = gamification_system.get_user_dashboard(user_id)
+        profile = gamification_data.get('profile', {})
+    except Exception as e:
+        print(f"⚠️ Gamification error for user {user_id}: {e}")
+        # Crea profilo minimo di fallback
+        gamification_system.get_or_create_profile(user_id)
+        gamification_data = gamification_system.get_user_dashboard(user_id)
+        profile = gamification_data.get('profile', {})
     
     # Statistiche recenti
     recent_messages = db_manager.query('''
@@ -59,9 +67,9 @@ def dashboard_studente():
     dashboard_stats = {
         'messages_today': recent_messages,
         'ai_questions_today': ai_interactions,
-        'current_streak': gamification_data['profile']['current_streak'],
-        'total_xp': gamification_data['profile']['total_xp'],
-        'current_level': gamification_data['profile']['current_level']
+        'current_streak': profile.get('current_streak', 0),
+        'total_xp': profile.get('total_xp', 0),
+        'current_level': profile.get('current_level', 1)
     }
     
     return render_template('dashboard_studente.html', 
