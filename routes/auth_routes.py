@@ -20,8 +20,20 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
+        remember_me = request.form.get('remember_me') == 'on'
         
-        print(f"🔐 Login attempt: {email}")
+        print(f"🔐 Login attempt: {email} (Remember: {remember_me})")
+        
+        # Verifica lockout
+        if auth_service.is_locked_out(email):
+            import time
+            last_attempt = auth_service.login_attempts.get(email, {}).get('last_attempt', 0)
+            time_since_last_attempt = time.time() - last_attempt
+            time_remaining = max(0, auth_service.lockout_duration - time_since_last_attempt)
+            minutes_left = max(1, int(time_remaining / 60))  # Minimo 1 minuto per evitare confusione
+            flash(f'⚠️ Troppi tentativi falliti. Riprova tra {minutes_left} minuti.', 'error')
+            print(f"🔒 Login locked out: {email} - {minutes_left} minuti rimanenti")
+            return render_template('login.html')
         
         # Verifica credenziali
         user = auth_service.authenticate_user(email, password)
@@ -39,16 +51,28 @@ def login():
             session['avatar'] = user.get('avatar', 'default.jpg')
             session['scuola_id'] = user.get('scuola_id')
             session['classe_id'] = user.get('classe_id')
+            
+            # Gestione Remember Me: 30 giorni se attivo, 1 giorno altrimenti
             session.permanent = True
+            if remember_me:
+                from datetime import timedelta
+                from flask import current_app
+                current_app.permanent_session_lifetime = timedelta(days=30)
+                print(f"✅ Remember Me attivo: sessione 30 giorni")
+            else:
+                from datetime import timedelta
+                from flask import current_app
+                current_app.permanent_session_lifetime = timedelta(days=1)
             
             # Aggiorna gamification
             gamification_system.update_streak(user['id'])
             gamification_system.award_xp(user['id'], 'login_daily', description="Login giornaliero")
             
+            flash(f'👋 Bentornato, {user["nome"]}!', 'success')
             return redirect('/dashboard')
         else:
             print(f"❌ Login failed: {email}")
-            flash('Email o password errati. Verifica le credenziali.', 'error')
+            flash('❌ Email o password errati. Controlla le credenziali e riprova.', 'error')
     
     return render_template('login.html')
 

@@ -271,6 +271,107 @@
             border-bottom: 2px solid white;
         }
 
+        /* Remember Me Checkbox */
+        .remember-me-group {
+            margin-bottom: 2rem;
+            margin-top: -0.5rem;
+        }
+
+        .remember-me-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .remember-me-label:hover {
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .remember-me-label input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: relative;
+            display: inline-block;
+            height: 22px;
+            width: 22px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            margin-right: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: var(--blur);
+        }
+
+        .remember-me-label:hover .checkmark {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .remember-me-label input:checked ~ .checkmark {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: white;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .remember-me-label input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .remember-me-label .checkmark:after {
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid var(--primary);
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        .remember-text {
+            user-select: none;
+        }
+
+        .success {
+            color: white;
+            background: rgba(16, 185, 129, 0.2);
+            backdrop-filter: var(--blur);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-weight: 500;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Decorative Elements */
         .login-container::before {
             content: '';
@@ -372,11 +473,20 @@
         <div class="logo">SKAILA</div>
         <h1>🔐 Bentornato!</h1>
 
-        {% if error %}
-        <div class="error">
-            <i class="fas fa-exclamation-triangle"></i> {{ error }}
-        </div>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}">
+                        {% if category == 'error' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% elif category == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -389,7 +499,7 @@
                 <label for="email">📧 Email</label>
                 <div class="input-wrapper">
                     <i class="input-icon fas fa-envelope"></i>
-                    <input type="email" id="email" name="email" placeholder="La tua email" required>
+                    <input type="email" id="email" name="email" placeholder="La tua email" autocomplete="email" required>
                 </div>
             </div>
 
@@ -397,8 +507,16 @@
                 <label for="password">🔒 Password</label>
                 <div class="input-wrapper">
                     <i class="input-icon fas fa-lock"></i>
-                    <input type="password" id="password" name="password" placeholder="La tua password" required>
+                    <input type="password" id="password" name="password" placeholder="La tua password" autocomplete="current-password" required>
                 </div>
+            </div>
+
+            <div class="form-group remember-me-group">
+                <label class="remember-me-label">
+                    <input type="checkbox" name="remember_me" id="remember_me" checked>
+                    <span class="checkmark"></span>
+                    <span class="remember-text">🔐 Ricordami per 30 giorni</span>
+                </label>
             </div>
 
             <button type="submit" class="btn">
