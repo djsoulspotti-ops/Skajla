@@ -122,8 +122,9 @@ class DatabaseManager:
     def get_connection(self):
         """Context manager per gestione automatica connessioni con retry per Neon sleep"""
         if self.db_type == 'postgresql':
-            max_retries = 3
+            max_retries = 5  # Più tentativi per wake-up garantito
             retry_count = 0
+            conn = None
             
             while retry_count < max_retries:
                 conn = None
@@ -141,33 +142,41 @@ class DatabaseManager:
                     
                 except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
                     retry_count += 1
+                    error_msg = str(e).lower()
                     print(f"⚠️ Database connection error (attempt {retry_count}/{max_retries}): {e}")
                     
-                    # CRITICO: Chiudi e ricrea pool se Neon è in sleep
+                    # CRITICO: Chiudi connessione fallita
                     if conn:
                         try:
-                            self.pool.putconn(conn, close=True)  # Force close
+                            self.pool.putconn(conn, close=True)
                         except:
                             pass
+                        conn = None
                     
-                    # Ricrea pool al secondo errore per dare più chance
-                    if retry_count == max_retries - 2:
-                        print("🔄 Ricreazione pool PostgreSQL per wake-up Neon...")
+                    # Ricrea pool IMMEDIATAMENTE al primo errore Neon
+                    if 'closed' in error_msg or 'timeout' in error_msg or 'connection' in error_msg:
+                        print("🔄 Neon sleep detected - ricreazione pool...")
                         try:
                             self.pool.closeall()
                         except:
                             pass
+                        
+                        # Ricrea pool con nuove connessioni
                         self.setup_postgresql_pool()
-                        # Attendi 3 secondi dopo ricreazione pool
-                        import time
-                        time.sleep(3)
-                    elif retry_count < max_retries - 1:
-                        # Attendi 2 secondi tra i primi retry
+                        
+                        # Attendi 2 secondi per wake-up Neon
                         import time
                         time.sleep(2)
+                        
+                        # Riprova immediatamente senza incrementare retry
+                        continue
+                    
+                    # Attendi 1 secondo tra retry normali
+                    import time
+                    time.sleep(1)
                     
                     # Ultimo tentativo fallito - solleva errore
-                    if retry_count >= max_retries - 1:
+                    if retry_count >= max_retries:
                         raise
                     
                 except Exception as e:

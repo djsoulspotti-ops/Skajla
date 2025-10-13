@@ -264,6 +264,11 @@ class SkailaApp:
 
         # CRITICO: Inizializza sistema scuole multi-tenant
         school_system.init_school_tables()
+        
+        # Avvia keep-alive database per evitare Neon sleep
+        if db_manager.db_type == 'postgresql':
+            from database_keep_alive import keep_alive
+            keep_alive.start()
 
         # Inizializza gamification
         gamification_system.init_gamification_tables()
