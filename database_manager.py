@@ -118,32 +118,56 @@ class DatabaseManager:
         self.sqlite_pool = SQLitePool()
         print("✅ SQLite pool ottimizzato configurato")
     
+    def _test_and_fix_pool(self):
+        """Testa pool e ricrea se necessario (preventivo per Neon sleep)"""
+        try:
+            test_conn = self.pool.getconn()
+            cursor = test_conn.cursor()
+            cursor.execute('SELECT 1')
+            cursor.fetchone()
+            cursor.close()
+            self.pool.putconn(test_conn)
+            return True  # Pool OK
+        except Exception as e:
+            print(f"🔍 Pool test failed: {e} - ricreazione...")
+            try:
+                self.pool.closeall()
+            except:
+                pass
+            self.setup_postgresql_pool()
+            import time
+            time.sleep(2)  # Attendi wake-up Neon
+            return False  # Pool ricreato
+    
     @contextmanager
     def get_connection(self):
         """Context manager per gestione automatica connessioni con retry per Neon sleep"""
         if self.db_type == 'postgresql':
-            max_retries = 5  # Più tentativi per wake-up garantito
+            max_retries = 6  # Più tentativi per garantire successo
             retry_count = 0
             conn = None
+            
+            # PREVENTIVO: Testa pool prima di iniziare
+            self._test_and_fix_pool()
             
             while retry_count < max_retries:
                 conn = None
                 try:
                     conn = self.pool.getconn()
                     
-                    # Test connessione prima dell'uso (wake up Neon se necessario)
+                    # Test connessione prima dell'uso
                     cursor = conn.cursor()
                     cursor.execute('SELECT 1')
+                    cursor.fetchone()
                     cursor.close()
                     
                     yield conn
                     conn.commit()
-                    break  # Success
+                    return  # Success - esci dal context manager
                     
                 except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
                     retry_count += 1
-                    error_msg = str(e).lower()
-                    print(f"⚠️ Database connection error (attempt {retry_count}/{max_retries}): {e}")
+                    print(f"⚠️ Database error (attempt {retry_count}/{max_retries}): {e}")
                     
                     # CRITICO: Chiudi connessione fallita
                     if conn:
@@ -153,30 +177,23 @@ class DatabaseManager:
                             pass
                         conn = None
                     
-                    # Ricrea pool IMMEDIATAMENTE al primo errore Neon
-                    if 'closed' in error_msg or 'timeout' in error_msg or 'connection' in error_msg:
-                        print("🔄 Neon sleep detected - ricreazione pool...")
-                        try:
-                            self.pool.closeall()
-                        except:
-                            pass
-                        
-                        # Ricrea pool con nuove connessioni
-                        self.setup_postgresql_pool()
-                        
-                        # Attendi 2 secondi per wake-up Neon
-                        import time
-                        time.sleep(2)
-                        
-                        # Riprova immediatamente senza incrementare retry
-                        continue
+                    # Ricrea pool e riprova
+                    print("🔄 Ricreazione pool PostgreSQL...")
+                    try:
+                        self.pool.closeall()
+                    except:
+                        pass
                     
-                    # Attendi 1 secondo tra retry normali
+                    self.setup_postgresql_pool()
+                    
+                    # Attendi progressivamente più tempo
                     import time
-                    time.sleep(1)
+                    wait_time = min(retry_count * 0.5, 3)  # Max 3 secondi
+                    time.sleep(wait_time)
                     
                     # Ultimo tentativo fallito - solleva errore
                     if retry_count >= max_retries:
+                        print(f"❌ Database connection failed dopo {max_retries} tentativi")
                         raise
                     
                 except Exception as e:
