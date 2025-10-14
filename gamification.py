@@ -12,6 +12,52 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 import random
 
+# Assume db_manager is imported and configured elsewhere, providing context manager support
+# For demonstration, let's mock a db_manager that supports context managers
+class MockDBManager:
+    def __init__(self, db_type='sqlite'):
+        self.db_type = db_type
+        if db_type == 'postgresql':
+            import psycopg2
+            from psycopg2.extras import DictCursor
+            self.psycopg2 = psycopg2
+            self.DictCursor = DictCursor
+
+    def get_connection(self):
+        if self.db_type == 'postgresql':
+            # Replace with your actual PostgreSQL connection details
+            try:
+                conn = self.psycopg2.connect(
+                    dbname="your_db", user="your_user", password="your_password", host="your_host"
+                )
+                return conn
+            except Exception as e:
+                print(f"Error connecting to PostgreSQL: {e}")
+                return None
+        else:
+            # SQLite connection (for demonstration, a real implementation would use a persistent file)
+            conn = sqlite3.connect(':memory:') # Use in-memory for mock, replace with 'skaila.db' for persistence
+            conn.row_factory = sqlite3.Row # Allows dictionary-like access to rows
+            return conn
+
+    def query(self, query: str, params: tuple = None):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            
+            if query.strip().upper().startswith("SELECT"):
+                return [dict(row) for row in cursor.fetchall()]
+            else:
+                conn.commit()
+                return cursor.lastrowid if cursor.lastrowid else True
+                
+# Initialize a mock db_manager for demonstration purposes
+# In a real application, this would be imported and configured properly.
+db_manager = MockDBManager(db_type='sqlite') # Change to 'postgresql' if needed
+
 class SKAILAGamification:
     def __init__(self):
         # XP Multipliers per bonus e eventi speciali
@@ -82,10 +128,10 @@ class SKAILAGamification:
         # Level 26-50: 200 * level
         # Level 51+: 300 * level
         self.level_thresholds = self._calculate_level_thresholds()
-        
+
         # Inizializza titoli livelli
         self.level_titles = self._init_level_titles()
-        
+
         # Inizializza tutti gli altri attributi necessari
         self._initialize_all_attributes()
 
@@ -586,7 +632,7 @@ class SKAILAGamification:
 
     def init_gamification_tables(self):
         """Inizializza le tabelle per il sistema di gamification completo"""
-        conn = sqlite3.connect('skaila.db')
+        conn = sqlite3.connect('skaila.db') # Using SQLite for initialization example
         cursor = conn.cursor()
 
         # Tabella profili gamification utenti (estesa)
@@ -1851,7 +1897,7 @@ class SKAILAGamification:
         }
 
     def get_user_dashboard(self, user_id: int) -> Dict[str, Any]:
-        """Dashboard completa gamification per l'utente"""
+        """Dashboard gamification completa per l'utente"""
         try:
             profile = self.get_or_create_user_profile(user_id)
 
@@ -1991,7 +2037,7 @@ class SKAILAGamification:
             return dashboard_data
         except Exception as e:
             print(f"❌ Error in get_user_dashboard: {e}")
-            if 'conn' in locals():
+            if 'conn' in locals() and conn:
                 try:
                     conn.close()
                 except:
@@ -2028,8 +2074,27 @@ class SKAILAGamification:
         conn.close()
 
         if stats:
-            return dict(stats)
+            # Convert tuple to dict, mapping column names if available or by index
+            # Assuming the columns are in the order they are defined in the CREATE TABLE statement
+            # For SQLite, fetchone() returns a tuple. For more robust solutions, use DictCursor if available.
+            column_names = [description[0] for description in cursor.description] if cursor.description else []
+            if column_names:
+                return dict(zip(column_names, stats))
+            else:
+                # Fallback if column names are not available
+                return {
+                    'user_id': stats[0], 'perfect_quizzes': stats[1], 'speed_completions': stats[2],
+                    'courses_mastered': stats[3], 'likes_received': stats[4], 'discussions_moderated': stats[5],
+                    'early_morning_sessions': stats[6], 'late_night_sessions': stats[7],
+                    'weekend_challenges_completed': stats[8], 'longest_study_session': stats[9],
+                    'lessons_completed': stats[10], 'days_on_platform': stats[11], 'courses_explored': stats[12],
+                    'features_suggested_implemented': stats[13], 'total_courses_available': stats[14],
+                    'freeze_cards_used_this_month': stats[15], 'weekend_passes_active': stats[16],
+                    'last_freeze_card_reset': stats[17]
+                }
+
         return {}
+
 
     def check_new_badges(self, user_id: int) -> List[Dict[str, Any]]:
         """Controlla e sblocca nuovi badge"""
