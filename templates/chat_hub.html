@@ -70,18 +70,16 @@
 
         <div class="section">
             <h2 style="margin-bottom: 1rem;">📚 Gruppi Materia</h2>
-            <div class="chat-card" onclick="window.location.href='/chat/group/materia/Matematica'">
-                <h3>📐 Matematica</h3>
-                <p style="opacity: 0.8;">Gruppo di studio matematica</p>
-            </div>
-            <div class="chat-card" onclick="window.location.href='/chat/group/materia/Fisica'">
-                <h3>🔬 Fisica</h3>
-                <p style="opacity: 0.8;">Gruppo di studio fisica</p>
-            </div>
-            <div class="chat-card" onclick="window.location.href='/chat/group/materia/Italiano'">
-                <h3>📖 Italiano</h3>
-                <p style="opacity: 0.8;">Gruppo di studio italiano</p>
-            </div>
+            {% if gruppi_materia and gruppi_materia|length > 0 %}
+                {% for gruppo in gruppi_materia %}
+                <div class="chat-card" onclick="window.location.href='/chat/room/{{ gruppo.id }}'">
+                    <h3>{{ gruppo.nome or gruppo.materia }}</h3>
+                    <p style="opacity: 0.8;">{{ gruppo.message_count or 0 }} messaggi</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="opacity: 0.7;">Nessun gruppo materia disponibile</p>
+            {% endif %}
         </div>
 
         <div class="section">
@@ -100,14 +98,25 @@
 
         <div class="section">
             <h2 style="margin-bottom: 1rem;">💬 Messaggi Privati</h2>
-            {% if available_users %}
-                <p style="opacity: 0.8; margin-bottom: 1rem;">Inizia una conversazione:</p>
-                {% for user in available_users[:5] %}
-                <div class="chat-card" onclick="window.location.href='/chat/private/{{ user[0] }}'">
-                    <h3>{{ user[1] }} {{ user[2] }}</h3>
-                    <p style="opacity: 0.8;">{{ user[3] }}</p>
+            {% if conversazioni_private and conversazioni_private|length > 0 %}
+                {% for conv in conversazioni_private %}
+                <div class="chat-card" onclick="window.location.href='/chat/room/{{ conv.id }}'">
+                    <h3>{{ conv.nome }} {{ conv.cognome }}</h3>
+                    <p style="opacity: 0.8;">{{ conv.message_count or 0 }} messaggi</p>
                 </div>
                 {% endfor %}
+            {% endif %}
+            
+            {% if available_users and available_users|length > 0 %}
+                <p style="opacity: 0.8; margin: 1.5rem 0 1rem;">Inizia una nuova conversazione:</p>
+                {% for user in available_users[:5] %}
+                <div class="chat-card" onclick="window.location.href='/chat/private/{{ user.id }}'">
+                    <h3>{{ user.nome }} {{ user.cognome }}</h3>
+                    <p style="opacity: 0.8;">{{ user.ruolo }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="opacity: 0.7;">Nessun utente disponibile</p>
             {% endif %}
         </div>
     </div>

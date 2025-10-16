@@ -162,41 +162,28 @@
         </div>
 
         <div class="quiz-categories">
-            <div class="category-card" onclick="alert('Quiz matematica in arrivo! 🎯')">
-                <div class="category-icon">📐</div>
-                <div class="category-title">Matematica</div>
-                <div class="category-meta">12 quiz disponibili</div>
-            </div>
-
-            <div class="category-card" onclick="alert('Quiz fisica in arrivo! ⚛️')">
-                <div class="category-icon">🔬</div>
-                <div class="category-title">Fisica</div>
-                <div class="category-meta">8 quiz disponibili</div>
-            </div>
-
-            <div class="category-card" onclick="alert('Quiz italiano in arrivo! 📚')">
-                <div class="category-icon">📖</div>
-                <div class="category-title">Italiano</div>
-                <div class="category-meta">10 quiz disponibili</div>
-            </div>
-
-            <div class="category-card" onclick="alert('Quiz storia in arrivo! 🏛️')">
-                <div class="category-icon">🏛️</div>
-                <div class="category-title">Storia</div>
-                <div class="category-meta">6 quiz disponibili</div>
-            </div>
-
-            <div class="category-card" onclick="alert('Quiz inglese in arrivo! 🇬🇧')">
-                <div class="category-icon">🇬🇧</div>
-                <div class="category-title">Inglese</div>
-                <div class="category-meta">15 quiz disponibili</div>
-            </div>
-
-            <div class="category-card" onclick="alert('Quiz scienze in arrivo! 🧪')">
-                <div class="category-icon">🧪</div>
-                <div class="category-title">Scienze</div>
-                <div class="category-meta">9 quiz disponibili</div>
-            </div>
+            {% if available_quizzes and available_quizzes|length > 0 %}
+                {% for quiz in available_quizzes %}
+                <div class="category-card" onclick="window.location.href='/quiz/start/{{ quiz.id }}'">
+                    <div class="category-icon">
+                        {% if quiz.materia == 'Matematica' %}📐
+                        {% elif quiz.materia == 'Fisica' %}🔬
+                        {% elif quiz.materia == 'Italiano' %}📖
+                        {% elif quiz.materia == 'Storia' %}🏛️
+                        {% elif quiz.materia == 'Inglese' %}🇬🇧
+                        {% elif quiz.materia == 'Scienze' %}🧪
+                        {% else %}📚{% endif %}
+                    </div>
+                    <div class="category-title">{{ quiz.titolo or quiz.materia }}</div>
+                    <div class="category-meta">Difficoltà: {{ quiz.difficolta }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem; opacity: 0.7;">
+                    <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    <p>Nessun quiz disponibile al momento</p>
+                </div>
+            {% endif %}
         </div>
 
         <div class="stats-section">
