@@ -73,10 +73,37 @@ Complete digital register system replacing obsolete school systems:
 -   **Teacher Interface**: Separate view for professors to manage class grades and attendance
 -   **Purple Gradient Theme**: Consistent design language across all register pages
 
+## AI Insights Engine with Machine Learning (Oct 16, 2025)
+Advanced predictive analytics system using statistical methods and regression analysis:
+-   **Grade Trend Analysis**: Linear regression for performance predictions, identifies improvement/decline patterns
+-   **Attendance Pattern Detection**: Calculates rates and streak analysis for early intervention
+-   **Weak Subject Identification**: Uses z-scores and standard deviation to pinpoint struggling areas
+-   **Future Performance Predictions**: Compares recent vs historical grades for trend forecasting
+-   **Gamification Progress Tracking**: Analyzes XP velocity and achievement patterns
+-   **Data-Driven Insights**: Generates top 3 prioritized recommendations based on statistical significance
+-   *Note: Temporarily disabled for database schema optimization*
+
+## Granular Messaging System (Oct 16, 2025)
+Complete messaging infrastructure with multiple communication channels:
+-   **Chat Hub Central**: Unified interface for all messaging types (`/chat-hub`)
+-   **1-to-1 Direct Messages**: Private student-teacher and peer conversations (`/direct-messages/<user_id>`)
+-   **Subject-Based Groups**: Dedicated chat rooms per academic subject (`/group-chats/<materia>`)
+-   **Class-Wide Chats**: Announcements and discussions for entire classes
+-   **Database Schema**: Tables for `direct_messages`, `group_chats`, `group_members` with timestamps
+-   **Backend Routes**: Complete API endpoints in `messaging_routes.py` for all message types
+-   **Real-time Support**: Socket.IO integration ready for live message delivery
+
+## Complete Backend Infrastructure (Oct 16, 2025)
+Comprehensive routing system for educational features:
+-   **Materials Management**: Routes for uploading/downloading teaching resources (`/materiali`)
+-   **Quiz System**: Adaptive quiz delivery and scoring endpoints (`/quiz`)
+-   **Calendar Integration**: Academic calendar with events and deadlines (`/calendario`)
+-   **API Layer**: RESTful endpoints for SKAILA Connect, applications, and user data
+-   **Modular Architecture**: Separated blueprints for dashboard, messaging, and API concerns
+
 ## New Features
 -   **Teaching Materials Management System**: Allows teachers to upload, organize, and manage various file types (PDF, DOC, images, video) with class-based access control and download analytics.
 -   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance tracking, grade recording (Italian 1-10 scale), disciplinary notes, and a lesson calendar.
--   **AI-Powered Register Intelligence**: Provides a "Student Risk Assessment System" (0-100 score), anomaly detection (grade drops, absence changes), intervention planning, and "Class Health Monitoring."
 -   **Parent Communication System**: Generates automated weekly and monthly reports with attendance, grades, behavior updates, homework tracking, and AI insights. It also provides real-time notifications for important events.
 
 # External Dependencies
