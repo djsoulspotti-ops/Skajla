@@ -9,6 +9,7 @@ from database_manager import db_manager
 from gamification import gamification_system
 from services.tenant_guard import get_school_stats, get_current_school_id
 from ai_chatbot import AISkailaBot
+from ai_insights_engine import ai_insights_engine
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -82,11 +83,15 @@ def dashboard_studente():
         LIMIT 3
     ''') or []
     
+    # AI Insights intelligenti (ML + statistica) - Temporaneamente disabilitato
+    ai_insights = []  # ai_insights_engine.generate_insights(user_id)
+    
     return render_template('dashboard_studente.html', 
                          user=session, 
                          gamification=gamification_data,
                          stats=dashboard_stats,
-                         companies=companies)
+                         companies=companies,
+                         ai_insights=ai_insights)
 
 @dashboard_bp.route('/dashboard/professore')
 @require_login

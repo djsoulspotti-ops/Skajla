@@ -34,6 +34,7 @@ from routes.api_routes import api_bp
 from routes.school_routes import school_bp
 from routes.credits_routes import credits_bp
 from routes.admin_school_codes_routes import admin_codes_bp
+from routes.messaging_routes import messaging_bp
 from routes.socket_routes import register_socket_events
 
 # Import services
@@ -170,6 +171,7 @@ class SkailaApp:
         self.app.register_blueprint(school_bp)
         self.app.register_blueprint(credits_bp)
         self.app.register_blueprint(admin_codes_bp)
+        self.app.register_blueprint(messaging_bp)
         
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp

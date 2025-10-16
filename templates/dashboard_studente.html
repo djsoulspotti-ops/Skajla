@@ -562,27 +562,30 @@
                     </a>
                 </div>
 
-                <!-- AI Insights -->
+                <!-- AI Insights Intelligenti -->
                 <div class="ai-insights">
                     <div class="section-header">
                         <i class="fas fa-brain" style="font-size: 1.5rem;"></i>
                         <h3>AI Insights</h3>
                     </div>
                     
-                    <div class="insight-item">
-                        <h4>💡 Suggerimento del Giorno</h4>
-                        <p>Concentrati su matematica: le tue performance stanno migliorando del 15%!</p>
-                    </div>
-
-                    <div class="insight-item">
-                        <h4>🎯 Prossimo Obiettivo</h4>
-                        <p>Raggiungi 1000 XP per sbloccare il badge "Master Learner"</p>
-                    </div>
-
-                    <div class="insight-item">
-                        <h4>📊 Statistiche Settimanali</h4>
-                        <p>Hai studiato 12 ore questa settimana. Continua così!</p>
-                    </div>
+                    {% if ai_insights %}
+                        {% for insight in ai_insights %}
+                        <div class="insight-item" style="border-left-color: 
+                            {% if insight.type == 'positive' %}var(--success)
+                            {% elif insight.type == 'warning' or insight.type == 'critical' %}var(--warning)
+                            {% elif insight.type == 'achievement' %}#f093fb
+                            {% else %}rgba(255,255,255,0.3){% endif %};">
+                            <h4>{{ insight.icon }} {{ insight.title }}</h4>
+                            <p>{{ insight.message }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="insight-item">
+                            <h4>📊 Raccogli Dati</h4>
+                            <p>Completa più attività per ricevere insights personalizzati basati sui tuoi dati.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
