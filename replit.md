@@ -45,6 +45,34 @@ SKAILA now features a production-ready, user-friendly authentication system:
 -   **Modern UI**: Beautiful purple gradient login page with custom checkbox styling, autocomplete support for password managers, and smooth animations.
 -   **Session Persistence**: Sessions no longer reset on server restart thanks to persistent SECRET_KEY storage.
 
+## Modern UI/UX Design (Oct 16, 2025)
+SKAILA features a completely redesigned, immersive user interface:
+-   **Purple Gradient Background**: Stunning animated gradient (purple to violet) with radial pattern overlays for a premium, modern look
+-   **Glass Morphism Design**: Frosted glass effect with backdrop-filter blur for all components
+-   **Intelligent Layout**: Grid-based responsive design (2fr 1fr) that adapts to screen sizes
+-   **Smooth Animations**: Hover effects, fade-in animations, and transform transitions for premium feel
+-   **Removed Clutter**: Eliminated "Azioni Rapide" section for cleaner, more focused experience
+
+## SKAILA Connect - Student Career Portal (Oct 16, 2025)
+Revolutionary feature connecting students with real companies for internships and job opportunities:
+-   **Company Database**: Structured table with companies, sectors, positions, requirements, and compensation
+-   **Smart Application System**: One-click applications with XP rewards (50 XP for first application only)
+-   **Anti-Farming Protection**: Duplicate applications detected, XP awarded only for new submissions
+-   **API Endpoints**: `/api/skaila-connect/companies`, `/apply`, `/my-applications`
+-   **Input Validation**: Complete validation (company existence, active status) with proper error handling
+-   **Dynamic UI**: Company cards loaded from database with logo emojis, descriptions, and action buttons
+-   **5 Partner Companies**: TechStart Italia, Innovation Lab, Creative Digital, Green Energy Corp, MediaTech Solutions
+
+## Integrated Online Register (Oct 16, 2025)
+Complete digital register system replacing obsolete school systems:
+-   **Database Tables**: `voti` (grades 1-10 scale), `presenze` (attendance tracking)
+-   **Student View**: Tabs for Grades, Attendance, Statistics with responsive design
+-   **Grade Tracking**: Subject-wise grades, evaluation types (written/oral), teacher notes
+-   **Attendance System**: Daily presence tracking, justified absences, tardiness recording
+-   **Statistics Dashboard**: Automated average calculation per subject, visual progress bars, overall performance metrics
+-   **Teacher Interface**: Separate view for professors to manage class grades and attendance
+-   **Purple Gradient Theme**: Consistent design language across all register pages
+
 ## New Features
 -   **Teaching Materials Management System**: Allows teachers to upload, organize, and manage various file types (PDF, DOC, images, video) with class-based access control and download analytics.
 -   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance tracking, grade recording (Italian 1-10 scale), disciplinary notes, and a lesson calendar.
