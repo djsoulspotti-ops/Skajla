@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 Calendario Accademico - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 10s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .calendar-main {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .month-title {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day-header {
+            text-align: center;
+            padding: 1rem;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        .day-cell {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .day-cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .day-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .day-cell.has-event {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .day-cell.today {
+            border: 2px solid white;
+        }
+
+        .events-sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #f093fb;
+        }
+
+        .event-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-meta {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Calendario Accademico</h1>
+            <a href="/dashboard" class="btn">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-main">
+                <div class="month-header">
+                    <button class="btn"><i class="fas fa-chevron-left"></i></button>
+                    <div class="month-title">Ottobre 2025</div>
+                    <button class="btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="day-header">Lun</div>
+                    <div class="day-header">Mar</div>
+                    <div class="day-header">Mer</div>
+                    <div class="day-header">Gio</div>
+                    <div class="day-header">Ven</div>
+                    <div class="day-header">Sab</div>
+                    <div class="day-header">Dom</div>
+
+                    {% for i in range(1, 32) %}
+                    <div class="day-cell {% if i == 16 %}today{% endif %} {% if i in [20, 25] %}has-event{% endif %}">
+                        <div class="day-number">{{ i }}</div>
+                        {% if i == 20 %}
+                        <div style="font-size: 0.7rem;">📝 Verifica</div>
+                        {% elif i == 25 %}
+                        <div style="font-size: 0.7rem;">📚 Compito</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="events-sidebar">
+                <h2 style="margin-bottom: 1.5rem;">📌 Prossimi Eventi</h2>
+
+                <div class="event-card">
+                    <div class="event-title">📝 Verifica Matematica</div>
+                    <div class="event-meta">
+                        📅 20 Ottobre 2025<br>
+                        ⏰ 09:00 - 10:30
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-title">📚 Consegna Tema Italiano</div>
+                    <div class="event-meta">
+                        📅 25 Ottobre 2025<br>
+                        ⏰ Entro le 23:59
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-title">🎓 Assemblea di Classe</div>
+                    <div class="event-meta">
+                        📅 28 Ottobre 2025<br>
+                        ⏰ 11:00 - 12:00
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-title">🔬 Laboratorio Fisica</div>
+                    <div class="event-meta">
+                        📅 30 Ottobre 2025<br>
+                        ⏰ 14:00 - 16:00
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

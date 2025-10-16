@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Quiz & Test - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 10s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .quiz-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-meta {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Quiz & Test</h1>
+            <a href="/dashboard" class="btn">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <div class="quiz-categories">
+            <div class="category-card" onclick="alert('Quiz matematica in arrivo! 🎯')">
+                <div class="category-icon">📐</div>
+                <div class="category-title">Matematica</div>
+                <div class="category-meta">12 quiz disponibili</div>
+            </div>
+
+            <div class="category-card" onclick="alert('Quiz fisica in arrivo! ⚛️')">
+                <div class="category-icon">🔬</div>
+                <div class="category-title">Fisica</div>
+                <div class="category-meta">8 quiz disponibili</div>
+            </div>
+
+            <div class="category-card" onclick="alert('Quiz italiano in arrivo! 📚')">
+                <div class="category-icon">📖</div>
+                <div class="category-title">Italiano</div>
+                <div class="category-meta">10 quiz disponibili</div>
+            </div>
+
+            <div class="category-card" onclick="alert('Quiz storia in arrivo! 🏛️')">
+                <div class="category-icon">🏛️</div>
+                <div class="category-title">Storia</div>
+                <div class="category-meta">6 quiz disponibili</div>
+            </div>
+
+            <div class="category-card" onclick="alert('Quiz inglese in arrivo! 🇬🇧')">
+                <div class="category-icon">🇬🇧</div>
+                <div class="category-title">Inglese</div>
+                <div class="category-meta">15 quiz disponibili</div>
+            </div>
+
+            <div class="category-card" onclick="alert('Quiz scienze in arrivo! 🧪')">
+                <div class="category-icon">🧪</div>
+                <div class="category-title">Scienze</div>
+                <div class="category-meta">9 quiz disponibili</div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2 style="margin-bottom: 1rem;">📊 Le Tue Statistiche</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value">{{ quiz_completati or 0 }}</div>
+                    <div class="stat-label">Quiz completati</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ media_voti or 0 }}%</div>
+                    <div class="stat-label">Media risultati</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ xp_guadagnati or 0 }}</div>
+                    <div class="stat-label">XP guadagnati</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ streak_giorni or 0 }}</div>
+                    <div class="stat-label">Giorni di streak</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
