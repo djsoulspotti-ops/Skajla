@@ -1,299 +1,653 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎒 Dashboard Studente - SKAILA</title>
+    <title>🎓 Dashboard SKAILA - {{ user.nome }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --purple-start: #667eea;
+            --purple-end: #764ba2;
+            --accent-pink: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-strong: rgba(255, 255, 255, 0.95);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, var(--purple-start) 0%, var(--purple-end) 100%);
             min-height: 100vh;
-            color: var(--text);
+            color: white;
+            overflow-x: hidden;
         }
 
-        .dashboard-container {
-            max-width: 1200px;
+        /* Animated Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 10s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dashboard-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
         }
 
-        .header {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
+        /* Top Navigation */
+        .top-nav {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
             margin-bottom: 2rem;
-            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-section {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-
-        .welcome-section h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-section p {
-            color: var(--text-light);
-            font-size: 1.1rem;
-        }
-
-        .nav-links {
-            display: flex;
             gap: 1rem;
         }
 
-        .nav-link {
-            padding: 0.75rem 1.5rem;
-            background: var(--gradient-primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
+        .logo-section h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(to right, white, var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .nav-link:hover {
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-pink), white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
         }
 
-        .stats-grid {
+        /* Welcome Hero */
+        .welcome-hero {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .welcome-hero h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .welcome-hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats Dashboard */
+        .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 16px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
             padding: 2rem;
-            box-shadow: var(--shadow);
-            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 2.5rem;
         }
 
-        .stat-number {
+        .stat-value {
             font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
         }
 
         .stat-label {
-            color: var(--text-light);
-            font-weight: 500;
+            font-size: 1rem;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
         }
 
-        .quick-actions {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
+        /* Main Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
+        /* SKAILA Connect Section */
+        .skaila-connect {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             margin-bottom: 1.5rem;
         }
 
-        .actions-grid {
+        .section-header h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .company-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .company-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .company-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .company-info p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--accent-pink), white);
+            color: var(--purple-end);
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .connect-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Registro Online */
+        .registro-online {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .registro-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .registro-info {
+            flex: 1;
+        }
+
+        .registro-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .registro-info p {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        .grade-badge {
+            padding: 0.5rem 1rem;
+            background: var(--success);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* AI Insights Widget */
+        .ai-insights {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent-pink);
+        }
+
+        .insight-item h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-item p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Quick Access Cards */
+        .quick-access {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
         }
 
-        .action-card {
+        .access-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
             padding: 1.5rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
         }
 
-        .action-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
+        .access-card:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .action-icon {
-            font-size: 2rem;
+        .access-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .access-card h4 {
+            font-size: 1.1rem;
             margin-bottom: 0.5rem;
-            color: var(--primary);
         }
 
-        .recent-activity {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-        }
-
-        .activity-item {
-            padding: 1rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
+        .access-card p {
+            font-size: 0.85rem;
+            opacity: 0.7;
         }
 
         @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 1rem;
+            .content-grid {
+                grid-template-columns: 1fr;
             }
-            
-            .header {
+
+            .top-nav {
                 flex-direction: column;
                 gap: 1rem;
             }
-            
-            .nav-links {
-                flex-wrap: wrap;
+
+            .welcome-hero h2 {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="welcome-section">
-                <h1>🎒 Ciao {{ user.nome }}!</h1>
-                <p>Benvenuto nella tua dashboard studente</p>
+    <div class="dashboard-wrapper">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="logo-section">
+                <div class="user-avatar">{{ user.nome[0] }}</div>
+                <div>
+                    <h1>SKAILA</h1>
+                    <p style="opacity: 0.7; font-size: 0.9rem;">{{ user.nome }} {{ user.cognome }}</p>
+                </div>
             </div>
-            <div class="nav-links">
-                <a href="/chat" class="nav-link">💬 Chat</a>
-                <a href="/ai-chat" class="nav-link">🤖 AI Tutor</a>
-                <a href="/gamification" class="nav-link">🏆 XP & Badge</a>
-                <a href="/logout" class="nav-link">🚪 Esci</a>
+            <div class="user-menu">
+                <a href="/ai-chat" class="nav-btn"><i class="fas fa-robot"></i> AI Tutor</a>
+                <a href="/gamification" class="nav-btn"><i class="fas fa-trophy"></i> XP & Badge</a>
+                <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Esci</a>
+            </div>
+        </nav>
+
+        <!-- Welcome Hero -->
+        <div class="welcome-hero">
+            <h2>👋 Benvenuto, {{ user.nome }}!</h2>
+            <p>🚀 La tua piattaforma educativa intelligente per il successo scolastico</p>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">🔥</span>
+                </div>
+                <div class="stat-value">{{ stats.current_streak }}</div>
+                <div class="stat-label">Giorni di Streak</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">⭐</span>
+                </div>
+                <div class="stat-value">{{ stats.total_xp }}</div>
+                <div class="stat-label">XP Totali</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">🎯</span>
+                </div>
+                <div class="stat-value">Lvl {{ stats.current_level }}</div>
+                <div class="stat-label">Livello Attuale</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon">🤖</span>
+                </div>
+                <div class="stat-value">{{ stats.ai_questions_today }}</div>
+                <div class="stat-label">Domande AI Oggi</div>
             </div>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">💬</div>
-                <div class="stat-number">{{ stats.messaggi_inviati }}</div>
-                <div class="stat-label">Messaggi Inviati</div>
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- SKAILA Connect -->
+            <div class="skaila-connect">
+                <div class="section-header">
+                    <i class="fas fa-briefcase" style="font-size: 1.5rem;"></i>
+                    <h3>SKAILA Connect - Opportunità Aziendali</h3>
+                </div>
+                <p style="opacity: 0.8; margin-bottom: 1.5rem;">Connettiti con aziende leader per stage, tirocini e opportunità di lavoro</p>
+                
+                {% if companies %}
+                    {% for company in companies %}
+                    <div class="company-card">
+                        <div class="company-header">
+                            <div class="company-logo">{{ company[4] }}</div>
+                            <div class="company-info">
+                                <h4>{{ company[1] }}</h4>
+                                <p>{{ company[6] }} - {{ company[5] }}</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem;">{{ company[3] }}</p>
+                        <button class="connect-btn" onclick="connectWithCompany({{ company[0] }})">
+                            <i class="fas fa-paper-plane"></i> Candidati Ora
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="opacity: 0.7; text-align: center; padding: 2rem;">Nessuna opportunità disponibile al momento</p>
+                {% endif %}
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-number">{{ stats.chat_partecipate }}</div>
-                <div class="stat-label">Chat Attive</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🤖</div>
-                <div class="stat-number">{{ stats.conversazioni_ai }}</div>
-                <div class="stat-label">Domande AI</div>
-            </div>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2 class="section-title">🚀 Azioni Rapide</h2>
-            <div class="actions-grid">
-                <div class="action-card" onclick="window.location.href='/chat'">
-                    <div class="action-icon">💬</div>
-                    <h3>Chat Classe</h3>
-                    <p>Parla con i compagni</p>
-                </div>
-                <div class="action-card" onclick="window.location.href='/ai-chat'">
-                    <div class="action-icon">🎓</div>
-                    <h3>Chiedi Aiuto AI</h3>
-                    <p>Tutor personale 24/7</p>
-                </div>
-                <div class="action-card" onclick="window.location.href='/gamification'">
-                    <div class="action-icon">⭐</div>
-                    <h3>Guadagna XP</h3>
-                    <p>Completa sfide</p>
-                </div>
-                <div class="action-card" onclick="startStudySession()">
-                    <div class="action-icon">📚</div>
-                    <h3>Sessione Studio</h3>
-                    <p>Inizia a studiare</p>
-                </div>
-            </div>
-        </div>
+            <!-- Sidebar -->
+            <div>
+                <!-- Registro Online -->
+                <div class="registro-online" style="margin-bottom: 2rem;">
+                    <div class="section-header">
+                        <i class="fas fa-clipboard-list" style="font-size: 1.5rem;"></i>
+                        <h3>Registro Online</h3>
+                    </div>
+                    
+                    <div class="registro-item">
+                        <div class="registro-info">
+                            <h4>📐 Matematica</h4>
+                            <p>Verifica - 15/10/2025</p>
+                        </div>
+                        <div class="grade-badge">8.5</div>
+                    </div>
 
-        <!-- Recent Activity -->
-        <div class="recent-activity">
-            <h2 class="section-title">📊 Attività Recente</h2>
-            {% if chat_classe %}
-                {% for chat in chat_classe %}
-                <div class="activity-item">
-                    <i class="fas fa-comments" style="color: var(--primary);"></i>
-                    <div>
-                        <strong>{{ chat.nome }}</strong>
-                        <p>{{ chat.descrizione }}</p>
+                    <div class="registro-item">
+                        <div class="registro-info">
+                            <h4>🔬 Fisica</h4>
+                            <p>Interrogazione - 12/10/2025</p>
+                        </div>
+                        <div class="grade-badge">9.0</div>
+                    </div>
+
+                    <div class="registro-item">
+                        <div class="registro-info">
+                            <h4>📚 Italiano</h4>
+                            <p>Tema - 10/10/2025</p>
+                        </div>
+                        <div class="grade-badge">7.5</div>
+                    </div>
+
+                    <a href="/registro" class="nav-btn" style="width: 100%; margin-top: 1rem; text-align: center;">
+                        Vedi Registro Completo <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="ai-insights">
+                    <div class="section-header">
+                        <i class="fas fa-brain" style="font-size: 1.5rem;"></i>
+                        <h3>AI Insights</h3>
+                    </div>
+                    
+                    <div class="insight-item">
+                        <h4>💡 Suggerimento del Giorno</h4>
+                        <p>Concentrati su matematica: le tue performance stanno migliorando del 15%!</p>
+                    </div>
+
+                    <div class="insight-item">
+                        <h4>🎯 Prossimo Obiettivo</h4>
+                        <p>Raggiungi 1000 XP per sbloccare il badge "Master Learner"</p>
+                    </div>
+
+                    <div class="insight-item">
+                        <h4>📊 Statistiche Settimanali</h4>
+                        <p>Hai studiato 12 ore questa settimana. Continua così!</p>
                     </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p style="color: var(--text-light); text-align: center; padding: 2rem;">
-                    🌟 Inizia a partecipare alle chat per vedere l'attività qui!
-                </p>
-            {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Access -->
+        <div class="quick-access">
+            <a href="/chat" class="access-card">
+                <i class="fas fa-comments"></i>
+                <h4>Chat Classe</h4>
+                <p>Parla con i compagni</p>
+            </a>
+            <a href="/materiali" class="access-card">
+                <i class="fas fa-folder-open"></i>
+                <h4>Materiali Didattici</h4>
+                <p>Risorse e documenti</p>
+            </a>
+            <a href="/quiz" class="access-card">
+                <i class="fas fa-brain"></i>
+                <h4>Quiz & Test</h4>
+                <p>Metti alla prova</p>
+            </a>
+            <a href="/calendario" class="access-card">
+                <i class="fas fa-calendar"></i>
+                <h4>Calendario</h4>
+                <p>Eventi e scadenze</p>
+            </a>
         </div>
     </div>
 
     <script>
-        function startStudySession() {
-            // Gamification - Sessione di studio
-            fetch('/api/gamification/study-session', {
+        function connectWithCompany(companyId) {
+            // Invia candidatura tramite API
+            fetch('/api/skaila-connect/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ duration_minutes: 25, focused: true })
+                body: JSON.stringify({ 
+                    company_id: companyId
+                })
             }).then(response => response.json())
               .then(data => {
                   if (data.success) {
-                      alert('🎉 Sessione di studio avviata! +' + data.xp_gained + ' XP guadagnati!');
+                      const xpMessage = data.xp_gained > 0 ? ` +${data.xp_gained} XP!` : '';
+                      alert(`🎉 ${data.message}${xpMessage}`);
+                      if (data.xp_gained > 0) {
+                          setTimeout(() => location.reload(), 1500);
+                      }
+                  } else {
+                      alert(`❌ ${data.error || 'Errore nell\'invio della candidatura.'}`);
                   }
+              })
+              .catch(err => {
+                  console.error('Error:', err);
+                  alert('❌ Errore di connessione.');
               });
         }
 
-        // Auto-refresh stats ogni 30 secondi
-        setInterval(() => {
-            location.reload();
-        }, 30000);
+        // Smooth scroll animation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
     </script>
 </body>
 </html>

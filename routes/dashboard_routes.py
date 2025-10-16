@@ -72,10 +72,21 @@ def dashboard_studente():
         'current_level': profile.get('current_level', 1)
     }
     
+    # SKAILA Connect - Aziende disponibili
+    companies = db_manager.query('''
+        SELECT id, nome, settore, descrizione, logo, citta, posizione_offerta, 
+               tipo_opportunita, requisiti, retribuzione
+        FROM skaila_connect_companies 
+        WHERE attiva = true 
+        ORDER BY created_at DESC 
+        LIMIT 3
+    ''') or []
+    
     return render_template('dashboard_studente.html', 
                          user=session, 
                          gamification=gamification_data,
-                         stats=dashboard_stats)
+                         stats=dashboard_stats,
+                         companies=companies)
 
 @dashboard_bp.route('/dashboard/professore')
 @require_login
@@ -170,3 +181,64 @@ def dashboard_admin():
     return render_template('dashboard_admin.html', 
                          user=session, 
                          stats=admin_stats)
+
+@dashboard_bp.route('/registro')
+@require_login
+def registro_online():
+    """Registro Online - Sistema completo voti e presenze"""
+    user_id = session['user_id']
+    ruolo = session.get('ruolo', 'studente')
+    
+    if ruolo == 'studente':
+        # Voti studente
+        voti = db_manager.query('''
+            SELECT materia, voto, tipo_valutazione, data, note 
+            FROM voti 
+            WHERE studente_id = ? 
+            ORDER BY data DESC 
+            LIMIT 50
+        ''', (user_id,))
+        
+        # Presenze studente
+        presenze = db_manager.query('''
+            SELECT data, presente, giustificato, ritardo, note
+            FROM presenze 
+            WHERE studente_id = ?
+            ORDER BY data DESC
+            LIMIT 30
+        ''', (user_id,))
+        
+        # Media voti per materia
+        medie = db_manager.query('''
+            SELECT materia, AVG(voto) as media, COUNT(*) as num_voti
+            FROM voti
+            WHERE studente_id = ?
+            GROUP BY materia
+        ''', (user_id,))
+        
+        return render_template('registro_online.html',
+                             user=session,
+                             voti=voti or [],
+                             presenze=presenze or [],
+                             medie=medie or [],
+                             ruolo=ruolo)
+    
+    elif ruolo == 'professore':
+        # Vista professore - voti classe
+        classe = session.get('classe', '')
+        school_id = get_current_school_id()
+        
+        studenti = db_manager.query('''
+            SELECT id, nome, cognome 
+            FROM utenti 
+            WHERE ruolo = ? AND classe = ? AND scuola_id = ? AND attivo = ?
+            ORDER BY cognome, nome
+        ''', ('studente', classe, school_id, True))
+        
+        return render_template('registro_professore.html',
+                             user=session,
+                             studenti=studenti or [],
+                             ruolo=ruolo)
+    
+    else:
+        return redirect('/dashboard')

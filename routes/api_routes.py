@@ -293,3 +293,109 @@ def health_check():
         'timestamp': '2024-01-01T12:00:00',
         'version': '2.0.0'
     })
+
+@api_bp.route('/skaila-connect/companies')
+def get_companies():
+    """Ottieni lista aziende SKAILA Connect"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    companies = db_manager.query('''
+        SELECT * FROM skaila_connect_companies 
+        WHERE attiva = true 
+        ORDER BY created_at DESC
+    ''')
+    
+    return jsonify({
+        'companies': [dict(zip(['id', 'nome', 'settore', 'descrizione', 'logo', 'citta', 
+                                'posizione_offerta', 'tipo_opportunita', 'requisiti', 
+                                'retribuzione', 'attiva', 'created_at'], company)) 
+                      for company in companies]
+    })
+
+@api_bp.route('/skaila-connect/apply', methods=['POST'])
+def apply_to_company():
+    """Candidatura a un'azienda"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    data = request.get_json()
+    company_id = data.get('company_id')
+    student_id = session['user_id']
+    
+    # Validazione input
+    if not company_id:
+        return jsonify({'error': 'company_id obbligatorio'}), 400
+    
+    # Verifica che l'azienda esista ed è attiva
+    company = db_manager.query('''
+        SELECT id FROM skaila_connect_companies 
+        WHERE id = ? AND attiva = true
+    ''', (company_id,), one=True)
+    
+    if not company:
+        return jsonify({'error': 'Azienda non trovata o non attiva'}), 400
+    
+    try:
+        # Controlla se candidatura già esistente
+        existing = db_manager.query('''
+            SELECT id FROM skaila_connect_applications 
+            WHERE studente_id = ? AND company_id = ?
+        ''', (student_id, company_id), one=True)
+        
+        is_new_application = existing is None
+        
+        with db_manager.get_connection() as conn:
+            if is_new_application:
+                # Nuova candidatura - inserisci
+                conn.execute('''
+                    INSERT INTO skaila_connect_applications 
+                    (studente_id, company_id, stato, note_studente)
+                    VALUES (?, ?, ?, ?)
+                ''', (student_id, company_id, 'in_attesa', data.get('note', '')))
+            else:
+                # Candidatura esistente - aggiorna timestamp
+                conn.execute('''
+                    UPDATE skaila_connect_applications 
+                    SET data_candidatura = CURRENT_TIMESTAMP,
+                        stato = 'in_attesa'
+                    WHERE studente_id = ? AND company_id = ?
+                ''', (student_id, company_id))
+            conn.commit()
+        
+        # XP solo per nuove candidature
+        xp_gained = 0
+        if is_new_application:
+            gamification_system.award_xp(student_id, 'career_action', 50)
+            xp_gained = 50
+        
+        return jsonify({
+            'success': True,
+            'message': 'Candidatura inviata con successo!' if is_new_application else 'Candidatura già inviata, aggiornata la data.',
+            'xp_gained': xp_gained,
+            'is_new': is_new_application
+        })
+    except Exception as e:
+        print(f"Error in apply_to_company: {e}")
+        return jsonify({'error': 'Errore interno del server'}), 500
+
+@api_bp.route('/skaila-connect/my-applications')
+def my_applications():
+    """Ottieni candidature dello studente"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+    
+    applications = db_manager.query('''
+        SELECT a.*, c.nome, c.posizione_offerta, c.logo
+        FROM skaila_connect_applications a
+        JOIN skaila_connect_companies c ON a.company_id = c.id
+        WHERE a.studente_id = ?
+        ORDER BY a.data_candidatura DESC
+    ''', (session['user_id'],))
+    
+    return jsonify({
+        'applications': [dict(zip(['id', 'studente_id', 'company_id', 'data_candidatura', 
+                                   'stato', 'note_studente', 'note_azienda', 'nome', 
+                                   'posizione_offerta', 'logo'], app)) 
+                        for app in applications]
+    })
