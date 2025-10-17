@@ -380,32 +380,45 @@
             opacity: 0.8;
         }
 
-        /* Services Section Header */
-        .services-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
+        /* Category Section - LAYOUT RIORGANIZZATO */
+        .category-section {
+            margin-bottom: 4rem;
         }
 
-        .services-header h2 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .category-header > i {
+            font-size: 3rem;
+            opacity: 0.9;
+        }
+
+        .category-header h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
             background: linear-gradient(to right, white, var(--accent-pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .services-header p {
-            font-size: 1.1rem;
-            opacity: 0.8;
+        .category-header p {
+            font-size: 1.05rem;
+            opacity: 0.75;
+            margin: 0;
         }
 
-        /* Quick Access Cards - NUOVO DESIGN MODERNO */
-        .quick-access {
+        /* Category Cards Grid */
+        .category-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-bottom: 3rem;
+            gap: 1.5rem;
         }
 
         .access-card {
@@ -478,8 +491,34 @@
             line-height: 1.6;
         }
 
+        /* Featured Cards (SKAILA AI, SKAILA Connect) */
+        .access-card.featured {
+            background: linear-gradient(135deg, rgba(255, 107, 237, 0.25), rgba(102, 126, 234, 0.15));
+            border: 2px solid var(--accent-pink);
+            position: relative;
+        }
+
+        .access-card.featured::after {
+            content: '⭐ IN EVIDENZA';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent-pink);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .access-card.featured:hover {
+            border-color: var(--accent-pink);
+            box-shadow: 0 30px 60px rgba(255, 107, 237, 0.4);
+        }
+
         @media (max-width: 1024px) {
-            .quick-access {
+            .category-cards {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -489,9 +528,27 @@
                 grid-template-columns: 1fr;
             }
 
-            .quick-access {
+            .category-cards {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
+            }
+
+            .category-section {
+                margin-bottom: 3rem;
+            }
+
+            .category-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .category-header > i {
+                font-size: 2.5rem;
+            }
+
+            .category-header h3 {
+                font-size: 1.75rem;
             }
 
             .access-card {
@@ -503,16 +560,17 @@
                 font-size: 3rem;
             }
 
+            .access-card.featured::after {
+                font-size: 0.6rem;
+                padding: 0.25rem 0.6rem;
+            }
+
             .top-nav {
                 flex-direction: column;
                 gap: 1rem;
             }
 
             .welcome-hero h2 {
-                font-size: 2rem;
-            }
-
-            .services-header h2 {
                 font-size: 2rem;
             }
         }
@@ -671,44 +729,106 @@
             </div>
         </div>
 
-        <!-- Services Header -->
-        <div class="services-header">
-            <h2>🚀 I Tuoi Servizi</h2>
-            <p>Accedi rapidamente a tutti gli strumenti della piattaforma</p>
+        <!-- SEZIONE 1: COMUNICAZIONE -->
+        <div class="category-section">
+            <div class="category-header">
+                <i class="fas fa-comments"></i>
+                <div>
+                    <h3>📱 Comunicazione</h3>
+                    <p>Resta connesso con compagni, professori e gruppi di studio</p>
+                </div>
+            </div>
+            <div class="category-cards">
+                <a href="/chat" class="access-card">
+                    <i class="fas fa-message"></i>
+                    <h4>Chat Hub</h4>
+                    <p>Centro messaggi unificato</p>
+                </a>
+                <a href="/direct-messages" class="access-card">
+                    <i class="fas fa-user-friends"></i>
+                    <h4>Messaggi Diretti</h4>
+                    <p>Chat 1-a-1 private</p>
+                </a>
+                <a href="/group-chats" class="access-card">
+                    <i class="fas fa-users"></i>
+                    <h4>Gruppi Materia</h4>
+                    <p>Discussioni per argomento</p>
+                </a>
+            </div>
         </div>
 
-        <!-- Quick Access -->
-        <div class="quick-access">
-            <a href="/chat" class="access-card">
-                <i class="fas fa-message"></i>
-                <h4>💬 Chat Hub</h4>
-                <p>Messaggi e gruppi</p>
-            </a>
-            <a href="/materiali" class="access-card">
-                <i class="fas fa-folder-open"></i>
-                <h4>📚 Materiali Didattici</h4>
-                <p>Risorse e documenti</p>
-            </a>
-            <a href="/quiz" class="access-card">
-                <i class="fas fa-brain"></i>
-                <h4>🧠 Quiz & Test</h4>
-                <p>Metti alla prova</p>
-            </a>
-            <a href="/calendario" class="access-card">
-                <i class="fas fa-calendar"></i>
-                <h4>📅 Calendario</h4>
-                <p>Eventi e scadenze</p>
-            </a>
-            <a href="/registro-online" class="access-card">
-                <i class="fas fa-book"></i>
-                <h4>📖 Registro Online</h4>
-                <p>Voti e presenze</p>
-            </a>
-            <a href="/skaila-connect" class="access-card">
+        <!-- SEZIONE 2: STUDIO & APPRENDIMENTO -->
+        <div class="category-section">
+            <div class="category-header">
+                <i class="fas fa-graduation-cap"></i>
+                <div>
+                    <h3>📚 Studio & Apprendimento</h3>
+                    <p>Tutti gli strumenti per imparare in modo efficace</p>
+                </div>
+            </div>
+            <div class="category-cards">
+                <a href="/skaila-ai" class="access-card featured">
+                    <i class="fas fa-robot"></i>
+                    <h4>SKAILA AI</h4>
+                    <p>Tutor personale intelligente</p>
+                </a>
+                <a href="/quiz" class="access-card">
+                    <i class="fas fa-brain"></i>
+                    <h4>Quiz & Test</h4>
+                    <p>Allenati e migliora</p>
+                </a>
+                <a href="/materiali" class="access-card">
+                    <i class="fas fa-folder-open"></i>
+                    <h4>Materiali Didattici</h4>
+                    <p>Risorse e documenti</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- SEZIONE 3: CARRIERA -->
+        <div class="category-section">
+            <div class="category-header">
                 <i class="fas fa-briefcase"></i>
-                <h4>💼 SKAILA Connect</h4>
-                <p>Aziende e stage</p>
-            </a>
+                <div>
+                    <h3>💼 Carriera</h3>
+                    <p>Il tuo futuro professionale inizia qui</p>
+                </div>
+            </div>
+            <div class="category-cards">
+                <a href="/skaila-connect" class="access-card featured">
+                    <i class="fas fa-handshake"></i>
+                    <h4>SKAILA Connect</h4>
+                    <p>Stage, tirocini e opportunità</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- SEZIONE 4: REGISTRO ONLINE -->
+        <div class="category-section">
+            <div class="category-header">
+                <i class="fas fa-clipboard-list"></i>
+                <div>
+                    <h3>📊 Registro Online</h3>
+                    <p>Monitora il tuo rendimento scolastico</p>
+                </div>
+            </div>
+            <div class="category-cards">
+                <a href="/registro-online" class="access-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Voti</h4>
+                    <p>Valutazioni e medie</p>
+                </a>
+                <a href="/registro-online#presenze" class="access-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h4>Presenze</h4>
+                    <p>Assenze e ritardi</p>
+                </a>
+                <a href="/calendario" class="access-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h4>Calendario</h4>
+                    <p>Eventi e scadenze</p>
+                </a>
+            </div>
         </div>
     </div>
 
