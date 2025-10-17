@@ -1901,27 +1901,22 @@ class SKAILAGamification:
         try:
             profile = self.get_or_create_user_profile(user_id)
 
-            # Achievement sbloccati
-            conn = sqlite3.connect('skaila.db')
-            cursor = conn.cursor()
-
-            unlocked_achievements = cursor.execute('''
+            # Achievement sbloccati - USA db_manager invece di sqlite3 diretto
+            unlocked_achievements = db_manager.query('''
                 SELECT ua.achievement_id, ua.unlocked_at, ua.xp_earned
                 FROM user_achievements ua
                 WHERE ua.user_id = ?
                 ORDER BY ua.unlocked_at DESC
-            ''', (user_id,)).fetchall()
+            ''', (user_id,))
 
             # Attività XP recente
-            recent_activity = cursor.execute('''
+            recent_activity = db_manager.query('''
                 SELECT action_type, xp_earned, description, timestamp
                 FROM xp_activity_log
                 WHERE user_id = ?
                 ORDER BY timestamp DESC
                 LIMIT 10
-            ''', (user_id,)).fetchall()
-
-            conn.close()
+            ''', (user_id,))
 
             # Calcola prossimo livello
             current_level = profile['current_level']
@@ -1930,13 +1925,13 @@ class SKAILAGamification:
             next_level_xp = self.level_thresholds.get(next_level, self.level_thresholds[10])
             level_progress = min(100, (current_xp / next_level_xp) * 100) if next_level_xp > 0 else 100
 
-            # Ottieni badge sbloccati
-            unlocked_badges = cursor.execute('''
+            # Ottieni badge sbloccati - USA db_manager
+            unlocked_badges = db_manager.query('''
                 SELECT ub.badge_id, ub.earned_at, ub.xp_earned, ub.rarity
                 FROM user_badges ub
                 WHERE ub.user_id = ?
                 ORDER BY ub.earned_at DESC
-            ''', (user_id,)).fetchall()
+            ''', (user_id,))
 
             # Ottieni statistiche avanzate per badge
             advanced_stats = self.get_or_create_advanced_stats(user_id)
@@ -2033,15 +2028,9 @@ class SKAILAGamification:
                 }
             }
 
-            conn.close()
             return dashboard_data
         except Exception as e:
             print(f"❌ Error in get_user_dashboard: {e}")
-            if 'conn' in locals() and conn:
-                try:
-                    conn.close()
-                except:
-                    pass
             return {
                 'profile': {'total_xp': 0, 'current_level': 1, 'coins': 0},
                 'recent_activities': [],

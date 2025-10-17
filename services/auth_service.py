@@ -1,4 +1,3 @@
-
 """
 SKAILA - Authentication Service
 Logica business per autenticazione e sicurezza
@@ -35,19 +34,19 @@ class AuthService:
         """Controlla se account è bloccato"""
         if email not in self.login_attempts:
             return False
-        
+
         attempts = self.login_attempts[email]
         if attempts['count'] >= self.max_attempts:
             time_diff = time.time() - attempts['last_attempt']
             return time_diff < self.lockout_duration
-        
+
         return False
 
     def record_failed_attempt(self, email: str):
         """Registra tentativo fallito"""
         if email not in self.login_attempts:
             self.login_attempts[email] = {'count': 0, 'last_attempt': 0}
-        
+
         self.login_attempts[email]['count'] += 1
         self.login_attempts[email]['last_attempt'] = time.time()
 
@@ -77,12 +76,12 @@ class AuthService:
                     FROM utenti 
                     WHERE email = ? AND attivo = 1
                 ''', (email,))
-            
+
             user = cursor.fetchone()
 
             if user and self.verify_password(password, user[3]):
                 self.reset_attempts(email)
-                
+
                 # Aggiorna ultimo accesso
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('''
@@ -97,6 +96,15 @@ class AuthService:
                         WHERE id = ?
                     ''', (user[0],))
                 conn.commit()
+
+                session['user_id'] = user[0]
+                session['username'] = user[1]
+                session['nome'] = user[4]
+                session['cognome'] = user[5]
+                session['ruolo'] = user[7]
+                session['classe'] = user[6] or ''
+                session['school_id'] = user[10] # FIX: Aggiungi school_id
+                session.permanent = True
 
                 return {
                     'id': user[0],
@@ -121,7 +129,7 @@ class AuthService:
         try:
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
-                
+
                 # Verifica se email/username esistono
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('''
@@ -133,7 +141,7 @@ class AuthService:
                         SELECT COUNT(*) FROM utenti 
                         WHERE email = ? OR username = ?
                     ''', (email, username))
-                
+
                 existing = cursor.fetchone()[0]
 
                 if existing > 0:
@@ -158,7 +166,7 @@ class AuthService:
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id))
                     user_id = cursor.lastrowid
-                
+
                 conn.commit()
                 return {'success': True, 'message': 'Utente creato con successo', 'user_id': user_id}
 
@@ -170,10 +178,10 @@ class AuthService:
         @wraps(f)
         def decorated_function(*args, **kwargs):
             client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
-            
+
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
-                
+
                 # Crea tabella se non esiste
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('''
@@ -186,7 +194,7 @@ class AuthService:
                             success BOOLEAN
                         )
                     ''')
-                    
+
                     cursor.execute('''
                         SELECT COUNT(*) FROM login_attempts 
                         WHERE ip_address = %s AND timestamp > NOW() - INTERVAL '15 minutes'
@@ -202,21 +210,21 @@ class AuthService:
                             success BOOLEAN
                         )
                     ''')
-                    
+
                     cursor.execute('''
                         SELECT COUNT(*) FROM login_attempts 
                         WHERE ip_address = ? AND timestamp > datetime('now', '-15 minutes')
                     ''', (client_ip,))
-                
+
                 recent_attempts = cursor.fetchone()[0]
-                
+
                 if recent_attempts >= 10:
                     return render_template('login.html', 
                         error='Troppi tentativi di login. Riprova tra 15 minuti.')
-            
+
             return f(*args, **kwargs)
         return decorated_function
-    
+
     def log_login_attempt(self, email, success, ip_address):
         """Log tentativi di login"""
         with db_manager.get_connection() as conn:
@@ -232,7 +240,7 @@ class AuthService:
                     VALUES (?, ?, ?, ?)
                 ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
             conn.commit()
-    
+
     def require_auth(self, f):
         """Decorator per route protette"""
         @wraps(f)
@@ -241,7 +249,7 @@ class AuthService:
                 return {'error': 'Non autorizzato'}, 401
             return f(*args, **kwargs)
         return decorated_function
-    
+
     def require_role(self, required_role):
         """Decorator per controllo ruoli"""
         def decorator(f):
