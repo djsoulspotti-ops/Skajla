@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -32,7 +33,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated Background Pattern */
         body::before {
             content: '';
             position: fixed;
@@ -55,18 +55,18 @@
         .dashboard-wrapper {
             position: relative;
             z-index: 1;
-            padding: 2rem;
-            max-width: 1400px;
+            padding: 1.5rem;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
-        /* Top Navigation */
+        /* COMPACT TOP NAV */
         .top-nav {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -80,7 +80,7 @@
         }
 
         .logo-section h1 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 900;
             background: linear-gradient(to right, white, var(--accent-pink));
             -webkit-background-clip: text;
@@ -90,23 +90,23 @@
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .user-avatar {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-pink), white);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
         }
 
         .nav-btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             border-radius: 12px;
@@ -115,7 +115,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .nav-btn:hover {
@@ -123,559 +126,566 @@
             transform: translateY(-2px);
         }
 
-        /* Welcome Hero */
-        .welcome-hero {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 3rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-        }
-
-        .welcome-hero h2 {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            animation: fadeInUp 0.6s ease;
-        }
-
-        .welcome-hero p {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            margin-bottom: 2rem;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Stats Dashboard */
+        /* COMPACT STATS - 4 colonne orizzontali */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .stat-card {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 12px;
+            padding: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--accent-pink) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover::before {
-            opacity: 0.1;
+            text-align: center;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
             border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-        }
-
         .stat-icon {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 900;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 0.3rem;
         }
 
         .stat-label {
-            font-size: 1rem;
+            font-size: 0.8rem;
             opacity: 0.8;
-            position: relative;
-            z-index: 1;
         }
 
-        /* Main Content Grid */
-        .content-grid {
+        /* MAIN GRID LAYOUT - 2 colonne principali */
+        .main-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* SKAILA Connect Section */
-        .skaila-connect {
+        /* LEFT COLUMN - Azioni Rapide e Materiali */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* QUICK ACTIONS - Risolve pain point: accesso lento in Classroom */
+        .quick-actions-section {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .section-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
         }
 
         .section-header h3 {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 800;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .quick-action {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            border-radius: 12px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--accent-pink);
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(102, 126, 234, 0.2));
+        }
+
+        .quick-action i {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .quick-action h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .quick-action p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* MATERIALI DIDATTICI - Pain point: difficile trovare file in Classroom */
+        .materiali-section {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .material-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .material-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .material-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background: var(--accent-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .material-info {
+            flex: 1;
+        }
+
+        .material-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .material-info p {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        /* RIGHT COLUMN - AI + Registro + SKAILA Connect */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* SKAILA AI - Pain point: nessun supporto AI in Classroom */
+        .ai-assistant-section {
+            background: linear-gradient(135deg, rgba(255, 107, 237, 0.25), rgba(102, 126, 234, 0.15));
+            border: 2px solid var(--accent-pink);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .ai-assistant-section::after {
+            content: '⭐ AI NATIVA';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent-pink);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .ai-quick-chat {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .ai-quick-chat input {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .ai-suggestion-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-suggestion-btn:hover {
+            background: var(--accent-pink);
+            transform: scale(1.05);
+        }
+
+        /* REGISTRO ONLINE - Pain point: Classroom non ha registro */
+        .registro-section {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .registro-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .registro-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .registro-info p {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .grade-badge {
+            padding: 0.4rem 0.8rem;
+            background: var(--success);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* SKAILA CONNECT */
+        .connect-section {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .company-card {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
 
         .company-card:hover {
             background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
+            transform: translateX(3px);
         }
 
         .company-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
         }
 
         .company-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
         }
 
         .company-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
         }
 
         .company-info p {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             opacity: 0.7;
         }
 
         .connect-btn {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.6rem;
             background: linear-gradient(135deg, var(--accent-pink), white);
             color: var(--purple-end);
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 700;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .connect-btn:hover {
-            transform: scale(1.05);
+            transform: scale(1.03);
         }
 
-        /* Registro Online */
-        .registro-online {
+        /* BOTTOM SECTION - Calendario + Chat Recenti */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .calendar-widget {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .registro-item {
+        .event-item {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .registro-info {
-            flex: 1;
-        }
-
-        .registro-info h4 {
-            font-size: 1rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .registro-info p {
-            font-size: 0.85rem;
-            opacity: 0.7;
-        }
-
-        .grade-badge {
-            padding: 0.5rem 1rem;
-            background: var(--success);
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        /* AI Insights Widget */
-        .ai-insights {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .insight-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
             border-left: 4px solid var(--accent-pink);
         }
 
-        .insight-item h4 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .insight-item p {
+        .event-item h4 {
             font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        /* Category Section - LAYOUT RIORGANIZZATO */
-        .category-section {
-            margin-bottom: 4rem;
-        }
-
-        .category-header {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .category-header > i {
-            font-size: 3rem;
-            opacity: 0.9;
-        }
-
-        .category-header h3 {
-            font-size: 2rem;
-            font-weight: 800;
             margin-bottom: 0.3rem;
-            background: linear-gradient(to right, white, var(--accent-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .category-header p {
-            font-size: 1.05rem;
-            opacity: 0.75;
-            margin: 0;
+        .event-item p {
+            font-size: 0.75rem;
+            opacity: 0.7;
         }
 
-        /* Category Cards Grid */
-        .category-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
 
-        .access-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 3rem 2rem;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-decoration: none;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 220px;
-        }
-
-        .access-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--purple-start) 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .access-card:hover {
-            transform: translateY(-12px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-        }
-
-        .access-card:hover::before {
-            opacity: 0.2;
-        }
-
-        .access-card i {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            display: block;
-            position: relative;
-            z-index: 1;
-            transition: all 0.3s ease;
-        }
-
-        .access-card:hover i {
-            transform: scale(1.15) rotate(5deg);
-        }
-
-        .access-card h4 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 0.75rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .access-card p {
-            font-size: 1rem;
-            opacity: 0.85;
-            position: relative;
-            z-index: 1;
-            line-height: 1.6;
-        }
-
-        /* Featured Cards (SKAILA AI, SKAILA Connect) */
-        .access-card.featured {
-            background: linear-gradient(135deg, rgba(255, 107, 237, 0.25), rgba(102, 126, 234, 0.15));
-            border: 2px solid var(--accent-pink);
-            position: relative;
-        }
-
-        .access-card.featured::after {
-            content: '⭐ IN EVIDENZA';
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--accent-pink);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-        }
-
-        .access-card.featured:hover {
-            border-color: var(--accent-pink);
-            box-shadow: 0 30px 60px rgba(255, 107, 237, 0.4);
-        }
-
-        @media (max-width: 1024px) {
-            .category-cards {
+            .stats-container {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bottom-grid {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 768px) {
-            .content-grid {
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .quick-actions-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .category-cards {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .category-section {
-                margin-bottom: 3rem;
-            }
-
-            .category-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .category-header > i {
-                font-size: 2.5rem;
-            }
-
-            .category-header h3 {
-                font-size: 1.75rem;
-            }
-
-            .access-card {
-                padding: 2rem 1.5rem;
-                min-height: 180px;
-            }
-
-            .access-card i {
-                font-size: 3rem;
-            }
-
-            .access-card.featured::after {
-                font-size: 0.6rem;
-                padding: 0.25rem 0.6rem;
             }
 
             .top-nav {
                 flex-direction: column;
                 gap: 1rem;
             }
-
-            .welcome-hero h2 {
-                font-size: 2rem;
-            }
         }
     </style>
 </head>
 <body>
     <div class="dashboard-wrapper">
-        <!-- Top Navigation -->
+        <!-- COMPACT TOP NAV -->
         <nav class="top-nav">
             <div class="logo-section">
                 <div class="user-avatar">{{ user.nome[0] }}</div>
                 <div>
                     <h1>SKAILA</h1>
-                    <p style="opacity: 0.7; font-size: 0.9rem;">{{ user.nome }} {{ user.cognome }}</p>
+                    <p style="opacity: 0.7; font-size: 0.85rem;">{{ user.nome }} {{ user.cognome }} • {{ user.classe or 'Studente' }}</p>
                 </div>
             </div>
             <div class="user-menu">
-                <a href="/ai-chat" class="nav-btn"><i class="fas fa-robot"></i> AI Tutor</a>
-                <a href="/gamification" class="nav-btn"><i class="fas fa-trophy"></i> XP & Badge</a>
-                <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Esci</a>
+                <a href="/gamification" class="nav-btn"><i class="fas fa-trophy"></i> <span class="stat-value" style="font-size: 0.9rem;">{{ stats.total_xp }}</span> XP</a>
+                <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </nav>
 
-        <!-- Welcome Hero -->
-        <div class="welcome-hero">
-            <h2>👋 Benvenuto, {{ user.nome }}!</h2>
-            <p>🚀 La tua piattaforma educativa intelligente per il successo scolastico</p>
-        </div>
-
-        <!-- Stats Dashboard -->
+        <!-- COMPACT STATS -->
         <div class="stats-container">
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-icon">🔥</span>
-                </div>
+                <div class="stat-icon">🔥</div>
                 <div class="stat-value">{{ stats.current_streak }}</div>
-                <div class="stat-label">Giorni di Streak</div>
+                <div class="stat-label">Giorni Streak</div>
             </div>
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-icon">⭐</span>
-                </div>
-                <div class="stat-value">{{ stats.total_xp }}</div>
-                <div class="stat-label">XP Totali</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-icon">🎯</span>
-                </div>
+                <div class="stat-icon">🎯</div>
                 <div class="stat-value">Lvl {{ stats.current_level }}</div>
-                <div class="stat-label">Livello Attuale</div>
+                <div class="stat-label">Livello</div>
             </div>
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-icon">🤖</span>
-                </div>
+                <div class="stat-icon">💬</div>
+                <div class="stat-value">{{ stats.messages_today }}</div>
+                <div class="stat-label">Messaggi Oggi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🤖</div>
                 <div class="stat-value">{{ stats.ai_questions_today }}</div>
-                <div class="stat-label">Domande AI Oggi</div>
+                <div class="stat-label">AI Oggi</div>
             </div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="content-grid">
-            <!-- SKAILA Connect -->
-            <div class="skaila-connect">
-                <div class="section-header">
-                    <i class="fas fa-briefcase" style="font-size: 1.5rem;"></i>
-                    <h3>SKAILA Connect - Opportunità Aziendali</h3>
-                </div>
-                <p style="opacity: 0.8; margin-bottom: 1.5rem;">Connettiti con aziende leader per stage, tirocini e opportunità di lavoro</p>
-                
-                {% if companies %}
-                    {% for company in companies %}
-                    <div class="company-card">
-                        <div class="company-header">
-                            <div class="company-logo">{{ company[4] }}</div>
-                            <div class="company-info">
-                                <h4>{{ company[1] }}</h4>
-                                <p>{{ company[6] }} - {{ company[5] }}</p>
-                            </div>
-                        </div>
-                        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem;">{{ company[3] }}</p>
-                        <button class="connect-btn" onclick="connectWithCompany({{ company[0] }})">
-                            <i class="fas fa-paper-plane"></i> Candidati Ora
-                        </button>
+        <!-- MAIN GRID: 2 COLONNE -->
+        <div class="main-grid">
+            <!-- LEFT COLUMN -->
+            <div class="left-column">
+                <!-- QUICK ACTIONS - Accesso Ultra-Rapido -->
+                <div class="quick-actions-section">
+                    <div class="section-header">
+                        <i class="fas fa-bolt" style="font-size: 1.2rem; color: var(--accent-pink);"></i>
+                        <h3>Azioni Rapide</h3>
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <p style="opacity: 0.7; text-align: center; padding: 2rem;">Nessuna opportunità disponibile al momento</p>
-                {% endif %}
+                    <div class="quick-actions-grid">
+                        <a href="/chat" class="quick-action">
+                            <i class="fas fa-comments"></i>
+                            <h4>Chat Classe</h4>
+                            <p>Messaggi in tempo reale</p>
+                        </a>
+                        <a href="/materiali" class="quick-action">
+                            <i class="fas fa-folder-open"></i>
+                            <h4>Materiali</h4>
+                            <p>Documenti e risorse</p>
+                        </a>
+                        <a href="/calendario" class="quick-action">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h4>Calendario</h4>
+                            <p>Eventi e scadenze</p>
+                        </a>
+                        <a href="/registro-online" class="quick-action">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>Voti</h4>
+                            <p>Registro e medie</p>
+                        </a>
+                        <a href="/registro-online#presenze" class="quick-action">
+                            <i class="fas fa-calendar-check"></i>
+                            <h4>Presenze</h4>
+                            <p>Assenze e giustificazioni</p>
+                        </a>
+                        <a href="/gamification" class="quick-action">
+                            <i class="fas fa-trophy"></i>
+                            <h4>Gamification</h4>
+                            <p>Badge e sfide</p>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- MATERIALI DIDATTICI - Accesso Diretto -->
+                <div class="materiali-section">
+                    <div class="section-header">
+                        <i class="fas fa-book" style="font-size: 1.2rem;"></i>
+                        <h3>Materiali Recenti</h3>
+                        <a href="/materiali" style="margin-left: auto; color: var(--accent-pink); font-size: 0.85rem; text-decoration: none;">Vedi tutti →</a>
+                    </div>
+                    
+                    <div class="material-item" onclick="window.location.href='/materiali'">
+                        <div class="material-icon">📐</div>
+                        <div class="material-info">
+                            <h4>Equazioni di secondo grado</h4>
+                            <p>Matematica • Prof. Rossi • 2 giorni fa</p>
+                        </div>
+                    </div>
+
+                    <div class="material-item" onclick="window.location.href='/materiali'">
+                        <div class="material-icon">🔬</div>
+                        <div class="material-info">
+                            <h4>Leggi di Newton - Appunti</h4>
+                            <p>Fisica • Prof. Bianchi • 3 giorni fa</p>
+                        </div>
+                    </div>
+
+                    <div class="material-item" onclick="window.location.href='/materiali'">
+                        <div class="material-icon">📚</div>
+                        <div class="material-info">
+                            <h4>Divina Commedia - Canto III</h4>
+                            <p>Italiano • Prof. Verdi • 5 giorni fa</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Sidebar -->
-            <div>
-                <!-- Registro Online -->
-                <div class="registro-online" style="margin-bottom: 2rem;">
+            <!-- RIGHT COLUMN -->
+            <div class="right-column">
+                <!-- SKAILA AI - Tutor Personale -->
+                <div class="ai-assistant-section">
                     <div class="section-header">
-                        <i class="fas fa-clipboard-list" style="font-size: 1.5rem;"></i>
-                        <h3>Registro Online</h3>
+                        <i class="fas fa-robot" style="font-size: 1.2rem;"></i>
+                        <h3>SKAILA AI - Tutor Personale</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 1rem;">Chiedimi qualsiasi cosa su qualsiasi materia!</p>
+                    
+                    <div class="ai-quick-chat">
+                        <input type="text" placeholder="Scrivi la tua domanda..." onclick="window.location.href='/ai-chat'">
+                        <div class="ai-suggestions">
+                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">🧮 Aiuto Matematica</button>
+                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">📖 Riassunto Testo</button>
+                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">🔬 Spiegazione Fisica</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REGISTRO ONLINE -->
+                <div class="registro-section">
+                    <div class="section-header">
+                        <i class="fas fa-clipboard-list" style="font-size: 1.2rem;"></i>
+                        <h3>Ultimi Voti</h3>
+                        <a href="/registro-online" style="margin-left: auto; color: var(--accent-pink); font-size: 0.85rem; text-decoration: none;">Tutti →</a>
                     </div>
                     
                     <div class="registro-item">
                         <div class="registro-info">
                             <h4>📐 Matematica</h4>
-                            <p>Verifica - 15/10/2025</p>
+                            <p>Verifica • 15/01/2025</p>
                         </div>
                         <div class="grade-badge">8.5</div>
                     </div>
@@ -683,7 +693,7 @@
                     <div class="registro-item">
                         <div class="registro-info">
                             <h4>🔬 Fisica</h4>
-                            <p>Interrogazione - 12/10/2025</p>
+                            <p>Interrogazione • 12/01/2025</p>
                         </div>
                         <div class="grade-badge">9.0</div>
                     </div>
@@ -691,156 +701,95 @@
                     <div class="registro-item">
                         <div class="registro-info">
                             <h4>📚 Italiano</h4>
-                            <p>Tema - 10/10/2025</p>
+                            <p>Tema • 10/01/2025</p>
                         </div>
                         <div class="grade-badge">7.5</div>
                     </div>
-
-                    <a href="/registro" class="nav-btn" style="width: 100%; margin-top: 1rem; text-align: center;">
-                        Vedi Registro Completo <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
 
-                <!-- AI Insights Intelligenti -->
-                <div class="ai-insights">
+                <!-- SKAILA CONNECT -->
+                <div class="connect-section">
                     <div class="section-header">
-                        <i class="fas fa-brain" style="font-size: 1.5rem;"></i>
-                        <h3>AI Insights</h3>
+                        <i class="fas fa-briefcase" style="font-size: 1.2rem;"></i>
+                        <h3>SKAILA Connect</h3>
                     </div>
                     
-                    {% if ai_insights %}
-                        {% for insight in ai_insights %}
-                        <div class="insight-item" style="border-left-color: 
-                            {% if insight.type == 'positive' %}var(--success)
-                            {% elif insight.type == 'warning' or insight.type == 'critical' %}var(--warning)
-                            {% elif insight.type == 'achievement' %}#f093fb
-                            {% else %}rgba(255,255,255,0.3){% endif %};">
-                            <h4>{{ insight.icon }} {{ insight.title }}</h4>
-                            <p>{{ insight.message }}</p>
+                    {% if companies and companies|length > 0 %}
+                        {% for company in companies[:2] %}
+                        <div class="company-card">
+                            <div class="company-header">
+                                <div class="company-logo">{{ company[4] }}</div>
+                                <div class="company-info">
+                                    <h4>{{ company[1] }}</h4>
+                                    <p>{{ company[6] }}</p>
+                                </div>
+                            </div>
+                            <button class="connect-btn" onclick="connectWithCompany({{ company[0] }})">
+                                <i class="fas fa-paper-plane"></i> Candidati
+                            </button>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <div class="insight-item">
-                            <h4>📊 Raccogli Dati</h4>
-                            <p>Completa più attività per ricevere insights personalizzati basati sui tuoi dati.</p>
-                        </div>
+                        <p style="opacity: 0.7; font-size: 0.85rem; text-align: center; padding: 1rem;">Nessuna opportunità al momento</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- SEZIONE 1: COMUNICAZIONE -->
-        <div class="category-section">
-            <div class="category-header">
-                <i class="fas fa-comments"></i>
-                <div>
-                    <h3>📱 Comunicazione</h3>
-                    <p>Resta connesso con compagni, professori e gruppi di studio</p>
+        <!-- BOTTOM GRID: Calendario + Chat Recenti -->
+        <div class="bottom-grid">
+            <div class="calendar-widget">
+                <div class="section-header">
+                    <i class="fas fa-calendar-alt" style="font-size: 1.2rem;"></i>
+                    <h3>Prossimi Eventi</h3>
                 </div>
-            </div>
-            <div class="category-cards">
-                <a href="/chat" class="access-card">
-                    <i class="fas fa-message"></i>
-                    <h4>Chat Hub</h4>
-                    <p>Centro messaggi unificato</p>
-                </a>
-                <a href="/direct-messages" class="access-card">
-                    <i class="fas fa-user-friends"></i>
-                    <h4>Messaggi Diretti</h4>
-                    <p>Chat 1-a-1 private</p>
-                </a>
-                <a href="/group-chats" class="access-card">
-                    <i class="fas fa-users"></i>
-                    <h4>Gruppi Materia</h4>
-                    <p>Discussioni per argomento</p>
-                </a>
-            </div>
-        </div>
+                
+                <div class="event-item">
+                    <h4>📝 Verifica Matematica</h4>
+                    <p>20 Gennaio 2025 • 09:00-10:30</p>
+                </div>
 
-        <!-- SEZIONE 2: STUDIO & APPRENDIMENTO -->
-        <div class="category-section">
-            <div class="category-header">
-                <i class="fas fa-graduation-cap"></i>
-                <div>
-                    <h3>📚 Studio & Apprendimento</h3>
-                    <p>Tutti gli strumenti per imparare in modo efficace</p>
+                <div class="event-item">
+                    <h4>📚 Consegna Tema Italiano</h4>
+                    <p>25 Gennaio 2025 • Entro 23:59</p>
                 </div>
-            </div>
-            <div class="category-cards">
-                <a href="/skaila-ai" class="access-card featured">
-                    <i class="fas fa-robot"></i>
-                    <h4>SKAILA AI</h4>
-                    <p>Tutor personale intelligente</p>
-                </a>
-                <a href="/quiz" class="access-card">
-                    <i class="fas fa-brain"></i>
-                    <h4>Quiz & Test</h4>
-                    <p>Allenati e migliora</p>
-                </a>
-                <a href="/materiali" class="access-card">
-                    <i class="fas fa-folder-open"></i>
-                    <h4>Materiali Didattici</h4>
-                    <p>Risorse e documenti</p>
-                </a>
-            </div>
-        </div>
 
-        <!-- SEZIONE 3: CARRIERA -->
-        <div class="category-section">
-            <div class="category-header">
-                <i class="fas fa-briefcase"></i>
-                <div>
-                    <h3>💼 Carriera</h3>
-                    <p>Il tuo futuro professionale inizia qui</p>
+                <div class="event-item">
+                    <h4>🎓 Assemblea di Classe</h4>
+                    <p>28 Gennaio 2025 • 11:00-12:00</p>
                 </div>
             </div>
-            <div class="category-cards">
-                <a href="/skaila-connect" class="access-card featured">
-                    <i class="fas fa-handshake"></i>
-                    <h4>SKAILA Connect</h4>
-                    <p>Stage, tirocini e opportunità</p>
-                </a>
-            </div>
-        </div>
 
-        <!-- SEZIONE 4: REGISTRO ONLINE -->
-        <div class="category-section">
-            <div class="category-header">
-                <i class="fas fa-clipboard-list"></i>
-                <div>
-                    <h3>📊 Registro Online</h3>
-                    <p>Monitora il tuo rendimento scolastico</p>
+            <div class="calendar-widget">
+                <div class="section-header">
+                    <i class="fas fa-comments" style="font-size: 1.2rem;"></i>
+                    <h3>Chat Recenti</h3>
                 </div>
-            </div>
-            <div class="category-cards">
-                <a href="/registro-online" class="access-card">
-                    <i class="fas fa-chart-line"></i>
-                    <h4>Voti</h4>
-                    <p>Valutazioni e medie</p>
-                </a>
-                <a href="/registro-online#presenze" class="access-card">
-                    <i class="fas fa-calendar-check"></i>
-                    <h4>Presenze</h4>
-                    <p>Assenze e ritardi</p>
-                </a>
-                <a href="/calendario" class="access-card">
-                    <i class="fas fa-calendar-alt"></i>
-                    <h4>Calendario</h4>
-                    <p>Eventi e scadenze</p>
-                </a>
+                
+                <div class="event-item">
+                    <h4>💬 Classe 3A - Generale</h4>
+                    <p>Giulia: "Qualcuno ha fatto l'esercizio 15?" • 2h fa</p>
+                </div>
+
+                <div class="event-item">
+                    <h4>👥 Gruppo Studio Matematica</h4>
+                    <p>Marco: "Ci vediamo alle 16?" • 4h fa</p>
+                </div>
+
+                <div class="event-item">
+                    <h4>📐 Prof. Rossi (Matematica)</h4>
+                    <p>Nuovi materiali caricati • 1 giorno fa</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         function connectWithCompany(companyId) {
-            // Invia candidatura tramite API
             fetch('/api/skaila-connect/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    company_id: companyId
-                })
+                body: JSON.stringify({ company_id: companyId })
             }).then(response => response.json())
               .then(data => {
                   if (data.success) {
@@ -858,16 +807,6 @@
                   alert('❌ Errore di connessione.');
               });
         }
-
-        // Smooth scroll animation
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
     </script>
 </body>
 </html>
