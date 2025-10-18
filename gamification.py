@@ -575,223 +575,229 @@ class SKAILAGamification:
 
     def init_gamification_tables(self):
         """Inizializza le tabelle per il sistema di gamification completo"""
-        conn = sqlite3.connect('skaila.db') # Using SQLite for initialization example
-        cursor = conn.cursor()
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Determina sintassi PRIMARY KEY in base al database
+            is_postgres = db_manager.db_type == 'postgresql'
+            pk_syntax = 'PRIMARY KEY' if is_postgres else 'PRIMARY KEY AUTOINCREMENT'
+            serial_type = 'SERIAL PRIMARY KEY' if is_postgres else 'INTEGER PRIMARY KEY AUTOINCREMENT'
+            
+            # Tabella profili gamification utenti (estesa)
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS user_gamification (
+                    user_id INTEGER PRIMARY KEY,
+                    total_xp INTEGER DEFAULT 0,
+                    current_level INTEGER DEFAULT 1,
+                    current_streak INTEGER DEFAULT 0,
+                    max_streak INTEGER DEFAULT 0,
+                    last_activity_date DATE,
+                    total_messages INTEGER DEFAULT 0,
+                    ai_interactions INTEGER DEFAULT 0,
+                    quizzes_completed INTEGER DEFAULT 0,
+                    help_given INTEGER DEFAULT 0,
+                    study_minutes INTEGER DEFAULT 0,
+                    team_challenges_participated INTEGER DEFAULT 0,
+                    team_challenges_won INTEGER DEFAULT 0,
+                    mentorship_sessions INTEGER DEFAULT 0,
+                    current_avatar TEXT DEFAULT 'default',
+                    current_theme TEXT DEFAULT 'default',
+                    avatar_coins INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    {',' if not is_postgres else ','}
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella profili gamification utenti (estesa)
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_gamification (
-                user_id INTEGER PRIMARY KEY,
-                total_xp INTEGER DEFAULT 0,
-                current_level INTEGER DEFAULT 1,
-                current_streak INTEGER DEFAULT 0,
-                max_streak INTEGER DEFAULT 0,
-                last_activity_date DATE,
-                total_messages INTEGER DEFAULT 0,
-                ai_interactions INTEGER DEFAULT 0,
-                quizzes_completed INTEGER DEFAULT 0,
-                help_given INTEGER DEFAULT 0,
-                study_minutes INTEGER DEFAULT 0,
-                team_challenges_participated INTEGER DEFAULT 0,
-                team_challenges_won INTEGER DEFAULT 0,
-                mentorship_sessions INTEGER DEFAULT 0,
-                current_avatar TEXT DEFAULT 'default',
-                current_theme TEXT DEFAULT 'default',
-                avatar_coins INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
+            # Tabella avatar e temi sbloccati
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS user_unlocked_items (
+                    id {serial_type},
+                    user_id INTEGER,
+                    item_type TEXT,
+                    item_id TEXT,
+                    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    unlock_method TEXT,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id),
+                    UNIQUE(user_id, item_type, item_id)
+                )
+            ''')
 
-        # Tabella avatar e temi sbloccati
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_unlocked_items (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                item_type TEXT, -- 'avatar' o 'theme'
-                item_id TEXT,
-                unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                unlock_method TEXT, -- 'level', 'purchase', 'achievement'
-                FOREIGN KEY (user_id) REFERENCES utenti (id),
-                UNIQUE(user_id, item_type, item_id)
-            )
-        ''')
+            # Tabella sfide collaborative
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS team_challenges (
+                    id {serial_type},
+                    challenge_id TEXT,
+                    challenge_name TEXT,
+                    class_a TEXT,
+                    class_b TEXT,
+                    start_date TIMESTAMP,
+                    end_date TIMESTAMP,
+                    status TEXT DEFAULT 'active',
+                    winner_class TEXT,
+                    class_a_progress INTEGER DEFAULT 0,
+                    class_b_progress INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
 
-        # Tabella sfide collaborative
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS team_challenges (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                challenge_id TEXT,
-                challenge_name TEXT,
-                class_a TEXT,
-                class_b TEXT,
-                start_date TIMESTAMP,
-                end_date TIMESTAMP,
-                status TEXT DEFAULT 'active', -- 'active', 'completed', 'cancelled'
-                winner_class TEXT,
-                class_a_progress INTEGER DEFAULT 0,
-                class_b_progress INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
+            # Tabella partecipazioni sfide team
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS team_challenge_participants (
+                    id {serial_type},
+                    challenge_id INTEGER,
+                    user_id INTEGER,
+                    contribution INTEGER DEFAULT 0,
+                    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (challenge_id) REFERENCES team_challenges (id),
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella partecipazioni sfide team
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS team_challenge_participants (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                challenge_id INTEGER,
-                user_id INTEGER,
-                contribution INTEGER DEFAULT 0,
-                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (challenge_id) REFERENCES team_challenges (id),
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
+            # Tabella analytics giornaliere
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS daily_analytics (
+                    id {serial_type},
+                    user_id INTEGER,
+                    date DATE,
+                    daily_xp_earned INTEGER DEFAULT 0,
+                    messages_sent INTEGER DEFAULT 0,
+                    ai_questions INTEGER DEFAULT 0,
+                    quiz_completed INTEGER DEFAULT 0,
+                    study_minutes INTEGER DEFAULT 0,
+                    help_given INTEGER DEFAULT 0,
+                    login_time TIME,
+                    total_session_time INTEGER DEFAULT 0,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id),
+                    UNIQUE(user_id, date)
+                )
+            ''')
 
-        # Tabella analytics giornaliere
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS daily_analytics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                date DATE,
-                daily_xp_earned INTEGER DEFAULT 0,
-                messages_sent INTEGER DEFAULT 0,
-                ai_questions INTEGER DEFAULT 0,
-                quiz_completed INTEGER DEFAULT 0,
-                study_minutes INTEGER DEFAULT 0,
-                help_given INTEGER DEFAULT 0,
-                login_time TIME,
-                total_session_time INTEGER DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES utenti (id),
-                UNIQUE(user_id, date)
-            )
-        ''')
+            # Tabella achievement utenti
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS user_achievements (
+                    id {serial_type},
+                    user_id INTEGER,
+                    achievement_id TEXT,
+                    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    xp_earned INTEGER DEFAULT 0,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id),
+                    UNIQUE(user_id, achievement_id)
+                )
+            ''')
 
-        # Tabella achievement utenti
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_achievements (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                achievement_id TEXT,
-                unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                xp_earned INTEGER DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES utenti (id),
-                UNIQUE(user_id, achievement_id)
-            )
-        ''')
+            # Tabella sfide giornaliere
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS daily_challenges_progress (
+                    id {serial_type},
+                    user_id INTEGER,
+                    challenge_id TEXT,
+                    challenge_date DATE,
+                    current_progress INTEGER DEFAULT 0,
+                    target_progress INTEGER,
+                    completed BOOLEAN DEFAULT {'false' if is_postgres else '0'},
+                    xp_earned INTEGER DEFAULT 0,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id),
+                    UNIQUE(user_id, challenge_id, challenge_date)
+                )
+            ''')
 
-        # Tabella sfide giornaliere
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS daily_challenges_progress (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                challenge_id TEXT,
-                challenge_date DATE,
-                current_progress INTEGER DEFAULT 0,
-                target_progress INTEGER,
-                completed BOOLEAN DEFAULT 0,
-                xp_earned INTEGER DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES utenti (id),
-                UNIQUE(user_id, challenge_id, challenge_date)
-            )
-        ''')
+            # Tabella classifiche
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS leaderboards (
+                    id {serial_type},
+                    user_id INTEGER,
+                    period_type TEXT,
+                    period_date DATE,
+                    total_xp INTEGER,
+                    rank_position INTEGER,
+                    class_rank INTEGER,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella classifiche
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS leaderboards (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                period_type TEXT, -- 'daily', 'weekly', 'monthly', 'all_time'
-                period_date DATE,
-                total_xp INTEGER,
-                rank_position INTEGER,
-                class_rank INTEGER,
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
+            # Tabella log attività XP
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS xp_activity_log (
+                    id {serial_type},
+                    user_id INTEGER,
+                    action_type TEXT,
+                    xp_earned INTEGER,
+                    bonus_multiplier REAL DEFAULT 1.0,
+                    description TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella log attività XP
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS xp_activity_log (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                action_type TEXT,
-                xp_earned INTEGER,
-                bonus_multiplier REAL DEFAULT 1.0,
-                description TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
+            # Tabella ricompense speciali
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS special_rewards_earned (
+                    id {serial_type},
+                    user_id INTEGER,
+                    reward_type TEXT,
+                    earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    bonus_applied REAL,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella ricompense speciali
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS special_rewards_earned (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                reward_type TEXT,
-                earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                bonus_applied REAL,
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
+            # Tabella badge utenti
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS user_badges (
+                    id {serial_type},
+                    user_id INTEGER,
+                    badge_id TEXT,
+                    earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    xp_earned INTEGER DEFAULT 0,
+                    rarity TEXT,
+                    FOREIGN KEY (user_id) REFERENCES utenti (id),
+                    UNIQUE(user_id, badge_id)
+                )
+            ''')
 
-        # Tabella badge utenti
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_badges (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                badge_id TEXT,
-                earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                xp_earned INTEGER DEFAULT 0,
-                rarity TEXT,
-                FOREIGN KEY (user_id) REFERENCES utenti (id),
-                UNIQUE(user_id, badge_id)
-            )
-        ''')
+            # Tabella protezioni streak
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS streak_protections (
+                    id {serial_type},
+                    user_id INTEGER,
+                    protection_type TEXT,
+                    used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP,
+                    active BOOLEAN DEFAULT {'true' if is_postgres else '1'},
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella protezioni streak
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS streak_protections (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                protection_type TEXT, -- 'freeze_card', 'weekend_pass'
-                used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                expires_at TIMESTAMP,
-                active BOOLEAN DEFAULT 1,
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
+            # Tabella statistiche avanzate per badge
+            last_freeze_default = "CURRENT_DATE" if is_postgres else "(DATE('now', 'start of month'))"
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS user_advanced_stats (
+                    user_id INTEGER PRIMARY KEY,
+                    perfect_quizzes INTEGER DEFAULT 0,
+                    speed_completions INTEGER DEFAULT 0,
+                    courses_mastered INTEGER DEFAULT 0,
+                    likes_received INTEGER DEFAULT 0,
+                    discussions_moderated INTEGER DEFAULT 0,
+                    early_morning_sessions INTEGER DEFAULT 0,
+                    late_night_sessions INTEGER DEFAULT 0,
+                    weekend_challenges_completed INTEGER DEFAULT 0,
+                    longest_study_session INTEGER DEFAULT 0,
+                    lessons_completed INTEGER DEFAULT 0,
+                    days_on_platform INTEGER DEFAULT 0,
+                    courses_explored INTEGER DEFAULT 0,
+                    features_suggested_implemented INTEGER DEFAULT 0,
+                    total_courses_available INTEGER DEFAULT 10,
+                    freeze_cards_used_this_month INTEGER DEFAULT 0,
+                    weekend_passes_active INTEGER DEFAULT 0,
+                    last_freeze_card_reset DATE DEFAULT {last_freeze_default},
+                    FOREIGN KEY (user_id) REFERENCES utenti (id)
+                )
+            ''')
 
-        # Tabella statistiche avanzate per badge
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_advanced_stats (
-                user_id INTEGER PRIMARY KEY,
-                perfect_quizzes INTEGER DEFAULT 0,
-                speed_completions INTEGER DEFAULT 0,
-                courses_mastered INTEGER DEFAULT 0,
-                likes_received INTEGER DEFAULT 0,
-                discussions_moderated INTEGER DEFAULT 0,
-                early_morning_sessions INTEGER DEFAULT 0,
-                late_night_sessions INTEGER DEFAULT 0,
-                weekend_challenges_completed INTEGER DEFAULT 0,
-                longest_study_session INTEGER DEFAULT 0,
-                lessons_completed INTEGER DEFAULT 0,
-                days_on_platform INTEGER DEFAULT 0,
-                courses_explored INTEGER DEFAULT 0,
-                features_suggested_implemented INTEGER DEFAULT 0,
-                total_courses_available INTEGER DEFAULT 10,
-                freeze_cards_used_this_month INTEGER DEFAULT 0,
-                weekend_passes_active INTEGER DEFAULT 0,
-                last_freeze_card_reset DATE DEFAULT (DATE('now', 'start of month')),
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
-
-        conn.commit()
-        conn.close()
-        print("✅ Tabelle gamification complete create con successo!")
+            conn.commit()
+            print("✅ Tabelle gamification complete create con successo!")
 
     def get_or_create_user_profile(self, user_id: int) -> Dict[str, Any]:
         """Ottieni o crea il profilo gamification dell'utente"""
