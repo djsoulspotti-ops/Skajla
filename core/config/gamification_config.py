@@ -9,29 +9,83 @@ class XPConfig:
     """Configurazione sistema XP"""
     
     ACTIONS = {
+        # Login e streak
         'login_daily': 10,
-        'complete_profile': 50,
-        'first_message': 20,
-        'message_sent': 5,
-        'ai_question': 15,
-        'quiz_completed': 50,
-        'quiz_perfect': 100,
+        'first_login_day': 25,
+        'week_streak': 100,
+        'month_streak': 300,
+        
+        # Lezioni e corsi
+        'lesson_completion_easy': 50,
+        'lesson_completion_medium': 100,
+        'lesson_completion_hard': 200,
+        'course_completion': 750,
+        'bonus_challenge': 250,
         'lesson_completed': 30,
         'homework_submitted': 40,
+        
+        # Quiz e valutazioni
+        'quiz_completed': 50,
+        'quiz_perfect_score_easy': 100,
+        'quiz_perfect_score_medium': 200,
+        'quiz_perfect_score_hard': 300,
+        'assignment_submit': 100,
+        'milestone_achievement': 350,
+        'quiz_perfect': 100,
+        
+        # Interazioni AI
+        'ai_question': 15,
+        'ai_correct_answer': 30,
+        
+        # Social learning
+        'message_sent': 5,
+        'help_classmate': 60,
+        'peer_tutoring_session': 120,
+        'create_study_group': 80,
+        'join_study_group': 30,
         'help_peer': 25,
+        'first_message': 20,
+        
+        # Studio e tempo
+        'study_session_15min': 20,
+        'study_session_30min': 40,
+        'study_session_60min': 80,
+        'focus_session_completed': 50,
         'study_session': 35,
+        
+        # Collaborative e team
+        'team_challenge_completed': 150,
+        'team_challenge_contributed': 75,
+        'inter_class_victory': 200,
+        'mentorship_session': 100,
+        'collaborative_project': 120,
+        
+        # Special achievements
+        'perfect_week': 400,
+        'knowledge_master': 500,
+        'community_leader': 300,
         'achievement_unlocked': 100,
         'streak_milestone': 50,
+        
+        # Profilo e onboarding
+        'complete_profile': 50,
+        
+        # SKAILA Connect (carriera)
         'skaila_connect_apply': 50,
-        'first_skaila_connect': 50
+        'first_skaila_connect': 50,
+        'career_action': 50
     }
     
     MULTIPLIERS = {
         'daily_streak': 1.2,
         'weekend': 1.5,
+        'weekend_bonus': 1.5,
         'birthday': 2.0,
         'event_special': 1.3,
-        'perfect_week': 1.5
+        'perfect_week': 1.5,
+        'perfect_score': 2.0,
+        'helping_others': 1.3,
+        'first_time': 1.1
     }
     
     BONUS_THRESHOLDS = {

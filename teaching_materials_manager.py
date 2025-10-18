@@ -8,6 +8,8 @@ from typing import Dict, List, Optional, BinaryIO
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from database_manager import db_manager
+from shared.formatters.file_formatters import file_formatter
+from shared.validators.input_validators import validator
 
 class TeachingMaterialsManager:
     """Gestione materiali didattici"""
@@ -158,7 +160,7 @@ class TeachingMaterialsManager:
                 'teacher': f"{mat['teacher_name']} {mat['teacher_surname']}",
                 'file_name': mat['file_name'],
                 'file_type': mat['file_type'],
-                'file_size': self._format_file_size(mat['file_size']),
+                'file_size': file_formatter.format_file_size(mat['file_size']),  # ✅ Formattatore centralizzato
                 'upload_date': mat['upload_date'],
                 'downloads': mat['downloads'],
                 'is_public': mat['is_public']
@@ -256,7 +258,7 @@ class TeachingMaterialsManager:
         return {
             'total_materials': stats['total_materials'] if stats else 0,
             'total_downloads': stats['total_downloads'] if stats else 0,
-            'total_size': self._format_file_size(stats['total_size']) if stats and stats['total_size'] else '0 B',
+            'total_size': file_formatter.format_file_size(stats['total_size']) if stats and stats['total_size'] else '0 B',  # ✅ Formattatore centralizzato
             'most_downloaded': [{'title': m['title'], 'downloads': m['downloads']} for m in most_downloaded],
             'by_subject': [{'subject': s['subject'], 'count': s['count'], 'downloads': s['downloads']} for s in by_subject]
         }
@@ -297,16 +299,7 @@ class TeachingMaterialsManager:
             for r in results
         ]
     
-    def _format_file_size(self, size: int) -> str:
-        """Formatta dimensione file"""
-        if not size:
-            return '0 B'
-        
-        for unit in ['B', 'KB', 'MB', 'GB']:
-            if size < 1024.0:
-                return f"{size:.1f} {unit}"
-            size /= 1024.0
-        return f"{size:.1f} TB"
+    # ✅ Funzione rimossa - ora usa file_formatter.format_file_size() centralizzato
 
 
 # Initialize

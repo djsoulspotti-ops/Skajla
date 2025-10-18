@@ -11,6 +11,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 import random
+from core.config.gamification_config import XPConfig, LevelConfig, BadgeConfig, StreakConfig
 
 # Assume db_manager is imported and configured elsewhere, providing context manager support
 # For demonstration, let's mock a db_manager that supports context managers
@@ -60,67 +61,9 @@ db_manager = MockDBManager(db_type='sqlite') # Change to 'postgresql' if needed
 
 class SKAILAGamification:
     def __init__(self):
-        # XP Multipliers per bonus e eventi speciali
-        self.xp_multipliers = {
-            'daily_streak': 1.2,
-            'weekend_bonus': 1.5,
-            'perfect_score': 2.0,
-            'helping_others': 1.3,
-            'first_time': 1.1
-        }
-
-        # XP Values per diverse azioni
-        self.xp_actions = {
-            # Login e streak
-            'login_daily': 10,
-            'first_login_day': 25,
-            'week_streak': 100,
-            'month_streak': 300,
-
-            # Lezioni e corsi (nuovi)
-            'lesson_completion_easy': 50,
-            'lesson_completion_medium': 100,
-            'lesson_completion_hard': 200,
-            'course_completion': 750,
-            'bonus_challenge': 250,
-
-            # Quiz e valutazioni (migliorati)
-            'quiz_completed': 25,
-            'quiz_perfect_score_easy': 100,
-            'quiz_perfect_score_medium': 200,
-            'quiz_perfect_score_hard': 300,
-            'assignment_submit': 100,
-            'milestone_achievement': 350,
-
-            # Interazioni AI
-            'ai_question': 15,
-            'ai_correct_answer': 30,
-
-            # Social learning (migliorati)
-            'message_sent': 5,
-            'help_classmate': 60,
-            'peer_tutoring_session': 120,
-            'create_study_group': 80,
-            'join_study_group': 30,
-
-            # Studio e tempo
-            'study_session_15min': 20,
-            'study_session_30min': 40,
-            'study_session_60min': 80,
-            'focus_session_completed': 50,
-
-            # Collaborative e team
-            'team_challenge_completed': 150,
-            'team_challenge_contributed': 75,
-            'inter_class_victory': 200,
-            'mentorship_session': 100,
-            'collaborative_project': 120,
-
-            # Special achievements
-            'perfect_week': 400,
-            'knowledge_master': 500,
-            'community_leader': 300
-        }
+        # ✅ XP da configurazione centralizzata (SSoT)
+        self.xp_multipliers = XPConfig.MULTIPLIERS
+        self.xp_actions = XPConfig.ACTIONS
 
         # Livelli e soglie XP - FORMULA MIGLIORATA
         # Level 1-10: 100 * level

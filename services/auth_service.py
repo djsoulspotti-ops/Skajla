@@ -10,12 +10,14 @@ from datetime import datetime, timedelta
 from functools import wraps
 from flask import request, session, render_template
 from database_manager import db_manager
+from shared.validators.input_validators import validator, sql_protector
+from core.config.settings import SecuritySettings
 
 class AuthService:
     def __init__(self):
         self.login_attempts = {}
-        self.max_attempts = 5
-        self.lockout_duration = 300  # 5 minuti
+        self.max_attempts = SecuritySettings.MAX_LOGIN_ATTEMPTS
+        self.lockout_duration = SecuritySettings.LOGIN_LOCKOUT_DURATION
 
     def hash_password(self, password: str) -> str:
         """Hash password con bcrypt"""
@@ -57,6 +59,15 @@ class AuthService:
 
     def authenticate_user(self, email: str, password: str):
         """Autentica utente"""
+        # ✅ Validazione email con validatore centralizzato
+        is_valid_email, email_error = validator.validate_email(email)
+        if not is_valid_email:
+            return None
+        
+        # ✅ Protezione SQL injection
+        if not sql_protector.is_safe(email):
+            return None
+        
         if self.is_locked_out(email):
             return None
 
@@ -126,6 +137,25 @@ class AuthService:
                    nome: str, cognome: str, ruolo: str, classe: str = '', 
                    scuola_id: int | None = None, classe_id: int | None = None) -> dict:
         """Crea nuovo utente"""
+        # ✅ Validazione email centralizzata
+        is_valid_email, email_error = validator.validate_email(email)
+        if not is_valid_email:
+            return {'success': False, 'message': email_error}
+        
+        # ✅ Validazione password centralizzata
+        is_valid_password, password_error = validator.validate_password(password)
+        if not is_valid_password:
+            return {'success': False, 'message': password_error}
+        
+        # ✅ Validazione username centralizzata
+        is_valid_username, username_error = validator.validate_username(username)
+        if not is_valid_username:
+            return {'success': False, 'message': username_error}
+        
+        # ✅ Sanitizzazione input (anti-XSS)
+        nome = validator.sanitize_html(nome)
+        cognome = validator.sanitize_html(cognome)
+        
         try:
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
