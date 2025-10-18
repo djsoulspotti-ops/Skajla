@@ -159,13 +159,65 @@ class SKAILAGamification:
             print(f"⚠️ Errore creazione tabelle gamification: {e}")
 
     def award_xp(self, user_id: int, action: str, multiplier: float = 1.0, context: str = None) -> Dict[str, Any]:
-        """Assegna XP per un'azione (stub minimal)"""
+        """Assegna XP per un'azione e persiste nel database (atomico, concurrency-safe)"""
         try:
-            xp_amount = self.xp_actions.get(action, 10) * multiplier
-            return {'success': True, 'xp_earned': int(xp_amount), 'level_up': False}
+            xp_amount = int(self.xp_actions.get(action, 10) * multiplier)
+            today = datetime.now().date()
+            
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    INSERT INTO user_gamification (user_id, total_xp, current_level, last_activity_date)
+                    VALUES (%s, %s, 1, %s)
+                    ON CONFLICT (user_id) DO UPDATE
+                    SET total_xp = user_gamification.total_xp + %s,
+                        last_activity_date = %s,
+                        updated_at = CURRENT_TIMESTAMP
+                    RETURNING total_xp, current_level
+                ''', (user_id, xp_amount, today, xp_amount, today))
+                
+                result = cursor.fetchone()
+                new_xp = result[0]
+                old_level = result[1]
+                new_level = self._calculate_level_from_xp(new_xp)
+                level_up = new_level > old_level
+                
+                if level_up:
+                    cursor.execute('''
+                        UPDATE user_gamification
+                        SET current_level = %s
+                        WHERE user_id = %s
+                    ''', (new_level, user_id))
+                
+                cursor.execute('''
+                    INSERT INTO daily_analytics (user_id, date, xp_earned)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (user_id, date) DO UPDATE
+                    SET xp_earned = daily_analytics.xp_earned + %s
+                ''', (user_id, today, xp_amount, xp_amount))
+                
+                conn.commit()
+            
+            return {
+                'success': True,
+                'xp_earned': xp_amount,
+                'total_xp': new_xp,
+                'old_level': old_level,
+                'new_level': new_level,
+                'level_up': level_up,
+                'context': context
+            }
         except Exception as e:
             print(f"⚠️ Errore award_xp: {e}")
             return {'success': False, 'error': str(e)}
+    
+    def _calculate_level_from_xp(self, total_xp: int) -> int:
+        """Calcola il livello basato sull'XP totale"""
+        for level in range(100, 0, -1):
+            if total_xp >= self.level_thresholds.get(level, 0):
+                return level
+        return 1
 
     def get_user_stats(self, user_id: int) -> Dict[str, Any]:
         """Ottieni statistiche utente (stub minimal)"""
