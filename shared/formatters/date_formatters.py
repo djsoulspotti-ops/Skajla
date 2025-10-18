@@ -78,7 +78,7 @@ class DateFormatter:
             try:
                 dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
             except:
-                return dt
+                return str(dt)
         
         if isinstance(dt, date) and not isinstance(dt, datetime):
             dt = datetime.combine(dt, datetime.min.time())

@@ -108,7 +108,7 @@ class InputValidator:
         return filename[:255]
     
     @staticmethod
-    def validate_integer(value: any, min_val: int = None, max_val: int = None) -> Tuple[bool, Optional[int]]:
+    def validate_integer(value, min_val: Optional[int] = None, max_val: Optional[int] = None) -> Tuple[bool, Optional[int]]:
         """Valida e converte a intero"""
         try:
             int_val = int(value)
@@ -124,7 +124,7 @@ class InputValidator:
             return False, None
     
     @staticmethod
-    def validate_grade(grade: any) -> Tuple[bool, Optional[float]]:
+    def validate_grade(grade) -> Tuple[bool, Optional[float]]:
         """Valida voto scolastico (1-10 scala italiana)"""
         try:
             grade_val = float(grade)
