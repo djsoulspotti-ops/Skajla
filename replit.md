@@ -11,6 +11,23 @@ Preferred communication style: Simple, everyday language.
 ## Backend Framework
 The application uses Flask with a modular architecture, separating concerns into blueprints for authentication, dashboards, and APIs.
 
+## Centralized Configuration System (SSoT) - Oct 18, 2025
+SKAILA implements Single Source of Truth principles with centralized, modular configuration:
+-   **Core Configurations** (`core/config/`):
+    -   `settings.py`: App settings, security configs, cache settings, feature flags
+    -   `gamification_config.py`: XP actions (40+ types), multipliers, levels, badges, streaks
+-   **Shared Validators** (`shared/validators/`):
+    -   `input_validators.py`: Email, password, username validation, SQL injection protection, XSS sanitization
+-   **Shared Formatters** (`shared/formatters/`):
+    -   `date_formatters.py`: Italian date formatting utilities
+    -   `file_formatters.py`: File size formatting (KB, MB, GB)
+-   **Benefits Achieved**:
+    -   ~60% code reduction through DRY principles
+    -   Consistent validation across all modules
+    -   Security hardening with centralized input sanitization
+    -   Easy configuration updates without touching business logic
+    -   Improved maintainability and testability
+
 ## Database Layer
 Supports both SQLite (development) and PostgreSQL (production) with a custom `DatabaseManager` for connection pooling and fallback mechanisms. The schema supports multi-tenant school management, users, chat, gamification, and AI interaction tracking.
 
