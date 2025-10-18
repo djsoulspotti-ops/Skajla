@@ -15,11 +15,28 @@ class TenantGuardException(Exception):
 def get_current_school_id():
     """
     Ottiene lo school_id dell'utente corrente dalla sessione
+    Se non presente, lo recupera dal database e lo aggiunge alla sessione
     Raises TenantGuardException se non trovato
     """
     school_id = session.get('school_id')
+    
     if not school_id:
-        raise TenantGuardException("school_id non trovato in sessione")
+        # Fallback: recupera dal database usando user_id
+        user_id = session.get('user_id')
+        if not user_id:
+            raise TenantGuardException("user_id non trovato in sessione")
+        
+        user = db_manager.query('''
+            SELECT school_id FROM utenti WHERE id = ?
+        ''', (user_id,), one=True)
+        
+        if not user or not user.get('school_id'):
+            raise TenantGuardException(f"school_id non trovato per utente {user_id}")
+        
+        # Aggiorna la sessione per le prossime richieste
+        school_id = user['school_id']
+        session['school_id'] = school_id
+    
     return school_id
 
 
