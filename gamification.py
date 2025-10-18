@@ -6,58 +6,12 @@ Sistema avanzato di punti, livelli, achievement e classifiche per motivare gli s
 + ANALYTICS AVANZATE
 """
 
-import sqlite3
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 import random
 from core.config.gamification_config import XPConfig, LevelConfig, BadgeConfig, StreakConfig
-
-# Assume db_manager is imported and configured elsewhere, providing context manager support
-# For demonstration, let's mock a db_manager that supports context managers
-class MockDBManager:
-    def __init__(self, db_type='sqlite'):
-        self.db_type = db_type
-        if db_type == 'postgresql':
-            import psycopg2
-            from psycopg2.extras import DictCursor
-            self.psycopg2 = psycopg2
-            self.DictCursor = DictCursor
-
-    def get_connection(self):
-        if self.db_type == 'postgresql':
-            # Replace with your actual PostgreSQL connection details
-            try:
-                conn = self.psycopg2.connect(
-                    dbname="your_db", user="your_user", password="your_password", host="your_host"
-                )
-                return conn
-            except Exception as e:
-                print(f"Error connecting to PostgreSQL: {e}")
-                return None
-        else:
-            # SQLite connection (for demonstration, a real implementation would use a persistent file)
-            conn = sqlite3.connect(':memory:') # Use in-memory for mock, replace with 'skaila.db' for persistence
-            conn.row_factory = sqlite3.Row # Allows dictionary-like access to rows
-            return conn
-
-    def query(self, query: str, params: tuple = None):
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            if params:
-                cursor.execute(query, params)
-            else:
-                cursor.execute(query)
-            
-            if query.strip().upper().startswith("SELECT"):
-                return [dict(row) for row in cursor.fetchall()]
-            else:
-                conn.commit()
-                return cursor.lastrowid if cursor.lastrowid else True
-                
-# Initialize a mock db_manager for demonstration purposes
-# In a real application, this would be imported and configured properly.
-db_manager = MockDBManager(db_type='sqlite') # Change to 'postgresql' if needed
+from database_manager import db_manager
 
 class SKAILAGamification:
     def __init__(self):
@@ -576,7 +530,6 @@ class SKAILAGamification:
     def init_gamification_tables(self):
         """Inizializza le tabelle per il sistema di gamification completo"""
         with db_manager.get_connection() as conn:
-            cursor = conn.cursor()
             
             # Determina sintassi PRIMARY KEY in base al database
             is_postgres = db_manager.db_type == 'postgresql'
@@ -584,7 +537,7 @@ class SKAILAGamification:
             serial_type = 'SERIAL PRIMARY KEY' if is_postgres else 'INTEGER PRIMARY KEY AUTOINCREMENT'
             
             # Tabella profili gamification utenti (estesa)
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS user_gamification (
                     user_id INTEGER PRIMARY KEY,
                     total_xp INTEGER DEFAULT 0,
@@ -611,7 +564,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella avatar e temi sbloccati
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS user_unlocked_items (
                     id {serial_type},
                     user_id INTEGER,
@@ -625,7 +578,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella sfide collaborative
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS team_challenges (
                     id {serial_type},
                     challenge_id TEXT,
@@ -643,7 +596,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella partecipazioni sfide team
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS team_challenge_participants (
                     id {serial_type},
                     challenge_id INTEGER,
@@ -656,7 +609,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella analytics giornaliere
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS daily_analytics (
                     id {serial_type},
                     user_id INTEGER,
@@ -675,7 +628,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella achievement utenti
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS user_achievements (
                     id {serial_type},
                     user_id INTEGER,
@@ -688,7 +641,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella sfide giornaliere
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS daily_challenges_progress (
                     id {serial_type},
                     user_id INTEGER,
@@ -704,7 +657,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella classifiche
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS leaderboards (
                     id {serial_type},
                     user_id INTEGER,
@@ -718,7 +671,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella log attività XP
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS xp_activity_log (
                     id {serial_type},
                     user_id INTEGER,
@@ -732,7 +685,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella ricompense speciali
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS special_rewards_earned (
                     id {serial_type},
                     user_id INTEGER,
@@ -744,7 +697,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella badge utenti
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS user_badges (
                     id {serial_type},
                     user_id INTEGER,
@@ -758,7 +711,7 @@ class SKAILAGamification:
             ''')
 
             # Tabella protezioni streak
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS streak_protections (
                     id {serial_type},
                     user_id INTEGER,
@@ -772,7 +725,7 @@ class SKAILAGamification:
 
             # Tabella statistiche avanzate per badge
             last_freeze_default = "CURRENT_DATE" if is_postgres else "(DATE('now', 'start of month'))"
-            cursor.execute(f'''
+            db_manager.execute(f'''
                 CREATE TABLE IF NOT EXISTS user_advanced_stats (
                     user_id INTEGER PRIMARY KEY,
                     perfect_quizzes INTEGER DEFAULT 0,
@@ -796,58 +749,52 @@ class SKAILAGamification:
                 )
             ''')
 
-            conn.commit()
             print("✅ Tabelle gamification complete create con successo!")
 
     def get_or_create_user_profile(self, user_id: int) -> Dict[str, Any]:
         """Ottieni o crea il profilo gamification dell'utente"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
-
-        profile = cursor.execute('''
-            SELECT * FROM user_gamification WHERE user_id = ?
-        ''', (user_id,)).fetchone()
+        profile = db_manager.query('''
+            user_class = db_manager.query("""
+            SELECT * FROM user_gamification WHERE user_id = %s
+        ''', (user_id,), one=True)
 
         if not profile:
             # Crea nuovo profilo
-            cursor.execute('''
+            db_manager.execute('''
                 INSERT INTO user_gamification (user_id, last_activity_date, avatar_coins)
-                VALUES (?, DATE('now'), 100)
+                VALUES (%s, CURRENT_DATE, 100)
             ''', (user_id,))
 
             # Sblocca avatar e tema default
-            cursor.execute('''
-                INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
-                VALUES (?, 'avatar', 'default', 'level'), (?, 'theme', 'default', 'level')
+            db_manager.execute('''
+                INSERT INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
+                VALUES (%s, 'avatar', 'default', 'level'), (%s, 'theme', 'default', 'level')
+                ON CONFLICT (user_id, item_type, item_id) DO NOTHING
             ''', (user_id, user_id))
 
-            conn.commit()
-
-            profile = cursor.execute('''
-                SELECT * FROM user_gamification WHERE user_id = ?
-            ''', (user_id,)).fetchone()
-
-        conn.close()
+            profile = db_manager.query('''
+                SELECT * FROM user_gamification WHERE user_id = %s
+            ''', (user_id,), one=True)
 
         if profile:
             return {
-                'user_id': profile[0],
-                'total_xp': profile[1],
-                'current_level': profile[2],
-                'current_streak': profile[3],
-                'max_streak': profile[4],
-                'last_activity_date': profile[5],
-                'total_messages': profile[6],
-                'ai_interactions': profile[7],
-                'quizzes_completed': profile[8],
-                'help_given': profile[9],
-                'study_minutes': profile[10],
-                'team_challenges_participated': profile[11],
-                'team_challenges_won': profile[12],
-                'mentorship_sessions': profile[13],
-                'current_avatar': profile[14],
-                'current_theme': profile[15],
-                'avatar_coins': profile[16]
+                'user_id': profile['user_id'],
+                'total_xp': profile['total_xp'],
+                'current_level': profile['current_level'],
+                'current_streak': profile['current_streak'],
+                'max_streak': profile['max_streak'],
+                'last_activity_date': profile['last_activity_date'],
+                'total_messages': profile['total_messages'],
+                'ai_interactions': profile['ai_interactions'],
+                'quizzes_completed': profile['quizzes_completed'],
+                'help_given': profile['help_given'],
+                'study_minutes': profile['study_minutes'],
+                'team_challenges_participated': profile['team_challenges_participated'],
+                'team_challenges_won': profile['team_challenges_won'],
+                'mentorship_sessions': profile['mentorship_sessions'],
+                'current_avatar': profile['current_avatar'],
+                'current_theme': profile['current_theme'],
+                'avatar_coins': profile['avatar_coins']
             }
         return {}
 
@@ -858,23 +805,18 @@ class SKAILAGamification:
         profile = self.get_or_create_user_profile(user_id)
         user_level = profile['current_level']
 
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
-
         # Ottieni achievement sbloccati
-        unlocked_achievements = cursor.execute('''
-            SELECT achievement_id FROM user_achievements WHERE user_id = ?
-        ''', (user_id,)).fetchall()
-        achievement_ids = [row[0] for row in unlocked_achievements]
+        unlocked_achievements = db_manager.query('''
+            SELECT achievement_id FROM user_achievements WHERE user_id = %s
+        ''', (user_id,))
+        achievement_ids = [row['achievement_id'] for row in unlocked_achievements]
 
         # Ottieni avatar già sbloccati
-        unlocked_items = cursor.execute('''
+        unlocked_items = db_manager.query('''
             SELECT item_id FROM user_unlocked_items 
-            WHERE user_id = ? AND item_type = 'avatar'
-        ''', (user_id,)).fetchall()
-        unlocked_avatar_ids = [row[0] for row in unlocked_items]
-
-        conn.close()
+            WHERE user_id = %s AND item_type = 'avatar'
+        ''', (user_id,))
+        unlocked_avatar_ids = [row['item_id'] for row in unlocked_items]
 
         avatar_status = {}
         for avatar_id, avatar_data in self.available_avatars.items():
@@ -893,7 +835,7 @@ class SKAILAGamification:
             elif 'cost' in avatar_data and profile['avatar_coins'] >= avatar_data['cost']:
                 unlock_reason = f"Acquistabile per {avatar_data['cost']} monete"
             else:
-                unlock_reason = f"Richiede livello {avatar_data.get('unlock_level', '?')} o achievement"
+                unlock_reason = f"Richiede livello {avatar_data.get('unlock_level', '%s')} o achievement"
 
             avatar_status[avatar_id] = {
                 **avatar_data,
@@ -916,34 +858,27 @@ class SKAILAGamification:
         if profile['avatar_coins'] < cost:
             return {'success': False, 'error': 'Monete insufficienti'}
 
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
-
         # Controlla se già posseduto
-        existing = cursor.execute('''
+        existing = db_manager.query('''
             SELECT id FROM user_unlocked_items 
-            WHERE user_id = ? AND item_type = 'avatar' AND item_id = ?
-        ''', (user_id, avatar_id)).fetchone()
+            WHERE user_id = %s AND item_type = 'avatar' AND item_id = %s
+        ''', (user_id, avatar_id), one=True)
 
         if existing:
-            conn.close()
             return {'success': False, 'error': 'Avatar già posseduto'}
 
         # Acquista avatar
-        cursor.execute('''
+        db_manager.execute('''
             INSERT INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
-            VALUES (?, 'avatar', ?, 'purchase')
+            VALUES (%s, 'avatar', %s, 'purchase')
         ''', (user_id, avatar_id))
 
         # Sottrai monete
-        cursor.execute('''
+        db_manager.execute('''
             UPDATE user_gamification 
-            SET avatar_coins = avatar_coins - ?
-            WHERE user_id = ?
+            SET avatar_coins = avatar_coins - %s
+            WHERE user_id = %s
         ''', (cost, user_id))
-
-        conn.commit()
-        conn.close()
 
         return {
             'success': True,
@@ -953,28 +888,21 @@ class SKAILAGamification:
 
     def change_avatar(self, user_id: int, avatar_id: str) -> Dict[str, Any]:
         """Cambia avatar dell'utente"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
-
         # Verifica possesso
-        unlocked = cursor.execute('''
+        unlocked = db_manager.query('''
             SELECT id FROM user_unlocked_items 
-            WHERE user_id = ? AND item_type = 'avatar' AND item_id = ?
-        ''', (user_id, avatar_id)).fetchone()
+            WHERE user_id = %s AND item_type = 'avatar' AND item_id = %s
+        ''', (user_id, avatar_id), one=True)
 
         if not unlocked:
-            conn.close()
             return {'success': False, 'error': 'Avatar non posseduto'}
 
         # Cambia avatar
-        cursor.execute('''
+        db_manager.execute('''
             UPDATE user_gamification 
-            SET current_avatar = ?
-            WHERE user_id = ?
+            SET current_avatar = %s
+            WHERE user_id = %s
         ''', (avatar_id, user_id))
-
-        conn.commit()
-        conn.close()
 
         avatar_data = self.available_avatars[avatar_id]
         return {
@@ -991,62 +919,47 @@ class SKAILAGamification:
         if not challenge_template:
             return {'success': False, 'error': 'Tipo sfida non valido'}
 
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
-
         # Calcola date di inizio e fine
         start_date = datetime.now()
         end_date = start_date + timedelta(hours=challenge_template['duration_hours'])
 
         # Crea sfida
-        cursor.execute('''
+        db_manager.execute('''
             INSERT INTO team_challenges 
             (challenge_id, challenge_name, class_a, class_b, start_date, end_date)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         ''', (challenge_type, challenge_template['name'], class_a, class_b, start_date, end_date))
-
-        challenge_db_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
 
         return {
             'success': True,
-            'challenge_id': challenge_db_id,
+            'challenge_id': 0,
             'message': f'Sfida {challenge_template["name"]} creata tra {class_a} e {class_b}!',
             'end_date': end_date.isoformat()
         }
 
     def join_team_challenge(self, user_id: int, challenge_id: int) -> Dict[str, Any]:
         """Unisciti a una sfida di squadra"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Verifica esistenza sfida
-        challenge = cursor.execute('''
-            SELECT * FROM team_challenges WHERE id = ? AND status = 'active'
+            SELECT * FROM team_challenges WHERE id = %s AND status = 'active'
         ''', (challenge_id,)).fetchone()
 
         if not challenge:
-            conn.close()
             return {'success': False, 'error': 'Sfida non trovata o non attiva'}
 
         # Verifica se utente appartiene a una delle classi
-        user_class = cursor.execute('''
-            SELECT classe FROM utenti WHERE id = ?
+            SELECT classe FROM utenti WHERE id = %s
         ''', (user_id,)).fetchone()[0]
 
         if user_class not in [challenge[3], challenge[4]]:  # class_a, class_b
-            conn.close()
             return {'success': False, 'error': 'Non appartienti alle classi partecipanti'}
 
         # Unisciti alla sfida
-        cursor.execute('''
+        db_manager.execute('''
             INSERT OR IGNORE INTO team_challenge_participants (challenge_id, user_id)
-            VALUES (?, ?)
+            VALUES (%s, %s)
         ''', (challenge_id, user_id))
 
-        conn.commit()
-        conn.close()
 
         return {
             'success': True,
@@ -1055,38 +968,34 @@ class SKAILAGamification:
 
     def update_team_challenge_progress(self, user_id: int, challenge_id: int, contribution: int = 1) -> Dict[str, Any]:
         """Aggiorna il progresso di una sfida di squadra"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Aggiorna contributo utente
-        cursor.execute('''
+        db_manager.execute('''
             UPDATE team_challenge_participants 
-            SET contribution = contribution + ?
-            WHERE challenge_id = ? AND user_id = ?
+            SET contribution = contribution + %s
+            WHERE challenge_id = %s AND user_id = %s
         ''', (contribution, challenge_id, user_id))
 
         # Ottieni classe utente
-        user_class = cursor.execute('''
-            SELECT classe FROM utenti WHERE id = ?
+            SELECT classe FROM utenti WHERE id = %s
         ''', (user_id,)).fetchone()[0]
 
         # Aggiorna progresso classe
         if user_class:
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE team_challenges 
-                SET class_a_progress = class_a_progress + ?
-                WHERE id = ? AND class_a = ?
+                SET class_a_progress = class_a_progress + %s
+                WHERE id = %s AND class_a = %s
             ''', (contribution, challenge_id, user_class))
 
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE team_challenges 
-                SET class_b_progress = class_b_progress + ?
-                WHERE id = ? AND class_b = ?
+                SET class_b_progress = class_b_progress + %s
+                WHERE id = %s AND class_b = %s
             ''', (contribution, challenge_id, user_class))
 
         # Verifica se sfida completata
-        challenge = cursor.execute('''
-            SELECT * FROM team_challenges WHERE id = ?
+            SELECT * FROM team_challenges WHERE id = %s
         ''', (challenge_id,)).fetchone()
 
         challenge_template = next((c for c in self.team_challenges if c['id'] == challenge[1]), None)
@@ -1096,35 +1005,29 @@ class SKAILAGamification:
             # Controlla vincitore
             if challenge[6] >= target or challenge[7] >= target:  # class_a_progress, class_b_progress
                 winner = challenge[3] if challenge[6] >= target else challenge[4]
-                cursor.execute('''
+                db_manager.execute('''
                     UPDATE team_challenges 
-                    SET status = 'completed', winner_class = ?
-                    WHERE id = ?
+                    SET status = 'completed', winner_class = %s
+                    WHERE id = %s
                 ''', (winner, challenge_id))
 
                 # Assegna ricompense
                 self.distribute_team_challenge_rewards(challenge_id, winner)
 
-        conn.commit()
-        conn.close()
 
         return {'success': True, 'contribution_added': contribution}
 
     def distribute_team_challenge_rewards(self, challenge_id: int, winner_class: str):
         """Distribuisci ricompense per sfida di squadra completata"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Ottieni partecipanti
-        participants = cursor.execute('''
+        participants = db_manager.execute('''
             SELECT tcp.user_id, u.classe, tcp.contribution
             FROM team_challenge_participants tcp
             JOIN utenti u ON tcp.user_id = u.id
-            WHERE tcp.challenge_id = ?
-        ''', (challenge_id,)).fetchall()
+            WHERE tcp.challenge_id = %s
 
-        challenge = cursor.execute('''
-            SELECT challenge_id FROM team_challenges WHERE id = ?
+            SELECT challenge_id FROM team_challenges WHERE id = %s
         ''', (challenge_id,)).fetchone()
 
         challenge_template = next((c for c in self.team_challenges if c['id'] == challenge[0]), None)
@@ -1135,10 +1038,10 @@ class SKAILAGamification:
                     # Vincitori
                     xp_reward = challenge_template['reward_winner']
                     self.award_xp(user_id, 'team_challenge_completed', 1.0, f"Vittoria sfida: {challenge_template['name']}")
-                    cursor.execute('''
+                    db_manager.execute('''
                         UPDATE user_gamification 
                         SET team_challenges_won = team_challenges_won + 1
-                        WHERE user_id = ?
+                        WHERE user_id = %s
                     ''', (user_id,))
                 else:
                     # Partecipanti
@@ -1146,19 +1049,15 @@ class SKAILAGamification:
                     self.award_xp(user_id, 'team_challenge_contributed', 1.0, f"Partecipazione sfida: {challenge_template['name']}")
 
                 # Aggiorna contatore partecipazioni
-                cursor.execute('''
+                db_manager.execute('''
                     UPDATE user_gamification 
                     SET team_challenges_participated = team_challenges_participated + 1
-                    WHERE user_id = ?
+                    WHERE user_id = %s
                 ''', (user_id,))
 
-        conn.commit()
-        conn.close()
 
     def get_active_team_challenges(self, user_class: str = None) -> List[Dict[str, Any]]:
         """Ottieni sfide di squadra attive"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         query = '''
             SELECT * FROM team_challenges 
@@ -1167,11 +1066,9 @@ class SKAILAGamification:
         params = []
 
         if user_class:
-            query += ' AND (class_a = ? OR class_b = ?)'
+            query += ' AND (class_a = %s OR class_b = %s)'
             params.extend([user_class, user_class])
 
-        challenges = cursor.execute(query, params).fetchall()
-        conn.close()
 
         result = []
         for challenge in challenges:
@@ -1196,68 +1093,61 @@ class SKAILAGamification:
 
     def record_daily_activity(self, user_id: int, activity_type: str, value: int = 1):
         """Registra attività giornaliera per analytics"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         today = datetime.now().date()
 
         # Crea record giornaliero se non esiste
-        cursor.execute('''
+        db_manager.execute('''
             INSERT OR IGNORE INTO daily_analytics (user_id, date)
-            VALUES (?, ?)
+            VALUES (%s, %s)
         ''', (user_id, today))
 
         # Aggiorna attività specifica
         if activity_type == 'message_sent':
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE daily_analytics 
-                SET messages_sent = messages_sent + ?
-                WHERE user_id = ? AND date = ?
+                SET messages_sent = messages_sent + %s
+                WHERE user_id = %s AND date = %s
             ''', (value, user_id, today))
         elif activity_type == 'ai_question':
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE daily_analytics 
-                SET ai_questions = ai_questions + ?
-                WHERE user_id = ? AND date = ?
+                SET ai_questions = ai_questions + %s
+                WHERE user_id = %s AND date = %s
             ''', (value, user_id, today))
         elif activity_type == 'quiz_completed':
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE daily_analytics 
-                SET quiz_completed = quiz_completed + ?
-                WHERE user_id = ? AND date = ?
+                SET quiz_completed = quiz_completed + %s
+                WHERE user_id = %s AND date = %s
             ''', (value, user_id, today))
         elif activity_type == 'study_minutes':
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE daily_analytics 
-                SET study_minutes = study_minutes + ?
-                WHERE user_id = ? AND date = ?
+                SET study_minutes = study_minutes + %s
+                WHERE user_id = %s AND date = %s
             ''', (value, user_id, today))
         elif activity_type == 'help_given':
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE daily_analytics 
-                SET help_given = help_given + ?
-                WHERE user_id = ? AND date = ?
+                SET help_given = help_given + %s
+                WHERE user_id = %s AND date = %s
             ''', (value, user_id, today))
 
-        conn.commit()
-        conn.close()
 
     def get_user_analytics(self, user_id: int, days: int = 30) -> Dict[str, Any]:
         """Ottieni analytics dettagliate dell'utente"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Analytics giornaliere recenti
-        daily_data = cursor.execute('''
+        daily_data = db_manager.execute('''
             SELECT date, daily_xp_earned, messages_sent, ai_questions, 
                    quiz_completed, study_minutes, help_given
             FROM daily_analytics 
-            WHERE user_id = ? AND date > DATE('now', '-{} days')
+            WHERE user_id = %s AND date > DATE('now', '-{} days')
             ORDER BY date ASC
-        '''.format(days), (user_id,)).fetchall()
 
         # Statistiche aggregate
-        totals = cursor.execute('''
+        totals = db_manager.execute('''
             SELECT 
                 SUM(daily_xp_earned) as total_xp_period,
                 SUM(messages_sent) as total_messages_period,
@@ -1268,35 +1158,32 @@ class SKAILAGamification:
                 AVG(daily_xp_earned) as avg_daily_xp,
                 COUNT(*) as active_days
             FROM daily_analytics 
-            WHERE user_id = ? AND date > DATE('now', '-{} days')
+            WHERE user_id = %s AND date > DATE('now', '-{} days')
         '''.format(days), (user_id,)).fetchone()
 
         # Trend settimanali
-        weekly_trends = cursor.execute('''
+        weekly_trends = db_manager.execute('''
             SELECT 
                 strftime('%W', date) as week,
                 SUM(daily_xp_earned) as week_xp,
                 SUM(messages_sent) as week_messages,
                 SUM(ai_questions) as week_ai_questions
             FROM daily_analytics 
-            WHERE user_id = ? AND date > DATE('now', '-{} days')
+            WHERE user_id = %s AND date > DATE('now', '-{} days')
             GROUP BY strftime('%W', date)
             ORDER BY week ASC
-        '''.format(days), (user_id,)).fetchall()
 
         # Orari di attività preferiti
-        activity_patterns = cursor.execute('''
+        activity_patterns = db_manager.execute('''
             SELECT 
                 strftime('%H', login_time) as hour,
                 COUNT(*) as login_frequency
             FROM daily_analytics 
-            WHERE user_id = ? AND login_time IS NOT NULL
+            WHERE user_id = %s AND login_time IS NOT NULL
                 AND date > DATE('now', '-{} days')
             GROUP BY hour
             ORDER BY login_frequency DESC
-        '''.format(days), (user_id,)).fetchall()
 
-        conn.close()
 
         # Processa dati per grafici
         daily_chart_data = []
@@ -1446,35 +1333,33 @@ class SKAILAGamification:
             multiplier_info = f" (Multiplier: {total_multiplier:.1f}x)"
             description = description + multiplier_info if description else f"Bonus multiplier {total_multiplier:.1f}x"
 
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Aggiorna profilo utente
-        cursor.execute('''
+        db_manager.execute('''
             UPDATE user_gamification 
-            SET total_xp = total_xp + ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
+            SET total_xp = total_xp + %s, updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s
         ''', (final_xp, user_id))
 
         # Assegna monete avatar (10% dell'XP guadagnato)
         avatar_coins_earned = max(1, final_xp // 10)
-        cursor.execute('''
+        db_manager.execute('''
             UPDATE user_gamification 
-            SET avatar_coins = avatar_coins + ?
-            WHERE user_id = ?
+            SET avatar_coins = avatar_coins + %s
+            WHERE user_id = %s
         ''', (avatar_coins_earned, user_id))
 
         # Log dell'attività
-        cursor.execute('''
+        db_manager.execute('''
             INSERT INTO xp_activity_log (user_id, action_type, xp_earned, bonus_multiplier, description)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         ''', (user_id, action_type, final_xp, bonus_multiplier, description))
 
         # Aggiorna analytics giornaliere
-        cursor.execute('''
+        db_manager.execute('''
             UPDATE daily_analytics 
-            SET daily_xp_earned = daily_xp_earned + ?
-            WHERE user_id = ? AND date = DATE('now')
+            SET daily_xp_earned = daily_xp_earned + %s
+            WHERE user_id = %s AND date = DATE('now')
         ''', (final_xp, user_id))
 
         # Registra attività per analytics
@@ -1489,15 +1374,14 @@ class SKAILAGamification:
 
         # Aggiorna contatori specifici
         if action_type == 'message_sent':
-            cursor.execute('UPDATE user_gamification SET total_messages = total_messages + 1 WHERE user_id = ?', (user_id,))
+            db_manager.execute('UPDATE user_gamification SET total_messages = total_messages + 1 WHERE user_id = %s', (user_id,))
         elif action_type in ['ai_question', 'ai_correct_answer']:
-            cursor.execute('UPDATE user_gamification SET ai_interactions = ai_interactions + 1 WHERE user_id = ?', (user_id,))
+            db_manager.execute('UPDATE user_gamification SET ai_interactions = ai_interactions + 1 WHERE user_id = %s', (user_id,))
         elif action_type == 'quiz_completed':
-            cursor.execute('UPDATE user_gamification SET quizzes_completed = quizzes_completed + 1 WHERE user_id = ?', (user_id,))
+            db_manager.execute('UPDATE user_gamification SET quizzes_completed = quizzes_completed + 1 WHERE user_id = %s', (user_id,))
         elif action_type == 'help_classmate':
-            cursor.execute('UPDATE user_gamification SET help_given = help_given + 1 WHERE user_id = ?', (user_id,))
+            db_manager.execute('UPDATE user_gamification SET help_given = help_given + 1 WHERE user_id = %s', (user_id,))
 
-        conn.commit()
 
         # Controlla level up
         level_up_info = self.check_level_up(user_id)
@@ -1505,7 +1389,6 @@ class SKAILAGamification:
         # Controlla nuovi achievement
         new_achievements = self.check_new_achievements(user_id)
 
-        conn.close()
 
         return {
             'success': True,
@@ -1528,28 +1411,26 @@ class SKAILAGamification:
                 new_level = level
 
         if new_level > current_level:
-            conn = sqlite3.connect('skaila.db')
-            cursor = conn.cursor()
 
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE user_gamification 
-                SET current_level = ? 
-                WHERE user_id = ?
+                SET current_level = %s 
+                WHERE user_id = %s
             ''', (new_level, user_id))
 
             # Sblocca avatar e temi per livello
             for avatar_id, avatar_data in self.available_avatars.items():
                 if avatar_data.get('unlock_level') == new_level:
-                    cursor.execute('''
+                    db_manager.execute('''
                         INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
-                        VALUES (?, 'avatar', ?, 'level')
+                        VALUES (%s, 'avatar', %s, 'level')
                     ''', (user_id, avatar_id))
 
             for theme_id, theme_data in self.ui_themes.items():
                 if theme_data.get('unlock_level') == new_level:
-                    cursor.execute('''
+                    db_manager.execute('''
                         INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
-                        VALUES (?, 'theme', ?, 'level')
+                        VALUES (%s, 'theme', %s, 'level')
                     ''', (user_id, theme_id))
 
             # Applica reward specifici del livello
@@ -1559,16 +1440,14 @@ class SKAILAGamification:
                 # Aggiungi monete bonus
                 bonus_coins = level_reward.get('bonus_coins', 0)
                 if bonus_coins > 0:
-                    cursor.execute('''
+                    db_manager.execute('''
                         UPDATE user_gamification 
-                        SET avatar_coins = avatar_coins + ?
-                        WHERE user_id = ?
+                        SET avatar_coins = avatar_coins + %s
+                        WHERE user_id = %s
                     ''', (bonus_coins, user_id))
 
                 unlock_message = level_reward.get('description', '')
 
-            conn.commit()
-            conn.close()
 
             level_reward = self.level_rewards.get(new_level, {})
             return {
@@ -1589,12 +1468,8 @@ class SKAILAGamification:
         profile = self.get_or_create_user_profile(user_id)
 
         # Achievement sbloccati
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
-        unlocked = cursor.execute('''
-            SELECT achievement_id FROM user_achievements WHERE user_id = ?
-        ''', (user_id,)).fetchall()
+            SELECT achievement_id FROM user_achievements WHERE user_id = %s
         unlocked_ids = [row[0] for row in unlocked]
 
         new_achievements = []
@@ -1604,24 +1479,24 @@ class SKAILAGamification:
             if achievement_id not in unlocked_ids:
                 if achievement['condition'](profile):
                     # Sblocca achievement
-                    cursor.execute('''
+                    db_manager.execute('''
                         INSERT INTO user_achievements (user_id, achievement_id, xp_earned)
-                        VALUES (?, ?, ?)
+                        VALUES (%s, %s, %s)
                     ''', (user_id, achievement_id, achievement['xp_reward']))
 
                     # Assegna XP bonus
-                    cursor.execute('''
+                    db_manager.execute('''
                         UPDATE user_gamification 
-                        SET total_xp = total_xp + ? 
-                        WHERE user_id = ?
+                        SET total_xp = total_xp + %s 
+                        WHERE user_id = %s
                     ''', (achievement['xp_reward'], user_id))
 
                     # Sblocca avatar speciali per achievement
                     for avatar_id, avatar_data in self.available_avatars.items():
                         if avatar_data.get('unlock_achievement') == achievement_id:
-                            cursor.execute('''
+                            db_manager.execute('''
                                 INSERT OR IGNORE INTO user_unlocked_items (user_id, item_type, item_id, unlock_method)
-                                VALUES (?, 'avatar', ?, 'achievement')
+                                VALUES (%s, 'avatar', %s, 'achievement')
                             ''', (user_id, avatar_id))
 
                     new_achievements.append({
@@ -1632,8 +1507,6 @@ class SKAILAGamification:
                         'category': achievement['category']
                     })
 
-        conn.commit()
-        conn.close()
         return new_achievements
 
     def update_streak(self, user_id: int) -> Dict[str, Any]:
@@ -1642,72 +1515,58 @@ class SKAILAGamification:
         today = datetime.now().date()
         last_activity = datetime.strptime(profile['last_activity_date'], '%Y-%m-%d').date() if profile['last_activity_date'] else None
 
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         if last_activity:
             days_diff = (today - last_activity).days
 
             if days_diff == 0:
                 # Stesso giorno - non aggiornare streak
-                conn.close()
                 return {'streak_updated': False, 'current_streak': profile['current_streak'], 'streak_broken': False}
             elif days_diff == 1:
                 # Streak continua
                 new_streak = profile['current_streak'] + 1
                 new_max_streak = max(profile['max_streak'], new_streak)
 
-                cursor.execute('''
+                db_manager.execute('''
                     UPDATE user_gamification 
-                    SET current_streak = ?, max_streak = ?, last_activity_date = DATE('now')
-                    WHERE user_id = ?
+                    SET current_streak = %s, max_streak = %s, last_activity_date = DATE('now')
+                    WHERE user_id = %s
                 ''', (new_streak, new_max_streak, user_id))
 
                 # Bonus XP per streak
                 if new_streak % 7 == 0:  # Weekly streak bonus
                     self.award_xp(user_id, 'week_streak', description=f'Streak di {new_streak} giorni!')
 
-                conn.commit()
-                conn.close()
                 return {'streak_updated': True, 'current_streak': new_streak, 'streak_broken': False}
 
             elif days_diff > 1:
                 # Streak rotto
-                cursor.execute('''
+                db_manager.execute('''
                     UPDATE user_gamification 
                     SET current_streak = 1, last_activity_date = DATE('now')
-                    WHERE user_id = ?
+                    WHERE user_id = %s
                 ''', (user_id,))
-                conn.commit()
-                conn.close()
                 return {'streak_updated': True, 'current_streak': 1, 'streak_broken': True}
         else:
             # Primo accesso
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE user_gamification 
                 SET current_streak = 1, max_streak = 1, last_activity_date = DATE('now')
-                WHERE user_id = ?
+                WHERE user_id = %s
             ''', (user_id,))
-            conn.commit()
-            conn.close()
             return {'streak_updated': True, 'current_streak': 1, 'streak_broken': False}
 
-        conn.close()
         return {'streak_updated': False, 'current_streak': 0, 'streak_broken': False}
 
     def get_daily_challenges(self, user_id: int) -> List[Dict[str, Any]]:
         """Ottieni le sfide giornaliere dell'utente"""
         today = datetime.now().date()
 
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Ottieni progressi delle sfide odierne
-        current_progress = cursor.execute('''
             SELECT challenge_id, current_progress, completed, xp_earned
             FROM daily_challenges_progress 
-            WHERE user_id = ? AND challenge_date = DATE('now')
-        ''', (user_id,)).fetchall()
+            WHERE user_id = %s AND challenge_date = DATE('now')
 
         progress_dict = {row[0]: {'progress': row[1], 'completed': row[2], 'xp_earned': row[3]} for row in current_progress}
 
@@ -1720,22 +1579,18 @@ class SKAILAGamification:
                 challenge_data.update({'progress': 0, 'completed': False, 'xp_earned': 0})
 
                 # Crea record per la sfida
-                cursor.execute('''
+                db_manager.execute('''
                     INSERT OR IGNORE INTO daily_challenges_progress 
                     (user_id, challenge_id, challenge_date, target_progress)
-                    VALUES (?, ?, DATE('now'), ?)
+                    VALUES (%s, %s, DATE('now'), %s)
                 ''', (user_id, challenge['id'], challenge['target']))
 
             challenges.append(challenge_data)
 
-        conn.commit()
-        conn.close()
         return challenges
 
     def update_challenge_progress(self, user_id: int, challenge_type: str, increment: int = 1) -> Dict[str, Any]:
         """Aggiorna il progresso di una sfida giornaliera"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Trova sfide del tipo specificato
         matching_challenges = [c for c in self.daily_challenges if c['type'] == challenge_type]
@@ -1743,25 +1598,24 @@ class SKAILAGamification:
         results = []
         for challenge in matching_challenges:
             # Aggiorna progresso
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE daily_challenges_progress 
-                SET current_progress = current_progress + ?
-                WHERE user_id = ? AND challenge_id = ? AND challenge_date = DATE('now')
+                SET current_progress = current_progress + %s
+                WHERE user_id = %s AND challenge_id = %s AND challenge_date = DATE('now')
             ''', (increment, user_id, challenge['id']))
 
             # Controlla se completata
-            progress = cursor.execute('''
                 SELECT current_progress, target_progress, completed
                 FROM daily_challenges_progress 
-                WHERE user_id = ? AND challenge_id = ? AND challenge_date = DATE('now')
+                WHERE user_id = %s AND challenge_id = %s AND challenge_date = DATE('now')
             ''', (user_id, challenge['id'])).fetchone()
 
             if progress and progress[0] >= progress[1] and not progress[2]:
                 # Sfida completata!
-                cursor.execute('''
+                db_manager.execute('''
                     UPDATE daily_challenges_progress 
-                    SET completed = 1, xp_earned = ?
-                    WHERE user_id = ? AND challenge_id = ? AND challenge_date = DATE('now')
+                    SET completed = 1, xp_earned = %s
+                    WHERE user_id = %s AND challenge_id = %s AND challenge_date = DATE('now')
                 ''', (challenge['xp_reward'], user_id, challenge['id']))
 
                 # Assegna XP
@@ -1773,14 +1627,10 @@ class SKAILAGamification:
                     'xp_earned': challenge['xp_reward']
                 })
 
-        conn.commit()
-        conn.close()
         return {'challenges_updated': results}
 
     def get_leaderboard(self, user_id: int, period: str = 'weekly', class_filter: str = None) -> Dict[str, Any]:
         """Ottieni classifica per periodo specificato"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Query base per classifica
         base_query = '''
@@ -1796,7 +1646,7 @@ class SKAILAGamification:
 
         # Filtro per classe se specificato
         if class_filter:
-            base_query += ' AND u.classe = ?'
+            base_query += ' AND u.classe = %s'
             params.append(class_filter)
 
         # Filtro per periodo
@@ -1807,7 +1657,6 @@ class SKAILAGamification:
 
         base_query += ' ORDER BY ug.total_xp DESC LIMIT 20'
 
-        leaderboard = cursor.execute(base_query, params).fetchall()
 
         # Trova posizione utente corrente
         user_rank_query = '''
@@ -1815,16 +1664,15 @@ class SKAILAGamification:
             FROM user_gamification ug2
             JOIN utenti u2 ON ug2.user_id = u2.id
             WHERE ug2.total_xp > (
-                SELECT total_xp FROM user_gamification WHERE user_id = ?
+                SELECT total_xp FROM user_gamification WHERE user_id = %s
             ) AND u2.attivo = 1
         '''
 
         if class_filter:
             user_rank_query = user_rank_query.replace('u2.attivo = 1', f'u2.attivo = 1 AND u2.classe = "{class_filter}"')
 
-        user_rank = cursor.execute(user_rank_query, (user_id,)).fetchone()[0]
+        user_rank = db_manager.execute(user_rank_query, (user_id,)).fetchone()[0]
 
-        conn.close()
 
         return {
             'leaderboard': [
@@ -1854,7 +1702,7 @@ class SKAILAGamification:
             unlocked_achievements = db_manager.query('''
                 SELECT ua.achievement_id, ua.unlocked_at, ua.xp_earned
                 FROM user_achievements ua
-                WHERE ua.user_id = ?
+                WHERE ua.user_id = %s
                 ORDER BY ua.unlocked_at DESC
             ''', (user_id,))
 
@@ -1862,7 +1710,7 @@ class SKAILAGamification:
             recent_activity = db_manager.query('''
                 SELECT action_type, xp_earned, description, timestamp
                 FROM xp_activity_log
-                WHERE user_id = ?
+                WHERE user_id = %s
                 ORDER BY timestamp DESC
                 LIMIT 10
             ''', (user_id,))
@@ -1878,7 +1726,7 @@ class SKAILAGamification:
             unlocked_badges = db_manager.query('''
                 SELECT ub.badge_id, ub.earned_at, ub.xp_earned, ub.rarity
                 FROM user_badges ub
-                WHERE ub.user_id = ?
+                WHERE ub.user_id = %s
                 ORDER BY ub.earned_at DESC
             ''', (user_id,))
 
@@ -1990,26 +1838,20 @@ class SKAILAGamification:
 
     def get_or_create_advanced_stats(self, user_id: int) -> Dict[str, Any]:
         """Ottieni o crea statistiche avanzate per badge"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
-        stats = cursor.execute('''
-            SELECT * FROM user_advanced_stats WHERE user_id = ?
+            SELECT * FROM user_advanced_stats WHERE user_id = %s
         ''', (user_id,)).fetchone()
 
         if not stats:
             # Crea nuovo record statistiche
-            cursor.execute('''
+            db_manager.execute('''
                 INSERT INTO user_advanced_stats (user_id)
-                VALUES (?)
+                VALUES (%s)
             ''', (user_id,))
-            conn.commit()
 
-            stats = cursor.execute('''
-                SELECT * FROM user_advanced_stats WHERE user_id = ?
+                SELECT * FROM user_advanced_stats WHERE user_id = %s
             ''', (user_id,)).fetchone()
 
-        conn.close()
 
         if stats:
             # Convert tuple to dict, mapping column names if available or by index
@@ -2043,12 +1885,8 @@ class SKAILAGamification:
         combined_stats = {**profile, **advanced_stats}
 
         # Ottieni badge già sbloccati
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
-        unlocked_badges = cursor.execute('''
-            SELECT badge_id FROM user_badges WHERE user_id = ?
-        ''', (user_id,)).fetchall()
+            SELECT badge_id FROM user_badges WHERE user_id = %s
         unlocked_badge_ids = [row[0] for row in unlocked_badges]
 
         new_badges = []
@@ -2058,16 +1896,16 @@ class SKAILAGamification:
             if badge_id not in unlocked_badge_ids:
                 if badge['condition'](combined_stats):
                     # Sblocca badge
-                    cursor.execute('''
+                    db_manager.execute('''
                         INSERT INTO user_badges (user_id, badge_id, xp_earned, rarity)
-                        VALUES (?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s)
                     ''', (user_id, badge_id, badge['xp_reward'], badge['rarity']))
 
                     # Assegna XP bonus
-                    cursor.execute('''
+                    db_manager.execute('''
                         UPDATE user_gamification 
-                        SET total_xp = total_xp + ? 
-                        WHERE user_id = ?
+                        SET total_xp = total_xp + %s 
+                        WHERE user_id = %s
                     ''', (badge['xp_reward'], user_id))
 
                     new_badges.append({
@@ -2080,8 +1918,6 @@ class SKAILAGamification:
                         'badge_icon': badge['badge_icon']
                     })
 
-        conn.commit()
-        conn.close()
         return new_badges
 
     def apply_streak_bonus(self, user_id: int, base_xp: int) -> int:
@@ -2099,8 +1935,6 @@ class SKAILAGamification:
 
     def use_streak_protection(self, user_id: int, protection_type: str) -> Dict[str, Any]:
         """Usa una protezione streak"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         advanced_stats = self.get_or_create_advanced_stats(user_id)
         current_month = datetime.now().strftime('%Y-%m')
@@ -2108,74 +1942,63 @@ class SKAILAGamification:
         if protection_type == 'freeze_card':
             # Controlla se può usare freeze card questo mese
             if advanced_stats.get('freeze_cards_used_this_month', 0) >= 1:
-                conn.close()
                 return {'success': False, 'error': 'Freeze Card già usata questo mese'}
 
             # Usa freeze card
-            cursor.execute('''
+            db_manager.execute('''
                 INSERT INTO streak_protections (user_id, protection_type, expires_at)
-                VALUES (?, ?, DATETIME('now', '+1 day'))
+                VALUES (%s, %s, DATETIME('now', '+1 day'))
             ''', (user_id, protection_type))
 
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE user_advanced_stats 
                 SET freeze_cards_used_this_month = freeze_cards_used_this_month + 1
-                WHERE user_id = ?
+                WHERE user_id = %s
             ''', (user_id,))
 
-            conn.commit()
-            conn.close()
             return {'success': True, 'message': '❄️ Freeze Card attivata! Streak protetta per 1 giorno.'}
 
         elif protection_type == 'weekend_pass':
             # Controlla se ha abbastanza monete
             profile = self.get_or_create_user_profile(user_id)
             if profile.get('avatar_coins', 0) < 500:
-                conn.close()
                 return {'success': False, 'error': 'Monete insufficienti (richieste: 500)'}
 
             # Acquista weekend pass
-            cursor.execute('''
+            db_manager.execute('''
                 INSERT INTO streak_protections (user_id, protection_type, expires_at)
-                VALUES (?, ?, DATETIME('now', '+7 days'))
+                VALUES (%s, %s, DATETIME('now', '+7 days'))
             ''', (user_id, protection_type))
 
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE user_gamification 
                 SET avatar_coins = avatar_coins - 500
-                WHERE user_id = ?
+                WHERE user_id = %s
             ''', (user_id,))
 
-            cursor.execute('''
+            db_manager.execute('''
                 UPDATE user_advanced_stats 
                 SET weekend_passes_active = weekend_passes_active + 1
-                WHERE user_id = ?
+                WHERE user_id = %s
             ''', (user_id,))
 
-            conn.commit()
-            conn.close()
             return {'success': True, 'message': '🎫 Weekend Pass attivato! Streak protetta nei weekend per 1 settimana.'}
 
-        conn.close()
         return {'success': False, 'error': 'Tipo di protezione non valido'}
 
     def update_advanced_stat(self, user_id: int, stat_name: str, increment: int = 1):
         """Aggiorna una statistica avanzata"""
-        conn = sqlite3.connect('skaila.db')
-        cursor = conn.cursor()
 
         # Assicura che il record esista
         self.get_or_create_advanced_stats(user_id)
 
         # Aggiorna la statistica
-        cursor.execute(f'''
+        db_manager.execute(f'''
             UPDATE user_advanced_stats 
-            SET {stat_name} = {stat_name} + ?
-            WHERE user_id = ?
+            SET {stat_name} = {stat_name} + %s
+            WHERE user_id = %s
         ''', (increment, user_id))
 
-        conn.commit()
-        conn.close()
 
     def calculate_achievement_progress(self, achievement_id: str, profile: Dict[str, Any]) -> float:
         """Calcola il progresso verso un achievement"""
