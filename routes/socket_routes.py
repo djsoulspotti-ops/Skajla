@@ -23,7 +23,7 @@ def register_socket_events(socketio):
                 school_id = get_current_school_id()
                 join_room(f"school_{school_id}")
                 
-                db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (True, session['user_id']))
+                db_manager.execute('UPDATE utenti SET status_online = %s WHERE id = %s', (True, session['user_id']))
 
                 # Emit solo alla scuola dell'utente, NON broadcast globale
                 emit('user_connected', {
@@ -44,7 +44,7 @@ def register_socket_events(socketio):
             try:
                 school_id = get_current_school_id()
                 
-                db_manager.execute('UPDATE utenti SET status_online = ? WHERE id = ?', (False, session['user_id']))
+                db_manager.execute('UPDATE utenti SET status_online = %s WHERE id = %s', (False, session['user_id']))
 
                 emit('user_disconnected', {
                     'nome': session['nome'],
@@ -80,7 +80,7 @@ def register_socket_events(socketio):
         # SECURITY: Verifica che l'utente sia membro della chat
         is_member = db_manager.query('''
             SELECT 1 FROM partecipanti_chat 
-            WHERE chat_id = ? AND utente_id = ?
+            WHERE chat_id = %s AND utente_id = %s
         ''', (conversation_id, session['user_id']), one=True)
 
         if not is_member:
@@ -123,7 +123,7 @@ def register_socket_events(socketio):
         # SECURITY: Verifica che l'utente sia membro della chat
         is_member = db_manager.query('''
             SELECT 1 FROM partecipanti_chat 
-            WHERE chat_id = ? AND utente_id = ?
+            WHERE chat_id = %s AND utente_id = %s
         ''', (conversation_id, session['user_id']), one=True)
 
         if not is_member:
@@ -133,7 +133,7 @@ def register_socket_events(socketio):
         with db_manager.get_connection() as conn:
             cursor = conn.execute('''
                 INSERT INTO messaggi (chat_id, utente_id, contenuto)
-                VALUES (?, ?, ?)
+                VALUES (%s, %s, %s)
             ''', (conversation_id, session['user_id'], contenuto))
 
             message_id = cursor.lastrowid
@@ -143,7 +143,7 @@ def register_socket_events(socketio):
                        m.timestamp as data_invio
                 FROM messaggi m
                 JOIN utenti u ON m.utente_id = u.id
-                WHERE m.id = ?
+                WHERE m.id = %s
             ''', (message_id,)).fetchone()
 
         # Gamification
@@ -171,7 +171,7 @@ def register_socket_events(socketio):
         # SECURITY: Verifica che l'utente sia membro della chat
         is_member = db_manager.query('''
             SELECT 1 FROM partecipanti_chat 
-            WHERE chat_id = ? AND utente_id = ?
+            WHERE chat_id = %s AND utente_id = %s
         ''', (conversation_id, session['user_id']), one=True)
 
         if not is_member:
@@ -203,7 +203,7 @@ def register_socket_events(socketio):
         # SECURITY: Verifica che l'utente sia membro della chat
         is_member = db_manager.query('''
             SELECT 1 FROM partecipanti_chat 
-            WHERE chat_id = ? AND utente_id = ?
+            WHERE chat_id = %s AND utente_id = %s
         ''', (conversation_id, session['user_id']), one=True)
 
         if not is_member:

@@ -21,7 +21,7 @@ class RegistroElettronico:
             return {'error': f'Status non valido. Usa: {", ".join(valid_statuses)}'}
         
         # Get student class
-        student = db_manager.query('SELECT classe FROM utenti WHERE id = ?', (student_id,), one=True)
+        student = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (student_id,), one=True)
         if not student:
             return {'error': 'Studente non trovato'}
         
@@ -40,14 +40,14 @@ class RegistroElettronico:
             db_manager.execute('''
                 INSERT INTO registro_presenze 
                 (student_id, class, date, status, note, teacher_id)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s)
             ''', (student_id, student['classe'], date, status, note, teacher_id))
         
         # If absence, create justification entry
         if status == 'assente':
             db_manager.execute('''
                 INSERT INTO registro_assenze_giustificate (student_id, absence_date)
-                VALUES (?, ?)
+                VALUES (%s, %s)
                 ON CONFLICT (student_id, absence_date) DO NOTHING
             ''', (student_id, date))
         
@@ -85,15 +85,15 @@ class RegistroElettronico:
                                end_date: Optional[date] = None) -> List[Dict]:
         """Ottieni presenze studente"""
         
-        query = 'SELECT * FROM registro_presenze WHERE student_id = ?'
+        query = 'SELECT * FROM registro_presenze WHERE student_id = %s'
         params = [student_id]
         
         if start_date:
-            query += ' AND date >= ?'
+            query += ' AND date >= %s'
             params.append(start_date)
         
         if end_date:
-            query += ' AND date <= ?'
+            query += ' AND date <= %s'
             params.append(end_date)
         
         query += ' ORDER BY date DESC'
@@ -155,7 +155,7 @@ class RegistroElettronico:
         cursor = db_manager.execute('''
             INSERT INTO registro_voti 
             (student_id, teacher_id, subject, voto, tipo, description, date, peso)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (student_id, teacher_id, subject, voto, tipo, description, date, peso))
         
         grade_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
@@ -179,11 +179,11 @@ class RegistroElettronico:
         params = [student_id]
         
         if subject:
-            query += ' AND rv.subject = ?'
+            query += ' AND rv.subject = %s'
             params.append(subject)
         
         if start_date:
-            query += ' AND rv.date >= ?'
+            query += ' AND rv.date >= %s'
             params.append(start_date)
         
         query += ' ORDER BY rv.date DESC'
@@ -258,7 +258,7 @@ class RegistroElettronico:
         cursor = db_manager.execute('''
             INSERT INTO registro_note_disciplinari
             (student_id, teacher_id, note_type, description, severity, date)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         ''', (student_id, teacher_id, note_type, description, severity, date))
         
         note_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
@@ -337,7 +337,7 @@ class RegistroElettronico:
         cursor = db_manager.execute('''
             INSERT INTO registro_calendario_lezioni
             (teacher_id, class, subject, lesson_date, lesson_time, topic, homework, materials_used)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (teacher_id, class_name, subject, lesson_date, lesson_time, topic, homework, materials_used))
         
         lesson_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
@@ -360,11 +360,11 @@ class RegistroElettronico:
         params = [class_name]
         
         if subject:
-            query += ' AND rcl.subject = ?'
+            query += ' AND rcl.subject = %s'
             params.append(subject)
         
         if start_date:
-            query += ' AND rcl.lesson_date >= ?'
+            query += ' AND rcl.lesson_date >= %s'
             params.append(start_date)
         
         query += ' ORDER BY rcl.lesson_date DESC, rcl.lesson_time DESC'

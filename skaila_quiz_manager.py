@@ -79,7 +79,7 @@ class QuizManager:
             INSERT INTO student_quiz_history 
             (user_id, quiz_id, subject, topic, difficulty, user_answer, 
              correct_answer, is_correct, time_taken_seconds, xp_earned)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (user_id, quiz_id, quiz_data['subject'], quiz_data['topic'], 
               quiz_data['difficulty'], user_answer, quiz_data['correct_answer'],
               is_correct, time_taken, xp_earned))
@@ -232,7 +232,7 @@ class QuizManager:
                 INSERT INTO student_subject_progress 
                 (user_id, subject, total_quizzes, correct_quizzes, 
                  accuracy_percentage, total_xp, topics_weak, last_activity_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ''', (user_id, subject, 1, 1 if is_correct else 0,
                   100 if is_correct else 0, xp_earned,
                   topic if not is_correct else '', datetime.now()))
@@ -341,7 +341,7 @@ class QuizManager:
             INSERT INTO quiz_bank 
             (subject, topic, difficulty, question, option_a, option_b, option_c, option_d,
              correct_answer, explanation, xp_reward, prerequisiti, tags, created_by, approved)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             quiz_data['subject'],
             quiz_data['topic'],

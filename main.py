@@ -576,7 +576,7 @@ class SkailaApp:
                         cursor.execute('''
                             INSERT OR REPLACE INTO utenti 
                             (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
                         ''', (username, email, password_hash, nome, cognome, classe, ruolo))
 
                 # Crea chat demo
@@ -591,7 +591,7 @@ class SkailaApp:
                 for nome, descrizione, tipo, classe in chat_rooms:
                     conn.execute('''
                         INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
-                        VALUES (?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s)
                     ''', (nome, descrizione, tipo, classe))
 
                 print("✅ Dati demo creati con successo")

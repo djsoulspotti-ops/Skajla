@@ -15,7 +15,7 @@ class SocialLearningSystem:
         """Trova compagni esperti in una materia"""
         
         # Get user class
-        user = db_manager.query('SELECT classe, scuola_id FROM utenti WHERE id = ?', (user_id,), one=True)
+        user = db_manager.query('SELECT classe, scuola_id FROM utenti WHERE id = %s', (user_id,), one=True)
         
         if not user or not user.get('classe'):
             return []
@@ -52,7 +52,7 @@ class SocialLearningSystem:
         cursor = db_manager.execute('''
             INSERT INTO peer_help_requests 
             (requester_id, helper_id, subject, topic, question, status)
-            VALUES (?, ?, ?, ?, ?, 'pending')
+            VALUES (%s, %s, %s, %s, %s, 'pending')
         ''', (requester_id, helper_id, subject, topic, question))
         
         # Notifica helper (TODO: implementare sistema notifiche)
@@ -65,7 +65,7 @@ class SocialLearningSystem:
         # Update request
         db_manager.execute('''
             UPDATE peer_help_requests 
-            SET status = 'completed', resolved_at = ?
+            SET status = 'completed', resolved_at = %s
             WHERE id = ? AND helper_id = ?
         ''', (datetime.now(), request_id, helper_id))
         
@@ -96,13 +96,13 @@ class SocialLearningSystem:
         """Crea gruppo di studio"""
         
         # Get creator class
-        user = db_manager.query('SELECT classe FROM utenti WHERE id = ?', (creator_id,), one=True)
+        user = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (creator_id,), one=True)
         classe = user['classe'] if user else None
         
         # Create group
         cursor = db_manager.execute('''
             INSERT INTO study_groups (name, subject, class, creator_id, max_members)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         ''', (name, subject, classe, creator_id, max_members))
         
         group_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
@@ -146,7 +146,7 @@ class SocialLearningSystem:
         # Join
         db_manager.execute('''
             INSERT INTO study_group_members (group_id, user_id)
-            VALUES (?, ?)
+            VALUES (%s, %s)
         ''', (group_id, user_id))
         
         # Award XP
@@ -169,11 +169,11 @@ class SocialLearningSystem:
         params = []
         
         if user_class:
-            query += ' AND sg.class = ?'
+            query += ' AND sg.class = %s'
             params.append(user_class)
         
         if subject:
-            query += ' AND sg.subject = ?'
+            query += ' AND sg.subject = %s'
             params.append(subject)
         
         query += ' GROUP BY sg.id ORDER BY sg.created_at DESC'

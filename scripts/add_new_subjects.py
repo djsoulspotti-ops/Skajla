@@ -23,7 +23,7 @@ def add_new_subject_chats():
         if not existing:
             cursor.execute('''
                 INSERT INTO chat (nome, descrizione, tipo, classe)
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             ''', (nome, descrizione, tipo, classe))
             
             chat_id = cursor.lastrowid
@@ -37,7 +37,7 @@ def add_new_subject_chats():
                 
                 cursor.execute('''
                     INSERT OR IGNORE INTO partecipanti_chat (chat_id, utente_id, ruolo_chat)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
                 ''', (chat_id, user_id, ruolo_chat))
             
             print(f"  → Aggiunti {len(users)} partecipanti alla chat {nome}")

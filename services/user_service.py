@@ -215,7 +215,7 @@ class UserService:
             cursor = conn.execute('''
                 INSERT INTO utenti (username, email, password_hash, nome, cognome, 
                                    classe, ruolo, primo_accesso)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 user_data['username'],
                 user_data['email'], 

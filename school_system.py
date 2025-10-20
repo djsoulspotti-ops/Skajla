@@ -290,7 +290,7 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, codice_dirigente)
-                        VALUES (?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s)
                     ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code(), 'DIR2024'))
                     default_school_id = cursor.lastrowid
                 
@@ -470,7 +470,7 @@ class SchoolSystem:
                             cursor.execute('''
                                 INSERT OR REPLACE INTO personal_codes 
                                 (school_id, email, code, role, expires_at, used)
-                                VALUES (?, ?, ?, ?, ?, 0)
+                                VALUES (%s, %s, %s, %s, %s, 0)
                             ''', (scuola_id, email, personal_code, role, expires_at))
                         
                         codes_generated += 1
@@ -623,7 +623,7 @@ class SchoolSystem:
             else:
                 cursor.execute('''
                     INSERT INTO scuole (nome, codice_pubblico, dominio_email, codice_invito_docenti)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', (nome, codice_pubblico, dominio_email, codice_invito_docenti))
                 school_id = cursor.lastrowid
             
@@ -668,7 +668,7 @@ class SchoolSystem:
             else:
                 cursor.execute('''
                     INSERT INTO classi (scuola_id, nome, anno, sezione, codice_classe)
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                 ''', (scuola_id, nome, anno, sezione, codice_classe))
                 class_id = cursor.lastrowid
             
@@ -692,7 +692,7 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         INSERT INTO docenti_classi (docente_id, classe_id, materia)
-                        VALUES (?, ?, ?)
+                        VALUES (%s, %s, %s)
                     ''', (docente_id, classe_id, materia))
                 
                 conn.commit()
@@ -720,12 +720,12 @@ class SchoolSystem:
             else:
                 cursor.execute('''
                     INSERT INTO chat (nome, tipo, scuola_id, sistema)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', ('Comunicazioni Scuola', 'scuola', scuola_id, 1))
                 
                 cursor.execute('''
                     INSERT INTO chat (nome, tipo, scuola_id, sistema)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', ('Sala Professori', 'docenti', scuola_id, 1))
             
             conn.commit()
@@ -743,7 +743,7 @@ class SchoolSystem:
             else:
                 cursor.execute('''
                     INSERT INTO chat (nome, tipo, scuola_id, classe_id, sistema)
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                 ''', (f'Classe {classe_nome}', 'classe', scuola_id, classe_id, 1))
             
             conn.commit()
@@ -836,7 +836,7 @@ class SchoolSystem:
                         (nome, codice_pubblico, dominio_email, codice_invito_docenti, 
                          codice_dirigente, dirigente_invite_token, docente_invite_code_hash, 
                          invite_link_salt, attiva)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0)
                     ''', (nome, codice_pubblico, dominio_email, codice_docenti, 
                           codice_dirigente, dirigente_token, docente_hash, salt))
                     school_id = cursor.lastrowid
@@ -856,7 +856,7 @@ class SchoolSystem:
                     cursor.execute('''
                         INSERT INTO email_verifications 
                         (email, purpose, token, expires_at, metadata)
-                        VALUES (?, ?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s, %s)
                     ''', (dirigente_email, 'dirigente_school_verification', verification_token, 
                           expires_at, f'{{"school_id": {school_id}, "nome": "{dirigente_nome}", "cognome": "{dirigente_cognome}"}}'))
                 

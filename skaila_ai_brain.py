@@ -134,7 +134,7 @@ class SKAILABrain:
         profile = gamification_data['profile']
 
         # Dati utente base
-        user_data = db_manager.query('SELECT * FROM utenti WHERE id = ?', (user_id,), one=True)
+        user_data = db_manager.query('SELECT * FROM utenti WHERE id = %s', (user_id,), one=True)
 
         # Analisi attività oggi
         today_activity = self._get_today_activity(user_id)

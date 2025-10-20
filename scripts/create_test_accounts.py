@@ -62,7 +62,7 @@ def create_test_accounts():
         print("⚠️ Nessuna scuola predefinita trovata. Creazione in corso...")
         cursor.execute('''
             INSERT INTO scuole (nome, codice_pubblico, indirizzo, citta, codice_invito_docenti, codice_dirigente)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         ''', ('Istituto Demo SKAILA', 'DEFAULT_SCHOOL', 'Via della Scuola, 1', 'Milano', 'PROF2024', 'DIR2024'))
         
         scuola_id = cursor.lastrowid
@@ -77,7 +77,7 @@ def create_test_accounts():
     if not classe_result:
         cursor.execute('''
             INSERT INTO classi (nome, scuola_id, descrizione)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         ''', ('3A', scuola_id, 'Classe terza sezione A'))
         classe_id = cursor.lastrowid
         print(f"✅ Classe 3A creata (ID: {classe_id})")

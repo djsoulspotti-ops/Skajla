@@ -56,7 +56,7 @@ class TeachingMaterialsManager:
         """Upload materiale didattico"""
         
         # Validate teacher
-        teacher = db_manager.query('SELECT ruolo FROM utenti WHERE id = ?', (teacher_id,), one=True)
+        teacher = db_manager.query('SELECT ruolo FROM utenti WHERE id = %s', (teacher_id,), one=True)
         if not teacher or teacher['ruolo'] != 'docente':
             return {'error': 'Solo i docenti possono caricare materiali'}
         
@@ -89,7 +89,7 @@ class TeachingMaterialsManager:
             INSERT INTO teaching_materials 
             (teacher_id, title, description, subject, class, file_name, file_path, 
              file_type, file_size, is_public)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (teacher_id, title, description, subject, classe, original_filename, 
               file_path, self.get_file_type(original_filename), file_size, is_public))
         
@@ -108,7 +108,7 @@ class TeachingMaterialsManager:
         """Lista materiali disponibili"""
         
         # Get user info
-        user = db_manager.query('SELECT ruolo, classe FROM utenti WHERE id = ?', (user_id,), one=True)
+        user = db_manager.query('SELECT ruolo, classe FROM utenti WHERE id = %s', (user_id,), one=True)
         
         if not user:
             return []
@@ -124,25 +124,25 @@ class TeachingMaterialsManager:
         
         # Students can only see public or their class materials
         if user['ruolo'] == 'studente':
-            query += ' AND (tm.is_public = TRUE OR tm.class = ?)'
+            query += ' AND (tm.is_public = TRUE OR tm.class = %s)'
             params.append(user['classe'])
         
         # Teachers see their own + public
         elif user['ruolo'] == 'docente':
-            query += ' AND (tm.teacher_id = ? OR tm.is_public = TRUE)'
+            query += ' AND (tm.teacher_id = %s OR tm.is_public = TRUE)'
             params.append(user_id)
         
         # Filters
         if subject:
-            query += ' AND tm.subject = ?'
+            query += ' AND tm.subject = %s'
             params.append(subject)
         
         if classe:
-            query += ' AND (tm.class = ? OR tm.class IS NULL)'
+            query += ' AND (tm.class = %s OR tm.class IS NULL)'
             params.append(classe)
         
         if teacher_id:
-            query += ' AND tm.teacher_id = ?'
+            query += ' AND tm.teacher_id = %s'
             params.append(teacher_id)
         
         query += ' ORDER BY tm.upload_date DESC'
@@ -179,7 +179,7 @@ class TeachingMaterialsManager:
             return {'error': 'Materiale non trovato'}
         
         # Check permissions
-        user = db_manager.query('SELECT ruolo, classe FROM utenti WHERE id = ?', (user_id,), one=True)
+        user = db_manager.query('SELECT ruolo, classe FROM utenti WHERE id = %s', (user_id,), one=True)
         
         if user['ruolo'] == 'studente':
             if not material['is_public'] and material['class'] != user['classe']:
@@ -192,7 +192,7 @@ class TeachingMaterialsManager:
         
         # Log download
         db_manager.execute('''
-            INSERT INTO material_downloads (material_id, user_id) VALUES (?, ?)
+            INSERT INTO material_downloads (material_id, user_id) VALUES (%s, %s)
         ''', (material_id, user_id))
         
         return {
@@ -213,7 +213,7 @@ class TeachingMaterialsManager:
             return {'error': 'Materiale non trovato'}
         
         # Check permissions
-        user = db_manager.query('SELECT ruolo FROM utenti WHERE id = ?', (user_id,), one=True)
+        user = db_manager.query('SELECT ruolo FROM utenti WHERE id = %s', (user_id,), one=True)
         
         if material['teacher_id'] != user_id and user['ruolo'] != 'admin':
             return {'error': 'Solo il proprietario o admin può eliminare'}
@@ -223,8 +223,8 @@ class TeachingMaterialsManager:
             os.remove(material['file_path'])
         
         # Delete from database
-        db_manager.execute('DELETE FROM teaching_materials WHERE id = ?', (material_id,))
-        db_manager.execute('DELETE FROM material_downloads WHERE material_id = ?', (material_id,))
+        db_manager.execute('DELETE FROM teaching_materials WHERE id = %s', (material_id,))
+        db_manager.execute('DELETE FROM material_downloads WHERE material_id = %s', (material_id,))
         
         return {'success': True, 'message': 'Materiale eliminato'}
     
@@ -266,7 +266,7 @@ class TeachingMaterialsManager:
     def search_materials(self, user_id: int, query: str) -> List[Dict]:
         """Cerca materiali"""
         
-        user = db_manager.query('SELECT ruolo, classe FROM utenti WHERE id = ?', (user_id,), one=True)
+        user = db_manager.query('SELECT ruolo, classe FROM utenti WHERE id = %s', (user_id,), one=True)
         
         search_query = '''
             SELECT tm.*, u.nome as teacher_name, u.cognome as teacher_surname
@@ -277,10 +277,10 @@ class TeachingMaterialsManager:
         params = [f'%{query}%', f'%{query}%', f'%{query}%']
         
         if user['ruolo'] == 'studente':
-            search_query += ' AND (tm.is_public = TRUE OR tm.class = ?)'
+            search_query += ' AND (tm.is_public = TRUE OR tm.class = %s)'
             params.append(user['classe'])
         elif user['ruolo'] == 'docente':
-            search_query += ' AND (tm.teacher_id = ? OR tm.is_public = TRUE)'
+            search_query += ' AND (tm.teacher_id = %s OR tm.is_public = TRUE)'
             params.append(user_id)
         
         search_query += ' ORDER BY tm.upload_date DESC LIMIT 20'

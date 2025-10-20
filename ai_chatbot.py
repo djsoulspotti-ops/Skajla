@@ -351,7 +351,7 @@ Su quale linguaggio o concetto vuoi lavorare? 🔧"""
                     INSERT INTO ai_profiles 
                     (utente_id, bot_name, bot_avatar, conversation_style, learning_preferences, 
                      difficulty_preference, personality_traits)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ''', (user_id, default_profile['bot_name'], default_profile['bot_avatar'],
                       default_profile['conversation_style'], default_profile['learning_preferences'],
                       default_profile['difficulty_preference'], 'empathetic,supportive'))

@@ -26,7 +26,7 @@ def fix_papa_account():
         papa_password = hash_password('papa123')
         cursor.execute('''
             INSERT INTO utenti (username, email, password_hash, nome, cognome, ruolo, attivo, primo_accesso)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', ('papa', 'papa@skaila.it', papa_password, 'Papà', 'Famiglia', 'genitore', 1, 0))
         
         print("✅ Account papà creato con successo!")

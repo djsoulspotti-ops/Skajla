@@ -147,7 +147,7 @@ class AICostManager:
             conn.execute('''
                 INSERT OR REPLACE INTO ai_response_cache 
                 (request_hash, user_context_hash, message, response, model_used)
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s)
             ''', (request_hash, user_context_hash, message, response, model_used))
             
             conn.commit()
@@ -176,7 +176,7 @@ class AICostManager:
                 conn.execute('''
                     INSERT INTO ai_user_limits 
                     (user_id, last_reset_daily, last_reset_monthly)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
                 ''', (user_id, today, current_month))
                 conn.commit()
                 user_limits = conn.execute('''
@@ -252,7 +252,7 @@ class AICostManager:
             conn.execute('''
                 INSERT INTO ai_cost_tracking 
                 (user_id, model_used, input_tokens, output_tokens, cost_usd, request_type, cached)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             ''', (user_id, model_used, input_tokens, output_tokens, cost, request_type, cached))
             
             # Aggiorna budget utente se non cached

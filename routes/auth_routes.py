@@ -101,7 +101,7 @@ def register():
                     if db_manager.db_type == 'postgresql':
                         cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
                     else:
-                        cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = ?', ('DEFAULT_SCHOOL',))
+                        cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
                     default_school = cursor.fetchone()
                     if default_school:
                         scuola_id = default_school[0]
@@ -145,7 +145,7 @@ def register():
                         cursor.execute('SELECT id FROM scuole WHERE id = %s AND codice_dirigente = %s', 
                                      (scuola_id, codice_dirigente))
                     else:
-                        cursor.execute('SELECT id FROM scuole WHERE id = ? AND codice_dirigente = ?', 
+                        cursor.execute('SELECT id FROM scuole WHERE id = %s AND codice_dirigente = %s', 
                                      (scuola_id, codice_dirigente))
                     
                     if cursor.fetchone():
@@ -163,7 +163,7 @@ def register():
                         cursor.execute('SELECT id FROM scuole WHERE id = %s AND codice_invito_docenti = %s', 
                                      (scuola_id, codice_docente))
                     else:
-                        cursor.execute('SELECT id FROM scuole WHERE id = ? AND codice_invito_docenti = ?', 
+                        cursor.execute('SELECT id FROM scuole WHERE id = %s AND codice_invito_docenti = %s', 
                                      (scuola_id, codice_docente))
                     
                     if cursor.fetchone():

@@ -27,21 +27,21 @@ def view_credits():
         today_xp = conn.execute('''
             SELECT COALESCE(SUM(xp_earned), 0) 
             FROM xp_activity_log 
-            WHERE user_id = ? AND DATE(timestamp) = DATE('now')
+            WHERE user_id = %s AND DATE(timestamp) = CURRENT_DATE
         ''', (user_id,)).fetchone()[0]
         
         # XP questa settimana
         week_xp = conn.execute('''
             SELECT COALESCE(SUM(xp_earned), 0) 
             FROM xp_activity_log 
-            WHERE user_id = ? AND DATE(timestamp) > DATE('now', '-7 days')
+            WHERE user_id = %s AND DATE(timestamp) > DATE('now', '-7 days')
         ''', (user_id,)).fetchone()[0]
         
         # Attività recenti che hanno dato XP
         recent_activities = conn.execute('''
             SELECT action_type, xp_earned, description, timestamp
             FROM xp_activity_log
-            WHERE user_id = ?
+            WHERE user_id = %s
             ORDER BY timestamp DESC
             LIMIT 10
         ''', (user_id,)).fetchall()

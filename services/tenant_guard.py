@@ -27,14 +27,14 @@ def get_current_school_id():
             raise TenantGuardException("user_id non trovato in sessione")
         
         user = db_manager.query('''
-            SELECT school_id FROM utenti WHERE id = ?
+            SELECT scuola_id FROM utenti WHERE id = %s
         ''', (user_id,), one=True)
         
-        if not user or not user.get('school_id'):
-            raise TenantGuardException(f"school_id non trovato per utente {user_id}")
+        if not user or not user.get('scuola_id'):
+            raise TenantGuardException(f"scuola_id non trovato per utente {user_id}")
         
         # Aggiorna la sessione per le prossime richieste
-        school_id = user['school_id']
+        school_id = user['scuola_id']
         session['school_id'] = school_id
     
     return school_id
@@ -50,7 +50,7 @@ def verify_chat_belongs_to_school(chat_id, school_id=None):
     
     result = db_manager.query('''
         SELECT 1 FROM chat 
-        WHERE id = ? AND school_id = ?
+        WHERE id = %s AND scuola_id = %s
     ''', (chat_id, school_id), one=True)
     
     return result is not None
@@ -66,7 +66,7 @@ def verify_user_belongs_to_school(user_id, school_id=None):
     
     result = db_manager.query('''
         SELECT 1 FROM utenti 
-        WHERE id = ? AND school_id = ?
+        WHERE id = %s AND scuola_id = %s
     ''', (user_id, school_id), one=True)
     
     return result is not None
@@ -88,11 +88,11 @@ def get_school_filtered_query(base_query, table_alias=''):
     # Determina il prefisso della tabella
     prefix = f"{table_alias}." if table_alias else ""
     
-    # Aggiunge il filtro school_id
+    # Aggiunge il filtro scuola_id
     if 'WHERE' in base_query.upper():
-        filtered_query = base_query + f" AND {prefix}school_id = ?"
+        filtered_query = base_query + f" AND {prefix}scuola_id = %s"
     else:
-        filtered_query = base_query + f" WHERE {prefix}school_id = ?"
+        filtered_query = base_query + f" WHERE {prefix}scuola_id = %s"
     
     return filtered_query, school_id
 
@@ -126,7 +126,7 @@ def get_chat_members_query(chat_id, school_id=None):
     return db_manager.query('''
         SELECT u.* FROM utenti u
         JOIN partecipanti_chat pc ON u.id = pc.utente_id
-        WHERE pc.chat_id = ? AND u.school_id = ?
+        WHERE pc.chat_id = %s AND u.scuola_id = %s
     ''', (chat_id, school_id))
 
 
@@ -143,20 +143,20 @@ def get_school_stats(school_id=None):
     # Conta utenti della scuola
     stats['total_users'] = db_manager.query('''
         SELECT COUNT(*) as count FROM utenti 
-        WHERE school_id = ? AND attivo = ?
+        WHERE scuola_id = %s AND attivo = %s
     ''', (school_id, True), one=True)['count']
     
     # Conta messaggi della scuola (via chat)
     stats['total_messages'] = db_manager.query('''
         SELECT COUNT(*) as count FROM messaggi m
         JOIN chat c ON m.chat_id = c.id
-        WHERE c.school_id = ?
+        WHERE c.scuola_id = %s
     ''', (school_id,), one=True)['count']
     
     # Conta chat della scuola
     stats['active_chats'] = db_manager.query('''
         SELECT COUNT(*) as count FROM chat 
-        WHERE school_id = ?
+        WHERE scuola_id = %s
     ''', (school_id,), one=True)['count']
     
     return stats

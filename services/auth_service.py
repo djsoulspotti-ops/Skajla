@@ -193,7 +193,7 @@ class AuthService:
                     cursor.execute('''
                         INSERT INTO utenti 
                         (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ''', (username, email, password_hash, nome, cognome, classe, ruolo, scuola_id, classe_id))
                     user_id = cursor.lastrowid
 
@@ -267,7 +267,7 @@ class AuthService:
             else:
                 cursor.execute('''
                     INSERT INTO login_attempts (email, success, ip_address, user_agent)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', (email, success, ip_address, request.headers.get('User-Agent', '')))
             conn.commit()
 

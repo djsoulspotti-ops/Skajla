@@ -30,7 +30,7 @@ def chat_hub():
         SELECT c.*, COUNT(DISTINCT m.id) as message_count
         FROM chat c
         LEFT JOIN messaggi m ON c.id = m.chat_id
-        WHERE c.scuola_id = ? AND c.classe = ? AND c.tipo = 'classe'
+        WHERE c.scuola_id = %s AND c.classe = %s AND c.tipo = 'classe'
         GROUP BY c.id
     ''', (school_id, session.get('classe', '')))
     
@@ -40,7 +40,7 @@ def chat_hub():
         FROM chat c
         LEFT JOIN messaggi m ON c.id = m.chat_id
         JOIN partecipanti_chat pc ON c.id = pc.chat_id
-        WHERE c.scuola_id = ? AND c.tipo = 'materia' AND pc.utente_id = ?
+        WHERE c.scuola_id = %s AND c.tipo = 'materia' AND pc.utente_id = %s
         GROUP BY c.id
     ''', (school_id, user_id))
     
@@ -51,9 +51,9 @@ def chat_hub():
         JOIN partecipanti_chat pc ON c.id = pc.chat_id
         JOIN utenti u ON pc.utente_id = u.id
         LEFT JOIN messaggi m ON c.id = m.chat_id
-        WHERE c.scuola_id = ? AND c.tipo = 'privata' 
-        AND c.id IN (SELECT chat_id FROM partecipanti_chat WHERE utente_id = ?)
-        AND u.id != ?
+        WHERE c.scuola_id = %s AND c.tipo = 'privata' 
+        AND c.id IN (SELECT chat_id FROM partecipanti_chat WHERE utente_id = %s)
+        AND u.id != %s
         GROUP BY c.id, u.id
     ''', (school_id, user_id, user_id))
     
@@ -61,7 +61,7 @@ def chat_hub():
     available_users = db_manager.query('''
         SELECT id, nome, cognome, ruolo
         FROM utenti
-        WHERE scuola_id = ? AND id != ? AND attivo = true
+        WHERE scuola_id = %s AND id != %s AND attivo = true
         ORDER BY cognome, nome
     ''', (school_id, user_id))
     
@@ -86,9 +86,9 @@ def private_chat(recipient_id):
         JOIN partecipanti_chat pc1 ON c.id = pc1.chat_id
         JOIN partecipanti_chat pc2 ON c.id = pc2.chat_id
         WHERE c.tipo = 'privata' 
-        AND c.scuola_id = ?
-        AND pc1.utente_id = ? 
-        AND pc2.utente_id = ?
+        AND c.scuola_id = %s
+        AND pc1.utente_id = %s 
+        AND pc2.utente_id = %s
         LIMIT 1
     ''', (school_id, user_id, recipient_id), one=True)
     
@@ -99,7 +99,7 @@ def private_chat(recipient_id):
         with db_manager.get_connection() as conn:
             cursor = conn.execute('''
                 INSERT INTO chat (nome, tipo, scuola_id, created_at)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
                 RETURNING id
             ''', (f'Chat privata', 'privata', school_id))
             chat_id = cursor.fetchone()[0]
@@ -107,7 +107,7 @@ def private_chat(recipient_id):
             # Aggiungi partecipanti
             conn.execute('''
                 INSERT INTO partecipanti_chat (chat_id, utente_id)
-                VALUES (?, ?), (?, ?)
+                VALUES (%s, %s), (?, ?)
             ''', (chat_id, user_id, chat_id, recipient_id))
             conn.commit()
     
@@ -125,8 +125,8 @@ def group_chat_materia(materia):
     existing_group = db_manager.query('''
         SELECT id FROM chat
         WHERE tipo = 'materia' 
-        AND scuola_id = ? 
-        AND classe = ?
+        AND scuola_id = %s 
+        AND classe = %s
         AND nome LIKE ?
         LIMIT 1
     ''', (school_id, classe, f'%{materia}%'), one=True)
@@ -138,7 +138,7 @@ def group_chat_materia(materia):
         with db_manager.get_connection() as conn:
             cursor = conn.execute('''
                 INSERT INTO chat (nome, descrizione, tipo, classe, scuola_id, created_at)
-                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
                 RETURNING id
             ''', (f'📚 {materia} - {classe}', f'Gruppo di studio per {materia}', 'materia', classe, school_id))
             chat_id = cursor.fetchone()[0]
@@ -147,7 +147,7 @@ def group_chat_materia(materia):
             conn.execute('''
                 INSERT INTO partecipanti_chat (chat_id, utente_id)
                 SELECT ?, id FROM utenti 
-                WHERE classe = ? AND scuola_id = ? AND ruolo = 'studente' AND attivo = true
+                WHERE classe = %s AND scuola_id = %s AND ruolo = 'studente' AND attivo = true
             ''', (chat_id, classe, school_id))
             conn.commit()
     
@@ -163,7 +163,7 @@ def chat_room(chat_id):
     # Verifica accesso
     is_participant = db_manager.query('''
         SELECT 1 FROM partecipanti_chat
-        WHERE chat_id = ? AND utente_id = ?
+        WHERE chat_id = %s AND utente_id = %s
     ''', (chat_id, user_id), one=True)
     
     # O è admin/professore della scuola
@@ -174,7 +174,7 @@ def chat_room(chat_id):
     
     # Info chat
     chat_info = db_manager.query('''
-        SELECT * FROM chat WHERE id = ? AND scuola_id = ?
+        SELECT * FROM chat WHERE id = %s AND scuola_id = %s
     ''', (chat_id, school_id), one=True)
     
     if not chat_info:
@@ -185,7 +185,7 @@ def chat_room(chat_id):
         SELECT m.*, u.nome, u.cognome
         FROM messaggi m
         JOIN utenti u ON m.utente_id = u.id
-        WHERE m.chat_id = ?
+        WHERE m.chat_id = %s
         ORDER BY m.timestamp ASC
         LIMIT 100
     ''', (chat_id,))
@@ -195,7 +195,7 @@ def chat_room(chat_id):
         SELECT u.id, u.nome, u.cognome, u.ruolo
         FROM utenti u
         JOIN partecipanti_chat pc ON u.id = pc.utente_id
-        WHERE pc.chat_id = ?
+        WHERE pc.chat_id = %s
     ''', (chat_id,))
     
     return render_template('chat_room.html',
@@ -216,14 +216,14 @@ def materiali():
         # Studenti vedono materiali della loro classe
         materials = db_manager.query('''
             SELECT * FROM materiali_didattici
-            WHERE scuola_id = ? AND classe = ?
+            WHERE scuola_id = %s AND classe = %s
             ORDER BY data_upload DESC
         ''', (school_id, session.get('classe', '')))
     else:
         # Professori vedono i loro materiali
         materials = db_manager.query('''
             SELECT * FROM materiali_didattici
-            WHERE scuola_id = ? AND professore_id = ?
+            WHERE scuola_id = %s AND professore_id = %s
             ORDER BY data_upload DESC
         ''', (school_id, user_id))
     
@@ -242,7 +242,7 @@ def quiz_hub():
     # Quiz disponibili
     available_quizzes = db_manager.query('''
         SELECT * FROM quiz
-        WHERE scuola_id = ? AND attivo = true
+        WHERE scuola_id = %s AND attivo = true
         ORDER BY materia, difficolta
     ''', (school_id,))
     
@@ -251,7 +251,7 @@ def quiz_hub():
         SELECT q.*, qr.punteggio, qr.data_completamento
         FROM quiz q
         JOIN quiz_results qr ON q.id = qr.quiz_id
-        WHERE qr.studente_id = ?
+        WHERE qr.studente_id = %s
         ORDER BY qr.data_completamento DESC
         LIMIT 10
     ''', (user_id,))
@@ -271,7 +271,7 @@ def calendario():
     # Eventi futuri
     upcoming_events = db_manager.query('''
         SELECT * FROM eventi
-        WHERE scuola_id = ? AND data >= DATE('now')
+        WHERE scuola_id = %s AND data >= CURRENT_DATE
         ORDER BY data ASC
         LIMIT 20
     ''', (school_id,))
@@ -299,7 +299,7 @@ def send_message():
     with db_manager.get_connection() as conn:
         cursor = conn.execute('''
             INSERT INTO messaggi (chat_id, utente_id, contenuto, timestamp)
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
             RETURNING id
         ''', (chat_id, user_id, content))
         message_id = cursor.fetchone()[0]

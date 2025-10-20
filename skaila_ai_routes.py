@@ -37,7 +37,7 @@ def ai_chat():
         db_manager.execute('''
             INSERT INTO ai_conversations 
             (utente_id, message, response, detected_subject, sentiment, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         ''', (user_id, message, response, 
               context.get('detected_subject', 'generale'),
               ','.join(context.get('sentiment', [])),

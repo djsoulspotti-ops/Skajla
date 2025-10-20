@@ -7,7 +7,7 @@ Routes per dashboard specifiche per ruolo
 from flask import Blueprint, render_template, session, redirect
 from database_manager import db_manager
 from gamification import gamification_system
-from services.tenant_guard import get_school_stats, get_current_school_id
+from services.tenant_guard import get_school_stats, get_current_school_id, TenantGuardException
 from ai_chatbot import AISkailaBot
 from ai_insights_engine import ai_insights_engine
 
@@ -55,15 +55,17 @@ def dashboard_studente():
         profile = gamification_data.get('profile', {})
     
     # Statistiche recenti
-    recent_messages = db_manager.query('''
+    recent_messages_result = db_manager.query('''
         SELECT COUNT(*) as count FROM messaggi 
-        WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
-    ''', (user_id,), one=True)['count']
+        WHERE utente_id = %s AND DATE(timestamp) = CURRENT_DATE
+    ''', (user_id,), one=True)
+    recent_messages = recent_messages_result['count'] if recent_messages_result else 0
     
-    ai_interactions = db_manager.query('''
+    ai_interactions_result = db_manager.query('''
         SELECT COUNT(*) as count FROM ai_conversations 
-        WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
-    ''', (user_id,), one=True)['count']
+        WHERE utente_id = %s AND DATE(timestamp) = CURRENT_DATE
+    ''', (user_id,), one=True)
+    ai_interactions = ai_interactions_result['count'] if ai_interactions_result else 0
     
     dashboard_stats = {
         'messages_today': recent_messages,
@@ -107,7 +109,7 @@ def dashboard_professore():
         # Statistiche classe (con school_id)
         students_count = db_manager.query('''
             SELECT COUNT(*) as count FROM utenti 
-            WHERE ruolo = ? AND classe = ? AND scuola_id = ? AND attivo = ?
+            WHERE ruolo = %s AND classe = %s AND scuola_id = %s AND attivo = %s
         ''', ('studente', session.get('classe', ''), school_id, True), one=True)['count']
         
         # Messaggi recenti (con school_id)
@@ -116,8 +118,8 @@ def dashboard_professore():
             FROM messaggi m
             JOIN utenti u ON m.utente_id = u.id
             JOIN chat c ON m.chat_id = c.id
-            WHERE u.classe = ? AND u.scuola_id = ? AND c.scuola_id = ? 
-            AND DATE(m.timestamp) = DATE('now')
+            WHERE u.classe = %s AND u.scuola_id = %s AND c.scuola_id = %s 
+            AND DATE(m.timestamp) = CURRENT_DATE
             ORDER BY m.timestamp DESC
             LIMIT 10
         ''', (session.get('classe', ''), school_id, school_id))
@@ -165,14 +167,14 @@ def dashboard_admin():
     messages_today = db_manager.query('''
         SELECT COUNT(*) as count FROM messaggi m
         JOIN chat c ON m.chat_id = c.id
-        WHERE c.school_id = ? AND DATE(m.timestamp) = DATE('now')
+        WHERE c.school_id = %s AND DATE(m.timestamp) = CURRENT_DATE
     ''', (school_id,), one=True)['count']
     
     # Utenti per ruolo (filtrati per scuola)
     role_stats = db_manager.query('''
         SELECT ruolo, COUNT(*) as count 
         FROM utenti 
-        WHERE school_id = ? AND attivo = ? 
+        WHERE school_id = %s AND attivo = %s 
         GROUP BY ruolo
     ''', (school_id, True))
     
@@ -199,7 +201,7 @@ def registro_online():
         voti = db_manager.query('''
             SELECT materia, voto, tipo_valutazione, data, note 
             FROM voti 
-            WHERE studente_id = ? 
+            WHERE studente_id = %s 
             ORDER BY data DESC 
             LIMIT 50
         ''', (user_id,))
@@ -208,7 +210,7 @@ def registro_online():
         presenze = db_manager.query('''
             SELECT data, presente, giustificato, ritardo, note
             FROM presenze 
-            WHERE studente_id = ?
+            WHERE studente_id = %s
             ORDER BY data DESC
             LIMIT 30
         ''', (user_id,))
@@ -217,7 +219,7 @@ def registro_online():
         medie = db_manager.query('''
             SELECT materia, AVG(voto) as media, COUNT(*) as num_voti
             FROM voti
-            WHERE studente_id = ?
+            WHERE studente_id = %s
             GROUP BY materia
         ''', (user_id,))
         
@@ -236,7 +238,7 @@ def registro_online():
         studenti = db_manager.query('''
             SELECT id, nome, cognome 
             FROM utenti 
-            WHERE ruolo = ? AND classe = ? AND scuola_id = ? AND attivo = ?
+            WHERE ruolo = %s AND classe = %s AND scuola_id = %s AND attivo = %s
             ORDER BY cognome, nome
         ''', ('studente', classe, school_id, True))
         
@@ -247,3 +249,46 @@ def registro_online():
     
     else:
         return redirect('/dashboard')
+
+@dashboard_bp.route('/gamification')
+@require_login
+def gamification_page():
+    """Pagina Gamification completa"""
+    user_id = session['user_id']
+    
+    try:
+        user_stats = gamification_system.get_user_stats(user_id)
+        leaderboard = db_manager.query('''
+            SELECT u.nome, u.cognome, ug.total_xp, ug.current_level
+            FROM user_gamification ug
+            JOIN utenti u ON ug.user_id = u.id
+            ORDER BY ug.total_xp DESC
+            LIMIT 10
+        ''')
+        
+        achievements = db_manager.query('''
+            SELECT achievement_id, unlocked_at, xp_earned
+            FROM user_achievements
+            WHERE user_id = %s
+            ORDER BY unlocked_at DESC
+        ''', (user_id,))
+        
+        badges = db_manager.query('''
+            SELECT badge_id, earned_at, xp_earned, rarity
+            FROM user_badges
+            WHERE user_id = %s
+            ORDER BY earned_at DESC
+        ''', (user_id,))
+        
+    except Exception as e:
+        print(f"⚠️ Errore gamification: {e}")
+        user_stats = {'total_xp': 0, 'current_level': 1, 'current_streak': 0}
+        leaderboard = []
+        achievements = []
+        badges = []
+    
+    return render_template('gamification_dashboard.html',
+                         stats=user_stats,
+                         leaderboard=leaderboard,
+                         achievements=achievements,
+                         badges=badges)

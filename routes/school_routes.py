@@ -87,7 +87,7 @@ def verify_email():
                 cursor.execute('''
                     INSERT INTO email_verifications 
                     (email, purpose, token, expires_at, metadata)
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                 ''', (result['email'], 'dirigente_account_setup', setup_token, 
                       expires_at, json.dumps({"school_id": result["school_id"], "nome": result["dirigente_nome"], "cognome": result["dirigente_cognome"]})))
             conn.commit()
@@ -158,7 +158,7 @@ def setup_dirigente_account():
             cursor = conn.cursor()
             cursor.execute('''
                 SELECT email, metadata FROM email_verifications 
-                WHERE token = ? AND purpose = 'dirigente_account_setup' 
+                WHERE token = %s AND purpose = 'dirigente_account_setup' 
                 AND expires_at > datetime('now') AND consumed_at IS NULL
             ''', (token,))
             result = cursor.fetchone()
@@ -219,8 +219,8 @@ def setup_dirigente_account():
                     else:
                         cursor.execute('''
                             UPDATE email_verifications 
-                            SET consumed_at = ? 
-                            WHERE token = ? AND purpose = 'dirigente_account_setup'
+                            SET consumed_at = %s 
+                            WHERE token = %s AND purpose = 'dirigente_account_setup'
                         ''', (consumed_at, token))
                     conn.commit()
                 

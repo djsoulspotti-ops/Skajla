@@ -102,7 +102,7 @@ class SchoolCodesManager:
                     cursor.execute('''
                         INSERT OR IGNORE INTO school_activation_codes 
                         (school_name, school_code, teacher_invite_code, director_code, notes)
-                        VALUES (?, ?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s, %s)
                     ''', (school_name, school_code, teacher_code, director_code,
                           f'Codice premium per scuola partner #{i}'))
                 

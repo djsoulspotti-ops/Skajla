@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS utenti (
 # Inserire un utente di test
 cursor.execute("""
 INSERT OR IGNORE INTO utenti (nome, email, password)
-VALUES (?, ?, ?)
+VALUES (%s, %s, %s)
 """, ("Daniele", "danis@gmail.com", "1234"))
 
 conn.commit()

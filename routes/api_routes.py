@@ -48,7 +48,7 @@ def conversations():
                 LEFT JOIN messaggi m ON c.id = m.chat_id 
                     AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
                 LEFT JOIN utenti u ON m.utente_id = u.id
-                WHERE c.scuola_id = ?
+                WHERE c.scuola_id = %s
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
             ''', (school_id,))
@@ -65,7 +65,7 @@ def conversations():
                 LEFT JOIN messaggi m ON c.id = m.chat_id 
                     AND m.timestamp = (SELECT MAX(timestamp) FROM messaggi WHERE chat_id = c.id)
                 LEFT JOIN utenti u ON m.utente_id = u.id
-                WHERE c.scuola_id = ? AND (pc.utente_id = ? OR c.classe = ?)
+                WHERE c.scuola_id = %s AND (pc.utente_id = %s OR c.classe = %s)
                 GROUP BY c.id
                 ORDER BY ultimo_messaggio_data DESC NULLS LAST
             ''', (school_id, user_id, session.get('classe', '')))
@@ -98,7 +98,7 @@ def messages(conversation_id):
             FROM messaggi m
             JOIN utenti u ON m.utente_id = u.id
             JOIN chat c ON m.chat_id = c.id
-            WHERE m.chat_id = ? AND c.scuola_id = ?
+            WHERE m.chat_id = %s AND c.scuola_id = %s
             ORDER BY m.timestamp ASC
             LIMIT 100
         ''', (conversation_id, school_id))
@@ -137,7 +137,7 @@ def ai_chat():
         db_manager.execute('''
             INSERT INTO ai_conversations 
             (utente_id, message, response, subject_detected, sentiment_analysis, timestamp)
-            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         ''', (session['user_id'], message, response, subject_detected, sentiment_analysis))
 
         # Gamification
@@ -259,7 +259,7 @@ def ai_chat():
     with db_manager.get_connection() as conn:
         conn.execute('''
             INSERT INTO ai_conversations (utente_id, message, response)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         ''', (session['user_id'], message, response))
         conn.commit()
     
@@ -330,7 +330,7 @@ def apply_to_company():
     # Verifica che l'azienda esista ed è attiva
     company = db_manager.query('''
         SELECT id FROM skaila_connect_companies 
-        WHERE id = ? AND attiva = true
+        WHERE id = %s AND attiva = true
     ''', (company_id,), one=True)
     
     if not company:
@@ -340,7 +340,7 @@ def apply_to_company():
         # Controlla se candidatura già esistente
         existing = db_manager.query('''
             SELECT id FROM skaila_connect_applications 
-            WHERE studente_id = ? AND company_id = ?
+            WHERE studente_id = %s AND company_id = %s
         ''', (student_id, company_id), one=True)
         
         is_new_application = existing is None
@@ -351,7 +351,7 @@ def apply_to_company():
                 conn.execute('''
                     INSERT INTO skaila_connect_applications 
                     (studente_id, company_id, stato, note_studente)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', (student_id, company_id, 'in_attesa', data.get('note', '')))
             else:
                 # Candidatura esistente - aggiorna timestamp
@@ -359,7 +359,7 @@ def apply_to_company():
                     UPDATE skaila_connect_applications 
                     SET data_candidatura = CURRENT_TIMESTAMP,
                         stato = 'in_attesa'
-                    WHERE studente_id = ? AND company_id = ?
+                    WHERE studente_id = %s AND company_id = %s
                 ''', (student_id, company_id))
             conn.commit()
         
@@ -389,7 +389,7 @@ def my_applications():
         SELECT a.*, c.nome, c.posizione_offerta, c.logo
         FROM skaila_connect_applications a
         JOIN skaila_connect_companies c ON a.company_id = c.id
-        WHERE a.studente_id = ?
+        WHERE a.studente_id = %s
         ORDER BY a.data_candidatura DESC
     ''', (session['user_id'],))
     
