@@ -211,6 +211,14 @@ def materiali():
     try:
         user_id = session['user_id']
         school_id = get_current_school_id()
+        
+        if not school_id:
+            return render_template('materiali.html',
+                                 user=session,
+                                 materials=[],
+                                 ruolo=session.get('ruolo', 'studente'),
+                                 error='Scuola non configurata. Contatta l\'amministratore.')
+        
         ruolo = session.get('ruolo', 'studente')
         
         if ruolo == 'studente':
@@ -247,6 +255,13 @@ def quiz_hub():
         user_id = session['user_id']
         school_id = get_current_school_id()
         
+        if not school_id:
+            return render_template('quiz_hub.html',
+                                 user=session,
+                                 available_quizzes=[],
+                                 completed_quizzes=[],
+                                 error='Scuola non configurata. Contatta l\'amministratore.')
+        
         # Quiz disponibili
         available_quizzes = db_manager.query('''
             SELECT * FROM quiz
@@ -282,6 +297,12 @@ def calendario():
     try:
         user_id = session['user_id']
         school_id = get_current_school_id()
+        
+        if not school_id:
+            return render_template('calendario.html',
+                                 user=session,
+                                 events=[],
+                                 error='Scuola non configurata. Contatta l\'amministratore.')
         
         # Eventi futuri
         upcoming_events = db_manager.query('''

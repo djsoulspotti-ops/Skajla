@@ -24,32 +24,52 @@ def get_current_school_id():
         # Fallback: recupera dal database usando user_id
         user_id = session.get('user_id')
         if not user_id:
-            raise TenantGuardException("user_id non trovato in sessione")
+            # Utente non loggato - ritorna None invece di errore
+            return None
         
-        user = db_manager.query('''
-            SELECT scuola_id FROM utenti WHERE id = %s
-        ''', (user_id,), one=True)
-        
-        if not user or not user.get('scuola_id'):
-            # FALLBACK: Assegna scuola predefinita per utenti legacy
-            default_school = db_manager.query('''
-                SELECT id FROM scuole WHERE codice_pubblico = %s LIMIT 1
-            ''', ('DEFAULT_SCHOOL',), one=True)
+        try:
+            user = db_manager.query('''
+                SELECT scuola_id FROM utenti WHERE id = %s
+            ''', (user_id,), one=True)
             
-            if default_school:
-                school_id = default_school['id']
-                # Aggiorna utente con scuola predefinita
-                db_manager.execute('''
-                    UPDATE utenti SET scuola_id = %s WHERE id = %s
-                ''', (school_id, user_id))
-                session['school_id'] = school_id
-                print(f"✅ Utente {user_id} assegnato a scuola predefinita {school_id}")
+            if not user or not user.get('scuola_id'):
+                # FALLBACK: Assegna scuola predefinita per utenti legacy
+                default_school = db_manager.query('''
+                    SELECT id FROM scuole WHERE codice_pubblico = %s LIMIT 1
+                ''', ('DEFAULT_SCHOOL',), one=True)
+                
+                if default_school:
+                    school_id = default_school['id']
+                    # Aggiorna utente con scuola predefinita
+                    db_manager.execute('''
+                        UPDATE utenti SET scuola_id = %s WHERE id = %s
+                    ''', (school_id, user_id))
+                    session['school_id'] = school_id
+                    print(f"✅ Utente {user_id} assegnato a scuola predefinita {school_id}")
+                else:
+                    # Crea scuola predefinita se non esiste
+                    print("⚠️ Nessuna scuola trovata, creazione scuola predefinita...")
+                    school_id = db_manager.execute('''
+                        INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, codice_dirigente, attiva)
+                        VALUES (%s, %s, %s, %s, %s)
+                    ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', 'PROF2024', 'DIR2024', True))
+                    
+                    if hasattr(school_id, 'lastrowid'):
+                        school_id = school_id.lastrowid
+                    
+                    db_manager.execute('''
+                        UPDATE utenti SET scuola_id = %s WHERE id = %s
+                    ''', (school_id, user_id))
+                    session['school_id'] = school_id
+                    print(f"✅ Scuola predefinita creata e assegnata a utente {user_id}")
             else:
-                raise TenantGuardException(f"scuola_id non trovato per utente {user_id} e nessuna scuola predefinita disponibile")
-        else:
-            # Aggiorna la sessione per le prossime richieste
-            school_id = user['scuola_id']
-            session['school_id'] = school_id
+                # Aggiorna la sessione per le prossime richieste
+                school_id = user['scuola_id']
+                session['school_id'] = school_id
+        except Exception as e:
+            print(f"❌ Errore get_current_school_id: {e}")
+            # Ritorna None invece di sollevare eccezione per evitare crash
+            return None
     
     return school_id
 
