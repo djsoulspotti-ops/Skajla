@@ -8,6 +8,16 @@ from eventlet import Queue
 import time
 from contextlib import contextmanager
 
+class CursorProxy:
+    """Wrapper per simulare cursor.lastrowid in PostgreSQL"""
+    def __init__(self, lastrowid=None, rowcount=0):
+        self.lastrowid = lastrowid
+        self.rowcount = rowcount
+    
+    def __bool__(self):
+        """Truthy solo se rowcount > 0 (per compatibilità ON CONFLICT)"""
+        return self.rowcount > 0
+
 class DatabaseManager:
     """Gestione database scalabile con supporto PostgreSQL e SQLite"""
     
@@ -267,28 +277,50 @@ class DatabaseManager:
                 return cursor.fetchall()
     
     def execute(self, sql, params=None):
-        """Wrapper unificato per INSERT/UPDATE/DELETE"""
+        """Wrapper unificato per INSERT/UPDATE/DELETE con supporto RETURNING id intelligente"""
         adapted_sql, adapted_params = self._adapt_params(sql, params)
         
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(adapted_sql, adapted_params or ())
             
-            # Restituisce ID per INSERT, row count per UPDATE/DELETE
+            # PostgreSQL: Aggiungi RETURNING id SOLO se sicuro
+            returning_added = False
             if self.db_type == 'postgresql':
                 if adapted_sql.strip().upper().startswith('INSERT'):
-                    try:
-                        # Se la query non ha RETURNING, non cercare lastrowid
-                        if 'RETURNING' not in adapted_sql.upper():
-                            return True
-                        else:
+                    # Aggiungi RETURNING id SOLO se:
+                    # 1. Non ha già RETURNING
+                    # 2. Non ha ON CONFLICT (potrebb not inserire)
+                    if ('RETURNING' not in adapted_sql.upper() and 
+                        'ON CONFLICT' not in adapted_sql.upper()):
+                        # Rimuovi eventuale punto e virgola finale
+                        clean_sql = adapted_sql.rstrip().rstrip(';')
+                        adapted_sql = f"{clean_sql} RETURNING id"
+                        returning_added = True
+            
+            cursor.execute(adapted_sql, adapted_params or ())
+            
+            # Restituisce CursorProxy per compatibilità con lastrowid
+            if self.db_type == 'postgresql':
+                if adapted_sql.strip().upper().startswith('INSERT'):
+                    # Se abbiamo aggiunto RETURNING, fetch il risultato
+                    if returning_added or 'RETURNING' in adapted_sql.upper():
+                        try:
                             result = cursor.fetchone()
-                            return result[0] if result else None
-                    except:
-                        return True
+                            if result:
+                                inserted_id = result[0] if isinstance(result, tuple) else result
+                                return CursorProxy(lastrowid=inserted_id, rowcount=1)
+                        except Exception as e:
+                            # Tabella senza colonna id - fallback sicuro
+                            pass
+                    
+                    # Fallback: usa rowcount (per ON CONFLICT o tabelle senza id)
+                    return CursorProxy(lastrowid=0, rowcount=cursor.rowcount)
+                    
+                # UPDATE/DELETE - ritorna rowcount
                 return cursor.rowcount
             else:
-                return cursor.lastrowid if cursor.lastrowid else cursor.rowcount
+                # SQLite - ritorna cursor originale per compatibilità
+                return cursor
     
     def create_optimized_indexes(self):
         """Crea indici per performance ottimali"""
