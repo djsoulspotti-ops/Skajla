@@ -50,7 +50,7 @@ def conversations():
                 LEFT JOIN utenti u ON m.utente_id = u.id
                 WHERE c.scuola_id = %s
                 GROUP BY c.id
-                ORDER BY ultimo_messaggio_data DESC NULLS LAST
+                ORDER BY COALESCE(ultimo_messaggio_data, '1900-01-01') DESC
             ''', (school_id,))
         else:
             # SECURITY: Utenti vedono solo chat della loro scuola + membership
@@ -67,7 +67,7 @@ def conversations():
                 LEFT JOIN utenti u ON m.utente_id = u.id
                 WHERE c.scuola_id = %s AND (pc.utente_id = %s OR c.classe = %s)
                 GROUP BY c.id
-                ORDER BY ultimo_messaggio_data DESC NULLS LAST
+                ORDER BY COALESCE(ultimo_messaggio_data, '1900-01-01') DESC
             ''', (school_id, user_id, session.get('classe', '')))
 
         conversations_list = conversations
