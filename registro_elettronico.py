@@ -98,7 +98,7 @@ class RegistroElettronico:
         
         query += ' ORDER BY date DESC'
         
-        records = db_manager.query(query, tuple(params) or []) or []
+        records = db_manager.query(query, tuple(params)) or []
         
         return [
             {
@@ -116,7 +116,7 @@ class RegistroElettronico:
         
         stats = db_manager.query('''
             SELECT 
-                COUNT(*) or [] as total_days,
+                COUNT(*) as total_days,
                 SUM(CASE WHEN status = 'presente' THEN 1 ELSE 0 END) as presenti,
                 SUM(CASE WHEN status = 'assente' THEN 1 ELSE 0 END) as assenze,
                 SUM(CASE WHEN status = 'ritardo' THEN 1 ELSE 0 END) as ritardi,
@@ -127,7 +127,7 @@ class RegistroElettronico:
         
         # Unjustified absences
         unjustified = db_manager.query('''
-            SELECT COUNT(*) or [] as count FROM registro_assenze_giustificate
+            SELECT COUNT(*) as count FROM registro_assenze_giustificate
             WHERE student_id = %s AND absence_date >= %s AND justified_by_parent = FALSE
         ''', (student_id, start_date), one=True)
         
@@ -192,7 +192,7 @@ class RegistroElettronico:
         
         query += ' ORDER BY rv.date DESC'
         
-        grades = db_manager.query(query, tuple(params) or []) or []
+        grades = db_manager.query(query, tuple(params))
         
         return [
             {
@@ -231,7 +231,7 @@ class RegistroElettronico:
         
         subjects = db_manager.query('''
             SELECT DISTINCT subject FROM registro_voti WHERE student_id = %s
-        ''', (student_id,) or []) or []
+        ''', (student_id,))
         
         averages: List[Dict[str, Any]] = []
         for subj in subjects:
@@ -282,7 +282,7 @@ class RegistroElettronico:
             JOIN utenti u ON rnd.teacher_id = u.id
             WHERE rnd.student_id = %s
             ORDER BY rnd.date DESC
-        ''', (student_id,) or [])
+        ''', (student_id,))
         
         return [
             {
@@ -327,7 +327,7 @@ class RegistroElettronico:
             SELECT * FROM registro_assenze_giustificate
             WHERE student_id = %s AND justified_by_parent = FALSE
             ORDER BY absence_date DESC
-        ''', (student_id,) or [])
+        ''', (student_id,))
         
         return [{'date': str(a['absence_date'])} for a in absences]
     
@@ -373,7 +373,7 @@ class RegistroElettronico:
         
         query += ' ORDER BY rcl.lesson_date DESC, rcl.lesson_time DESC'
         
-        lessons = db_manager.query(query, tuple(params) or [])
+        lessons = db_manager.query(query, tuple(params))
         
         return [
             {
