@@ -3,9 +3,9 @@ SKAILA Registro Elettronico
 Sistema completo per gestione presenze, voti, note, calendario lezioni
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any, Union
 from datetime import datetime, date, timedelta
-from database_manager import db_manager
+from database_manager import db_manager, CursorProxy
 
 class RegistroElettronico:
     """Sistema registro elettronico"""
@@ -13,7 +13,7 @@ class RegistroElettronico:
     # ========== PRESENZE ==========
     
     def mark_attendance(self, student_id: int, date: date, status: str, 
-                       teacher_id: int, note: Optional[str] = None) -> Dict:
+                       teacher_id: int, note: Optional[str] = None) -> Dict[str, Any]:
         """Segna presenza/assenza"""
         
         valid_statuses = ['presente', 'assente', 'ritardo', 'uscita_anticipata']
@@ -21,14 +21,14 @@ class RegistroElettronico:
             return {'error': f'Status non valido. Usa: {", ".join(valid_statuses)}'}
         
         # Get student class
-        student = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (student_id,), one=True)
+        student = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (student_id,) or [], one=True)
         if not student:
             return {'error': 'Studente non trovato'}
         
         # Upsert attendance
         existing = db_manager.query('''
             SELECT id FROM registro_presenze WHERE student_id = %s AND date = %s
-        ''', (student_id, date), one=True)
+        ''', (student_id, date) or [], one=True)
         
         if existing:
             db_manager.execute('''
@@ -41,7 +41,7 @@ class RegistroElettronico:
                 INSERT INTO registro_presenze 
                 (student_id, class, date, status, note, teacher_id)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (student_id, student['classe'], date, status, note, teacher_id))
+            ''', (student_id, student.get('classe'), date, status, note, teacher_id))
         
         # If absence, create justification entry
         if status == 'assente':
@@ -82,11 +82,11 @@ class RegistroElettronico:
         }
     
     def get_student_attendance(self, student_id: int, start_date: Optional[date] = None,
-                               end_date: Optional[date] = None) -> List[Dict]:
+                               end_date: Optional[date] = None) -> List[Dict[str, Any]]:
         """Ottieni presenze studente"""
         
         query = 'SELECT * FROM registro_presenze WHERE student_id = %s'
-        params = [student_id]
+        params: List[Union[int, date]] = [student_id]
         
         if start_date:
             query += ' AND date >= %s'
@@ -98,25 +98,25 @@ class RegistroElettronico:
         
         query += ' ORDER BY date DESC'
         
-        records = db_manager.query(query, tuple(params))
+        records = db_manager.query(query, tuple(params) or []) or []
         
         return [
             {
-                'date': str(r['date']),
-                'status': r['status'],
-                'note': r['note']
+                'date': str(r.get('date', '')),
+                'status': r.get('status', ''),
+                'note': r.get('note')
             }
             for r in records
         ]
     
-    def get_attendance_statistics(self, student_id: int, months: int = 3) -> Dict:
+    def get_attendance_statistics(self, student_id: int, months: int = 3) -> Dict[str, Any]:
         """Statistiche presenze studente"""
         
         start_date = date.today() - timedelta(days=months * 30)
         
         stats = db_manager.query('''
             SELECT 
-                COUNT(*) as total_days,
+                COUNT(*) or [] as total_days,
                 SUM(CASE WHEN status = 'presente' THEN 1 ELSE 0 END) as presenti,
                 SUM(CASE WHEN status = 'assente' THEN 1 ELSE 0 END) as assenze,
                 SUM(CASE WHEN status = 'ritardo' THEN 1 ELSE 0 END) as ritardi,
@@ -127,38 +127,42 @@ class RegistroElettronico:
         
         # Unjustified absences
         unjustified = db_manager.query('''
-            SELECT COUNT(*) as count FROM registro_assenze_giustificate
+            SELECT COUNT(*) or [] as count FROM registro_assenze_giustificate
             WHERE student_id = %s AND absence_date >= %s AND justified_by_parent = FALSE
         ''', (student_id, start_date), one=True)
         
         return {
-            'total_days': stats['total_days'] if stats else 0,
-            'presenti': stats['presenti'] if stats else 0,
-            'assenze': stats['assenze'] if stats else 0,
-            'ritardi': stats['ritardi'] if stats else 0,
-            'uscite_anticipate': stats['uscite_anticipate'] if stats else 0,
-            'assenze_non_giustificate': unjustified['count'] if unjustified else 0,
-            'percentuale_presenza': round((stats['presenti'] / stats['total_days'] * 100), 1) if stats and stats['total_days'] > 0 else 0
+            'total_days': stats.get('total_days', 0) if stats else 0,
+            'presenti': stats.get('presenti', 0) if stats else 0,
+            'assenze': stats.get('assenze', 0) if stats else 0,
+            'ritardi': stats.get('ritardi', 0) if stats else 0,
+            'uscite_anticipate': stats.get('uscite_anticipate', 0) if stats else 0,
+            'assenze_non_giustificate': unjustified.get('count', 0) if unjustified else 0,
+            'percentuale_presenza': round((stats.get('presenti', 0) / stats.get('total_days', 1) * 100), 1) if stats and stats.get('total_days', 0) > 0 else 0
         }
     
     # ========== VOTI ==========
     
     def insert_grade(self, student_id: int, teacher_id: int, subject: str,
                     voto: float, tipo: str, description: str, date: date, 
-                    peso: float = 1.0) -> Dict:
+                    peso: float = 1.0) -> Dict[str, Any]:
         """Inserisci voto"""
         
         # Validate grade (Italian scale 1-10)
         if not (1 <= voto <= 10):
             return {'error': 'Voto deve essere tra 1 e 10'}
         
-        cursor = db_manager.execute('''
+        result = db_manager.execute('''
             INSERT INTO registro_voti 
             (student_id, teacher_id, subject, voto, tipo, description, date, peso)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (student_id, teacher_id, subject, voto, tipo, description, date, peso))
         
-        grade_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+        grade_id = 0
+        if isinstance(result, CursorProxy):
+            grade_id = result.lastrowid or 0
+        elif hasattr(result, 'lastrowid'):
+            grade_id = result.lastrowid or 0
         
         return {
             'success': True,
@@ -167,7 +171,7 @@ class RegistroElettronico:
         }
     
     def get_student_grades(self, student_id: int, subject: Optional[str] = None,
-                          start_date: Optional[date] = None) -> List[Dict]:
+                          start_date: Optional[date] = None) -> List[Dict[str, Any]]:
         """Ottieni voti studente"""
         
         query = '''
@@ -176,7 +180,7 @@ class RegistroElettronico:
             JOIN utenti u ON rv.teacher_id = u.id
             WHERE rv.student_id = %s
         '''
-        params = [student_id]
+        params: List[Union[int, str, date]] = [student_id]
         
         if subject:
             query += ' AND rv.subject = %s'
@@ -188,18 +192,18 @@ class RegistroElettronico:
         
         query += ' ORDER BY rv.date DESC'
         
-        grades = db_manager.query(query, tuple(params))
+        grades = db_manager.query(query, tuple(params) or []) or []
         
         return [
             {
-                'id': g['id'],
-                'subject': g['subject'],
-                'voto': float(g['voto']),
-                'tipo': g['tipo'],
-                'description': g['description'],
-                'date': str(g['date']),
-                'peso': float(g['peso']),
-                'teacher': f"{g['teacher_name']} {g['teacher_surname']}"
+                'id': g.get('id'),
+                'subject': g.get('subject'),
+                'voto': float(g.get('voto', 0)),
+                'tipo': g.get('tipo'),
+                'description': g.get('description'),
+                'date': str(g.get('date', '')),
+                'peso': float(g.get('peso', 1.0)),
+                'teacher': f"{g.get('teacher_name', '')} {g.get('teacher_surname', '')}"
             }
             for g in grades
         ]
@@ -210,7 +214,7 @@ class RegistroElettronico:
         grades = db_manager.query('''
             SELECT voto, peso FROM registro_voti
             WHERE student_id = %s AND subject = %s
-        ''', (student_id, subject))
+        ''', (student_id, subject) or [])
         
         if not grades:
             return 0.0, 0
@@ -222,30 +226,30 @@ class RegistroElettronico:
         
         return round(average, 2), len(grades)
     
-    def get_subject_averages(self, student_id: int) -> List[Dict]:
+    def get_subject_averages(self, student_id: int) -> List[Dict[str, Any]]:
         """Ottieni medie per tutte le materie"""
         
         subjects = db_manager.query('''
             SELECT DISTINCT subject FROM registro_voti WHERE student_id = %s
-        ''', (student_id,))
+        ''', (student_id,) or []) or []
         
-        averages = []
+        averages: List[Dict[str, Any]] = []
         for subj in subjects:
-            avg, count = self.calculate_average(student_id, subj['subject'])
+            avg, count = self.calculate_average(student_id, subj.get('subject', ''))
             averages.append({
-                'subject': subj['subject'],
+                'subject': subj.get('subject'),
                 'average': avg,
                 'grade_count': count,
                 'status': self._get_grade_status(avg)
             })
         
-        return sorted(averages, key=lambda x: x['average'], reverse=True)
+        return sorted(averages, key=lambda x: x.get('average', 0), reverse=True)
     
     # ========== NOTE DISCIPLINARI ==========
     
     def insert_disciplinary_note(self, student_id: int, teacher_id: int,
                                  note_type: str, description: str, 
-                                 severity: str = 'lieve', date: date = None) -> Dict:
+                                 severity: str = 'lieve', date: Optional[date] = None) -> Dict[str, Any]:
         """Inserisci nota disciplinare"""
         
         if date is None:
@@ -255,13 +259,13 @@ class RegistroElettronico:
         if severity not in valid_severities:
             severity = 'lieve'
         
-        cursor = db_manager.execute('''
+        result = db_manager.execute('''
             INSERT INTO registro_note_disciplinari
             (student_id, teacher_id, note_type, description, severity, date)
             VALUES (%s, %s, %s, %s, %s, %s)
         ''', (student_id, teacher_id, note_type, description, severity, date))
         
-        note_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+        note_id = result.lastrowid if hasattr(result, 'lastrowid') else 0
         
         return {
             'success': True,
@@ -269,7 +273,7 @@ class RegistroElettronico:
             'severity': severity
         }
     
-    def get_disciplinary_notes(self, student_id: int) -> List[Dict]:
+    def get_disciplinary_notes(self, student_id: int) -> List[Dict[str, Any]]:
         """Ottieni note disciplinari studente"""
         
         notes = db_manager.query('''
@@ -278,7 +282,7 @@ class RegistroElettronico:
             JOIN utenti u ON rnd.teacher_id = u.id
             WHERE rnd.student_id = %s
             ORDER BY rnd.date DESC
-        ''', (student_id,))
+        ''', (student_id,) or [])
         
         return [
             {
@@ -302,7 +306,7 @@ class RegistroElettronico:
         absence = db_manager.query('''
             SELECT * FROM registro_assenze_giustificate
             WHERE student_id = %s AND absence_date = %s
-        ''', (student_id, absence_date), one=True)
+        ''', (student_id, absence_date) or [], one=True)
         
         if not absence:
             return {'error': 'Assenza non trovata'}
@@ -316,14 +320,14 @@ class RegistroElettronico:
         
         return {'success': True, 'message': 'Assenza giustificata'}
     
-    def get_unjustified_absences(self, student_id: int) -> List[Dict]:
+    def get_unjustified_absences(self, student_id: int) -> List[Dict[str, Any]]:
         """Ottieni assenze non giustificate"""
         
         absences = db_manager.query('''
             SELECT * FROM registro_assenze_giustificate
             WHERE student_id = %s AND justified_by_parent = FALSE
             ORDER BY absence_date DESC
-        ''', (student_id,))
+        ''', (student_id,) or [])
         
         return [{'date': str(a['absence_date'])} for a in absences]
     
@@ -334,13 +338,13 @@ class RegistroElettronico:
                   homework: Optional[str] = None, materials_used: Optional[str] = None) -> Dict:
         """Aggiungi lezione al calendario"""
         
-        cursor = db_manager.execute('''
+        result = db_manager.execute('''
             INSERT INTO registro_calendario_lezioni
             (teacher_id, class, subject, lesson_date, lesson_time, topic, homework, materials_used)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (teacher_id, class_name, subject, lesson_date, lesson_time, topic, homework, materials_used))
         
-        lesson_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+        lesson_id = result.lastrowid if hasattr(result, 'lastrowid') else 0
         
         return {
             'success': True,
@@ -369,7 +373,7 @@ class RegistroElettronico:
         
         query += ' ORDER BY rcl.lesson_date DESC, rcl.lesson_time DESC'
         
-        lessons = db_manager.query(query, tuple(params))
+        lessons = db_manager.query(query, tuple(params) or [])
         
         return [
             {
@@ -397,7 +401,7 @@ class RegistroElettronico:
         else:
             return 'gravemente_insufficiente'
     
-    def get_student_report(self, student_id: int, months: int = 1) -> Dict:
+    def get_student_report(self, student_id: int, months: int = 1) -> Dict[str, Any]:
         """Report completo studente"""
         
         start_date = date.today() - timedelta(days=months * 30)

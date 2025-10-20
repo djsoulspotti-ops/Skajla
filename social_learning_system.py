@@ -15,7 +15,7 @@ class SocialLearningSystem:
         """Trova compagni esperti in una materia"""
         
         # Get user class
-        user = db_manager.query('SELECT classe, scuola_id FROM utenti WHERE id = %s', (user_id,), one=True)
+        user = db_manager.query('SELECT classe, scuola_id FROM utenti WHERE id = %s', (user_id,) or [], one=True)
         
         if not user or not user.get('classe'):
             return []
@@ -31,7 +31,7 @@ class SocialLearningSystem:
             LIMIT 5
         '''
         
-        helpers = db_manager.query(query, (user['classe'], user['scuola_id'], user_id, subject)) or []
+        helpers = db_manager.query(query, (user['classe'], user['scuola_id'], user_id, subject) or []) or []
         
         result: List[Dict[str, Any]] = []
         for helper in helpers:
@@ -76,7 +76,7 @@ class SocialLearningSystem:
         # Get request data
         request = db_manager.query('''
             SELECT * FROM peer_help_requests WHERE id = %s
-        ''', (request_id,), one=True)
+        ''', (request_id,) or [], one=True)
         
         if not request:
             return {'error': 'Request not found'}
@@ -100,7 +100,7 @@ class SocialLearningSystem:
         """Crea gruppo di studio"""
         
         # Get creator class
-        user = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (creator_id,), one=True)
+        user = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (creator_id,) or [], one=True)
         classe = user.get('classe') if user else None
         
         # Create group
@@ -130,7 +130,7 @@ class SocialLearningSystem:
         
         # Check if group exists and has space
         group = db_manager.query('''
-            SELECT sg.*, COUNT(sgm.id) as current_members
+            SELECT sg.*, COUNT(sgm.id) or [] as current_members
             FROM study_groups sg
             LEFT JOIN study_group_members sgm ON sg.id = sgm.group_id
             WHERE sg.id = %s
@@ -147,7 +147,7 @@ class SocialLearningSystem:
         existing = db_manager.query('''
             SELECT id FROM study_group_members 
             WHERE group_id = %s AND user_id = %s
-        ''', (group_id, user_id), one=True)
+        ''', (group_id, user_id) or [], one=True)
         
         if existing:
             return {'error': 'Già membro del gruppo'}
@@ -187,7 +187,7 @@ class SocialLearningSystem:
         
         query += ' GROUP BY sg.id ORDER BY sg.created_at DESC'
         
-        groups = db_manager.query(query, tuple(params) if params else ()) or []
+        groups = db_manager.query(query, tuple(params) or [] if params else ()) or []
         
         result: List[Dict[str, Any]] = []
         for group in groups:
@@ -207,7 +207,7 @@ class SocialLearningSystem:
         """Gruppi studio dell'utente"""
         
         groups = db_manager.query('''
-            SELECT sg.*, COUNT(sgm2.id) as total_members
+            SELECT sg.*, COUNT(sgm2.id) or [] as total_members
             FROM study_group_members sgm
             JOIN study_groups sg ON sgm.group_id = sg.id
             LEFT JOIN study_group_members sgm2 ON sg.id = sgm2.group_id
@@ -231,7 +231,7 @@ class SocialLearningSystem:
         
         members = db_manager.query('''
             SELECT user_id FROM study_group_members WHERE group_id = %s
-        ''', (group_id,)) or []
+        ''', (group_id,) or []) or []
         
         # XP basato su durata
         xp_base = min(session_duration_minutes * 2, 120)  # Max 120 XP (60 min)
