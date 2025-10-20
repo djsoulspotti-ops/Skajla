@@ -31,11 +31,25 @@ def get_current_school_id():
         ''', (user_id,), one=True)
         
         if not user or not user.get('scuola_id'):
-            raise TenantGuardException(f"scuola_id non trovato per utente {user_id}")
-        
-        # Aggiorna la sessione per le prossime richieste
-        school_id = user['scuola_id']
-        session['school_id'] = school_id
+            # FALLBACK: Assegna scuola predefinita per utenti legacy
+            default_school = db_manager.query('''
+                SELECT id FROM scuole WHERE codice_pubblico = %s LIMIT 1
+            ''', ('DEFAULT_SCHOOL',), one=True)
+            
+            if default_school:
+                school_id = default_school['id']
+                # Aggiorna utente con scuola predefinita
+                db_manager.execute('''
+                    UPDATE utenti SET scuola_id = %s WHERE id = %s
+                ''', (school_id, user_id))
+                session['school_id'] = school_id
+                print(f"✅ Utente {user_id} assegnato a scuola predefinita {school_id}")
+            else:
+                raise TenantGuardException(f"scuola_id non trovato per utente {user_id} e nessuna scuola predefinita disponibile")
+        else:
+            # Aggiorna la sessione per le prossime richieste
+            school_id = user['scuola_id']
+            session['school_id'] = school_id
     
     return school_id
 

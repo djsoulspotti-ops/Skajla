@@ -208,77 +208,98 @@ def chat_room(chat_id):
 @require_login
 def materiali():
     """Materiali didattici"""
-    user_id = session['user_id']
-    school_id = get_current_school_id()
-    ruolo = session.get('ruolo', 'studente')
-    
-    if ruolo == 'studente':
-        # Studenti vedono materiali della loro classe
-        materials = db_manager.query('''
-            SELECT * FROM materiali_didattici
-            WHERE scuola_id = %s AND classe = %s
-            ORDER BY data_upload DESC
-        ''', (school_id, session.get('classe', '')))
-    else:
-        # Professori vedono i loro materiali
-        materials = db_manager.query('''
-            SELECT * FROM materiali_didattici
-            WHERE scuola_id = %s AND professore_id = %s
-            ORDER BY data_upload DESC
-        ''', (school_id, user_id))
-    
-    return render_template('materiali.html',
-                         user=session,
-                         materials=materials or [],
-                         ruolo=ruolo)
+    try:
+        user_id = session['user_id']
+        school_id = get_current_school_id()
+        ruolo = session.get('ruolo', 'studente')
+        
+        if ruolo == 'studente':
+            # Studenti vedono materiali della loro classe
+            materials = db_manager.query('''
+                SELECT * FROM materiali_didattici
+                WHERE scuola_id = %s AND classe = %s
+                ORDER BY data_upload DESC
+            ''', (school_id, session.get('classe', '')))
+        else:
+            # Professori vedono i loro materiali
+            materials = db_manager.query('''
+                SELECT * FROM materiali_didattici
+                WHERE scuola_id = %s AND professore_id = %s
+                ORDER BY data_upload DESC
+            ''', (school_id, user_id))
+        
+        return render_template('materiali.html',
+                             user=session,
+                             materials=materials or [],
+                             ruolo=ruolo)
+    except Exception as e:
+        print(f"❌ Errore materiali: {e}")
+        return render_template('materiali.html',
+                             user=session,
+                             materials=[],
+                             ruolo=session.get('ruolo', 'studente'))
 
 @messaging_bp.route('/quiz')
 @require_login
 def quiz_hub():
     """Hub quiz e test"""
-    user_id = session['user_id']
-    school_id = get_current_school_id()
-    
-    # Quiz disponibili
-    available_quizzes = db_manager.query('''
-        SELECT * FROM quiz
-        WHERE scuola_id = %s AND attivo = true
-        ORDER BY materia, difficolta
-    ''', (school_id,))
-    
-    # Storico quiz completati
-    completed_quizzes = db_manager.query('''
-        SELECT q.*, qr.punteggio, qr.data_completamento
-        FROM quiz q
-        JOIN quiz_results qr ON q.id = qr.quiz_id
-        WHERE qr.studente_id = %s
-        ORDER BY qr.data_completamento DESC
-        LIMIT 10
-    ''', (user_id,))
-    
-    return render_template('quiz_hub.html',
-                         user=session,
-                         available_quizzes=available_quizzes or [],
-                         completed_quizzes=completed_quizzes or [])
+    try:
+        user_id = session['user_id']
+        school_id = get_current_school_id()
+        
+        # Quiz disponibili
+        available_quizzes = db_manager.query('''
+            SELECT * FROM quiz
+            WHERE scuola_id = %s AND attivo = true
+            ORDER BY materia, difficolta
+        ''', (school_id,))
+        
+        # Storico quiz completati
+        completed_quizzes = db_manager.query('''
+            SELECT q.*, qr.punteggio, qr.data_completamento
+            FROM quiz q
+            JOIN quiz_results qr ON q.id = qr.quiz_id
+            WHERE qr.studente_id = %s
+            ORDER BY qr.data_completamento DESC
+            LIMIT 10
+        ''', (user_id,))
+        
+        return render_template('quiz_hub.html',
+                             user=session,
+                             available_quizzes=available_quizzes or [],
+                             completed_quizzes=completed_quizzes or [])
+    except Exception as e:
+        print(f"❌ Errore quiz: {e}")
+        return render_template('quiz_hub.html',
+                             user=session,
+                             available_quizzes=[],
+                             completed_quizzes=[])
 
 @messaging_bp.route('/calendario')
 @require_login
 def calendario():
     """Calendario eventi"""
-    user_id = session['user_id']
-    school_id = get_current_school_id()
-    
-    # Eventi futuri
-    upcoming_events = db_manager.query('''
-        SELECT * FROM eventi
-        WHERE scuola_id = %s AND data >= CURRENT_DATE
-        ORDER BY data ASC
-        LIMIT 20
-    ''', (school_id,))
-    
-    return render_template('calendario.html',
-                         user=session,
-                         events=upcoming_events or [])
+    try:
+        user_id = session['user_id']
+        school_id = get_current_school_id()
+        
+        # Eventi futuri
+        upcoming_events = db_manager.query('''
+            SELECT * FROM eventi
+            WHERE scuola_id = %s AND data >= CURRENT_DATE
+            ORDER BY data ASC
+            LIMIT 20
+        ''', (school_id,))
+        
+        return render_template('calendario.html',
+                             user=session,
+                             events=upcoming_events or [])
+    except Exception as e:
+        print(f"❌ Errore calendario: {e}")
+        # Fallback: mostra calendario senza eventi
+        return render_template('calendario.html',
+                             user=session,
+                             events=[])
 
 # API Endpoints
 @messaging_bp.route('/api/chat/send', methods=['POST'])
