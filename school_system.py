@@ -277,7 +277,7 @@ class SchoolSystem:
             if db_manager.db_type == 'postgresql':
                 cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
             else:
-                cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = ?', ('DEFAULT_SCHOOL',))
+                cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
             
             if not cursor.fetchone():
                 # Crea scuola predefinita
@@ -298,7 +298,7 @@ class SchoolSystem:
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('UPDATE utenti SET scuola_id = %s WHERE scuola_id IS NULL', (default_school_id,))
                 else:
-                    cursor.execute('UPDATE utenti SET scuola_id = ? WHERE scuola_id IS NULL', (default_school_id,))
+                    cursor.execute('UPDATE utenti SET scuola_id = %s WHERE scuola_id IS NULL', (default_school_id,))
                 
                 conn.commit()
                 print(f"✅ Scuola predefinita creata (ID: {default_school_id})")
@@ -433,7 +433,7 @@ class SchoolSystem:
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('SELECT nome, dominio_email FROM scuole WHERE id = %s', (scuola_id,))
                 else:
-                    cursor.execute('SELECT nome, dominio_email FROM scuole WHERE id = ?', (scuola_id,))
+                    cursor.execute('SELECT nome, dominio_email FROM scuole WHERE id = %s', (scuola_id,))
                 
                 school_info = cursor.fetchone()
                 if not school_info:
@@ -803,7 +803,7 @@ class SchoolSystem:
                     cursor.execute('SELECT id FROM scuole WHERE dominio_email = %s OR nome = %s', 
                                  (dominio_email, nome))
                 else:
-                    cursor.execute('SELECT id FROM scuole WHERE dominio_email = ? OR nome = ?', 
+                    cursor.execute('SELECT id FROM scuole WHERE dominio_email = %s OR nome = %s', 
                                  (dominio_email, nome))
                 
                 if cursor.fetchone():
@@ -915,13 +915,13 @@ class SchoolSystem:
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('UPDATE scuole SET attiva = true, domain_verified = true WHERE id = %s', (school_id,))
                 else:
-                    cursor.execute('UPDATE scuole SET attiva = 1, domain_verified = 1 WHERE id = ?', (school_id,))
+                    cursor.execute('UPDATE scuole SET attiva = 1, domain_verified = 1 WHERE id = %s', (school_id,))
                 
                 # Marca verifica come consumata
                 if db_manager.db_type == 'postgresql':
                     cursor.execute('UPDATE email_verifications SET consumed_at = CURRENT_TIMESTAMP WHERE token = %s', (token,))
                 else:
-                    cursor.execute('UPDATE email_verifications SET consumed_at = CURRENT_TIMESTAMP WHERE token = ?', (token,))
+                    cursor.execute('UPDATE email_verifications SET consumed_at = CURRENT_TIMESTAMP WHERE token = %s', (token,))
                 
                 conn.commit()
                 

@@ -18,7 +18,7 @@ def add_new_subject_chats():
     
     for nome, descrizione, tipo, classe in new_chat_rooms:
         # Controlla se la chat esiste già
-        existing = cursor.execute('SELECT id FROM chat WHERE nome = ?', (nome,)).fetchone()
+        existing = cursor.execute('SELECT id FROM chat WHERE nome = %s', (nome,)).fetchone()
         
         if not existing:
             cursor.execute('''

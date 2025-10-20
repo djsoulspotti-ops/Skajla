@@ -55,7 +55,7 @@ def create_test_accounts():
     cursor = conn.cursor()
     
     # Trova scuola predefinita
-    cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = ?', ('DEFAULT_SCHOOL',))
+    cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
     default_school = cursor.fetchone()
     
     if not default_school:
@@ -71,7 +71,7 @@ def create_test_accounts():
         scuola_id = default_school[0]
     
     # Trova o crea classe 3A
-    cursor.execute('SELECT id FROM classi WHERE nome = ? AND scuola_id = ?', ('3A', scuola_id))
+    cursor.execute('SELECT id FROM classi WHERE nome = %s AND scuola_id = %s', ('3A', scuola_id))
     classe_result = cursor.fetchone()
     
     if not classe_result:

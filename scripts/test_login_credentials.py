@@ -52,7 +52,7 @@ def test_all_credentials():
                     if db_manager.db_type == 'postgresql':
                         cursor.execute('SELECT id, attivo FROM utenti WHERE email = %s', (email,))
                     else:
-                        cursor.execute('SELECT id, attivo FROM utenti WHERE email = ?', (email,))
+                        cursor.execute('SELECT id, attivo FROM utenti WHERE email = %s', (email,))
                     
                     user_exists = cursor.fetchone()
                     if user_exists:

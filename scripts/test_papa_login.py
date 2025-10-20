@@ -28,7 +28,7 @@ def test_papa_login():
     print(f"🔑 Password di test: {password}")
     
     # Trova utente
-    papa = cursor.execute('SELECT * FROM utenti WHERE email = ?', (email,)).fetchone()
+    papa = cursor.execute('SELECT * FROM utenti WHERE email = %s', (email,)).fetchone()
     
     if not papa:
         print("❌ ERRORE: Account papà non trovato!")

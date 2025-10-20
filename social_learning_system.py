@@ -25,8 +25,8 @@ class SocialLearningSystem:
             SELECT u.id, u.nome, u.cognome, ssp.total_xp, ssp.accuracy_percentage, u.status_online
             FROM utenti u
             JOIN student_subject_progress ssp ON u.id = ssp.user_id
-            WHERE u.classe = ? AND u.scuola_id = ? AND u.id != ? 
-            AND ssp.subject = ? AND ssp.accuracy_percentage >= 75
+            WHERE u.classe = %s AND u.scuola_id = %s AND u.id != %s 
+            AND ssp.subject = %s AND ssp.accuracy_percentage >= 75
             ORDER BY ssp.total_xp DESC, u.status_online DESC
             LIMIT 5
         '''
@@ -66,12 +66,12 @@ class SocialLearningSystem:
         db_manager.execute('''
             UPDATE peer_help_requests 
             SET status = 'completed', resolved_at = %s
-            WHERE id = ? AND helper_id = ?
+            WHERE id = %s AND helper_id = %s
         ''', (datetime.now(), request_id, helper_id))
         
         # Get request data
         request = db_manager.query('''
-            SELECT * FROM peer_help_requests WHERE id = ?
+            SELECT * FROM peer_help_requests WHERE id = %s
         ''', (request_id,), one=True)
         
         if not request:
@@ -124,7 +124,7 @@ class SocialLearningSystem:
             SELECT sg.*, COUNT(sgm.id) as current_members
             FROM study_groups sg
             LEFT JOIN study_group_members sgm ON sg.id = sgm.group_id
-            WHERE sg.id = ?
+            WHERE sg.id = %s
             GROUP BY sg.id
         ''', (group_id,), one=True)
         
@@ -137,7 +137,7 @@ class SocialLearningSystem:
         # Check if already member
         existing = db_manager.query('''
             SELECT id FROM study_group_members 
-            WHERE group_id = ? AND user_id = ?
+            WHERE group_id = %s AND user_id = %s
         ''', (group_id, user_id), one=True)
         
         if existing:
@@ -202,7 +202,7 @@ class SocialLearningSystem:
             FROM study_group_members sgm
             JOIN study_groups sg ON sgm.group_id = sg.id
             LEFT JOIN study_group_members sgm2 ON sg.id = sgm2.group_id
-            WHERE sgm.user_id = ?
+            WHERE sgm.user_id = %s
             GROUP BY sg.id
         ''', (user_id,))
         
@@ -221,7 +221,7 @@ class SocialLearningSystem:
         """Assegna XP a tutti i membri del gruppo per sessione studio"""
         
         members = db_manager.query('''
-            SELECT user_id FROM study_group_members WHERE group_id = ?
+            SELECT user_id FROM study_group_members WHERE group_id = %s
         ''', (group_id,))
         
         # XP basato su durata
@@ -235,8 +235,8 @@ class SocialLearningSystem:
             # Update member stats
             db_manager.execute('''
                 UPDATE study_group_members 
-                SET xp_earned = xp_earned + ?
-                WHERE group_id = ? AND user_id = ?
+                SET xp_earned = xp_earned + %s
+                WHERE group_id = %s AND user_id = %s
             ''', (xp_base, group_id, member['user_id']))
 
 

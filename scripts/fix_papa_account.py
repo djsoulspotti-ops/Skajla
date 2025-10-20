@@ -17,7 +17,7 @@ def fix_papa_account():
     print("🔍 Verifica account papà...")
     
     # Controlla se l'account esiste
-    papa = cursor.execute('SELECT * FROM utenti WHERE email = ?', ('papa@skaila.it',)).fetchone()
+    papa = cursor.execute('SELECT * FROM utenti WHERE email = %s', ('papa@skaila.it',)).fetchone()
     
     if not papa:
         print("❌ Account papà non trovato! Creazione in corso...")
@@ -41,17 +41,17 @@ def fix_papa_account():
         # Verifica se l'account è attivo
         if not papa['attivo']:
             print("⚠️ Account disattivato! Riattivazione...")
-            cursor.execute('UPDATE utenti SET attivo = 1 WHERE id = ?', (papa['id'],))
+            cursor.execute('UPDATE utenti SET attivo = 1 WHERE id = %s', (papa['id'],))
             print("✅ Account riattivato!")
         
         # Reset password per sicurezza
         print("🔄 Reset password a 'papa123'...")
         new_password = hash_password('papa123')
-        cursor.execute('UPDATE utenti SET password_hash = ? WHERE id = ?', (new_password, papa['id']))
+        cursor.execute('UPDATE utenti SET password_hash = %s WHERE id = %s', (new_password, papa['id']))
         print("✅ Password resettata!")
     
     # Verifica credenziali finali
-    papa_verificato = cursor.execute('SELECT * FROM utenti WHERE email = ?', ('papa@skaila.it',)).fetchone()
+    papa_verificato = cursor.execute('SELECT * FROM utenti WHERE email = %s', ('papa@skaila.it',)).fetchone()
     
     if papa_verificato and papa_verificato['attivo']:
         print("\n🎉 ACCOUNT PAPÀ PRONTO!")

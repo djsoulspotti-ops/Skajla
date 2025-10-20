@@ -27,14 +27,14 @@ class RegistroElettronico:
         
         # Upsert attendance
         existing = db_manager.query('''
-            SELECT id FROM registro_presenze WHERE student_id = ? AND date = ?
+            SELECT id FROM registro_presenze WHERE student_id = %s AND date = %s
         ''', (student_id, date), one=True)
         
         if existing:
             db_manager.execute('''
                 UPDATE registro_presenze 
-                SET status = ?, note = ?, teacher_id = ?
-                WHERE student_id = ? AND date = ?
+                SET status = %s, note = %s, teacher_id = %s
+                WHERE student_id = %s AND date = %s
             ''', (status, note, teacher_id, student_id, date))
         else:
             db_manager.execute('''
@@ -122,13 +122,13 @@ class RegistroElettronico:
                 SUM(CASE WHEN status = 'ritardo' THEN 1 ELSE 0 END) as ritardi,
                 SUM(CASE WHEN status = 'uscita_anticipata' THEN 1 ELSE 0 END) as uscite_anticipate
             FROM registro_presenze
-            WHERE student_id = ? AND date >= ?
+            WHERE student_id = %s AND date >= %s
         ''', (student_id, start_date), one=True)
         
         # Unjustified absences
         unjustified = db_manager.query('''
             SELECT COUNT(*) as count FROM registro_assenze_giustificate
-            WHERE student_id = ? AND absence_date >= ? AND justified_by_parent = FALSE
+            WHERE student_id = %s AND absence_date >= %s AND justified_by_parent = FALSE
         ''', (student_id, start_date), one=True)
         
         return {
@@ -174,7 +174,7 @@ class RegistroElettronico:
             SELECT rv.*, u.nome as teacher_name, u.cognome as teacher_surname
             FROM registro_voti rv
             JOIN utenti u ON rv.teacher_id = u.id
-            WHERE rv.student_id = ?
+            WHERE rv.student_id = %s
         '''
         params = [student_id]
         
@@ -209,7 +209,7 @@ class RegistroElettronico:
         
         grades = db_manager.query('''
             SELECT voto, peso FROM registro_voti
-            WHERE student_id = ? AND subject = ?
+            WHERE student_id = %s AND subject = %s
         ''', (student_id, subject))
         
         if not grades:
@@ -226,7 +226,7 @@ class RegistroElettronico:
         """Ottieni medie per tutte le materie"""
         
         subjects = db_manager.query('''
-            SELECT DISTINCT subject FROM registro_voti WHERE student_id = ?
+            SELECT DISTINCT subject FROM registro_voti WHERE student_id = %s
         ''', (student_id,))
         
         averages = []
@@ -276,7 +276,7 @@ class RegistroElettronico:
             SELECT rnd.*, u.nome as teacher_name, u.cognome as teacher_surname
             FROM registro_note_disciplinari rnd
             JOIN utenti u ON rnd.teacher_id = u.id
-            WHERE rnd.student_id = ?
+            WHERE rnd.student_id = %s
             ORDER BY rnd.date DESC
         ''', (student_id,))
         
@@ -301,7 +301,7 @@ class RegistroElettronico:
         # Check if absence exists
         absence = db_manager.query('''
             SELECT * FROM registro_assenze_giustificate
-            WHERE student_id = ? AND absence_date = ?
+            WHERE student_id = %s AND absence_date = %s
         ''', (student_id, absence_date), one=True)
         
         if not absence:
@@ -309,9 +309,9 @@ class RegistroElettronico:
         
         db_manager.execute('''
             UPDATE registro_assenze_giustificate
-            SET justification_date = ?, justification_note = ?, 
-                justified_by_parent = TRUE, parent_id = ?
-            WHERE student_id = ? AND absence_date = ?
+            SET justification_date = %s, justification_note = %s, 
+                justified_by_parent = TRUE, parent_id = %s
+            WHERE student_id = %s AND absence_date = %s
         ''', (datetime.now().date(), justification_note, parent_id, student_id, absence_date))
         
         return {'success': True, 'message': 'Assenza giustificata'}
@@ -321,7 +321,7 @@ class RegistroElettronico:
         
         absences = db_manager.query('''
             SELECT * FROM registro_assenze_giustificate
-            WHERE student_id = ? AND justified_by_parent = FALSE
+            WHERE student_id = %s AND justified_by_parent = FALSE
             ORDER BY absence_date DESC
         ''', (student_id,))
         
@@ -355,7 +355,7 @@ class RegistroElettronico:
             SELECT rcl.*, u.nome as teacher_name, u.cognome as teacher_surname
             FROM registro_calendario_lezioni rcl
             JOIN utenti u ON rcl.teacher_id = u.id
-            WHERE rcl.class = ?
+            WHERE rcl.class = %s
         '''
         params = [class_name]
         
