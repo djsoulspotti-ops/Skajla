@@ -3,15 +3,15 @@ SKAILA Social Learning System
 Peer help, study groups, collaborative learning
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 from datetime import datetime
-from database_manager import db_manager
+from database_manager import db_manager, CursorProxy
 from gamification import gamification_system
 
 class SocialLearningSystem:
     """Sistema apprendimento collaborativo"""
     
-    def find_peer_help(self, user_id: int, subject: str, topic: Optional[str] = None) -> List[Dict]:
+    def find_peer_help(self, user_id: int, subject: str, topic: Optional[str] = None) -> List[Dict[str, Any]]:
         """Trova compagni esperti in una materia"""
         
         # Get user class
@@ -31,9 +31,9 @@ class SocialLearningSystem:
             LIMIT 5
         '''
         
-        helpers = db_manager.query(query, (user['classe'], user['scuola_id'], user_id, subject))
+        helpers = db_manager.query(query, (user['classe'], user['scuola_id'], user_id, subject)) or []
         
-        result = []
+        result: List[Dict[str, Any]] = []
         for helper in helpers:
             result.append({
                 'user_id': helper['id'],
@@ -49,7 +49,7 @@ class SocialLearningSystem:
     def request_peer_help(self, requester_id: int, helper_id: int, subject: str, topic: str, question: str) -> int:
         """Crea richiesta aiuto peer"""
         
-        cursor = db_manager.execute('''
+        result = db_manager.execute('''
             INSERT INTO peer_help_requests 
             (requester_id, helper_id, subject, topic, question, status)
             VALUES (%s, %s, %s, %s, %s, 'pending')
@@ -57,9 +57,13 @@ class SocialLearningSystem:
         
         # Notifica helper (TODO: implementare sistema notifiche)
         
-        return cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+        if isinstance(result, CursorProxy):
+            return result.lastrowid or 0
+        elif hasattr(result, 'lastrowid'):
+            return result.lastrowid or 0
+        return 0
     
-    def complete_peer_help(self, request_id: int, helper_id: int) -> Dict:
+    def complete_peer_help(self, request_id: int, helper_id: int) -> Dict[str, Any]:
         """Completa sessione peer help"""
         
         # Update request
@@ -80,10 +84,10 @@ class SocialLearningSystem:
         # Award XP to both
         # Helper gets more XP
         gamification_system.award_xp(helper_id, 'help_classmate', 1.0, 
-            f"Aiuto peer {request['subject']}")
+            f"Aiuto peer {request.get('subject', 'Unknown')}")
         
         # Requester gets participation XP
-        gamification_system.award_xp(request['requester_id'], 'join_study_group', 1.0,
+        gamification_system.award_xp(request.get('requester_id', 0), 'join_study_group', 1.0,
             "Aiuto ricevuto da compagno")
         
         return {
@@ -97,18 +101,23 @@ class SocialLearningSystem:
         
         # Get creator class
         user = db_manager.query('SELECT classe FROM utenti WHERE id = %s', (creator_id,), one=True)
-        classe = user['classe'] if user else None
+        classe = user.get('classe') if user else None
         
         # Create group
-        cursor = db_manager.execute('''
+        result = db_manager.execute('''
             INSERT INTO study_groups (name, subject, class, creator_id, max_members)
             VALUES (%s, %s, %s, %s, %s)
         ''', (name, subject, classe, creator_id, max_members))
         
-        group_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+        group_id = 0
+        if isinstance(result, CursorProxy):
+            group_id = result.lastrowid or 0
+        elif hasattr(result, 'lastrowid'):
+            group_id = result.lastrowid or 0
         
         # Auto-join creator
-        self.join_study_group(group_id, creator_id)
+        if group_id > 0:
+            self.join_study_group(group_id, creator_id)
         
         # Award XP for creating
         gamification_system.award_xp(creator_id, 'create_study_group', 1.0,
@@ -116,7 +125,7 @@ class SocialLearningSystem:
         
         return group_id
     
-    def join_study_group(self, group_id: int, user_id: int) -> Dict:
+    def join_study_group(self, group_id: int, user_id: int) -> Dict[str, Any]:
         """Unisciti a gruppo studio"""
         
         # Check if group exists and has space
@@ -131,7 +140,7 @@ class SocialLearningSystem:
         if not group:
             return {'error': 'Gruppo non trovato'}
         
-        if group['current_members'] >= group['max_members']:
+        if group.get('current_members', 0) >= group.get('max_members', 0):
             return {'error': 'Gruppo pieno'}
         
         # Check if already member
@@ -151,11 +160,11 @@ class SocialLearningSystem:
         
         # Award XP
         gamification_system.award_xp(user_id, 'join_study_group', 1.0,
-            f"Unito a '{group['name']}'")
+            f"Unito a '{group.get('name', 'gruppo')}'")
         
-        return {'success': True, 'group_name': group['name']}
+        return {'success': True, 'group_name': group.get('name', 'gruppo')}
     
-    def get_study_groups(self, user_class: Optional[str] = None, subject: Optional[str] = None) -> List[Dict]:
+    def get_study_groups(self, user_class: Optional[str] = None, subject: Optional[str] = None) -> List[Dict[str, Any]]:
         """Lista gruppi di studio disponibili"""
         
         query = '''
@@ -166,7 +175,7 @@ class SocialLearningSystem:
             LEFT JOIN utenti u ON sg.creator_id = u.id
             WHERE 1=1
         '''
-        params = []
+        params: List[str] = []
         
         if user_class:
             query += ' AND sg.class = %s'
@@ -178,23 +187,23 @@ class SocialLearningSystem:
         
         query += ' GROUP BY sg.id ORDER BY sg.created_at DESC'
         
-        groups = db_manager.query(query, tuple(params) if params else ())
+        groups = db_manager.query(query, tuple(params) if params else ()) or []
         
-        result = []
+        result: List[Dict[str, Any]] = []
         for group in groups:
             result.append({
-                'id': group['id'],
-                'name': group['name'],
-                'subject': group['subject'],
-                'creator': f"{group['creator_name']} {group['creator_surname']}",
-                'current_members': group['current_members'],
-                'max_members': group['max_members'],
-                'has_space': group['current_members'] < group['max_members']
+                'id': group.get('id'),
+                'name': group.get('name'),
+                'subject': group.get('subject'),
+                'creator': f"{group.get('creator_name', '')} {group.get('creator_surname', '')}",
+                'current_members': group.get('current_members', 0),
+                'max_members': group.get('max_members', 0),
+                'has_space': group.get('current_members', 0) < group.get('max_members', 0)
             })
         
         return result
     
-    def get_user_study_groups(self, user_id: int) -> List[Dict]:
+    def get_user_study_groups(self, user_id: int) -> List[Dict[str, Any]]:
         """Gruppi studio dell'utente"""
         
         groups = db_manager.query('''
@@ -204,31 +213,31 @@ class SocialLearningSystem:
             LEFT JOIN study_group_members sgm2 ON sg.id = sgm2.group_id
             WHERE sgm.user_id = %s
             GROUP BY sg.id
-        ''', (user_id,))
+        ''', (user_id,)) or []
         
-        result = []
+        result: List[Dict[str, Any]] = []
         for group in groups:
             result.append({
-                'id': group['id'],
-                'name': group['name'],
-                'subject': group['subject'],
-                'members_count': group['total_members']
+                'id': group.get('id'),
+                'name': group.get('name'),
+                'subject': group.get('subject'),
+                'members_count': group.get('total_members', 0)
             })
         
         return result
     
-    def award_group_study_xp(self, group_id: int, session_duration_minutes: int):
+    def award_group_study_xp(self, group_id: int, session_duration_minutes: int) -> None:
         """Assegna XP a tutti i membri del gruppo per sessione studio"""
         
         members = db_manager.query('''
             SELECT user_id FROM study_group_members WHERE group_id = %s
-        ''', (group_id,))
+        ''', (group_id,)) or []
         
         # XP basato su durata
         xp_base = min(session_duration_minutes * 2, 120)  # Max 120 XP (60 min)
         
         for member in members:
-            gamification_system.award_xp(member['user_id'], 'study_session_15min', 
+            gamification_system.award_xp(member.get('user_id', 0), 'study_session_15min', 
                 session_duration_minutes / 15,  # Multiplier
                 f"Sessione studio gruppo ({session_duration_minutes} min)")
             
@@ -237,7 +246,7 @@ class SocialLearningSystem:
                 UPDATE study_group_members 
                 SET xp_earned = xp_earned + %s
                 WHERE group_id = %s AND user_id = %s
-            ''', (xp_base, group_id, member['user_id']))
+            ''', (xp_base, group_id, member.get('user_id', 0)))
 
 
 # Initialize system

@@ -7,14 +7,15 @@ import eventlet
 from eventlet import Queue
 import time
 from contextlib import contextmanager
+from typing import Optional, Union, Any, List, Dict, Tuple
 
 class CursorProxy:
     """Wrapper per simulare cursor.lastrowid in PostgreSQL"""
-    def __init__(self, lastrowid=None, rowcount=0):
-        self.lastrowid = lastrowid
-        self.rowcount = rowcount
+    def __init__(self, lastrowid: Optional[int] = None, rowcount: int = 0):
+        self.lastrowid: Optional[int] = lastrowid
+        self.rowcount: int = rowcount
     
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """Truthy solo se rowcount > 0 (per compatibilità ON CONFLICT)"""
         return self.rowcount > 0
 
@@ -22,9 +23,9 @@ class DatabaseManager:
     """Gestione database scalabile con supporto PostgreSQL e SQLite"""
     
     def __init__(self):
-        self.db_type = 'postgresql' if os.getenv('DATABASE_URL') else 'sqlite'
-        self.pool = None
-        self.sqlite_pool = None
+        self.db_type: str = 'postgresql' if os.getenv('DATABASE_URL') else 'sqlite'
+        self.pool: Optional[psycopg2.pool.ThreadedConnectionPool] = None
+        self.sqlite_pool: Optional[Any] = None
         
         try:
             if self.db_type == 'postgresql':
@@ -252,7 +253,7 @@ class DatabaseManager:
             # SQLite usa ? - nessuna modifica necessaria
             return query, params
     
-    def query(self, sql, params=None, one=False, many=True):
+    def query(self, sql: str, params: Optional[Tuple] = None, one: bool = False, many: bool = True) -> Union[Optional[Dict[str, Any]], List[Dict[str, Any]], List[Any]]:
         """Wrapper unificato per SELECT con risultati dict-like"""
         adapted_sql, adapted_params = self._adapt_params(sql, params)
         
@@ -276,7 +277,7 @@ class DatabaseManager:
             else:
                 return cursor.fetchall()
     
-    def execute(self, sql, params=None):
+    def execute(self, sql: str, params: Optional[Tuple] = None) -> Union[CursorProxy, int, Any]:
         """Wrapper unificato per INSERT/UPDATE/DELETE con supporto RETURNING id intelligente"""
         adapted_sql, adapted_params = self._adapt_params(sql, params)
         
