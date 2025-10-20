@@ -239,6 +239,92 @@ class SKAILAGamification:
             print(f"⚠️ Errore get_user_stats: {e}")
             return {'user_id': user_id, 'total_xp': 0, 'current_level': 1}
 
+    def get_or_create_profile(self, user_id: int) -> Dict[str, Any]:
+        """Ottieni o crea profilo gamification utente"""
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Prova a ottenere profilo esistente
+                cursor.execute('SELECT * FROM user_gamification WHERE user_id = %s', (user_id,))
+                result = cursor.fetchone()
+                
+                if result:
+                    return dict(zip([desc[0] for desc in cursor.description], result))
+                
+                # Crea nuovo profilo
+                cursor.execute('''
+                    INSERT INTO user_gamification (user_id, total_xp, current_level, current_streak)
+                    VALUES (%s, 0, 1, 0)
+                    RETURNING *
+                ''', (user_id,))
+                
+                result = cursor.fetchone()
+                conn.commit()
+                
+                return dict(zip([desc[0] for desc in cursor.description], result))
+        except Exception as e:
+            print(f"⚠️ Errore get_or_create_profile: {e}")
+            return {
+                'user_id': user_id,
+                'total_xp': 0,
+                'current_level': 1,
+                'current_streak': 0,
+                'longest_streak': 0,
+                'achievements_unlocked': 0,
+                'badges_earned': 0,
+                'quizzes_completed': 0
+            }
+
+    def get_user_dashboard(self, user_id: int) -> Dict[str, Any]:
+        """Ottieni dati dashboard completi per utente"""
+        try:
+            profile = self.get_or_create_profile(user_id)
+            
+            # Calcola progresso al prossimo livello
+            current_level = profile.get('current_level', 1)
+            total_xp = profile.get('total_xp', 0)
+            
+            next_level_xp = self.level_thresholds.get(current_level + 1, total_xp + 1000)
+            current_level_xp = self.level_thresholds.get(current_level, 0)
+            xp_progress = total_xp - current_level_xp
+            xp_needed = next_level_xp - current_level_xp
+            progress_percent = int((xp_progress / xp_needed) * 100) if xp_needed > 0 else 0
+            
+            return {
+                'profile': profile,
+                'level_info': {
+                    'current_level': current_level,
+                    'level_title': self.level_titles.get(current_level, 'Studente'),
+                    'total_xp': total_xp,
+                    'xp_to_next_level': xp_needed - xp_progress,
+                    'progress_percent': progress_percent
+                },
+                'achievements': [],
+                'badges': [],
+                'recent_activity': []
+            }
+        except Exception as e:
+            print(f"⚠️ Errore get_user_dashboard: {e}")
+            return {
+                'profile': {
+                    'user_id': user_id,
+                    'total_xp': 0,
+                    'current_level': 1,
+                    'current_streak': 0
+                },
+                'level_info': {
+                    'current_level': 1,
+                    'level_title': 'Studente',
+                    'total_xp': 0,
+                    'xp_to_next_level': 100,
+                    'progress_percent': 0
+                },
+                'achievements': [],
+                'badges': [],
+                'recent_activity': []
+            }
+
 gamification_system = SKAILAGamification()
 
 def init_gamification():
