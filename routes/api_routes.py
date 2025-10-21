@@ -238,39 +238,6 @@ def award_xp():
     
     return jsonify(result)
 
-@api_bp.route('/ai/chat', methods=['POST'])
-def ai_chat():
-    """Endpoint per chat AI"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Non autenticato'}), 401
-    
-    data = request.get_json()
-    message = data.get('message', '')
-    
-    ai_bot = AISkailaBot()
-    response = ai_bot.generate_response(
-        message, 
-        session['nome'], 
-        session['ruolo'], 
-        session['user_id']
-    )
-    
-    # Salva conversazione
-    with db_manager.get_connection() as conn:
-        conn.execute('''
-            INSERT INTO ai_conversations (utente_id, message, response)
-            VALUES (%s, %s, %s)
-        ''', (session['user_id'], message, response))
-        conn.commit()
-    
-    # Award XP per interazione AI
-    gamification_system.award_xp(session['user_id'], 'ai_question')
-    
-    return jsonify({
-        'response': response,
-        'timestamp': '2024-01-01T12:00:00'  # Da implementare con timestamp reale
-    })
-
 @api_bp.route('/leaderboard/<period>')
 def get_leaderboard(period):
     """Ottieni classifica per periodo"""
