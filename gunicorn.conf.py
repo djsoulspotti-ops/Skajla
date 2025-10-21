@@ -9,11 +9,16 @@ import multiprocessing
 # Server socket
 bind = "0.0.0.0:5000"
 
-# TEMPORARY FIX: Switch to sync worker to resolve eventlet mainloop blocking
-# Will revert to eventlet after resolving compatibility issues
-workers = 1  # Single worker for now 
-worker_class = "sync"  # Changed from eventlet to sync temporarily
-# worker_connections = 1000  # Not needed for sync worker
+# Production-ready configuration per 100+ utenti simultanei
+import multiprocessing
+
+# Calcola workers ottimali: (2 * CPU cores) + 1
+cpu_count = multiprocessing.cpu_count()
+workers = min((cpu_count * 2) + 1, 4)  # Max 4 workers per Replit
+
+# Eventlet worker per async I/O (migliore per SocketIO)
+worker_class = "eventlet"
+worker_connections = 1000  # Connessioni per worker
 
 # Application - module specified in command line
 # module = "wsgi:socketio_app"  # Specificato nel comando
@@ -32,10 +37,10 @@ preload_app = True
 max_requests = 1000
 max_requests_jitter = 50
 
-# Timeouts
-timeout = 120  # Increased per SocketIO long polling
-keepalive = 5
-graceful_timeout = 30
+# Timeouts ottimizzati per carico elevato
+timeout = 180  # 3 minuti per operazioni lunghe
+keepalive = 10  # Keepalive più lungo
+graceful_timeout = 60  # Più tempo per shutdown graceful
 
 # Security
 limit_request_line = 4094

@@ -68,8 +68,8 @@ class DatabaseManager:
         
         try:
             self.pool = psycopg2.pool.ThreadedConnectionPool(
-                minconn=5,
-                maxconn=20,
+                minconn=10,  # Minimo 10 connessioni ready
+                maxconn=50,  # Max 50 connessioni per gestire più utenti
                 dsn=connection_url,
                 # CRITICO: Parametri SNI richiesti da Neon per produzione
                 sslmode='require',
