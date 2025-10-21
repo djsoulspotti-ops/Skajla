@@ -16,8 +16,8 @@ import multiprocessing
 cpu_count = multiprocessing.cpu_count()
 workers = min((cpu_count * 2) + 1, 4)  # Max 4 workers per Replit
 
-# Gevent worker per async I/O (più stabile di eventlet su Replit)
-worker_class = "gevent"
+# Eventlet worker per async I/O + SocketIO support
+worker_class = "eventlet"
 worker_connections = 1000  # Connessioni per worker
 
 # Application - module specified in command line

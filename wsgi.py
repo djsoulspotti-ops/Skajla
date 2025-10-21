@@ -4,9 +4,9 @@ WSGI entry point per production deployment con Gunicorn + eventlet
 SKAILA Platform - Production WSGI Application
 """
 
-# Gevent monkey patch per async I/O (più stabile di eventlet)
-from gevent import monkey
-monkey.patch_all()
+# Eventlet monkey patch per async I/O + SocketIO support
+import eventlet
+eventlet.monkey_patch()
 
 import os
 import sys

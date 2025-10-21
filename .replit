@@ -18,12 +18,12 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 37545
-externalPort = 3000
-
-[[ports]]
 localPort = 38573
 externalPort = 5173
+
+[[ports]]
+localPort = 43031
+externalPort = 6000
 
 [[ports]]
 localPort = 43627
@@ -136,7 +136,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "gunicorn --config gunicorn.conf.py wsgi:socketio_app"
+args = "python main.py"
 waitForPort = 5000
 
 [agent]
