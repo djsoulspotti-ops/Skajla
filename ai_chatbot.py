@@ -2,11 +2,11 @@
 import random
 import json
 from datetime import datetime, timedelta
-import sqlite3
 import re
 import openai
 import os
 from typing import Dict, List, Any, Tuple
+from database_manager import db_manager
 
 class AISkailaBot:
     def __init__(self):
@@ -143,19 +143,17 @@ class AISkailaBot:
         
         # Aggiungi cronologia recente (ultimi 5 messaggi)
         try:
-            conn = sqlite3.connect('skaila.db')
-            recent_conversations = conn.execute('''
+            recent_conversations = db_manager.query('''
                 SELECT message, response FROM ai_conversations 
-                WHERE utente_id = ? 
+                WHERE utente_id = %s 
                 ORDER BY timestamp DESC 
                 LIMIT 5
-            ''', (user_id,)).fetchall()
-            conn.close()
+            ''', (user_id,))
             
             # Aggiungi in ordine cronologico
             for conv in reversed(recent_conversations):
-                messages.append({"role": "user", "content": conv[0]})
-                messages.append({"role": "assistant", "content": conv[1]})
+                messages.append({"role": "user", "content": conv.get('message')})
+                messages.append({"role": "assistant", "content": conv.get('response')})
                 
         except Exception as e:
             print(f"Errore caricamento cronologia: {e}")
@@ -325,12 +323,9 @@ Su quale linguaggio o concetto vuoi lavorare? 🔧"""
     def load_user_profile(self, user_id: int) -> Dict[str, Any]:
         """Carica il profilo AI personalizzato dell'utente"""
         try:
-            conn = sqlite3.connect('skaila.db')
-            cursor = conn.cursor()
-
-            profile = cursor.execute('''
-                SELECT * FROM ai_profiles WHERE utente_id = ?
-            ''', (user_id,)).fetchone()
+            profile = db_manager.query('''
+                SELECT * FROM ai_profiles WHERE utente_id = %s
+            ''', (user_id,), one=True)
 
             if not profile:
                 # Crea profilo di default
@@ -347,32 +342,33 @@ Su quale linguaggio o concetto vuoi lavorare? 🔧"""
                     'success_rate': 0.0
                 }
 
-                cursor.execute('''
-                    INSERT INTO ai_profiles 
-                    (utente_id, bot_name, bot_avatar, conversation_style, learning_preferences, 
-                     difficulty_preference, personality_traits)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                ''', (user_id, default_profile['bot_name'], default_profile['bot_avatar'],
-                      default_profile['conversation_style'], default_profile['learning_preferences'],
-                      default_profile['difficulty_preference'], 'empathetic,supportive'))
-                conn.commit()
-                conn.close()
+                # Crea profilo nel database
+                try:
+                    db_manager.execute('''
+                        INSERT INTO ai_profiles 
+                        (utente_id, bot_name, bot_avatar, conversation_style, learning_preferences, 
+                         difficulty_preference, personality_traits)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ''', (user_id, default_profile['bot_name'], default_profile['bot_avatar'],
+                          default_profile['conversation_style'], default_profile['learning_preferences'],
+                          default_profile['difficulty_preference'], 'empathetic,supportive'))
+                except Exception:
+                    pass  # Tabella potrebbe non esistere, usa profilo default
+                
                 return default_profile
 
-            conn.close()
-
-            # Converti Row in dict
+            # Converti database row in dict
             profile_dict = {
-                'bot_name': profile[1] if len(profile) > 1 else 'SKAILA Assistant',
-                'bot_avatar': profile[2] if len(profile) > 2 else '🤖',
-                'conversation_style': profile[3] if len(profile) > 3 else 'friendly',
-                'learning_preferences': profile[4] if len(profile) > 4 else 'adaptive',
-                'difficulty_preference': profile[5] if len(profile) > 5 else 'adaptive',
-                'subject_strengths': (profile[6] or '').split(',') if len(profile) > 6 and profile[6] else [],
-                'subject_weaknesses': (profile[7] or '').split(',') if len(profile) > 7 and profile[7] else [],
-                'personality_traits': (profile[8] or 'empathetic,supportive').split(',') if len(profile) > 8 else ['empathetic', 'supportive'],
-                'total_interactions': profile[11] if len(profile) > 11 else 0,
-                'success_rate': profile[12] if len(profile) > 12 else 0.0
+                'bot_name': profile.get('bot_name', 'SKAILA Assistant'),
+                'bot_avatar': profile.get('bot_avatar', '🤖'),
+                'conversation_style': profile.get('conversation_style', 'friendly'),
+                'learning_preferences': profile.get('learning_preferences', 'adaptive'),
+                'difficulty_preference': profile.get('difficulty_preference', 'adaptive'),
+                'subject_strengths': (profile.get('subject_strengths') or '').split(',') if profile.get('subject_strengths') else [],
+                'subject_weaknesses': (profile.get('subject_weaknesses') or '').split(',') if profile.get('subject_weaknesses') else [],
+                'personality_traits': (profile.get('personality_traits') or 'empathetic,supportive').split(','),
+                'total_interactions': profile.get('total_interactions', 0),
+                'success_rate': profile.get('success_rate', 0.0)
             }
 
             return profile_dict
@@ -534,22 +530,20 @@ Cosa vuoi imparare oggi? 🚀"""
     def get_learning_analytics(self, user_id: int) -> Dict[str, Any]:
         """Ottieni analytics di apprendimento per l'utente"""
         try:
-            conn = sqlite3.connect('skaila.db')
-            cursor = conn.cursor()
-
             # Conversazioni per materia
-            subject_stats = cursor.execute('''
+            subject_stats = db_manager.query('''
                 SELECT subject_detected, COUNT(*) as count
                 FROM ai_conversations 
-                WHERE utente_id = ? AND subject_detected IS NOT NULL
+                WHERE utente_id = %s AND subject_detected IS NOT NULL
                 GROUP BY subject_detected
-            ''', (user_id,)).fetchall()
+            ''', (user_id,))
 
             # Statistiche temporali
-            weekly_activity = cursor.execute('''
-                SELECT COUNT(*) FROM ai_conversations 
-                WHERE utente_id = ? AND timestamp > datetime('now', '-7 days')
-            ''', (user_id,)).fetchone()[0]
+            weekly_activity_result = db_manager.query('''
+                SELECT COUNT(*) as count FROM ai_conversations 
+                WHERE utente_id = %s AND timestamp > NOW() - INTERVAL '7 days'
+            ''', (user_id,), one=True)
+            weekly_activity = weekly_activity_result.get('count', 0) if weekly_activity_result else 0
 
             conn.close()
 
