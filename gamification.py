@@ -276,6 +276,10 @@ class SKAILAGamification:
                 'quizzes_completed': 0
             }
 
+    def get_user_profile(self, user_id: int) -> Dict[str, Any]:
+        """Alias per get_user_dashboard - retrocompatibilità"""
+        return self.get_user_dashboard(user_id)
+    
     def get_user_dashboard(self, user_id: int) -> Dict[str, Any]:
         """Ottieni dati dashboard completi per utente"""
         try:
