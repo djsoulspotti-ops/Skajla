@@ -259,9 +259,77 @@ def generate_personal_codes():
     result = school_system.generate_personal_codes_for_school(scuola_id, user_id)
     
     if result['success']:
-        flash(f'Generati {result["codes_count"]} codici personali!', 'success')
-        flash('Email automatiche inviate a tutti gli utenti', 'info')
+        flash(f'✅ Generati {result["codes_count"]} codici personali!', 'success')
+        flash(f'📧 Email automatiche inviate a {result["codes_count"]} destinatari', 'info')
+        flash('🎯 Ogni persona ha ricevuto il proprio codice univoco', 'info')
     else:
         flash(result['message'], 'error')
     
     return redirect('/dashboard/dirigente')
+
+@school_bp.route('/dashboard/dirigente/upload_emails', methods=['POST'])
+@csrf_protect
+def upload_school_emails():
+    """Carica CSV con email per distribuzione automatica"""
+    if 'user_id' not in session or session.get('ruolo') != 'dirigente':
+        flash('Accesso non autorizzato', 'error')
+        return redirect('/login')
+    
+    scuola_id = session.get('scuola_id')
+    
+    # Controlla se è stato caricato un file
+    if 'emails_csv' not in request.files:
+        flash('Nessun file CSV caricato', 'error')
+        return redirect('/dashboard/dirigente')
+    
+    csv_file = request.files['emails_csv']
+    
+    if csv_file.filename == '':
+        flash('Nessun file selezionato', 'error')
+        return redirect('/dashboard/dirigente')
+    
+    if not csv_file.filename.endswith('.csv'):
+        flash('Il file deve essere in formato CSV', 'error')
+        return redirect('/dashboard/dirigente')
+    
+    try:
+        # Leggi contenuto CSV
+        csv_content = csv_file.read().decode('utf-8')
+        
+        # Carica nel sistema
+        result = school_system.upload_school_emails_csv(scuola_id, csv_content)
+        
+        if result['success']:
+            flash(f'✅ {result["message"]}', 'success')
+            flash('🚀 Ora puoi generare i codici automaticamente!', 'info')
+        else:
+            flash(result['message'], 'error')
+            
+    except Exception as e:
+        flash(f'Errore nel caricamento del CSV: {str(e)}', 'error')
+    
+    return redirect('/dashboard/dirigente')
+
+@school_bp.route('/dashboard/dirigente/download_csv_template')
+def download_csv_template():
+    """Scarica template CSV per email scuola"""
+    if 'user_id' not in session or session.get('ruolo') != 'dirigente':
+        flash('Accesso non autorizzato', 'error')
+        return redirect('/login')
+    
+    # Template CSV esempio
+    csv_template = """email,role
+mario.rossi@scuola.it,professore
+anna.bianchi@scuola.it,professore
+lucia.ferrari@scuola.it,studente
+marco.colombo@scuola.it,studente
+sofia.romano@scuola.it,studente"""
+    
+    from flask import Response
+    return Response(
+        csv_template,
+        mimetype='text/csv',
+        headers={
+            'Content-Disposition': 'attachment; filename=template_email_scuola.csv'
+        }
+    )

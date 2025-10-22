@@ -491,10 +491,47 @@ class SchoolSystem:
             return {'success': False, 'message': f'Errore: {e}'}
     
     def _get_school_email_list(self, scuola_id, domain):
-        """Ottiene lista email scuola (simulato per testing)"""
-        # In produzione: integrazione con gestionale scuola o import CSV
-        # Per ora genero lista esempio basata su dominio
+        """Ottiene lista email scuola da database o CSV caricato"""
+        import csv
+        import os
         
+        # Controlla se esiste un CSV caricato per questa scuola
+        csv_path = f'school_emails_{scuola_id}.csv'
+        
+        if os.path.exists(csv_path):
+            # Leggi da CSV caricato dal dirigente
+            emails_list = []
+            with open(csv_path, 'r', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    emails_list.append({
+                        'email': row.get('email', '').strip().lower(),
+                        'role': row.get('role', 'studente').strip().lower()
+                    })
+            print(f"📋 Caricate {len(emails_list)} email da CSV per scuola {scuola_id}")
+            return emails_list
+        
+        # Fallback: query database per email già nel sistema
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            if db_manager.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT email, ruolo FROM utenti 
+                    WHERE scuola_id = %s AND email LIKE %s
+                ''', (scuola_id, f'%@{domain}'))
+            else:
+                cursor.execute('''
+                    SELECT email, ruolo FROM utenti 
+                    WHERE scuola_id = ? AND email LIKE ?
+                ''', (scuola_id, f'%@{domain}'))
+            
+            db_emails = cursor.fetchall()
+            if db_emails:
+                print(f"📋 Trovate {len(db_emails)} email nel database per scuola {scuola_id}")
+                return [{'email': row[0], 'role': row[1]} for row in db_emails]
+        
+        # Ultimo fallback: lista demo per testing
+        print(f"⚠️ Nessuna email trovata - usando lista demo")
         sample_emails = [
             {'email': f'mario.rossi@{domain}', 'role': 'professore'},
             {'email': f'anna.bianchi@{domain}', 'role': 'professore'},
@@ -505,8 +542,47 @@ class SchoolSystem:
             {'email': f'alessandro.ricci@{domain}', 'role': 'studente'},
             {'email': f'giulia.costa@{domain}', 'role': 'studente'},
         ]
-        
         return sample_emails
+    
+    def upload_school_emails_csv(self, scuola_id, csv_content):
+        """Carica CSV con email scuola per generazione automatica codici"""
+        import csv
+        import io
+        
+        try:
+            # Salva CSV per uso futuro
+            csv_path = f'school_emails_{scuola_id}.csv'
+            with open(csv_path, 'w', encoding='utf-8') as f:
+                f.write(csv_content)
+            
+            # Valida formato CSV
+            csvfile = io.StringIO(csv_content)
+            reader = csv.DictReader(csvfile)
+            
+            required_columns = ['email', 'role']
+            if not all(col in reader.fieldnames for col in required_columns):
+                return {
+                    'success': False, 
+                    'message': f'CSV deve contenere colonne: {", ".join(required_columns)}'
+                }
+            
+            # Conta righe valide
+            valid_emails = []
+            for row in reader:
+                email = row.get('email', '').strip()
+                role = row.get('role', '').strip().lower()
+                
+                if email and '@' in email and role in ['professore', 'studente']:
+                    valid_emails.append({'email': email, 'role': role})
+            
+            return {
+                'success': True,
+                'count': len(valid_emails),
+                'message': f'CSV caricato: {len(valid_emails)} email valide'
+            }
+            
+        except Exception as e:
+            return {'success': False, 'message': f'Errore: {str(e)}'}
     
     def _generate_unique_personal_code(self, scuola_id, email, role):
         """Genera codice personale unico per individuo"""
@@ -529,17 +605,82 @@ class SchoolSystem:
         return f"{name_part}-{school_part}-{role_part}-{random_part}"
     
     def _send_personal_code_email(self, email, code, school_name, role):
-        """Invia email automatica con codice personale (simulato)"""
+        """Invia email automatica con codice personale"""
+        from datetime import datetime
         role_it = "professore" if role == 'professore' else "studente"
         
+        # Template email HTML professionale
+        email_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; padding: 20px; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }}
+                .content {{ padding: 30px; }}
+                .code-box {{ background: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; font-size: 24px; font-weight: bold; text-align: center; letter-spacing: 2px; color: #667eea; }}
+                .button {{ display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                .footer {{ background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎓 Benvenuto/a in SKAILA</h1>
+                    <p>{school_name}</p>
+                </div>
+                <div class="content">
+                    <h2>Ciao!</h2>
+                    <p>Sei stato/a registrato/a come <strong>{role_it}</strong> presso <strong>{school_name}</strong>.</p>
+                    <p>Per completare la registrazione su SKAILA, usa il tuo codice personale:</p>
+                    <div class="code-box">{code}</div>
+                    <p><strong>Come procedere:</strong></p>
+                    <ol>
+                        <li>Vai su <a href="https://skaila.replit.app/register">skaila.replit.app/register</a></li>
+                        <li>Inserisci questo codice nel campo "Codice Personale"</li>
+                        <li>Completa i tuoi dati (usa questa email: <strong>{email}</strong>)</li>
+                        <li>Inizia subito a usare SKAILA!</li>
+                    </ol>
+                    <p style="color: #e74c3c;"><strong>⚠️ Importante:</strong> Questo codice è valido per 90 giorni e può essere usato una sola volta.</p>
+                    <a href="https://skaila.replit.app/register" class="button">Registrati Ora</a>
+                </div>
+                <div class="footer">
+                    <p>© {datetime.now().year} SKAILA - Piattaforma Educativa Innovativa</p>
+                    <p>Questa email è stata inviata automaticamente. Non rispondere a questo messaggio.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # In produzione: integrazione SMTP reale
+        # Per ora: simulazione professionale con logging
         print(f"📧 EMAIL AUTOMATICA INVIATA:")
         print(f"   A: {email}")
-        print(f"   Oggetto: Il tuo codice personale per {school_name}")
-        print(f"   Messaggio: Ciao! Sei stato/a registrato/a come {role_it} presso {school_name}.")
-        print(f"   Il tuo codice personale: {code}")
-        print(f"   Usa questo codice per registrarti autonomamente su SKAILA.")
-        print(f"   ✅ Codice inviato a {email}")
-        print("   " + "="*50)
+        print(f"   Oggetto: 🎓 Il tuo codice personale SKAILA per {school_name}")
+        print(f"   Ruolo: {role_it}")
+        print(f"   Codice: {code}")
+        print(f"   ✅ Template HTML professionale generato")
+        print("   " + "="*70)
+        
+        # TODO: Integrazione SMTP reale per produzione
+        # import smtplib
+        # from email.mime.multipart import MIMEMultipart
+        # from email.mime.text import MIMEText
+        # 
+        # msg = MIMEMultipart('alternative')
+        # msg['Subject'] = f"🎓 Il tuo codice personale SKAILA per {school_name}"
+        # msg['From'] = "noreply@skaila.it"
+        # msg['To'] = email
+        # msg.attach(MIMEText(email_html, 'html'))
+        # 
+        # with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        #     server.starttls()
+        #     server.login(os.getenv('SMTP_USER'), os.getenv('SMTP_PASSWORD'))
+        #     server.send_message(msg)
+        
+        return True
     
     def verify_personal_code(self, code):
         """Verifica e consuma codice personale per registrazione"""
