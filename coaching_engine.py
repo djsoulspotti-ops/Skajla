@@ -10,6 +10,9 @@ from typing import Dict, List, Any, Tuple
 import json
 import re
 
+# Import calendario dopo definizione classe per evitare circular import
+calendario_module = None
+
 class SkailaCoachingEngine:
     """
     Motore di coaching intelligente che analizza dati da tutti i servizi SKAILA
@@ -17,6 +20,13 @@ class SkailaCoachingEngine:
     """
     
     def __init__(self):
+        global calendario_module
+        if calendario_module is None:
+            try:
+                from calendario_integration import calendario
+                calendario_module = calendario
+            except ImportError:
+                pass
         self.categories = ['stress', 'motivazione', 'organizzazione', 'obiettivi', 'burnout', 'sociale']
         self.sentiment_keywords = {
             'anxious': ['stressato', 'ansia', 'paura', 'preoccupato', 'nervoso', 'agitato'],
@@ -472,23 +482,31 @@ class SkailaCoachingEngine:
         return '\n'.join(achievements) if achievements else "Continua così, ogni piccolo passo conta! 🌟"
     
     def _build_action_plan(self, data: Dict, suggestions: str) -> str:
-        """Costruisce piano azione personalizzato"""
+        """Costruisce piano azione personalizzato INTEGRATO CON CALENDARIO"""
         actions = []
+        
+        # Integra calendario se disponibile
+        if calendario_module:
+            user_id = data.get('user_id')
+            calendar_summary = calendario_module.get_calendar_summary(user_id)
+            if calendar_summary and 'Nessuna scadenza' not in calendar_summary:
+                actions.append(f"📅 {calendar_summary.split(chr(10))[1]}")  # Prima scadenza
         
         # Priorità materie deboli
         weak = data['academic'].get('weak_subjects', [])
-        if weak:
+        if weak and len(actions) < 3:
             actions.append(f"1️⃣ Focus su {weak[0]}: 30 min/giorno")
         
         # Mantenimento streak
         streak = data['engagement']['gamification'].get('streak', 0)
-        if streak > 0:
-            actions.append(f"2️⃣ Mantieni streak: 1 quiz/giorno")
-        else:
-            actions.append("2️⃣ Ricomincia streak: 1 piccola attività oggi")
+        if len(actions) < 3:
+            if streak > 0:
+                actions.append(f"2️⃣ Mantieni streak: 1 quiz/giorno")
+            else:
+                actions.append("2️⃣ Ricomincia streak: 1 piccola attività oggi")
         
         # Engagement basso
-        if data['engagement'].get('activity_level') == 'low':
+        if data['engagement'].get('activity_level') == 'low' and len(actions) < 3:
             actions.append("3️⃣ 20 min studio + esercizi interattivi")
         
         # Default
