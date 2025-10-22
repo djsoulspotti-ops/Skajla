@@ -57,9 +57,12 @@ class AdminDashboard:
                 FROM coaching_interactions
                 WHERE timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days'
                 AND detected_category IN ('stress', 'burnout', 'motivazione')
-                AND detected_sentiment LIKE '%demotivated%' 
+                AND (
+                    detected_sentiment LIKE '%demotivated%' 
                     OR detected_sentiment LIKE '%exhausted%'
                     OR detected_sentiment LIKE '%overwhelmed%'
+                    OR detected_sentiment LIKE '%anxious%'
+                )
                 ORDER BY user_id, timestamp DESC
                 LIMIT 20
             ''')
