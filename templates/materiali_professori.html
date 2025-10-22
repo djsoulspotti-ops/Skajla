@@ -354,54 +354,55 @@
         <!-- Upload Form (hidden by default) -->
         <div id="uploadForm" class="upload-form">
             <h3 style="margin-bottom: 1.5rem;">Dettagli Materiale</h3>
-            <form id="materialForm" onsubmit="uploadMaterial(event)">
-                <div class="form-group">
-                    <label>Titolo *</label>
-                    <input type="text" id="materialTitle" required placeholder="Es: Appunti Matematica - Equazioni">
-                </div>
-                
-                <div class="form-group">
-                    <label>Descrizione</label>
-                    <textarea id="materialDescription" rows="3" placeholder="Descrivi brevemente il contenuto..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Materia *</label>
-                    <select id="materialSubject" required>
-                        <option value="">Seleziona materia</option>
-                        <option value="matematica">Matematica</option>
-                        <option value="italiano">Italiano</option>
-                        <option value="storia">Storia</option>
-                        <option value="scienze">Scienze</option>
-                        <option value="inglese">Inglese</option>
-                        <option value="geografia">Geografia</option>
-                        <option value="arte">Arte</option>
-                        <option value="musica">Musica</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Classe</label>
-                    <input type="text" id="materialClass" placeholder="Es: 3A">
-                </div>
-                
-                <div class="form-group">
-                    <label>Visibilità</label>
-                    <select id="materialVisibility">
-                        <option value="class">Solo la mia classe</option>
-                        <option value="school">Tutta la scuola</option>
-                        <option value="public">Pubblico</option>
-                    </select>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="upload-btn" style="flex: 1;">
-                        📤 Carica Materiale
-                    </button>
-                    <button type="button" class="upload-btn" onclick="cancelUpload()" style="background: var(--accent); flex: 1;">
-                        ❌ Annulla
-                    </button>
-                </div>
+            <form id="materialForm" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <label>Titolo *</label>
+                        <input type="text" id="materialTitle" required placeholder="Es: Appunti Matematica - Equazioni">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descrizione</label>
+                        <textarea id="materialDescription" rows="3" placeholder="Descrivi brevemente il contenuto..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Materia *</label>
+                        <select id="materialSubject" required>
+                            <option value="">Seleziona materia</option>
+                            <option value="matematica">Matematica</option>
+                            <option value="italiano">Italiano</option>
+                            <option value="storia">Storia</option>
+                            <option value="scienze">Scienze</option>
+                            <option value="inglese">Inglese</option>
+                            <option value="geografia">Geografia</option>
+                            <option value="arte">Arte</option>
+                            <option value="musica">Musica</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Classe</label>
+                        <input type="text" id="materialClass" placeholder="Es: 3A">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Visibilità</label>
+                        <select id="materialVisibility">
+                            <option value="class">Solo la mia classe</option>
+                            <option value="school">Tutta la scuola</option>
+                            <option value="public">Pubblico</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" class="upload-btn" style="flex: 1;">
+                            📤 Carica Materiale
+                        </button>
+                        <button type="button" class="upload-btn" onclick="cancelUpload()" style="background: var(--accent); flex: 1;">
+                            ❌ Annulla
+                        </button>
+                    </div>
             </form>
         </div>
     </div>
@@ -479,11 +480,11 @@ dropZone.addEventListener('drop', (e) => {
 // Handle File Selection
 function handleFileSelect(event) {
     selectedFiles = Array.from(event.target.files);
-    
+
     if (selectedFiles.length > 0) {
         const uploadForm = document.getElementById('uploadForm');
         uploadForm.classList.add('active');
-        
+
         // Auto-fill title if single file
         if (selectedFiles.length === 1) {
             document.getElementById('materialTitle').value = selectedFiles[0].name.split('.')[0];
@@ -508,12 +509,12 @@ function cancelUpload() {
 // Upload Material
 async function uploadMaterial(event) {
     event.preventDefault();
-    
+
     if (selectedFiles.length === 0) {
         alert('Seleziona almeno un file!');
         return;
     }
-    
+
     const formData = new FormData();
     selectedFiles.forEach(file => formData.append('files', file));
     formData.append('title', document.getElementById('materialTitle').value);
@@ -521,20 +522,33 @@ async function uploadMaterial(event) {
     formData.append('subject', document.getElementById('materialSubject').value);
     formData.append('class', document.getElementById('materialClass').value);
     formData.append('visibility', document.getElementById('materialVisibility').value);
-    
+    // Append CSRF token from the hidden input
+    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+
     try {
         const response = await fetch('/api/materials/upload', {
             method: 'POST',
             body: formData
         });
-        
+
         if (response.ok) {
             alert('✅ Materiale caricato con successo!');
             cancelUpload();
             loadMaterials();
             loadStats();
         } else {
-            alert('❌ Errore nel caricamento');
+            // Try to parse error message from response
+            let errorMsg = '❌ Errore nel caricamento';
+            try {
+                const errorData = await response.json();
+                if (errorData.message) {
+                    errorMsg = `❌ Errore nel caricamento: ${errorData.message}`;
+                }
+            } catch (e) {
+                // If response is not JSON, use generic error
+            }
+            alert(errorMsg);
         }
     } catch (error) {
         console.error('Upload error:', error);
@@ -549,6 +563,8 @@ async function loadMaterials() {
         if (response.ok) {
             allMaterials = await response.json();
             displayMaterials(allMaterials);
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
         console.error('Load error:', error);
@@ -559,12 +575,12 @@ async function loadMaterials() {
 // Display Materials
 function displayMaterials(materials) {
     const grid = document.getElementById('materialsGrid');
-    
+
     if (materials.length === 0) {
         grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Nessun materiale trovato</p></div>';
         return;
     }
-    
+
     const fileIcons = {
         pdf: '📄',
         doc: '📝',
@@ -577,11 +593,11 @@ function displayMaterials(materials) {
         mp4: '🎥',
         mp3: '🎵'
     };
-    
+
     grid.innerHTML = materials.map(mat => {
         const ext = mat.filename.split('.').pop().toLowerCase();
         const icon = fileIcons[ext] || '📎';
-        
+
         return `
             <div class="material-card">
                 <div class="material-header">
@@ -591,15 +607,15 @@ function displayMaterials(materials) {
                         <div style="font-size: 0.85rem; color: var(--text-light);">${mat.filename}</div>
                     </div>
                 </div>
-                
+
                 <div class="material-meta">
                     <div class="meta-tag">📚 ${mat.subject}</div>
                     <div class="meta-tag">👥 ${mat.class || 'Tutte'}</div>
                     <div class="meta-tag">⬇️ ${mat.downloads || 0}</div>
                 </div>
-                
+
                 ${mat.description ? `<div class="material-description">${mat.description}</div>` : ''}
-                
+
                 <div class="material-actions">
                     <button class="action-btn download-btn" onclick="downloadMaterial(${mat.id})">
                         ⬇️ Scarica
@@ -617,20 +633,20 @@ function displayMaterials(materials) {
 function filterMaterials() {
     const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
     const subjectFilter = document.getElementById('subjectFilter').value;
-    
+
     let filtered = allMaterials;
-    
+
     if (searchTerm) {
         filtered = filtered.filter(mat => 
             mat.title.toLowerCase().includes(searchTerm) || 
             mat.description?.toLowerCase().includes(searchTerm)
         );
     }
-    
+
     if (subjectFilter) {
         filtered = filtered.filter(mat => mat.subject === subjectFilter);
     }
-    
+
     displayMaterials(filtered);
 }
 
@@ -642,16 +658,19 @@ async function downloadMaterial(id) {
 // Delete Material
 async function deleteMaterial(id) {
     if (!confirm('Sei sicuro di voler eliminare questo materiale?')) return;
-    
+
     try {
         const response = await fetch(`/api/materials/delete/${id}`, { method: 'DELETE' });
         if (response.ok) {
             alert('✅ Materiale eliminato');
             loadMaterials();
             loadStats();
+        } else {
+            alert('❌ Errore eliminazione');
         }
     } catch (error) {
-        alert('❌ Errore eliminazione');
+        console.error('Delete error:', error);
+        alert('❌ Errore di connessione durante l\'eliminazione');
     }
 }
 
@@ -665,6 +684,8 @@ async function loadStats() {
             document.getElementById('totalDownloads').textContent = stats.total_downloads || 0;
             document.getElementById('mostDownloaded').textContent = stats.most_downloaded || '-';
             document.getElementById('storageUsed').textContent = `${(stats.storage_used / 1024 / 1024).toFixed(1)} MB`;
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
         console.error('Stats error:', error);

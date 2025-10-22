@@ -9,6 +9,7 @@ import time
 from datetime import timedelta
 from flask import Flask, render_template, redirect, session, make_response, request, g
 from flask_socketio import SocketIO
+from flask_compress import Compress
 
 # Import moduli personalizzati
 from database_manager import db_manager
@@ -66,6 +67,9 @@ class SkailaApp:
         # Usa environment manager per configurazione sicura
         flask_config = env_manager.get_flask_config()
         self.app.config.update(flask_config)
+        
+        # Abilita compressione response
+        Compress(self.app)
         
         # Sessioni permanenti
         self.app.permanent_session_lifetime = timedelta(days=30)

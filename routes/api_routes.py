@@ -1,4 +1,15 @@
 
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+# Rate limiter
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per hour"],
+    storage_uri="memory://"
+)
+
+
 """
 SKAILA - API Routes
 Tutte le API REST centralizzate
@@ -111,6 +122,7 @@ def messages(conversation_id):
         return jsonify({'error': str(e)}), 500
 
 @api_bp.route('/ai/chat', methods=['POST'])
+@limiter.limit("30 per minute")
 def ai_chat():
     """
     SKAILA Coach - Chatbot soft skills & coaching
