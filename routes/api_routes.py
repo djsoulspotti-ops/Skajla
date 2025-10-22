@@ -112,6 +112,10 @@ def messages(conversation_id):
 
 @api_bp.route('/ai/chat', methods=['POST'])
 def ai_chat():
+    """
+    SKAILA Coach - Chatbot soft skills & coaching
+    Salva automaticamente conversazioni in coaching_interactions
+    """
     if 'user_id' not in session:
         return jsonify({'error': 'Non autorizzato'}), 401
 
@@ -122,7 +126,7 @@ def ai_chat():
         if not message.strip():
             return jsonify({'error': 'Messaggio vuoto'}), 400
 
-        # Genera risposta AI
+        # Genera risposta AI (salva automaticamente in coaching_interactions)
         response = ai_bot.generate_response(
             message, 
             session['nome'], 
@@ -130,33 +134,23 @@ def ai_chat():
             session['user_id']
         )
 
-        # Salva conversazione
-        subject_detected = ai_bot.detect_subject(message)
-        sentiment_analysis = ','.join(ai_bot.analyze_user_sentiment(message))
-        
-        db_manager.execute('''
-            INSERT INTO ai_conversations 
-            (utente_id, message, response, subject_detected, sentiment_analysis, timestamp)
-            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-        ''', (session['user_id'], message, response, subject_detected, sentiment_analysis))
-
-        # Gamification
+        # Gamification (già gestito dentro _save_conversation, ma aggiungiamo per interazione chat)
         gamification_system.award_xp(
             session['user_id'], 
-            'ai_question', 
-            description=f"Domanda AI su {subject_detected}"
+            'ai_interaction', 
+            description="Coaching con SKAILA Coach"
         )
 
         return jsonify({
             'response': response,
-            'bot_name': 'SKAILA Assistant',
-            'bot_avatar': '🤖',
-            'subject_detected': subject_detected,
+            'bot_name': 'SKAILA Coach',
+            'bot_avatar': '🎓',
             'personalized': True
         })
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Errore API /ai/chat: {e}")
+        return jsonify({'error': 'Errore durante la generazione della risposta'}), 500
 
 @api_bp.route('/gamification/profile')
 def gamification_profile():

@@ -4,11 +4,13 @@ SKAILA - Socket.IO Events
 Eventi real-time per chat e notifiche
 """
 
+import time
 from flask_socketio import emit, join_room, leave_room
 from flask import session
 from database_manager import db_manager
 from gamification import gamification_system
 from services.tenant_guard import verify_chat_belongs_to_school, get_current_school_id, TenantGuardException
+from ai_chatbot import ai_bot
 
 def register_socket_events(socketio):
     """Registra tutti gli eventi Socket.IO"""
@@ -214,3 +216,43 @@ def register_socket_events(socketio):
             'user_name': session['nome'],
             'typing': False
         }, room=f"chat_{conversation_id}", include_self=False)
+
+    @socketio.on('ai_message')
+    def handle_ai_message(data):
+        """Gestisce messaggi per il chatbot AI"""
+        if 'user_id' not in session:
+            emit('ai_error', {'message': 'Non autorizzato'})
+            return
+        
+        message = data.get('message', '').strip()
+        if not message:
+            emit('ai_error', {'message': 'Messaggio vuoto'})
+            return
+        
+        try:
+            # Genera risposta AI
+            response = ai_bot.generate_response(
+                message=message,
+                user_name=session.get('nome', 'Studente'),
+                user_role=session.get('ruolo', 'studente'),
+                user_id=session['user_id']
+            )
+            
+            # Invia risposta all'utente
+            emit('ai_response', {
+                'message': response,
+                'timestamp': time.time()
+            })
+            
+            # Award XP per utilizzo AI coach
+            gamification_system.award_xp(
+                session['user_id'], 
+                'ai_interaction', 
+                description="Interazione con SKAILA Coach"
+            )
+            
+        except Exception as e:
+            print(f"Errore AI chatbot: {e}")
+            emit('ai_error', {
+                'message': 'Errore durante la generazione della risposta. Riprova.'
+            })
