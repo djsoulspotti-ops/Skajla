@@ -19,6 +19,7 @@ class AISkailaBot:
     def __init__(self):
         self.bot_name = "SKAILA Coach"
         self.bot_avatar = "🤖"
+        self.openai_available = False  # Chatbot non usa OpenAI
         
         # Context del sistema
         self.system_context = """
