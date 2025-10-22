@@ -21,10 +21,12 @@ except ImportError:
     print("⚠️ Replit Object Storage non disponibile - fallback a filesystem")
 
 class TeachingMaterialsManager:
-    """Gestione materiali didattici con Replit Object Storage"""
+    """Gestione materiali didattici con Replit Object Storage + Auto-cleanup"""
     
     UPLOAD_FOLDER = 'uploads/teaching_materials'  # Fallback locale
     STORAGE_PREFIX = 'teaching_materials/'  # Prefisso per Object Storage
+    MAX_STORAGE_GB = 9.5  # Limite sicurezza (10 GB - buffer)
+    RETENTION_DAYS = 730  # Conserva file per 2 anni
     
     ALLOWED_EXTENSIONS = {
         'pdf': 'application/pdf',
@@ -195,6 +197,95 @@ class TeachingMaterialsManager:
                 'teacher': f"{mat['teacher_name']} {mat['teacher_surname']}",
                 'file_name': mat['file_name'],
                 'file_type': mat['file_type'],
+
+    
+    def check_storage_usage(self) -> Dict:
+        """Verifica uso storage e attiva pulizia se necessario"""
+        
+        # Calcola storage totale usato
+        total_size = db_manager.query('''
+            SELECT SUM(file_size) as total FROM teaching_materials
+        ''', one=True)
+        
+        total_gb = (total_size['total'] or 0) / (1024**3)
+        
+        if total_gb > self.MAX_STORAGE_GB:
+            # Attiva pulizia automatica
+            cleaned = self.auto_cleanup_old_files()
+            return {
+                'warning': True,
+                'total_gb': round(total_gb, 2),
+                'limit_gb': self.MAX_STORAGE_GB,
+                'cleaned_files': cleaned
+            }
+        
+        return {
+            'warning': False,
+            'total_gb': round(total_gb, 2),
+            'limit_gb': self.MAX_STORAGE_GB
+        }
+    
+    def auto_cleanup_old_files(self) -> int:
+        """Elimina automaticamente file vecchi per liberare spazio"""
+        
+        from datetime import datetime, timedelta
+        cutoff_date = datetime.now() - timedelta(days=self.RETENTION_DAYS)
+        
+        # Trova file vecchi (mai scaricati o download < 5)
+        old_files = db_manager.query('''
+            SELECT id FROM teaching_materials
+            WHERE upload_date < %s AND downloads < 5
+            ORDER BY upload_date ASC
+            LIMIT 50
+        ''', (cutoff_date,))
+        
+        cleaned_count = 0
+        for file_record in old_files:
+            try:
+                # Elimina file (usa metodo esistente)
+                result = self.delete_material(file_record['id'], user_id=0)  # Admin override
+                if result.get('success'):
+                    cleaned_count += 1
+            except Exception as e:
+                print(f"⚠️ Cleanup error per file {file_record['id']}: {e}")
+        
+        print(f"🧹 Auto-cleanup: {cleaned_count} file eliminati (> {self.RETENTION_DAYS} giorni, < 5 download)")
+        return cleaned_count
+    
+    def get_storage_stats(self) -> Dict:
+        """Statistiche dettagliate storage per admin"""
+        
+        stats = db_manager.query('''
+            SELECT 
+                COUNT(*) as total_files,
+                SUM(file_size) as total_size,
+                AVG(file_size) as avg_size,
+                MAX(file_size) as max_size
+            FROM teaching_materials
+        ''', one=True)
+        
+        by_type = db_manager.query('''
+            SELECT file_type, COUNT(*) as count, SUM(file_size) as size
+            FROM teaching_materials
+            GROUP BY file_type
+            ORDER BY size DESC
+        ''')
+        
+        return {
+            'total_files': stats['total_files'],
+            'total_size_gb': round((stats['total_size'] or 0) / (1024**3), 2),
+            'avg_size_mb': round((stats['avg_size'] or 0) / (1024**2), 1),
+            'max_size_mb': round((stats['max_size'] or 0) / (1024**2), 1),
+            'by_type': [
+                {
+                    'type': t['file_type'],
+                    'count': t['count'],
+                    'size_gb': round(t['size'] / (1024**3), 2)
+                }
+                for t in by_type
+            ]
+        }
+
                 'file_size': file_formatter.format_file_size(mat['file_size']),  # ✅ Formattatore centralizzato
                 'upload_date': mat['upload_date'],
                 'downloads': mat['downloads'],
