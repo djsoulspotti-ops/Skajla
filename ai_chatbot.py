@@ -102,13 +102,44 @@ Vedo che hai una domanda tecnica su una materia specifica.
 Come posso supportarti su questi aspetti? 🤝"""
     
     def _save_conversation(self, user_id: int, message: str, response: str):
-        """Salva conversazione nel database"""
+        """Salva conversazione nel database coaching_interactions"""
         try:
+            # Rileva sentiment e categoria dal messaggio
+            sentiment = coaching_engine.detect_sentiment(message)
+            
+            # Determina categoria principale (in italiano per dashboard)
+            category = 'generale'
+            if 'stress' in message.lower() or 'ansia' in message.lower() or 'preoccup' in message.lower():
+                category = 'stress'
+            elif 'motivazione' in message.lower() or 'demotivato' in message.lower() or 'motiva' in message.lower():
+                category = 'motivazione'
+            elif 'organizzazione' in message.lower() or 'tempo' in message.lower() or 'organizz' in message.lower():
+                category = 'organizzazione'
+            elif 'obiettivi' in message.lower() or 'obiettivo' in message.lower() or 'goal' in message.lower():
+                category = 'obiettivi'
+            elif 'burnout' in message.lower() or 'esaurito' in message.lower():
+                category = 'burnout'
+            elif 'social' in message.lower() or 'amici' in message.lower() or 'compagni' in message.lower():
+                category = 'sociale'
+            
+            # Snapshot dati studente (light version per storage)
+            student_data = coaching_engine.analyze_student_ecosystem(user_id)
+            data_snapshot = {
+                'avg_grade': student_data['academic'].get('avg_grade', 0),
+                'xp': student_data['engagement']['gamification'].get('total_xp', 0),
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            # Salva in coaching_interactions (nuova tabella)
             db_manager.execute('''
-                INSERT INTO ai_conversations 
-                (utente_id, message, response, timestamp)
-                VALUES (%s, %s, %s, %s)
-            ''', (user_id, message, response, datetime.now()))
+                INSERT INTO coaching_interactions
+                (user_id, message, detected_category, detected_sentiment, response, user_data_snapshot)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (user_id, message, category, ','.join(sentiment), response, json.dumps(data_snapshot)))
+            
+            # Aggiorna analytics
+            self._update_coaching_analytics(user_id, category, sentiment)
+            
         except Exception as e:
             print(f"Errore save conversation: {e}")
     
@@ -332,6 +363,44 @@ Cosa ti preoccupa di più in questo momento? 🤝"""
             ))
         except Exception as e:
             print(f"Errore save study plan: {e}")
+    
+    def _update_coaching_analytics(self, user_id: int, category: str, sentiment: list):
+        """Aggiorna analytics aggregate per dashboard admin"""
+        try:
+            today = datetime.now().date()
+            
+            # Mappa categorie italiane a colonne analytics
+            category_map = {
+                'stress': 'stress_count',
+                'motivazione': 'motivation_count',
+                'burnout': 'burnout_count',
+                'organizzazione': 'organization_count',
+                'obiettivi': 'organization_count'
+            }
+            
+            category_column = category_map.get(category, None)
+            
+            # Aggiorna o crea entry giornaliera
+            if category_column:
+                db_manager.execute(f'''
+                    INSERT INTO coaching_analytics (date, total_interactions, {category_column}, students_helped)
+                    VALUES (%s, 1, 1, 1)
+                    ON CONFLICT (date) DO UPDATE SET
+                        total_interactions = coaching_analytics.total_interactions + 1,
+                        {category_column} = coaching_analytics.{category_column} + 1,
+                        students_helped = coaching_analytics.students_helped + 1
+                ''', (today,))
+            else:
+                db_manager.execute('''
+                    INSERT INTO coaching_analytics (date, total_interactions, students_helped)
+                    VALUES (%s, 1, 1)
+                    ON CONFLICT (date) DO UPDATE SET
+                        total_interactions = coaching_analytics.total_interactions + 1,
+                        students_helped = coaching_analytics.students_helped + 1
+                ''', (today,))
+            
+        except Exception as e:
+            print(f"Errore update coaching analytics: {e}")
 
 # Istanza globale
 ai_bot = AISkailaBot()
