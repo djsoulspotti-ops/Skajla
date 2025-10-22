@@ -11,10 +11,21 @@ from database_manager import db_manager
 from shared.formatters.file_formatters import file_formatter
 from shared.validators.input_validators import validator
 
+# Replit Object Storage - GRATUITO fino a 10GB
+try:
+    from replit.object_storage import Client
+    OBJECT_STORAGE_AVAILABLE = True
+    print("✅ Replit Object Storage disponibile (GRATUITO)")
+except ImportError:
+    OBJECT_STORAGE_AVAILABLE = False
+    print("⚠️ Replit Object Storage non disponibile - fallback a filesystem")
+
 class TeachingMaterialsManager:
-    """Gestione materiali didattici"""
+    """Gestione materiali didattici con Replit Object Storage"""
     
-    UPLOAD_FOLDER = 'uploads/teaching_materials'
+    UPLOAD_FOLDER = 'uploads/teaching_materials'  # Fallback locale
+    STORAGE_PREFIX = 'teaching_materials/'  # Prefisso per Object Storage
+    
     ALLOWED_EXTENSIONS = {
         'pdf': 'application/pdf',
         'doc': 'application/msword',
@@ -29,17 +40,28 @@ class TeachingMaterialsManager:
         'mp3': 'audio/mpeg',
         'zip': 'application/zip'
     }
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB per file (ottimizzato per Object Storage gratuito)
     
     def __init__(self):
-        """Inizializza manager"""
-        self._ensure_upload_folder()
+        """Inizializza manager con Object Storage"""
+        self.use_object_storage = OBJECT_STORAGE_AVAILABLE
+        
+        if self.use_object_storage:
+            try:
+                self.storage_client = Client()
+                print("✅ Object Storage client inizializzato")
+            except Exception as e:
+                print(f"⚠️ Object Storage fallback: {e}")
+                self.use_object_storage = False
+        
+        if not self.use_object_storage:
+            self._ensure_upload_folder()
     
     def _ensure_upload_folder(self):
-        """Crea cartella upload se non esiste"""
+        """Crea cartella upload locale (fallback)"""
         if not os.path.exists(self.UPLOAD_FOLDER):
             os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
-            print(f"📁 Created upload folder: {self.UPLOAD_FOLDER}")
+            print(f"📁 Created local upload folder: {self.UPLOAD_FOLDER}")
     
     def allowed_file(self, filename: str) -> bool:
         """Verifica se file è permesso"""
@@ -80,9 +102,22 @@ class TeachingMaterialsManager:
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f"{teacher_id}_{timestamp}_{original_filename}"
         
-        # Save file
-        file_path = os.path.join(self.UPLOAD_FOLDER, filename)
-        file.save(file_path)
+        # Save file to Object Storage o filesystem
+        if self.use_object_storage:
+            try:
+                # Upload a Replit Object Storage (GRATUITO)
+                storage_path = f"{self.STORAGE_PREFIX}{filename}"
+                file_contents = file.read()
+                self.storage_client.upload_from_bytes(storage_path, file_contents)
+                file_path = storage_path  # Path virtuale
+                print(f"✅ File caricato su Object Storage: {storage_path}")
+            except Exception as e:
+                print(f"❌ Object Storage error: {e}")
+                return {'error': 'Errore upload Object Storage'}
+        else:
+            # Fallback a filesystem locale
+            file_path = os.path.join(self.UPLOAD_FOLDER, filename)
+            file.save(file_path)
         
         # Save to database
         cursor = db_manager.execute('''
@@ -169,10 +204,10 @@ class TeachingMaterialsManager:
         return result
     
     def download_material(self, material_id: int, user_id: int) -> Dict:
-        """Download materiale"""
+        """Download materiale da Object Storage o filesystem"""
         
         material = db_manager.query('''
-            SELECT * FROM teaching_materials WHERE id = ?
+            SELECT * FROM teaching_materials WHERE id = %s
         ''', (material_id,), one=True)
         
         if not material:
@@ -187,7 +222,7 @@ class TeachingMaterialsManager:
         
         # Update download count
         db_manager.execute('''
-            UPDATE teaching_materials SET downloads = downloads + 1 WHERE id = ?
+            UPDATE teaching_materials SET downloads = downloads + 1 WHERE id = %s
         ''', (material_id,))
         
         # Log download
@@ -195,18 +230,37 @@ class TeachingMaterialsManager:
             INSERT INTO material_downloads (material_id, user_id) VALUES (%s, %s)
         ''', (material_id, user_id))
         
-        return {
-            'success': True,
-            'file_path': material['file_path'],
-            'file_name': material['file_name'],
-            'file_type': material['file_type']
-        }
+        # Download da Object Storage o filesystem
+        file_path = material['file_path']
+        if self.use_object_storage and file_path.startswith(self.STORAGE_PREFIX):
+            try:
+                # Download da Object Storage
+                file_contents = self.storage_client.download_as_bytes(file_path)
+                return {
+                    'success': True,
+                    'file_contents': file_contents,
+                    'file_name': material['file_name'],
+                    'file_type': material['file_type'],
+                    'from_storage': True
+                }
+            except Exception as e:
+                print(f"❌ Object Storage download error: {e}")
+                return {'error': 'Errore download da Object Storage'}
+        else:
+            # Fallback filesystem locale
+            return {
+                'success': True,
+                'file_path': file_path,
+                'file_name': material['file_name'],
+                'file_type': material['file_type'],
+                'from_storage': False
+            }
     
     def delete_material(self, material_id: int, user_id: int) -> Dict:
-        """Elimina materiale (solo proprietario o admin)"""
+        """Elimina materiale da Object Storage o filesystem"""
         
         material = db_manager.query('''
-            SELECT * FROM teaching_materials WHERE id = ?
+            SELECT * FROM teaching_materials WHERE id = %s
         ''', (material_id,), one=True)
         
         if not material:
@@ -218,9 +272,19 @@ class TeachingMaterialsManager:
         if material['teacher_id'] != user_id and user['ruolo'] != 'admin':
             return {'error': 'Solo il proprietario o admin può eliminare'}
         
-        # Delete file from disk
-        if os.path.exists(material['file_path']):
-            os.remove(material['file_path'])
+        # Delete file da Object Storage o filesystem
+        file_path = material['file_path']
+        if self.use_object_storage and file_path.startswith(self.STORAGE_PREFIX):
+            try:
+                # Delete da Object Storage
+                self.storage_client.delete(file_path)
+                print(f"✅ File eliminato da Object Storage: {file_path}")
+            except Exception as e:
+                print(f"⚠️ Object Storage delete error: {e}")
+        else:
+            # Delete da filesystem locale
+            if os.path.exists(file_path):
+                os.remove(file_path)
         
         # Delete from database
         db_manager.execute('DELETE FROM teaching_materials WHERE id = %s', (material_id,))
