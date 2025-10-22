@@ -6,7 +6,7 @@ hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cargo", "iana-etc", "libiconv", "rustc", "imagemagick"]
+packages = ["cargo", "iana-etc", "imagemagick", "libiconv", "rustc"]
 
 [deployment]
 run = ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:socketio_app"]
