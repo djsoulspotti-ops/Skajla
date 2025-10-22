@@ -545,13 +545,11 @@ Cosa vuoi imparare oggi? 🚀"""
             ''', (user_id,), one=True)
             weekly_activity = weekly_activity_result.get('count', 0) if weekly_activity_result else 0
 
-            conn.close()
-
             return {
-                'subject_performance': [{'subject_detected': row[0], 'count': row[1], 'avg_success': 0.8} for row in subject_stats],
+                'subject_performance': [{'subject_detected': row.get('subject_detected'), 'count': row.get('count'), 'avg_success': 0.8} for row in subject_stats],
                 'progress_metrics': {
                     'weekly_activity': weekly_activity,
-                    'total_sessions': sum(row[1] for row in subject_stats),
+                    'total_sessions': sum(row.get('count', 0) for row in subject_stats),
                     'avg_success_rate': 0.75
                 },
                 'sentiment_analysis': [],
