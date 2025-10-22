@@ -36,6 +36,7 @@ from routes.credits_routes import credits_bp
 from routes.admin_school_codes_routes import admin_codes_bp
 from routes.messaging_routes import messaging_bp
 from routes.socket_routes import register_socket_events
+from routes.admin_calendar_routes import admin_calendar_bp
 
 # Import services
 from services.auth_service import auth_service
@@ -172,6 +173,7 @@ class SkailaApp:
         self.app.register_blueprint(credits_bp)
         self.app.register_blueprint(admin_codes_bp)
         self.app.register_blueprint(messaging_bp)
+        self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp
