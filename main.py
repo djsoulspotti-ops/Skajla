@@ -27,6 +27,7 @@ from services.monitoring_service import (
 from school_system import school_system
 from gamification import gamification_system
 from ai_chatbot import AISkailaBot
+from report_scheduler import report_scheduler
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
@@ -38,6 +39,7 @@ from routes.admin_school_codes_routes import admin_codes_bp
 from routes.messaging_routes import messaging_bp
 from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
+from routes.admin_reports_routes import admin_reports_bp
 
 # Import services
 from services.auth_service import auth_service
@@ -178,6 +180,7 @@ class SkailaApp:
         self.app.register_blueprint(admin_codes_bp)
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
+        self.app.register_blueprint(admin_reports_bp)  # Report Automatici
         
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp
@@ -283,6 +286,12 @@ class SkailaApp:
 
         # Crea indici database ottimizzati
         db_manager.create_optimized_indexes()
+        
+        # Inizializza scheduler report automatici
+        try:
+            report_scheduler.start()
+        except Exception as e:
+            print(f"⚠️ Report scheduler non avviato: {e}")
 
         # Inizializza database se necessario
         self.init_database()
