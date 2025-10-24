@@ -280,10 +280,7 @@ class SkailaApp:
         # Avvia keep-alive database per evitare Neon sleep
         if db_manager.db_type == 'postgresql':
             from database_keep_alive import keep_alive
-            # Riduci verbosità log keep-alive
-            keep_alive_thread = threading.Thread(target=keep_alive.keep_database_alive, daemon=True)
-            keep_alive_thread.start()
-            print("✅ Database keep-alive attivato (ping ogni 2 min)")
+            keep_alive.start()  # Avvia keep-alive service
 
         # Inizializza gamification
         gamification_system.init_gamification_tables()
