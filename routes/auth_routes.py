@@ -90,28 +90,107 @@ def register():
             nome = request.form['nome']
             cognome = request.form['cognome']
             
-            # Gestione scuola e classe - Trova ID scuola predefinita
-            scuola_id_input = request.form.get('scuola_id')
-            if scuola_id_input:
-                scuola_id = int(scuola_id_input)
-            else:
-                # Lookup scuola predefinita invece di hardcode
-                with db_manager.get_connection() as conn:
-                    cursor = conn.cursor()
-                    if db_manager.db_type == 'postgresql':
-                        cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
-                    else:
-                        cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
-                    default_school = cursor.fetchone()
-                    if default_school:
-                        scuola_id = default_school[0]
-                    else:
-                        flash('Errore: nessuna scuola predefinita configurata. Seleziona una scuola.', 'error')
-                        return render_template('register.html', scuole=school_system.get_user_schools())
-            classe_nome = request.form.get('classe_nome', '').strip()
+            # NUOVO SISTEMA: Codici Scuola Premium (PRIORITÀ ASSOLUTA)
+            codice_scuola_premium = request.form.get('codice_scuola_premium', '').strip().upper()
+            scuola_id = None
+            ruolo = 'studente'  # Default
             
-            # Security: Ruolo assegnato in base al tipo registrazione
-            ruolo = 'studente'  # Default studente
+            # PRIORITÀ 1: Codice Scuola Premium (SKAIL, PROF, DIR)
+            if codice_scuola_premium:
+                from services.school_codes_manager import school_codes_manager
+                
+                # Verifica codice in school_activation_codes
+                codice_info = db_manager.query("""
+                    SELECT id, school_name, school_code, teacher_invite_code, 
+                           director_code, assigned, assigned_to_school_id
+                    FROM school_activation_codes
+                    WHERE school_code = %s OR teacher_invite_code = %s OR director_code = %s
+                """, (codice_scuola_premium, codice_scuola_premium, codice_scuola_premium), one=True)
+                
+                if not codice_info:
+                    flash('❌ Codice scuola non valido. Verifica e riprova.', 'error')
+                    return render_template('register.html', scuole=school_system.get_user_schools())
+                
+                # Determina ruolo dal tipo di codice
+                if codice_scuola_premium == codice_info['director_code']:
+                    ruolo = 'dirigente'
+                elif codice_scuola_premium == codice_info['teacher_invite_code']:
+                    ruolo = 'professore'
+                else:  # school_code
+                    ruolo = 'studente'
+                
+                # Se già assegnato, usa scuola esistente
+                if codice_info['assigned'] and codice_info['assigned_to_school_id']:
+                    scuola_id = codice_info['assigned_to_school_id']
+                    print(f"✅ Codice già assegnato - Scuola ID: {scuola_id}")
+                else:
+                    # RACE CONDITION PROTECTION: Transazione atomica per creazione scuola
+                    print(f"🏫 Creazione nuova scuola: {codice_info['school_name']}")
+                    try:
+                        with db_manager.get_connection() as conn:
+                            cursor = conn.cursor()
+                            
+                            # Lock esclusivo su riga codice per prevenire race condition
+                            cursor.execute("""
+                                SELECT assigned, assigned_to_school_id 
+                                FROM school_activation_codes 
+                                WHERE id = %s 
+                                FOR UPDATE
+                            """, (codice_info['id'],))
+                            
+                            locked_row = cursor.fetchone()
+                            
+                            # Double-check se già assegnato durante il lock
+                            if locked_row and locked_row[0]:
+                                scuola_id = locked_row[1]
+                                print(f"✅ Scuola già creata da altra richiesta - ID: {scuola_id}")
+                            else:
+                                # Crea scuola
+                                cursor.execute("""
+                                    INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, 
+                                                      codice_dirigente, attiva, created_at)
+                                    VALUES (%s, %s, %s, %s, TRUE, CURRENT_TIMESTAMP)
+                                    RETURNING id
+                                """, (codice_info['school_name'], codice_info['school_code'],
+                                      codice_info['teacher_invite_code'], codice_info['director_code']))
+                                
+                                scuola_id = cursor.fetchone()[0]
+                                
+                                # Marca codice come assegnato
+                                cursor.execute("""
+                                    UPDATE school_activation_codes
+                                    SET assigned = TRUE, assigned_to_school_id = %s, assigned_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                """, (scuola_id, codice_info['id']))
+                                
+                                conn.commit()
+                                print(f"✅ Scuola creata con ID: {scuola_id}")
+                                
+                    except Exception as e:
+                        print(f"❌ Errore creazione scuola: {e}")
+                        flash('Errore durante la creazione della scuola. Riprova.', 'error')
+                        return render_template('register.html', scuole=school_system.get_user_schools())
+                
+                flash(f'✅ Codice valido! Registrazione come {ruolo} per {codice_info["school_name"]}', 'success')
+            
+            # PRIORITÀ 2: Selezione scuola manuale (vecchio sistema)
+            else:
+                scuola_id_input = request.form.get('scuola_id')
+                if scuola_id_input:
+                    scuola_id = int(scuola_id_input)
+                else:
+                    # Lookup scuola predefinita
+                    default_school = db_manager.query(
+                        'SELECT id FROM scuole WHERE codice_pubblico = %s', 
+                        ('DEFAULT_SCHOOL',), one=True
+                    )
+                    if default_school:
+                        scuola_id = default_school['id']
+                    else:
+                        flash('❌ Inserisci un codice scuola oppure seleziona una scuola esistente.', 'error')
+                        return render_template('register.html', scuole=school_system.get_user_schools())
+            
+            classe_nome = request.form.get('classe_nome', '').strip()
             codice_docente = request.form.get('codice_docente', '').strip()
             codice_dirigente = request.form.get('codice_dirigente', '').strip()
             personal_code = request.form.get('personal_code', '').strip()

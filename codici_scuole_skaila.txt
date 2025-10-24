@@ -1,9 +1,3 @@
-⚙️ PostgreSQL: Found endpoint ep-noisy-salad-ae8vg6i0
-✅ PostgreSQL pool Neon SNI configurato per produzione
-✅ Sistema caching produzione inizializzato
-✅ UNIQUE constraint su dirigente_invite_token creato con successo - NESSUN DATO CANCELLATO
-✅ Sistema scuole-classi-professori inizializzato
-✅ Sistema gestione codici scuole inizializzato
 ======================================================================
 SKAILA - CODICI SCUOLE PARTNER (PRIME 10 SCUOLE)
 ======================================================================
@@ -97,5 +91,4 @@ SCUOLA #10: Scuola Partner 10
 
 💡 Note: Codice premium per scuola partner #10
 ══════════════════════════════════════════════════════════════════════
-
 

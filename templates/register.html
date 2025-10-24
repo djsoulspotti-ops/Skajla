@@ -514,18 +514,37 @@
                 </div>
             </div>
 
-            <!-- Selezione Scuola -->
+            <!-- NUOVO: Codice Scuola Premium -->
             <div class="form-group full-width">
-                <label for="scuola_id">🏫 Seleziona Scuola</label>
+                <label for="codice_scuola_premium">🎫 Codice Scuola / Professore / Dirigente</label>
+                <div class="input-wrapper">
+                    <i class="input-icon fas fa-key"></i>
+                    <input type="text" id="codice_scuola_premium" name="codice_scuola_premium" 
+                           placeholder="es. SKAIL01904, PROF01THH9, DIR016FS87J" 
+                           pattern="[A-Z0-9]+" 
+                           style="text-transform: uppercase;"
+                           title="Inserisci il codice fornito dalla scuola">
+                </div>
+                <small style="color: var(--cyber-green); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                    ✨ <strong>HAI UN CODICE?</strong> Inseriscilo qui e salta la selezione manuale!
+                </small>
+            </div>
+
+            <!-- OPPURE: Selezione Scuola Manuale -->
+            <div class="form-group full-width">
+                <label for="scuola_id">🏫 Oppure Seleziona Scuola Manualmente</label>
                 <div class="input-wrapper">
                     <i class="input-icon fas fa-school"></i>
-                    <select id="scuola_id" name="scuola_id" required>
+                    <select id="scuola_id" name="scuola_id">
                         <option value="">Scegli la tua scuola...</option>
                         {% for scuola in scuole %}
                         <option value="{{ scuola[0] }}">{{ scuola[1] }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                    💡 Usa questo solo se NON hai un codice scuola
+                </small>
             </div>
 
             <!-- Nome Classe -->
@@ -649,10 +668,11 @@
                 return;
             }
 
-            // Validazione scuola
-            if (!scuolaId) {
+            // Validazione scuola O codice premium
+            const codicePremium = document.getElementById('codice_scuola_premium').value.trim();
+            if (!scuolaId && !codicePremium) {
                 e.preventDefault();
-                alert('🏫 Seleziona una scuola!');
+                alert('🏫 Inserisci un Codice Scuola oppure seleziona una scuola!');
                 return;
             }
             
