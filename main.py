@@ -27,7 +27,7 @@ from services.monitoring_service import (
 from school_system import school_system
 from gamification import gamification_system
 from ai_chatbot import AISkailaBot
-from report_scheduler import report_scheduler
+from report_scheduler import ReportScheduler
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
@@ -287,9 +287,10 @@ class SkailaApp:
         # Crea indici database ottimizzati
         db_manager.create_optimized_indexes()
         
-        # Inizializza scheduler report automatici
+        # Inizializza scheduler report automatici (con app context)
         try:
-            report_scheduler.start()
+            self.report_scheduler = ReportScheduler(app=self.app)
+            self.report_scheduler.start()
         except Exception as e:
             print(f"⚠️ Report scheduler non avviato: {e}")
 

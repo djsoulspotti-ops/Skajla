@@ -14,10 +14,11 @@ from flask import render_template_string
 class ReportScheduler:
     """Scheduler per report automatici"""
     
-    def __init__(self):
+    def __init__(self, app=None):
         self.scheduler = BackgroundScheduler()
         self.recipient_email = os.getenv('ADMIN_EMAIL', 'admin@skaila.app')
         self.enabled = True
+        self.app = app
     
     def start(self):
         """Avvia scheduler"""
@@ -110,11 +111,15 @@ class ReportScheduler:
     def _render_report_html(self, report_data):
         """Renderizza template HTML del report"""
         try:
-            with open('templates/report_email_template.html', 'r', encoding='utf-8') as f:
-                template_content = f.read()
+            if not self.app:
+                raise Exception("Flask app non configurata nel scheduler")
             
-            html = render_template_string(template_content, report=report_data)
-            return html
+            with self.app.app_context():
+                with open('templates/report_email_template.html', 'r', encoding='utf-8') as f:
+                    template_content = f.read()
+                
+                html = render_template_string(template_content, report=report_data)
+                return html
         except Exception as e:
             print(f"❌ Errore _render_report_html: {e}")
             return f"<html><body><h1>Errore rendering template</h1><pre>{str(e)}</pre></body></html>"
