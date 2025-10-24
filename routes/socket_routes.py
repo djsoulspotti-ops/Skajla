@@ -149,7 +149,7 @@ def register_socket_events(socketio):
             ''', (message_id,)).fetchone()
 
         # Gamification
-        gamification_system.award_xp(session['user_id'], 'message_sent', description="Messaggio in chat")
+        gamification_system.award_xp(session['user_id'], 'message_sent', multiplier=1.0, context="Messaggio in chat")
 
         emit('new_message', dict(messaggio), room=f"chat_{conversation_id}")
 

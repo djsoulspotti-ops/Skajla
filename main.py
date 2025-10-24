@@ -182,6 +182,10 @@ class SkailaApp:
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
+        
+        # Registro Elettronico API
+        from routes.registro_routes import registro_bp
+        self.app.register_blueprint(registro_bp)
 
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp

@@ -64,10 +64,10 @@ def login():
                 from flask import current_app
                 current_app.permanent_session_lifetime = timedelta(days=1)
             
-            # Aggiorna gamification (TEMPORANEAMENTE DISABILITATO - FIX IN CORSO)
+            # Aggiorna gamification
             try:
                 gamification_system.update_streak(user['id'])
-                gamification_system.award_xp(user['id'], 'login_daily', description="Login giornaliero")
+                gamification_system.award_xp(user['id'], 'login_daily', multiplier=1.0, context="Login giornaliero")
             except Exception as e:
                 print(f"⚠️ Gamification error (non-blocking): {e}")
             
