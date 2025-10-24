@@ -6,6 +6,7 @@ Applicazione Flask modulare e scalabile
 
 import os
 import time
+import threading  # Import threading for the keep-alive thread
 from datetime import timedelta
 from flask import Flask, render_template, redirect, session, make_response, request, g
 from flask_socketio import SocketIO
@@ -52,12 +53,12 @@ class SkailaApp:
         self.app = Flask(__name__)
         self.socketio = None
         self.ai_bot = None
-        
+
         # Initialize new monitoring system (delayed to avoid blocking during eventlet init)
         self.production_logger = None
         self.metrics_collector = None
         self.performance_monitor = None
-        
+
         self.setup_app()
         self.register_routes()
         self.setup_socketio()
@@ -69,13 +70,13 @@ class SkailaApp:
         # Usa environment manager per configurazione sicura
         flask_config = env_manager.get_flask_config()
         self.app.config.update(flask_config)
-        
+
         # Abilita compressione response
         Compress(self.app)
-        
+
         # Sessioni permanenti
         self.app.permanent_session_lifetime = timedelta(days=30)
-        
+
         # Status info per monitoring
         print(f"🔐 Environment: {'Production' if env_manager.is_production() else 'Development'}")
         ai_status = env_manager.get_ai_status()
@@ -88,17 +89,17 @@ class SkailaApp:
         # @self.app.before_request
         # def before_request():
         #     pass  # Monitoring temporarily disabled
-        
-        # @self.app.after_request  
+
+        # @self.app.after_request
         # def after_request(response):
         #     pass  # Monitoring temporarily disabled
-        
+
         # Headers per Replit e sicurezza produzione
         @self.app.after_request
         def after_request_headers(response):
             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
             response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
-            
+
             # CORS sicuro: restrictive in produzione, permissive in development
             if env_manager.is_development():
                 response.headers['Access-Control-Allow-Origin'] = '*'
@@ -109,7 +110,7 @@ class SkailaApp:
                 if origin and self._is_origin_allowed(origin, allowed_origins):
                     response.headers['Access-Control-Allow-Origin'] = origin
                 # Non impostare ACAO se origin non allowed (più sicuro di "null")
-                    
+
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, X-CSRF-Token'
             response.headers['Access-Control-Allow-Credentials'] = 'true'
@@ -150,9 +151,9 @@ class SkailaApp:
 
                 utenti_online = user_service.get_online_users(session['user_id'])
 
-            return render_template('chat.html', 
-                                 user=session, 
-                                 chats=chats, 
+            return render_template('chat.html',
+                                 user=session,
+                                 chats=chats,
                                  utenti_online=utenti_online)
 
         @self.app.route('/ai-chat')
@@ -181,20 +182,20 @@ class SkailaApp:
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
-        
+
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp
         self.app.register_blueprint(monitoring_bp)
-        
+
         # Aggiungi CSRF protection context processor
         from csrf_protection import inject_csrf_token
         self.app.context_processor(inject_csrf_token)
-        
+
         # Error handlers personalizzati
         @self.app.errorhandler(404)
         def page_not_found(e):
             return render_template('404.html'), 404
-        
+
         @self.app.errorhandler(500)
         def internal_server_error(e):
             return render_template('500.html'), 500
@@ -208,7 +209,7 @@ class SkailaApp:
             # Produzione: usa le stesse origini allowed del CORS HTTP
             allowed_origins = env_manager.get_allowed_origins()
             cors_origins = self._generate_socketio_cors_origins(allowed_origins)
-        
+
         self.socketio = SocketIO(
             self.app,
             cors_allowed_origins=cors_origins,
@@ -229,7 +230,7 @@ class SkailaApp:
         """Verifica se un'origine è consentita con supporto wildcard"""
         for allowed in allowed_origins:
             allowed = allowed.strip()
-            
+
             # Pattern wildcard (es: *.replit.com)
             if allowed.startswith('*.'):
                 domain = allowed[2:]  # Rimuovi '*.' dall'inizio
@@ -239,16 +240,16 @@ class SkailaApp:
             # Match esatto
             elif origin.endswith(f'://{allowed}'):
                 return True
-                
+
         return False
 
     def _generate_socketio_cors_origins(self, allowed_origins: list) -> list:
         """Genera pattern CORS validi per Socket.IO"""
         cors_origins = []
-        
+
         for origin in allowed_origins:
             origin = origin.strip()
-            
+
             # Normalizza pattern wildcard
             if origin.startswith('*.'):
                 base_domain = origin[2:]  # Rimuovi '*.' dall'inizio
@@ -265,7 +266,7 @@ class SkailaApp:
                     f'https://{origin}',
                     f'http://{origin}'  # HTTP fallback
                 ])
-                
+
         return cors_origins
 
     def init_systems(self):
@@ -275,18 +276,21 @@ class SkailaApp:
 
         # CRITICO: Inizializza sistema scuole multi-tenant
         school_system.init_school_tables()
-        
+
         # Avvia keep-alive database per evitare Neon sleep
         if db_manager.db_type == 'postgresql':
             from database_keep_alive import keep_alive
-            keep_alive.start()
+            # Riduci verbosità log keep-alive
+            keep_alive_thread = threading.Thread(target=keep_alive.keep_database_alive, daemon=True)
+            keep_alive_thread.start()
+            print("✅ Database keep-alive attivato (ping ogni 2 min)")
 
         # Inizializza gamification
         gamification_system.init_gamification_tables()
 
         # Crea indici database ottimizzati
         db_manager.create_optimized_indexes()
-        
+
         # Inizializza scheduler report automatici (con app context)
         try:
             self.report_scheduler = ReportScheduler(app=self.app)
@@ -296,7 +300,7 @@ class SkailaApp:
 
         # Inizializza database se necessario
         self.init_database()
-    
+
     def init_monitoring_delayed(self):
         """TEMPORARILY DISABLED - Monitoring system causing eventlet mainloop blocking"""
         print("⚠️ Monitoring system temporarily disabled to fix eventlet mainloop blocking")
@@ -583,14 +587,14 @@ class SkailaApp:
 
                     if db_manager.db_type == 'postgresql':
                         cursor.execute('''
-                            INSERT INTO utenti 
+                            INSERT INTO utenti
                             (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
                             VALUES (%s, %s, %s, %s, %s, %s, %s, false)
                             ON CONFLICT (username) DO NOTHING
                         ''', (username, email, password_hash, nome, cognome, classe, ruolo))
                     else:
                         cursor.execute('''
-                            INSERT OR REPLACE INTO utenti 
+                            INSERT OR REPLACE INTO utenti
                             (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
                             VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
                         ''', (username, email, password_hash, nome, cognome, classe, ruolo))
@@ -620,10 +624,10 @@ class SkailaApp:
         print(f"🤖 AI Bot: {'✅ Attivo' if self.ai_bot.openai_available else '⚠️ Mock mode'}")
 
         self.socketio.run(
-            self.app, 
-            host=host, 
-            port=port, 
-            debug=debug, 
+            self.app,
+            host=host,
+            port=port,
+            debug=debug,
             allow_unsafe_werkzeug=True
         )
 
@@ -641,7 +645,7 @@ if __name__ == '__main__':
 
     # Avvia in modalità production
     skaila_app.run(
-        host='0.0.0.0', 
-        port=port, 
+        host='0.0.0.0',
+        port=port,
         debug=False
     )
