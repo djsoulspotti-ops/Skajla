@@ -1,0 +1,443 @@
+/**
+ * Professional Override Styles for SKAILA Dashboard
+ * Transforms gaming/cyber UI into corporate professional design
+ */
+
+/* ========== GLOBAL OVERRIDES ========== */
+
+body {
+    background: var(--bg-primary) !important;
+    animation: none !important;
+}
+
+body::before,
+body::after {
+    display: none !important;
+}
+
+/* Remove all floating/animated elements */
+.floating-icon,
+.decoration {
+    display: none !important;
+}
+
+/* ========== LAYOUT ========== */
+
+.dashboard-layout {
+    background: var(--bg-primary);
+}
+
+/* ========== HEADER ========== */
+
+.header {
+    background: var(--bg-card) !important;
+    backdrop-filter: none !important;
+    border-bottom: 1px solid var(--border-primary) !important;
+    box-shadow: none !important;
+}
+
+.header::before {
+    display: none !important;
+}
+
+.logo {
+    background: linear-gradient(135deg, var(--color-teal-400) 0%, var(--color-navy-600) 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: none !important;
+    animation: none !important;
+    font-size: var(--text-3xl) !important;
+    font-weight: var(--font-bold) !important;
+}
+
+.nav-item a {
+    color: var(--text-secondary) !important;
+    font-weight: var(--font-medium) !important;
+}
+
+.nav-item a:hover,
+.nav-item a.active {
+    color: var(--color-teal-400) !important;
+    background: rgba(45, 212, 191, 0.1) !important;
+}
+
+.user-avatar {
+    background: var(--color-teal-500) !important;
+}
+
+.notification-badge {
+    background: var(--color-error) !important;
+}
+
+/* ========== SIDEBAR ========== */
+
+.sidebar {
+    background: var(--bg-secondary) !important;
+    backdrop-filter: none !important;
+    border-right: 1px solid var(--border-primary) !important;
+}
+
+.sidebar::before {
+    display: none !important;
+}
+
+.sidebar-header {
+    border-bottom: 1px solid var(--border-secondary) !important;
+}
+
+.sidebar-title {
+    color: var(--text-tertiary) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold) !important;
+}
+
+.menu-section-title {
+    color: var(--text-muted) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold) !important;
+}
+
+.menu-item {
+    color: var(--text-secondary) !important;
+    border-radius: var(--radius-lg) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.menu-item:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.menu-item.active {
+    background: rgba(45, 212, 191, 0.1) !important;
+    color: var(--color-teal-400) !important;
+    border-left: 3px solid var(--color-teal-500) !important;
+}
+
+.menu-badge {
+    background: var(--color-teal-500) !important;
+    color: white !important;
+    font-size: var(--text-xs) !important;
+    padding: var(--space-1) var(--space-2) !important;
+    border-radius: var(--radius-full) !important;
+}
+
+.sidebar-footer {
+    border-top: 1px solid var(--border-secondary) !important;
+}
+
+.support-button {
+    color: var(--text-secondary) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.support-button:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* ========== MAIN CONTENT ========== */
+
+.main-content {
+    background: var(--bg-primary) !important;
+}
+
+.breadcrumb {
+    background: transparent !important;
+    border-bottom: 1px solid var(--border-secondary) !important;
+}
+
+.breadcrumb-item {
+    color: var(--text-tertiary) !important;
+}
+
+.breadcrumb-item:last-child {
+    color: var(--color-teal-400) !important;
+}
+
+.page-header {
+    margin-bottom: var(--space-8) !important;
+}
+
+.page-title {
+    color: var(--text-primary) !important;
+    font-size: var(--text-4xl) !important;
+    font-weight: var(--font-bold) !important;
+    margin-bottom: var(--space-2) !important;
+}
+
+.page-subtitle {
+    color: var(--text-secondary) !important;
+    font-size: var(--text-base) !important;
+}
+
+/* ========== CARDS ========== */
+
+.card,
+.stat-card,
+.progress-card,
+.activity-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-primary) !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: none !important;
+    transition: all var(--transition-base) !important;
+    backdrop-filter: none !important;
+}
+
+.card::before,
+.stat-card::before,
+.progress-card::before,
+.activity-card::before {
+    display: none !important;
+}
+
+.card:hover,
+.stat-card:hover,
+.progress-card:hover,
+.activity-card:hover {
+    border-color: var(--border-accent) !important;
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-2px) !important;
+}
+
+.card-header,
+.stat-header {
+    border-bottom: 1px solid var(--border-secondary) !important;
+}
+
+.card-title,
+.stat-title {
+    color: var(--text-primary) !important;
+    font-size: var(--text-lg) !important;
+    font-weight: var(--font-semibold) !important;
+}
+
+.stat-value {
+    color: var(--text-primary) !important;
+    font-size: var(--text-4xl) !important;
+    font-weight: var(--font-bold) !important;
+}
+
+.stat-change {
+    font-size: var(--text-sm) !important;
+}
+
+.stat-change.positive {
+    color: var(--color-success) !important;
+}
+
+.stat-change.negative {
+    color: var(--color-error) !important;
+}
+
+.stat-icon {
+    background: rgba(45, 212, 191, 0.1) !important;
+    color: var(--color-teal-500) !important;
+    border-radius: var(--radius-lg) !important;
+}
+
+.stat-icon.primary {
+    background: rgba(45, 212, 191, 0.1) !important;
+    color: var(--color-teal-500) !important;
+}
+
+.stat-icon.success {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: var(--color-success) !important;
+}
+
+.stat-icon.warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: var(--color-warning) !important;
+}
+
+.stat-icon.error {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: var(--color-error) !important;
+}
+
+/* ========== BUTTONS ========== */
+
+.btn,
+.cta-button {
+    background: var(--color-teal-500) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--radius-lg) !important;
+    font-weight: var(--font-semibold) !important;
+    transition: all var(--transition-base) !important;
+    box-shadow: none !important;
+}
+
+.btn::before,
+.cta-button::before {
+    display: none !important;
+}
+
+.btn:hover,
+.cta-button:hover {
+    background: var(--color-teal-600) !important;
+    box-shadow: var(--glow-teal) !important;
+    transform: translateY(-2px) !important;
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-primary) !important;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-accent) !important;
+}
+
+/* ========== PROGRESS BARS ========== */
+
+.progress-bar {
+    background: var(--bg-tertiary) !important;
+    border-radius: var(--radius-full) !important;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, var(--color-teal-500) 0%, var(--color-teal-400) 100%) !important;
+    border-radius: var(--radius-full) !important;
+    box-shadow: none !important;
+}
+
+/* ========== BADGES ========== */
+
+.badge {
+    background: rgba(45, 212, 191, 0.1) !important;
+    color: var(--color-teal-500) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-medium) !important;
+    padding: var(--space-1) var(--space-3) !important;
+    border-radius: var(--radius-full) !important;
+}
+
+.badge.success {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: var(--color-success) !important;
+}
+
+.badge.warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: var(--color-warning) !important;
+}
+
+.badge.error {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: var(--color-error) !important;
+}
+
+/* ========== DROPDOWN ========== */
+
+.dropdown-menu {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-primary) !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+.dropdown-item {
+    color: var(--text-secondary) !important;
+    border-radius: var(--radius-lg) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.dropdown-divider {
+    background: var(--border-secondary) !important;
+}
+
+/* ========== ACTIVITY ITEMS ========== */
+
+.activity-item {
+    border-bottom: 1px solid var(--border-secondary) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.activity-item:hover {
+    background: var(--bg-tertiary) !important;
+}
+
+.activity-avatar {
+    background: var(--color-teal-500) !important;
+}
+
+.activity-content h4 {
+    color: var(--text-primary) !important;
+}
+
+.activity-content p {
+    color: var(--text-tertiary) !important;
+}
+
+.activity-time {
+    color: var(--text-muted) !important;
+}
+
+/* ========== REMOVE GLOW/NEON EFFECTS ========== */
+
+.cyber-glow,
+.neon-effect,
+.glow-effect {
+    animation: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove all keyframe animations that create gaming effects */
+@keyframes gridMove,
+@keyframes cyberPulse,
+@keyframes headerGlow,
+@keyframes logoGlow,
+@keyframes sidebarGlow,
+@keyframes cardGlow,
+@keyframes pulse,
+@keyframes rotate,
+@keyframes floatIcon {
+    from,
+    to {
+        transform: none;
+        opacity: 1;
+        filter: none;
+    }
+}
+
+/* ========== TEXT COLORS ========== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text-primary) !important;
+}
+
+p {
+    color: var(--text-secondary) !important;
+}
+
+a {
+    color: var(--color-teal-400) !important;
+}
+
+a:hover {
+    color: var(--color-teal-300) !important;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 1024px) {
+    .sidebar {
+        background: var(--bg-secondary) !important;
+    }
+}
