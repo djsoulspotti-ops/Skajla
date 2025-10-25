@@ -84,11 +84,11 @@
 
         <div class="section">
             <h2 style="margin-bottom: 1rem;">👥 Chat Classe</h2>
-            {% if chat_classe %}
+            {% if chat_classe and chat_classe|length > 0 %}
                 {% for chat in chat_classe %}
-                <div class="chat-card" onclick="window.location.href='/chat/room/{{ chat[0] }}'">
-                    <h3>{{ chat[1] }}</h3>
-                    <p style="opacity: 0.8;">{{ chat[5] or 'Chat di classe' }}</p>
+                <div class="chat-card" onclick="window.location.href='/chat/room/{{ chat.id }}'">
+                    <h3>{{ chat.nome or ('Classe ' + chat.classe) }}</h3>
+                    <p style="opacity: 0.8;">{{ chat.message_count or 0 }} messaggi</p>
                 </div>
                 {% endfor %}
             {% else %}

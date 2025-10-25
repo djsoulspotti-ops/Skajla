@@ -1,19 +1,34 @@
-<!-- Dashboard Registro Elettronico Professore -->
-<style>
-:root {
-    --primary: #00d4ff;
-    --secondary: #7c3aed;
-    --accent: #ff006e;
-    --success: #00ff88;
-    --warning: #ffaa00;
-    --error: #ff0066;
-    --dark: #0a0a0f;
-    --darker: #050508;
-    --light: #1a1a2e;
-    --text: #ffffff;
-    --border: rgba(0, 212, 255, 0.2);
-    --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
-}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Registro Elettronico - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #00d4ff;
+            --secondary: #7c3aed;
+            --accent: #ff006e;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --error: #ff0066;
+            --dark: #0a0a0f;
+            --darker: #050508;
+            --light: #1a1a2e;
+            --text: #ffffff;
+            --border: rgba(0, 212, 255, 0.2);
+            --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text);
+        }
 
 .registro-dashboard {
     background: var(--darker);
@@ -404,7 +419,12 @@
 </style>
 
 <div class="registro-dashboard">
-    <h1 style="margin-bottom: 2rem;">📝 Registro Elettronico</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>📝 Registro Elettronico</h1>
+        <a href="/dashboard" style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border-radius: 10px; color: white; text-decoration: none; font-weight: 600;">
+            <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
 
     <!-- Tabs -->
     <div class="registro-tabs">
@@ -421,9 +441,15 @@
                 <label style="font-weight: 600;">Classe:</label>
                 <select id="classePresenze" onchange="loadPresenze()">
                     <option value="">Seleziona classe</option>
+                    {% if user.classe %}
+                    <option value="{{ user.classe }}" selected>{{ user.classe }}</option>
+                    {% else %}
                     <option value="1A">1A</option>
                     <option value="2A">2A</option>
                     <option value="3A">3A</option>
+                    <option value="4A">4A</option>
+                    <option value="5A">5A</option>
+                    {% endif %}
                 </select>
                 <input type="date" id="dataPresenze" onchange="loadPresenze()" style="padding: 0.8rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text);">
             </div>
@@ -572,9 +598,15 @@
                         <div class="form-group">
                             <label>Classe *</label>
                             <select id="lezioneClasse" required>
+                                {% if user.classe %}
+                                <option value="{{ user.classe }}" selected>{{ user.classe }}</option>
+                                {% else %}
                                 <option value="1A">1A</option>
                                 <option value="2A">2A</option>
                                 <option value="3A">3A</option>
+                                <option value="4A">4A</option>
+                                <option value="5A">5A</option>
+                                {% endif %}
                             </select>
                         </div>
                     </div>
@@ -604,6 +636,7 @@
 let currentTab = 'presenze';
 let presenzeData = {};
 let selectedSeverity = 'lieve';
+let studentiData = {{ studenti|tojson|safe }};
 
 // Switch Tab
 function switchTab(tab) {
@@ -628,37 +661,45 @@ async function loadPresenze() {
     
     if (!classe) return;
     
-    // Simulate loading students
-    const students = ['Marco Rossi', 'Giulia Bianchi', 'Luca Verdi', 'Sofia Neri', 'Alessandro Russo'];
     const tbody = document.getElementById('presenzeTableBody');
     
-    tbody.innerHTML = students.map(student => `
-        <tr>
-            <td><strong>${student}</strong></td>
+    if (!studentiData || studentiData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem;">Nessuno studente trovato in questa classe</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = studentiData.map(student => `
+        <tr data-student-id="${student.id}">
+            <td><strong>${student.nome} ${student.cognome}</strong></td>
             <td>
                 <div class="status-selector">
-                    <button type="button" class="status-btn present" onclick="setStatus('${student}', 'present')">✅ Presente</button>
-                    <button type="button" class="status-btn" onclick="setStatus('${student}', 'absent')">❌ Assente</button>
-                    <button type="button" class="status-btn" onclick="setStatus('${student}', 'late')">⏰ Ritardo</button>
-                    <button type="button" class="status-btn" onclick="setStatus('${student}', 'early')">🚪 Uscita</button>
+                    <button type="button" class="status-btn present" onclick="setStatus(${student.id}, 'presente')">✅ Presente</button>
+                    <button type="button" class="status-btn" onclick="setStatus(${student.id}, 'assente')">❌ Assente</button>
+                    <button type="button" class="status-btn" onclick="setStatus(${student.id}, 'ritardo')">⏰ Ritardo</button>
+                    <button type="button" class="status-btn" onclick="setStatus(${student.id}, 'uscita_anticipata')">🚪 Uscita</button>
                 </div>
             </td>
-            <td><input type="text" id="note_${student.replace(' ', '_')}" placeholder="Note opzionali" style="padding: 0.5rem; background: var(--darker); border: 1px solid var(--border); border-radius: 5px; color: var(--text); width: 100%;"></td>
+            <td><input type="text" id="note_${student.id}" placeholder="Note opzionali" style="padding: 0.5rem; background: var(--darker); border: 1px solid var(--border); border-radius: 5px; color: var(--text); width: 100%;"></td>
         </tr>
     `).join('');
     
     presenzeData = {};
-    students.forEach(s => presenzeData[s] = 'present');
+    studentiData.forEach(s => presenzeData[s.id] = {status: 'presente', note: ''});
 }
 
-function setStatus(student, status) {
-    presenzeData[student] = status;
+function setStatus(studentId, status) {
+    if (!presenzeData[studentId]) {
+        presenzeData[studentId] = {note: ''};
+    }
+    presenzeData[studentId].status = status;
     
-    const row = event.target.closest('tr');
-    row.querySelectorAll('.status-btn').forEach(btn => {
-        btn.className = 'status-btn';
-    });
-    event.target.classList.add(status);
+    const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+    if (row) {
+        row.querySelectorAll('.status-btn').forEach(btn => {
+            btn.className = 'status-btn';
+        });
+        event.target.classList.add(status);
+    }
 }
 
 async function savePresenze() {
@@ -666,36 +707,95 @@ async function savePresenze() {
     const data = document.getElementById('dataPresenze').value;
     
     if (!classe || !data) {
-        alert('Seleziona classe e data!');
+        alert('⚠️ Seleziona classe e data!');
         return;
     }
     
+    // Raccogli note
+    studentiData.forEach(s => {
+        const noteInput = document.getElementById(`note_${s.id}`);
+        if (noteInput && presenzeData[s.id]) {
+            presenzeData[s.id].note = noteInput.value;
+        }
+    });
+    
+    // Costruisci payload per API
+    const attendance_list = Object.entries(presenzeData).map(([studentId, data]) => ({
+        student_id: parseInt(studentId),
+        status: data.status,
+        note: data.note || ''
+    }));
+    
     const payload = {
-        classe,
-        data,
-        presenze: presenzeData
+        classe: classe,
+        date: data,
+        attendance_list: attendance_list
     };
     
-    console.log('Salvando presenze:', payload);
-    alert('✅ Presenze salvate con successo!');
+    try {
+        const response = await fetch('/api/registro/presenze/classe', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(`✅ Presenze salvate! ${result.marked} studenti registrati`);
+        } else {
+            alert(`❌ Errore: ${result.error || 'Errore sconosciuto'}`);
+        }
+    } catch (error) {
+        console.error('Errore salvataggio presenze:', error);
+        alert('❌ Errore di connessione al server');
+    }
 }
 
 // VOTI Functions
 async function addVoto(e) {
     e.preventDefault();
     
-    const voto = {
-        studente: document.getElementById('votoStudente').value,
-        materia: document.getElementById('votoMateria').value,
-        valore: document.getElementById('votoValore').value,
-        tipo: document.getElementById('votoTipo').value,
-        descrizione: document.getElementById('votoDescrizione').value
+    const studentId = parseInt(document.getElementById('votoStudente').value);
+    const materia = document.getElementById('votoMateria').value;
+    const grade = parseFloat(document.getElementById('votoValore').value);
+    const tipo = document.getElementById('votoTipo').value;
+    const descrizione = document.getElementById('votoDescrizione').value;
+    
+    if (!studentId || !materia || !grade) {
+        alert('⚠️ Compila tutti i campi obbligatori!');
+        return;
+    }
+    
+    const payload = {
+        student_id: studentId,
+        subject: materia,
+        grade: grade,
+        evaluation_type: tipo,
+        description: descrizione,
+        date: new Date().toISOString().split('T')[0]
     };
     
-    console.log('Nuovo voto:', voto);
-    alert('✅ Voto inserito con successo!');
-    document.getElementById('votoForm').reset();
-    loadVoti();
+    try {
+        const response = await fetch('/api/registro/voti/inserisci', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('✅ Voto inserito con successo!');
+            document.getElementById('votoForm').reset();
+            loadVoti();
+        } else {
+            alert(`❌ Errore: ${result.error || 'Errore sconosciuto'}`);
+        }
+    } catch (error) {
+        console.error('Errore inserimento voto:', error);
+        alert('❌ Errore di connessione al server');
+    }
 }
 
 function loadVoti() {
@@ -731,17 +831,44 @@ function selectSeverity(severity) {
 async function addNota(e) {
     e.preventDefault();
     
-    const nota = {
-        studente: document.getElementById('notaStudente').value,
-        tipo: document.getElementById('notaTipo').value,
-        gravita: selectedSeverity,
-        descrizione: document.getElementById('notaDescrizione').value
+    const studentId = parseInt(document.getElementById('notaStudente').value);
+    const descrizione = document.getElementById('notaDescrizione').value;
+    
+    if (!studentId || !descrizione) {
+        alert('⚠️ Seleziona studente e inserisci descrizione!');
+        return;
+    }
+    
+    const payload = {
+        student_id: studentId,
+        description: descrizione,
+        severity: selectedSeverity,
+        date: new Date().toISOString().split('T')[0]
     };
     
-    console.log('Nuova nota:', nota);
-    alert('⚠️ Nota disciplinare inserita!');
-    document.getElementById('notaForm').reset();
-    loadNote();
+    try {
+        const response = await fetch('/api/registro/note/inserisci', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('⚠️ Nota disciplinare inserita!');
+            document.getElementById('notaForm').reset();
+            selectedSeverity = 'lieve';
+            document.querySelectorAll('.severity-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.severity-btn.lieve').classList.add('active');
+            loadNote();
+        } else {
+            alert(`❌ Errore: ${result.error || 'Errore sconosciuto'}`);
+        }
+    } catch (error) {
+        console.error('Errore inserimento nota:', error);
+        alert('❌ Errore di connessione al server');
+    }
 }
 
 function loadNote() {
@@ -766,18 +893,44 @@ function loadNote() {
 async function addLezione(e) {
     e.preventDefault();
     
-    const lezione = {
-        data: document.getElementById('lezioneData').value,
-        ora: document.getElementById('lezioneOra').value,
-        classe: document.getElementById('lezioneClasse').value,
-        topic: document.getElementById('lezioneTopic').value,
-        homework: document.getElementById('lezioneHomework').value
+    const classe = document.getElementById('lezioneClasse').value;
+    const topic = document.getElementById('lezioneTopic').value;
+    const data = document.getElementById('lezioneData').value;
+    const homework = document.getElementById('lezioneHomework').value;
+    
+    if (!classe || !topic || !data) {
+        alert('⚠️ Compila i campi obbligatori (data, classe, argomento)!');
+        return;
+    }
+    
+    const payload = {
+        class: classe,
+        subject: 'Generale',  // Potrebbe essere reso dinamico
+        topic: topic,
+        homework: homework || '',
+        lesson_date: data
     };
     
-    console.log('Nuova lezione:', lezione);
-    alert('📅 Lezione pianificata!');
-    document.getElementById('lezioneForm').reset();
-    loadCalendario();
+    try {
+        const response = await fetch('/api/registro/lezioni/aggiungi', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('📅 Lezione pianificata!');
+            document.getElementById('lezioneForm').reset();
+            loadCalendario();
+        } else {
+            alert(`❌ Errore: ${result.error || 'Errore sconosciuto'}`);
+        }
+    } catch (error) {
+        console.error('Errore pianificazione lezione:', error);
+        alert('❌ Errore di connessione al server');
+    }
 }
 
 function loadCalendario() {
@@ -804,8 +957,41 @@ function loadCalendario() {
     `).join('');
 }
 
+// Popola dropdown studenti
+function populateStudentDropdowns() {
+    const votoSelect = document.getElementById('votoStudente');
+    const notaSelect = document.getElementById('notaStudente');
+    
+    if (!studentiData || studentiData.length === 0) {
+        return;
+    }
+    
+    studentiData.forEach(s => {
+        const option1 = document.createElement('option');
+        option1.value = s.id;
+        option1.textContent = `${s.nome} ${s.cognome}`;
+        votoSelect.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = s.id;
+        option2.textContent = `${s.nome} ${s.cognome}`;
+        notaSelect.appendChild(option2);
+    });
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('dataPresenze').valueAsDate = new Date();
+    document.getElementById('lezioneData').valueAsDate = new Date();
+    populateStudentDropdowns();
+    
+    // Imposta classe dal backend
+    {% if user.classe %}
+    document.getElementById('classePresenze').value = '{{ user.classe }}';
+    document.getElementById('lezioneClasse').value = '{{ user.classe }}';
+    loadPresenze();
+    {% endif %}
 });
 </script>
+</body>
+</html>

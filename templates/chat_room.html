@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💬 {{ chat.nome or 'Chat' }} - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            padding: 0.6rem 1.2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+        }
+        
+        .messages-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 250px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .message {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .message.own {
+            background: rgba(102, 126, 234, 0.3);
+            margin-left: 20%;
+        }
+        
+        .message.other {
+            background: rgba(255, 255, 255, 0.15);
+            margin-right: 20%;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .message-author {
+            font-weight: 700;
+            color: #f093fb;
+        }
+        
+        .message-time {
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+        
+        .message-content {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .input-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .message-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .send-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .send-btn:active {
+            transform: translateY(0);
+        }
+        
+        .participants {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .participants-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .participant-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 0.3rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.7;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💬 {{ chat.nome or 'Chat' }}</h1>
+        <a href="/chat" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Chat Hub
+        </a>
+    </div>
+    
+    <div class="chat-container">
+        {% if participants and participants|length > 0 %}
+        <div class="participants">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="status-indicator"></span>
+                <strong>{{ participants|length }} partecipanti</strong>
+            </div>
+            <div class="participants-list">
+                {% for p in participants %}
+                <span class="participant-badge">{{ p.nome }} {{ p.cognome }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="messages-container" id="messagesContainer">
+            {% if messages and messages|length > 0 %}
+                {% for msg in messages %}
+                <div class="message {% if msg.utente_id == user.user_id %}own{% else %}other{% endif %}">
+                    <div class="message-header">
+                        <span class="message-author">{{ msg.nome }} {{ msg.cognome }}</span>
+                        <span class="message-time">{{ msg.timestamp.strftime('%H:%M') if msg.timestamp else '' }}</span>
+                    </div>
+                    <div class="message-content">{{ msg.contenuto }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-comments"></i>
+                    <h3>Nessun messaggio ancora</h3>
+                    <p>Inizia la conversazione scrivendo un messaggio!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="messageInput" 
+                class="message-input" 
+                placeholder="Scrivi un messaggio..."
+                autocomplete="off"
+            >
+            <button class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i> Invia
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        const chatId = {{ chat.id }};
+        const userId = {{ user.user_id }};
+        const userName = "{{ user.nome }} {{ user.cognome }}";
+        
+        // Connetti a Socket.IO
+        const socket = io();
+        
+        // Join chat room
+        socket.on('connect', function() {
+            console.log('✅ Socket.IO connesso');
+            socket.emit('join_conversation', {
+                conversation_id: chatId
+            });
+        });
+        
+        // Ricevi nuovo messaggio
+        socket.on('new_message', function(message) {
+            console.log('📨 Nuovo messaggio:', message);
+            addMessageToUI(message);
+        });
+        
+        // Error handling
+        socket.on('error', function(data) {
+            console.error('❌ Errore Socket.IO:', data);
+            alert('Errore: ' + (data.message || 'Errore sconosciuto'));
+        });
+        
+        // Conferma join
+        socket.on('joined_conversation', function(data) {
+            console.log('✅ Unito alla chat:', data);
+        });
+        
+        // Invia messaggio
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const contenuto = input.value.trim();
+            
+            if (!contenuto) {
+                alert('⚠️ Scrivi un messaggio prima di inviare!');
+                return;
+            }
+            
+            // Invia via Socket.IO
+            socket.emit('send_message', {
+                conversation_id: chatId,
+                contenuto: contenuto
+            });
+            
+            // Pulisci input
+            input.value = '';
+            input.focus();
+        }
+        
+        // Aggiungi messaggio a UI
+        function addMessageToUI(message) {
+            const container = document.getElementById('messagesContainer');
+            
+            // Rimuovi empty state se presente
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            const isOwn = message.utente_id === userId;
+            const timestamp = new Date(message.data_invio || message.timestamp);
+            const timeStr = timestamp.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'});
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-author">${message.nome} ${message.cognome}</span>
+                    <span class="message-time">${timeStr}</span>
+                </div>
+                <div class="message-content">${escapeHtml(message.contenuto)}</div>
+            `;
+            
+            container.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Escape HTML per sicurezza
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Invia con Enter
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Auto-scroll all'inizio
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        });
+    </script>
+</body>
+</html>
