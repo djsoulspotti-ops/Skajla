@@ -317,57 +317,6 @@ class SkailaApp:
         #     print(f"⚠️ Monitoring system initialization failed: {e}")
         #     # Continue without monitoring rather than failing
 
-    def migrate_oauth_columns(self):
-        """Migrazione colonne OAuth per database esistenti"""
-        try:
-            with db_manager.get_connection() as conn:
-                cursor = conn.cursor()
-                
-                if db_manager.db_type == 'postgresql':
-                    # Controlla se le colonne OAuth esistono già
-                    cursor.execute("""
-                        SELECT column_name 
-                        FROM information_schema.columns 
-                        WHERE table_name = 'utenti' 
-                        AND column_name IN ('oauth_provider', 'oauth_id', 'email_verified')
-                    """)
-                    existing_columns = {row[0] for row in cursor.fetchall()}
-                    
-                    # Aggiungi colonne mancanti
-                    if 'oauth_provider' not in existing_columns:
-                        cursor.execute("ALTER TABLE utenti ADD COLUMN oauth_provider TEXT")
-                        print("✅ Colonna oauth_provider aggiunta")
-                    
-                    if 'oauth_id' not in existing_columns:
-                        cursor.execute("ALTER TABLE utenti ADD COLUMN oauth_id TEXT")
-                        print("✅ Colonna oauth_id aggiunta")
-                    
-                    if 'email_verified' not in existing_columns:
-                        cursor.execute("ALTER TABLE utenti ADD COLUMN email_verified BOOLEAN DEFAULT FALSE")
-                        print("✅ Colonna email_verified aggiunta")
-                    
-                    # Rendi password_hash nullable se necessario
-                    cursor.execute("""
-                        ALTER TABLE utenti ALTER COLUMN password_hash DROP NOT NULL
-                    """)
-                    
-                    if existing_columns:
-                        print("✅ Schema OAuth migrato con successo")
-                else:
-                    # SQLite - usa PRAGMA per controllare colonne
-                    cursor.execute("PRAGMA table_info(utenti)")
-                    existing_columns = {row[1] for row in cursor.fetchall()}
-                    
-                    # SQLite non supporta ALTER COLUMN, quindi dobbiamo ricreare la tabella se necessario
-                    # Per ora skippiamo, le nuove installazioni avranno già le colonne
-                    if 'oauth_provider' not in existing_columns:
-                        print("⚠️ SQLite: migrazione OAuth richiede ricreazione tabella - skipped")
-                
-                conn.commit()
-        except Exception as e:
-            # Non bloccare l'avvio se la migrazione fallisce
-            print(f"⚠️ Migrazione OAuth colonne: {e}")
-
     def init_database(self):
         """Inizializzazione database con dati demo"""
         if db_manager.db_type == 'postgresql':
@@ -409,7 +358,7 @@ class SkailaApp:
                         id SERIAL PRIMARY KEY,
                         username TEXT UNIQUE NOT NULL,
                         email TEXT UNIQUE NOT NULL,
-                        password_hash TEXT,
+                        password_hash TEXT NOT NULL,
                         nome TEXT NOT NULL,
                         cognome TEXT NOT NULL,
                         classe TEXT,
@@ -419,10 +368,7 @@ class SkailaApp:
                         ultimo_accesso TIMESTAMP,
                         status_online BOOLEAN DEFAULT FALSE,
                         avatar TEXT DEFAULT 'default.jpg',
-                        data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        oauth_provider TEXT,
-                        oauth_id TEXT,
-                        email_verified BOOLEAN DEFAULT FALSE
+                        data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
             else:
@@ -431,7 +377,7 @@ class SkailaApp:
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         username TEXT UNIQUE NOT NULL,
                         email TEXT UNIQUE NOT NULL,
-                        password_hash TEXT,
+                        password_hash TEXT NOT NULL,
                         nome TEXT NOT NULL,
                         cognome TEXT NOT NULL,
                         classe TEXT,
@@ -441,10 +387,7 @@ class SkailaApp:
                         ultimo_accesso TIMESTAMP,
                         status_online BOOLEAN DEFAULT 0,
                         avatar TEXT DEFAULT 'default.jpg',
-                        data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        oauth_provider TEXT,
-                        oauth_id TEXT,
-                        email_verified BOOLEAN DEFAULT 0
+                        data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
 
