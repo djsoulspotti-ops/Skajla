@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -9,99 +8,56 @@
     <link rel="icon" type="image/svg+xml" href="/static/logo-skaila.svg">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --success: #10b981;
-            --error: #ef4444;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            --blur: blur(20px);
-        }
-
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--gradient-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            background: linear-gradient(135deg, var(--color-slate-950) 0%, var(--color-navy-900) 100%);
             position: relative;
         }
 
-        /* Animated Background */
+        /* Subtle geometric background pattern */
         body::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
-            animation: rotate 30s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Floating Elements */
-        .floating-icon {
-            position: absolute;
-            color: rgba(255,255,255,0.1);
-            font-size: 3rem;
-            animation: floatIcon 8s ease-in-out infinite;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 80px 80px;
             pointer-events: none;
         }
 
-        .floating-icon:nth-child(1) { top: 10%; left: 15%; animation-delay: 0s; }
-        .floating-icon:nth-child(2) { top: 70%; right: 10%; animation-delay: 3s; }
-        .floating-icon:nth-child(3) { bottom: 20%; left: 10%; animation-delay: 6s; }
-        .floating-icon:nth-child(4) { top: 30%; right: 20%; animation-delay: 1.5s; }
-
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
-            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.2; }
+        .login-wrapper {
+            width: 100%;
+            max-width: 480px;
+            padding: var(--space-6);
+            position: relative;
+            z-index: 1;
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: var(--blur);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 3.5rem;
-            border-radius: 24px;
-            box-shadow: var(--shadow-heavy);
-            width: 100%;
-            max-width: 450px;
-            position: relative;
-            z-index: 10;
-            animation: slideInUp 0.8s ease-out;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-12);
+            box-shadow: var(--shadow-2xl);
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        @keyframes slideInUp {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -109,456 +65,347 @@
             }
         }
 
-        .logo {
+        .logo-section {
             text-align: center;
-            font-size: 3rem;
-            font-weight: 900;
-            color: white;
-            margin-bottom: 2.5rem;
-            letter-spacing: -2px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: var(--space-10);
         }
 
-        @keyframes glow {
-            from { text-shadow: 0 4px 20px rgba(255,255,255,0.3); }
-            to { text-shadow: 0 4px 30px rgba(255,255,255,0.5); }
+        .logo {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            background: linear-gradient(135deg, var(--color-teal-400) 0%, var(--color-navy-600) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            margin-bottom: var(--space-3);
+        }
+
+        .logo-subtitle {
+            font-size: var(--text-sm);
+            color: var(--text-tertiary);
+            font-weight: var(--font-medium);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         h1 {
             text-align: center;
-            color: white;
-            margin-bottom: 2.5rem;
-            font-size: 2rem;
-            font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            color: var(--text-primary);
+            margin-bottom: var(--space-8);
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+        }
+
+        .alert {
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .alert i {
+            font-size: var(--text-lg);
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .form-group {
-            margin-bottom: 2rem;
-            position: relative;
+            margin-bottom: var(--space-6);
         }
 
         label {
             display: block;
-            margin-bottom: 0.75rem;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            margin-bottom: var(--space-2);
+            color: var(--text-secondary);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
         }
 
         .input-wrapper {
             position: relative;
         }
 
-        input {
+        .input-icon {
+            position: absolute;
+            left: var(--space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+            pointer-events: none;
+            transition: color var(--transition-fast);
+        }
+
+        input[type="email"],
+        input[type="password"] {
             width: 100%;
-            padding: 1.25rem 1.25rem 1.25rem 3.5rem;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            backdrop-filter: var(--blur);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 500;
+            padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) * 3);
+            font-size: var(--text-sm);
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-fast);
+            font-family: var(--font-sans);
         }
 
         input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
         }
 
         input:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            border-color: var(--color-teal-500);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
         }
 
-        .input-icon {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1rem;
-            pointer-events: none;
+        input:focus + .input-icon {
+            color: var(--color-teal-400);
         }
 
-        .btn {
-            width: 100%;
-            padding: 1.25rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--primary);
-            border: none;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: var(--shadow-medium);
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn:hover {
-            transform: translateY(-4px) scale(1.02);
-            background: white;
-            box-shadow: 
-                var(--shadow-heavy),
-                0 0 30px rgba(255,255,255,0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .error {
-            color: white;
-            background: rgba(239, 68, 68, 0.2);
-            backdrop-filter: var(--blur);
-            padding: 1.25rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            font-weight: 500;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .register-link {
-            text-align: center;
-            margin-top: 2.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
-        }
-
-        .register-link a {
-            color: white;
-            text-decoration: none;
-            font-weight: 700;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
-        }
-
-        .register-link a:hover {
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-            border-bottom: 2px solid white;
-        }
-
-        /* Remember Me Checkbox */
         .remember-me-group {
-            margin-bottom: 2rem;
-            margin-top: -0.5rem;
+            margin-bottom: var(--space-6);
         }
 
         .remember-me-label {
             display: flex;
             align-items: center;
             cursor: pointer;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            transition: color var(--transition-fast);
+            user-select: none;
         }
 
         .remember-me-label:hover {
-            color: white;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            color: var(--text-primary);
         }
 
         .remember-me-label input[type="checkbox"] {
             position: absolute;
             opacity: 0;
             cursor: pointer;
-            height: 0;
-            width: 0;
         }
 
-        .checkmark {
+        .checkbox-custom {
             position: relative;
-            display: inline-block;
-            height: 22px;
-            width: 22px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 6px;
-            margin-right: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: var(--blur);
+            width: 20px;
+            height: 20px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-sm);
+            margin-right: var(--space-3);
+            transition: all var(--transition-fast);
         }
 
-        .remember-me-label:hover .checkmark {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: scale(1.05);
+        .remember-me-label:hover .checkbox-custom {
+            border-color: var(--color-teal-500);
         }
 
-        .remember-me-label input:checked ~ .checkmark {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-color: white;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        .remember-me-label input:checked ~ .checkbox-custom {
+            background: var(--color-teal-500);
+            border-color: var(--color-teal-500);
         }
 
-        .checkmark:after {
+        .checkbox-custom::after {
             content: "";
             position: absolute;
             display: none;
-        }
-
-        .remember-me-label input:checked ~ .checkmark:after {
-            display: block;
-        }
-
-        .remember-me-label .checkmark:after {
-            left: 6px;
+            left: 5px;
             top: 2px;
-            width: 5px;
-            height: 10px;
-            border: solid var(--primary);
-            border-width: 0 3px 3px 0;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
 
-        .remember-text {
-            user-select: none;
+        .remember-me-label input:checked ~ .checkbox-custom::after {
+            display: block;
         }
 
-        .success {
+        .btn-primary {
+            width: 100%;
+            padding: var(--space-4);
+            background: var(--color-teal-500);
             color: white;
-            background: rgba(16, 185, 129, 0.2);
-            backdrop-filter: var(--blur);
-            padding: 1.25rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-weight: 500;
-            animation: slideInDown 0.5s ease-out;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-family: var(--font-sans);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
         }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .btn-primary:hover {
+            background: var(--color-teal-600);
+            box-shadow: var(--glow-teal);
+            transform: translateY(-2px);
         }
 
-        /* Decorative Elements */
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
-            border-radius: 26px;
-            z-index: -1;
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
-        .decoration {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: var(--blur);
+        .register-link {
+            text-align: center;
+            margin-top: var(--space-8);
+            padding-top: var(--space-8);
+            border-top: 1px solid var(--border-secondary);
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
         }
 
-        .decoration:nth-child(1) {
-            top: -50px;
-            right: -50px;
-            animation: pulse 3s ease-in-out infinite;
+        .register-link a {
+            color: var(--color-teal-400);
+            text-decoration: none;
+            font-weight: var(--font-semibold);
+            transition: color var(--transition-fast);
         }
 
-        .decoration:nth-child(2) {
-            bottom: -50px;
-            left: -50px;
-            animation: pulse 3s ease-in-out infinite 1.5s;
+        .register-link a:hover {
+            color: var(--color-teal-300);
+            text-decoration: underline;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.1; }
-            50% { transform: scale(1.2); opacity: 0.2; }
+        /* Brand accent line */
+        .accent-line {
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-teal-500) 0%, var(--color-navy-600) 100%);
+            margin-bottom: var(--space-8);
+            border-radius: var(--radius-full);
         }
 
         /* Responsive */
-        @media (max-width: 480px) {
-            body {
-                min-height: 100vh;
-                align-items: flex-start;
-                padding: 10px;
-                padding-top: 20px;
+        @media (max-width: 640px) {
+            .login-wrapper {
+                padding: var(--space-4);
             }
-            
+
             .login-container {
-                padding: 2rem;
-                margin: 0;
-                width: 100%;
-                max-width: none;
-                border-radius: 20px;
+                padding: var(--space-8);
             }
-            
+
             .logo {
-                font-size: 2.2rem;
-                margin-bottom: 1.5rem;
+                font-size: var(--text-3xl);
             }
-            
+
             h1 {
-                font-size: 1.5rem;
-                margin-bottom: 2rem;
-            }
-            
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-            
-            input {
-                padding: 1rem 1rem 1rem 3rem;
-            }
-            
-            .btn {
-                padding: 1rem;
-                font-size: 1rem;
-            }
-        }
-        
-        @media (max-height: 700px) {
-            body {
-                align-items: flex-start;
-                padding-top: 10px;
+                font-size: var(--text-xl);
             }
         }
     </style>
 </head>
 <body>
-    <i class="floating-icon fas fa-graduation-cap"></i>
-    <i class="floating-icon fas fa-rocket"></i>
-    <i class="floating-icon fas fa-star"></i>
-    <i class="floating-icon fas fa-book"></i>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="logo-section">
+                <div class="logo">SKAILA</div>
+                <div class="logo-subtitle">Education Platform</div>
+            </div>
 
-    <div class="login-container">
-        <div class="decoration"></div>
-        <div class="decoration"></div>
-        
-        <div class="logo">SKAILA</div>
-        <h1>🔐 Bentornato!</h1>
+            <div class="accent-line"></div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{{ category }}">
-                        {% if category == 'error' %}
-                            <i class="fas fa-exclamation-triangle"></i>
-                        {% elif category == 'success' %}
-                            <i class="fas fa-check-circle"></i>
-                        {% endif %}
-                        {{ message }}
+            <h1>Accedi al tuo account</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">
+                            {% if category == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% elif category == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" autocomplete="on">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if not csrf_token() %}
+                <div class="alert error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Errore CSRF: ricarica la pagina</span>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="email">Indirizzo Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" placeholder="nome@esempio.it" autocomplete="email" required>
+                        <i class="input-icon fas fa-envelope"></i>
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            {% if not csrf_token() %}
-            <div class="error">
-                <i class="fas fa-exclamation-triangle"></i> Errore CSRF: ricarica la pagina
-            </div>
-            {% endif %}
-            <div class="form-group">
-                <label for="email">📧 Email</label>
-                <div class="input-wrapper">
-                    <i class="input-icon fas fa-envelope"></i>
-                    <input type="email" id="email" name="email" placeholder="La tua email" autocomplete="email" required>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="password">🔒 Password</label>
-                <div class="input-wrapper">
-                    <i class="input-icon fas fa-lock"></i>
-                    <input type="password" id="password" name="password" placeholder="La tua password" autocomplete="current-password" required>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Inserisci la tua password" autocomplete="current-password" required>
+                        <i class="input-icon fas fa-lock"></i>
+                    </div>
                 </div>
+
+                <div class="form-group remember-me-group">
+                    <label class="remember-me-label">
+                        <input type="checkbox" name="remember_me" id="remember_me" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Mantieni l'accesso per 30 giorni</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Accedi</span>
+                </button>
+            </form>
+
+            <div class="register-link">
+                Non hai un account? <a href="/register">Registrati</a>
             </div>
-
-            <div class="form-group remember-me-group">
-                <label class="remember-me-label">
-                    <input type="checkbox" name="remember_me" id="remember_me" checked>
-                    <span class="checkmark"></span>
-                    <span class="remember-text">🔐 Ricordami per 30 giorni</span>
-                </label>
-            </div>
-
-            <button type="submit" class="btn">
-                <i class="fas fa-sign-in-alt"></i> Accedi a SKAILA
-            </button>
-        </form>
-
-        <div class="register-link">
-            Non hai ancora un account? <a href="/register">✨ Registrati qui</a>
         </div>
     </div>
 
     <script>
-        // Add focus effects
+        // Form submission loading state
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = this.querySelector('.btn-primary');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Accesso in corso...</span>';
+            btn.style.opacity = '0.7';
+        });
+
+        // Input focus animations
         document.querySelectorAll('input').forEach(input => {
             input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transform = 'scale(1.01)';
             });
             
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
-            });
-        });
-
-        // Form submission animation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const btn = this.querySelector('.btn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accesso in corso...';
-            btn.style.background = 'rgba(255,255,255,0.7)';
-        });
-
-        // Parallax effect for floating icons
-        document.addEventListener('mousemove', function(e) {
-            const icons = document.querySelectorAll('.floating-icon');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            
-            icons.forEach((icon, index) => {
-                const speed = (index + 1) * 0.5;
-                const newX = x * speed * 10;
-                const newY = y * speed * 10;
-                icon.style.transform = `translate(${newX}px, ${newY}px) rotate(${newX}deg)`;
             });
         });
     </script>
