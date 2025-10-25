@@ -41,14 +41,10 @@ from routes.messaging_routes import messaging_bp
 from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
-from routes.oauth_routes import oauth_bp, init_oauth_routes
 
 # Import services
 from services.auth_service import auth_service
 from services.user_service import user_service
-
-# Import OAuth
-from auth.oauth_manager import oauth_manager
 
 class SkailaApp:
     """Classe principale per l'applicazione SKAILA"""
@@ -195,9 +191,6 @@ class SkailaApp:
         from routes.monitoring_routes import monitoring_bp
         self.app.register_blueprint(monitoring_bp)
 
-        # OAuth routes (Google + Microsoft)
-        init_oauth_routes(self.app, oauth_manager, db_manager)
-
         # Aggiungi CSRF protection context processor
         from csrf_protection import inject_csrf_token
         self.app.context_processor(inject_csrf_token)
@@ -287,12 +280,6 @@ class SkailaApp:
 
         # CRITICO: Inizializza sistema scuole multi-tenant
         school_system.init_school_tables()
-
-        # Inizializza OAuth Manager (Google + Microsoft)
-        oauth_manager.init_app(self.app)
-
-        # Migrazione colonne OAuth per database esistenti
-        self.migrate_oauth_columns()
 
         # Avvia keep-alive database per evitare Neon sleep
         if db_manager.db_type == 'postgresql':
