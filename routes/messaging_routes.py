@@ -294,6 +294,12 @@ def quiz_hub():
 @require_login
 def calendario():
     """Calendario eventi"""
+    # Modalità demo: accesso senza dati database
+    if session.get('demo_mode'):
+        return render_template('calendario.html',
+                             user=session,
+                             events=[])
+    
     try:
         user_id = session['user_id']
         school_id = get_current_school_id()

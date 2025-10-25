@@ -136,7 +136,22 @@ class SkailaApp:
         @self.app.route('/chat')
         def chat():
             if 'user_id' not in session:
-                return redirect('/login')
+                # Modalità demo
+                session['user_id'] = 'demo_user'
+                session['nome'] = 'Demo'
+                session['cognome'] = 'User'
+                session['email'] = 'demo@skaila.it'
+                session['ruolo'] = 'studente'
+                session['classe'] = '3A'
+                session['scuola_id'] = 1
+                session['demo_mode'] = True
+
+            # Modalità demo: mostra chat vuote
+            if session.get('demo_mode'):
+                return render_template('chat.html',
+                                     user=session,
+                                     chats=[],
+                                     utenti_online=[])
 
             with db_manager.get_connection() as conn:
                 if session['ruolo'] == 'admin':
@@ -159,13 +174,29 @@ class SkailaApp:
         @self.app.route('/ai-chat')
         def ai_chat():
             if 'user_id' not in session:
-                return redirect('/login')
+                # Modalità demo
+                session['user_id'] = 'demo_user'
+                session['nome'] = 'Demo'
+                session['cognome'] = 'User'
+                session['email'] = 'demo@skaila.it'
+                session['ruolo'] = 'studente'
+                session['classe'] = '3A'
+                session['scuola_id'] = 1
+                session['demo_mode'] = True
             return render_template('ai_chat.html', user=session)
 
         @self.app.route('/gamification')
         def gamification_dashboard():
             if 'user_id' not in session:
-                return redirect('/login')
+                # Modalità demo
+                session['user_id'] = 'demo_user'
+                session['nome'] = 'Demo'
+                session['cognome'] = 'User'
+                session['email'] = 'demo@skaila.it'
+                session['ruolo'] = 'studente'
+                session['classe'] = '3A'
+                session['scuola_id'] = 1
+                session['demo_mode'] = True
 
             response = make_response(render_template('gamification_dashboard.html', user=session))
             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
