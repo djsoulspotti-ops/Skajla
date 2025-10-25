@@ -6,6 +6,7 @@ Mantiene database PostgreSQL attivo (evita Neon sleep) + pulizia storage automat
 import threading
 import time
 from database_manager import db_manager
+from datetime import datetime, timedelta
 
 class KeepAliveService:
     """Servizio keep-alive database + storage cleanup"""
@@ -77,5 +78,63 @@ class KeepAliveService:
 
             except Exception as e:
                 print(f"⚠️ Storage cleanup error: {e}")
+
+    def cleanup_old_data(self):
+        """Pulizia dati vecchi per ottimizzare storage"""
+        try:
+            cutoff_date = datetime.now() - timedelta(days=90)
+
+            # Pulisci log vecchi
+            db_manager.execute('''
+                DELETE FROM ai_conversations 
+                WHERE timestamp < %s
+            ''', (cutoff_date,))
+
+            db_manager.execute('''
+                DELETE FROM messaggi 
+                WHERE timestamp < %s
+            ''', (cutoff_date,))
+
+            print("🧹 Cleanup storage completato")
+        except Exception as e:
+            print(f"⚠️ Errore cleanup storage: {e}")
+
+    def check_storage_usage(self) -> dict:
+        """Verifica utilizzo storage database"""
+        try:
+            # Per PostgreSQL
+            if db_manager.db_type == 'postgresql':
+                result = db_manager.query('''
+                    SELECT pg_database_size(current_database()) as size_bytes
+                ''', one=True)
+
+                if result:
+                    size_mb = result['size_bytes'] / (1024 * 1024)
+                    # Neon free tier: 512 MB limit
+                    percentage_used = (size_mb / 512) * 100
+
+                    return {
+                        'total_size_mb': round(size_mb, 2),
+                        'percentage_used': round(percentage_used, 2),
+                        'status': 'ok' if percentage_used < 80 else 'warning'
+                    }
+
+            # Fallback per SQLite
+            import os
+            if os.path.exists('skaila.db'):
+                size_bytes = os.path.getsize('skaila.db')
+                size_mb = size_bytes / (1024 * 1024)
+                return {
+                    'total_size_mb': round(size_mb, 2),
+                    'percentage_used': 0,
+                    'status': 'ok'
+                }
+
+            return {'total_size_mb': 0, 'percentage_used': 0, 'status': 'unknown'}
+
+        except Exception as e:
+            print(f"⚠️ Errore check storage: {e}")
+            return {'total_size_mb': 0, 'percentage_used': 0, 'status': 'error'}
+
 
 keep_alive = KeepAliveService()
