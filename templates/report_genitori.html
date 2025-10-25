@@ -282,14 +282,14 @@
 
 <div class="genitori-dashboard">
     <div class="report-header">
-        <h1 style="margin: 0;">📊 Report Studente</h1>
-        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Monitora i progressi di tuo figlio</p>
+        <h1> Report Studente</h1>
+        <p>Monitora i progressi di tuo figlio</p>
     </div>
 
     <!-- Student Selector (for parents with multiple children) -->
     <div class="student-selector">
-        <label style="font-weight: 600; margin-right: 1rem;">Seleziona Studente:</label>
-        <select id="studentSelect" onchange="loadReports()" style="padding: 0.8rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text); min-width: 200px;">
+        <label>Seleziona Studente:</label>
+        <select id="studentSelect" onchange="loadReports()">
             <option value="1">Marco Rossi</option>
             <option value="2">Giulia Rossi</option>
         </select>
@@ -298,22 +298,22 @@
     <!-- Report Tabs -->
     <div class="report-tabs">
         <div class="report-tab active" onclick="switchReportTab('weekly')">
-            <div style="font-size: 1.5rem;">📅</div>
-            <div style="font-weight: 600; margin-top: 0.5rem;">Report Settimanale</div>
+            <div></div>
+            <div>Report Settimanale</div>
         </div>
         <div class="report-tab" onclick="switchReportTab('monthly')">
-            <div style="font-size: 1.5rem;">📈</div>
-            <div style="font-weight: 600; margin-top: 0.5rem;">Report Mensile</div>
+            <div></div>
+            <div>Report Mensile</div>
         </div>
     </div>
 
     <!-- WEEKLY REPORT -->
     <div id="weeklyReport" class="weekly-report">
-        <h2 style="margin-bottom: 1.5rem;">Settimana 9-15 Dicembre 2025</h2>
+        <h2>Settimana 9-15 Dicembre 2025</h2>
 
         <!-- Summary -->
         <div class="report-summary">
-            <h3 style="margin-bottom: 1rem;">📋 Riepilogo Settimanale</h3>
+            <h3> Riepilogo Settimanale</h3>
             <div class="summary-grid">
                 <div class="summary-stat">
                     <div class="stat-icon">✅</div>
@@ -321,17 +321,17 @@
                     <div class="stat-label">Giorni Presenti</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-icon">📚</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value">3</div>
                     <div class="stat-label">Nuovi Voti</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-icon">📝</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value">5</div>
                     <div class="stat-label">Compiti Assegnati</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value">0</div>
                     <div class="stat-label">Note Disciplinari</div>
                 </div>
@@ -340,7 +340,7 @@
 
         <!-- Attendance -->
         <div class="attendance-calendar">
-            <h3 style="margin-bottom: 1rem;">📅 Presenze</h3>
+            <h3> Presenze</h3>
             <div class="calendar-grid">
                 <div class="calendar-day empty">L</div>
                 <div class="calendar-day empty">M</div>
@@ -357,34 +357,34 @@
                 <div class="calendar-day present">13</div>
                 <div class="calendar-day empty"></div>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.9rem;">
-                <span><span style="display: inline-block; width: 15px; height: 15px; background: var(--success); border-radius: 3px; margin-right: 0.3rem;"></span> Presente</span>
-                <span><span style="display: inline-block; width: 15px; height: 15px; background: var(--error); border-radius: 3px; margin-right: 0.3rem;"></span> Assente</span>
-                <span><span style="display: inline-block; width: 15px; height: 15px; background: var(--warning); border-radius: 3px; margin-right: 0.3rem;"></span> Ritardo</span>
+            <div>
+                <span><span></span> Presente</span>
+                <span><span></span> Assente</span>
+                <span><span></span> Ritardo</span>
             </div>
         </div>
 
         <!-- New Grades -->
         <div class="grades-section">
-            <h3 style="margin-bottom: 1rem;">📊 Nuovi Voti</h3>
+            <h3> Nuovi Voti</h3>
             <div class="grade-item">
                 <div>
                     <strong>Matematica - Verifica equazioni</strong>
-                    <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">10 Dicembre 2025 | Scritto</div>
+                    <div>10 Dicembre 2025 | Scritto</div>
                 </div>
                 <div class="grade-badge high">8.5</div>
             </div>
             <div class="grade-item">
                 <div>
                     <strong>Italiano - Interrogazione Manzoni</strong>
-                    <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">11 Dicembre 2025 | Orale</div>
+                    <div>11 Dicembre 2025 | Orale</div>
                 </div>
                 <div class="grade-badge high">7.5</div>
             </div>
             <div class="grade-item">
                 <div>
                     <strong>Storia - Quiz Rivoluzione Francese</strong>
-                    <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.3rem;">13 Dicembre 2025 | Scritto</div>
+                    <div>13 Dicembre 2025 | Scritto</div>
                 </div>
                 <div class="grade-badge medium">6.5</div>
             </div>
@@ -392,13 +392,13 @@
 
         <!-- AI Insights -->
         <div class="ai-insights-card">
-            <h3 style="margin-bottom: 1rem;">🤖 Insights AI</h3>
+            <h3>🤖 Insights AI</h3>
             <div class="insight-item">
                 <span class="insight-icon strength">💪</span>
                 <strong>Punti di Forza:</strong> Ottima performance in matematica e italiano
             </div>
             <div class="insight-item">
-                <span class="insight-icon weakness">⚠️</span>
+                <span class="insight-icon weakness"></span>
                 <strong>Attenzione:</strong> Lieve calo in storia, considera ripasso
             </div>
             <div class="insight-item">
@@ -413,15 +413,15 @@
     </div>
 
     <!-- MONTHLY REPORT (hidden by default) -->
-    <div id="monthlyReport" class="monthly-report" style="display: none;">
-        <h2 style="margin-bottom: 1.5rem;">Report Mensile - Dicembre 2025</h2>
+    <div id="monthlyReport" class="monthly-report">
+        <h2>Report Mensile - Dicembre 2025</h2>
 
         <!-- Executive Summary -->
         <div class="report-summary">
-            <h3 style="margin-bottom: 1rem;">📈 Riepilogo Esecutivo</h3>
+            <h3> Riepilogo Esecutivo</h3>
             <div class="summary-grid">
                 <div class="summary-stat">
-                    <div class="stat-icon">📊</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value">7.3</div>
                     <div class="stat-label">Media Generale</div>
                 </div>
@@ -431,12 +431,12 @@
                     <div class="stat-label">Tasso Presenza</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-icon">📚</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value">12</div>
                     <div class="stat-label">Voti Totali</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-icon">🎯</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value">+0.5</div>
                     <div class="stat-label">Miglioramento</div>
                 </div>
@@ -445,52 +445,52 @@
 
         <!-- Subject Performance -->
         <div class="subject-chart">
-            <h3 style="margin-bottom: 1.5rem;">📚 Performance per Materia</h3>
+            <h3> Performance per Materia</h3>
             <div class="chart-bar">
                 <div class="chart-label">Matematica</div>
                 <div class="chart-progress">
-                    <div class="chart-fill" style="width: 85%;">8.5</div>
+                    <div class="chart-fill">8.5</div>
                 </div>
             </div>
             <div class="chart-bar">
                 <div class="chart-label">Italiano</div>
                 <div class="chart-progress">
-                    <div class="chart-fill" style="width: 75%;">7.5</div>
+                    <div class="chart-fill">7.5</div>
                 </div>
             </div>
             <div class="chart-bar">
                 <div class="chart-label">Storia</div>
                 <div class="chart-progress">
-                    <div class="chart-fill" style="width: 65%;">6.5</div>
+                    <div class="chart-fill">6.5</div>
                 </div>
             </div>
             <div class="chart-bar">
                 <div class="chart-label">Scienze</div>
                 <div class="chart-progress">
-                    <div class="chart-fill" style="width: 80%;">8.0</div>
+                    <div class="chart-fill">8.0</div>
                 </div>
             </div>
             <div class="chart-bar">
                 <div class="chart-label">Inglese</div>
                 <div class="chart-progress">
-                    <div class="chart-fill" style="width: 70%;">7.0</div>
+                    <div class="chart-fill">7.0</div>
                 </div>
             </div>
         </div>
 
         <!-- AI Risk Assessment -->
-        <div class="ai-insights-card" style="margin-top: 1.5rem;">
-            <h3 style="margin-bottom: 1rem;">🧠 Analisi AI Completa</h3>
+        <div class="ai-insights-card">
+            <h3>🧠 Analisi AI Completa</h3>
             <div class="insight-item">
                 <span class="insight-icon strength">✅</span>
                 <strong>Stato Generale:</strong> Studente in buona salute accademica (Score: 72/100)
             </div>
             <div class="insight-item">
-                <span class="insight-icon suggestion">📈</span>
+                <span class="insight-icon suggestion"></span>
                 <strong>Trend:</strong> Miglioramento costante (+0.5 punti rispetto a novembre)
             </div>
             <div class="insight-item">
-                <span class="insight-icon weakness">⚠️</span>
+                <span class="insight-icon weakness"></span>
                 <strong>Attenzione:</strong> Storia necessita rinforzo - considerare tutoraggio peer
             </div>
             <div class="insight-item">
@@ -506,16 +506,16 @@
 
     <!-- Real-time Notifications -->
     <div class="notifications-section">
-        <h2 style="margin-bottom: 1.5rem;">🔔 Notifiche Recenti</h2>
+        <h2>🔔 Notifiche Recenti</h2>
         <div class="notification-card high">
             <div class="notification-header">
-                <strong>⚠️ Assenza non giustificata</strong>
+                <strong> Assenza non giustificata</strong>
                 <span class="priority-badge high">ALTA</span>
             </div>
-            <div style="color: var(--text-light); font-size: 0.9rem;">
+            <div>
                 Assenza del 12 dicembre richiede giustificazione entro 3 giorni
             </div>
-            <button style="background: var(--primary); border: none; color: var(--dark); padding: 0.5rem 1rem; border-radius: 8px; margin-top: 0.8rem; cursor: pointer;">
+            <button>
                 Giustifica Ora
             </button>
         </div>
@@ -524,7 +524,7 @@
                 <strong>🎉 Nuovo voto eccellente!</strong>
                 <span class="priority-badge low">INFO</span>
             </div>
-            <div style="color: var(--text-light); font-size: 0.9rem;">
+            <div>
                 Matematica: 8.5 in verifica equazioni - complimenti!
             </div>
         </div>

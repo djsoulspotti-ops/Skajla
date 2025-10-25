@@ -522,10 +522,10 @@
                     <input type="text" id="codice_scuola_premium" name="codice_scuola_premium" 
                            placeholder="es. SKAIL01904, PROF01THH9, DIR016FS87J" 
                            pattern="[A-Z0-9]+" 
-                           style="text-transform: uppercase;"
+                          
                            title="Inserisci il codice fornito dalla scuola">
                 </div>
-                <small style="color: var(--cyber-green); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                <small>
                     ✨ <strong>HAI UN CODICE?</strong> Inseriscilo qui e salta la selezione manuale!
                 </small>
             </div>
@@ -542,14 +542,14 @@
                         {% endfor %}
                     </select>
                 </div>
-                <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                <small>
                     💡 Usa questo solo se NON hai un codice scuola
                 </small>
             </div>
 
             <!-- Nome Classe -->
             <div class="form-group full-width">
-                <label for="classe_nome">📚 Nome Classe</label>
+                <label for="classe_nome"> Nome Classe</label>
                 <div class="input-wrapper">
                     <i class="input-icon fas fa-chalkboard"></i>
                     <input type="text" id="classe_nome" name="classe_nome" 
@@ -557,7 +557,7 @@
                            pattern="[A-Za-z0-9\s]+" 
                            title="Usa solo lettere, numeri e spazi">
                 </div>
-                <small style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; display: block;">💡 Se la classe non esiste, verrà creata automaticamente</small>
+                <small>💡 Se la classe non esiste, verrà creata automaticamente</small>
             </div>
 
             <!-- Codici Accesso -->
@@ -585,7 +585,7 @@
                 </div>
             </div>
             
-            <small style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; display: block; text-align: center;">
+            <small>
                 💡 <strong>Studenti:</strong> lasciate entrambi vuoti | <strong>Staff:</strong> utilizzate il codice appropriato
             </small>
 

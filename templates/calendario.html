@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 Calendario Accademico - SKAILA</title>
+    <title> Calendario Accademico - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -189,7 +189,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📅 Calendario Accademico</h1>
+            <h1> Calendario Accademico</h1>
             <a href="/dashboard" class="btn">
                 <i class="fas fa-arrow-left"></i> Dashboard
             </a>
@@ -216,9 +216,9 @@
                     <div class="day-cell {% if i == 16 %}today{% endif %} {% if i in [20, 25] %}has-event{% endif %}">
                         <div class="day-number">{{ i }}</div>
                         {% if i == 20 %}
-                        <div style="font-size: 0.7rem;">📝 Verifica</div>
+                        <div> Verifica</div>
                         {% elif i == 25 %}
-                        <div style="font-size: 0.7rem;">📚 Compito</div>
+                        <div> Compito</div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -226,36 +226,36 @@
             </div>
 
             <div class="events-sidebar">
-                <h2 style="margin-bottom: 1.5rem;">📌 Prossimi Eventi</h2>
+                <h2>📌 Prossimi Eventi</h2>
 
                 <div class="event-card">
-                    <div class="event-title">📝 Verifica Matematica</div>
+                    <div class="event-title"> Verifica Matematica</div>
                     <div class="event-meta">
-                        📅 20 Ottobre 2025<br>
+                         20 Ottobre 2025<br>
                         ⏰ 09:00 - 10:30
                     </div>
                 </div>
 
                 <div class="event-card">
-                    <div class="event-title">📚 Consegna Tema Italiano</div>
+                    <div class="event-title"> Consegna Tema Italiano</div>
                     <div class="event-meta">
-                        📅 25 Ottobre 2025<br>
+                         25 Ottobre 2025<br>
                         ⏰ Entro le 23:59
                     </div>
                 </div>
 
                 <div class="event-card">
-                    <div class="event-title">🎓 Assemblea di Classe</div>
+                    <div class="event-title"> Assemblea di Classe</div>
                     <div class="event-meta">
-                        📅 28 Ottobre 2025<br>
+                         28 Ottobre 2025<br>
                         ⏰ 11:00 - 12:00
                     </div>
                 </div>
 
                 <div class="event-card">
-                    <div class="event-title">🔬 Laboratorio Fisica</div>
+                    <div class="event-title"> Laboratorio Fisica</div>
                     <div class="event-meta">
-                        📅 30 Ottobre 2025<br>
+                         30 Ottobre 2025<br>
                         ⏰ 14:00 - 16:00
                     </div>
                 </div>

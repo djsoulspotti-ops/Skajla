@@ -212,13 +212,13 @@
     <div class="email-container">
         <!-- Header -->
         <div class="header">
-            <h1>🎓 SKAILA</h1>
+            <h1> SKAILA</h1>
             <p>Report {{ 'Settimanale' if report.type == 'weekly' else 'Mensile' }}</p>
         </div>
         
         <!-- Content -->
         <div class="content">
-            <span class="period-badge">📅 {{ report.period }}</span>
+            <span class="period-badge"> {{ report.period }}</span>
             
             <!-- Statistiche Principali -->
             <div class="stats-grid">
@@ -249,28 +249,28 @@
             
             <!-- Engagement -->
             <div class="section">
-                <h2 class="section-title">📊 Engagement Piattaforma</h2>
-                <p style="margin-bottom: 12px;">
+                <h2 class="section-title"> Engagement Piattaforma</h2>
+                <p>
                     <strong>Tasso di attività:</strong> {{ report.statistics.users.activity_rate }}%
                 </p>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: {{ report.statistics.users.activity_rate }}%"></div>
+                    <div class="progress-fill"></div>
                 </div>
-                <p style="margin-top: 16px;">
+                <p>
                     <strong>Login giornalieri medi:</strong> {{ report.statistics.engagement.avg_daily_logins }}
                 </p>
-                <p style="margin-top: 8px;">
+                <p>
                     <strong>Engagement Score:</strong> {{ report.statistics.engagement.engagement_score }}/100
                 </p>
             </div>
             
             <!-- Statistiche Accademiche -->
             <div class="section">
-                <h2 class="section-title">📚 Rendimento Accademico</h2>
-                <p style="margin-bottom: 12px;">
+                <h2 class="section-title"> Rendimento Accademico</h2>
+                <p>
                     <strong>Media voti:</strong> {{ report.statistics.academic.avg_grade }}/10
                 </p>
-                <p style="margin-bottom: 12px;">
+                <p>
                     <strong>Voti registrati:</strong> {{ report.statistics.academic.grades_recorded }}
                 </p>
                 <p>
@@ -288,7 +288,7 @@
                         <span class="performer-name">{{ loop.index }}. {{ performer.name }}</span>
                         <div class="performer-stats">
                             <span>⭐ {{ performer.xp }} XP</span>
-                            <span>📊 Livello {{ performer.level }}</span>
+                            <span> Livello {{ performer.level }}</span>
                             <span>🔥 Streak {{ performer.streak }}</span>
                         </div>
                     </div>
@@ -300,13 +300,13 @@
             <!-- AI Coach Insights -->
             <div class="section">
                 <h2 class="section-title">🤖 SKAILA Coach - Insights</h2>
-                <p style="margin-bottom: 16px;">
+                <p>
                     <strong>Totale interazioni:</strong> {{ report.statistics.ai_coach.total_interactions }}
                 </p>
                 
                 {% if report.statistics.ai_coach.top_categories %}
-                <p style="margin-bottom: 8px;"><strong>Categorie più richieste:</strong></p>
-                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                <p><strong>Categorie più richieste:</strong></p>
+                <ul>
                     {% for cat in report.statistics.ai_coach.top_categories[:3] %}
                     <li>{{ cat.category|title }}: {{ cat.count }} richieste</li>
                     {% endfor %}
@@ -314,8 +314,8 @@
                 {% endif %}
                 
                 {% if report.statistics.ai_coach.sentiment_distribution %}
-                <p style="margin-bottom: 8px;"><strong>Distribuzione sentimenti:</strong></p>
-                <ul style="margin-left: 20px;">
+                <p><strong>Distribuzione sentimenti:</strong></p>
+                <ul>
                     {% for sentiment, count in report.statistics.ai_coach.sentiment_distribution.items() %}
                     <li>{{ sentiment|title }}: {{ count }}</li>
                     {% endfor %}
@@ -326,7 +326,7 @@
             <!-- Confronto Mensile (solo per report mensile) -->
             {% if report.type == 'monthly' and report.statistics.comparison %}
             <div class="section">
-                <h2 class="section-title">📈 Confronto con Mese Precedente</h2>
+                <h2 class="section-title"> Confronto con Mese Precedente</h2>
                 <p>
                     <strong>Crescita XP:</strong> 
                     {% if report.statistics.comparison.xp_growth > 0 %}
@@ -334,10 +334,10 @@
                     {% elif report.statistics.comparison.xp_growth < 0 %}
                     <span class="trend-indicator trend-negative">{{ report.statistics.comparison.xp_growth }}%</span>
                     {% else %}
-                    <span class="trend-indicator" style="background: #e0e0e0;">0%</span>
+                    <span class="trend-indicator">0%</span>
                     {% endif %}
                 </p>
-                <p style="margin-top: 12px; font-size: 14px; color: #666;">
+                <p>
                     Mese corrente: {{ report.statistics.comparison.current_month_xp }} XP | 
                     Mese precedente: {{ report.statistics.comparison.previous_month_xp }} XP
                 </p>
@@ -347,7 +347,7 @@
             <!-- Alerts -->
             {% if report.statistics.alerts %}
             <div class="section">
-                <h2 class="section-title">⚠️ Alert e Criticità</h2>
+                <h2 class="section-title"> Alert e Criticità</h2>
                 <div class="alerts-container">
                     {% for alert in report.statistics.alerts %}
                     <div class="alert-item">
@@ -355,9 +355,9 @@
                             {% if alert.type == 'emotional_support_needed' %}
                             🧠 Supporto Emotivo Necessario
                             {% elif alert.type == 'low_attendance' %}
-                            📉 Bassa Presenza
+                             Bassa Presenza
                             {% else %}
-                            ⚠️ Attenzione
+                             Attenzione
                             {% endif %}
                         </div>
                         <div class="alert-details">
@@ -373,10 +373,10 @@
         <!-- Footer -->
         <div class="footer">
             <p>Report generato automaticamente il {{ report.generated_at }}</p>
-            <p style="margin-top: 8px;">
+            <p>
                 <a href="http://localhost:5000/admin/dashboard">Visualizza Dashboard Admin</a>
             </p>
-            <p style="margin-top: 16px; font-size: 12px; color: #999;">
+            <p>
                 SKAILA - Piattaforma Educativa per Scuole Italiane
             </p>
         </div>

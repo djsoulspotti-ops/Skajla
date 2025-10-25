@@ -23,12 +23,7 @@
             {% for media in medie %}
             <div class="stat-card">
                 <div class="icon">
-                    {% if media[0] == 'Matematica' %}📐
-                    {% elif media[0] == 'Fisica' %}🔬
-                    {% elif media[0] == 'Italiano' %}📚
-                    {% elif media[0] == 'Inglese' %}🇬🇧
-                    {% elif media[0] == 'Storia' %}📜
-                    {% else %}📖{% endif %}
+                    <i class="fas fa-graduation-cap"></i>
                 </div>
                 <div class="value">{{ "%.1f"|format(media[1]) }}</div>
                 <div class="label">{{ media[0] }}</div>

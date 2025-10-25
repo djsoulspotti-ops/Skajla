@@ -271,39 +271,39 @@
 
 <div class="insights-dashboard">
     <div class="insights-header">
-        <h1 style="margin: 0;">🧠 AI Insights Dashboard</h1>
-        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Intelligence artificiale per il successo degli studenti</p>
+        <h1>🧠 AI Insights Dashboard</h1>
+        <p>Intelligence artificiale per il successo degli studenti</p>
     </div>
 
     <!-- Class Health -->
     <div class="class-health">
-        <h2 style="margin-bottom: 1rem;">📊 Salute della Classe</h2>
+        <h2> Salute della Classe</h2>
         <div id="classHealthScore" class="health-score">0</div>
-        <div style="text-align: center; color: var(--text-light); margin-top: -1rem;">Class Health Score</div>
+        <div>Class Health Score</div>
         
         <div class="health-indicators">
             <div class="indicator">
-                <div class="indicator-value" id="avgAttendance" style="color: var(--success);">0%</div>
-                <div style="color: var(--text-light); font-size: 0.9rem;">Presenza Media</div>
+                <div class="indicator-value" id="avgAttendance">0%</div>
+                <div>Presenza Media</div>
             </div>
             <div class="indicator">
-                <div class="indicator-value" id="avgGrade" style="color: var(--primary);">0</div>
-                <div style="color: var(--text-light); font-size: 0.9rem;">Voto Medio</div>
+                <div class="indicator-value" id="avgGrade">0</div>
+                <div>Voto Medio</div>
             </div>
             <div class="indicator">
-                <div class="indicator-value" id="atRiskCount" style="color: var(--error);">0</div>
-                <div style="color: var(--text-light); font-size: 0.9rem;">Studenti a Rischio</div>
+                <div class="indicator-value" id="atRiskCount">0</div>
+                <div>Studenti a Rischio</div>
             </div>
             <div class="indicator">
-                <div class="indicator-value" id="improvingCount" style="color: var(--success);">0</div>
-                <div style="color: var(--text-light); font-size: 0.9rem;">In Miglioramento</div>
+                <div class="indicator-value" id="improvingCount">0</div>
+                <div>In Miglioramento</div>
             </div>
         </div>
     </div>
 
     <!-- Risk Students -->
     <div class="risk-students-section">
-        <h2 style="margin-bottom: 1.5rem;">⚠️ Studenti a Rischio</h2>
+        <h2> Studenti a Rischio</h2>
         
         <div class="risk-filters">
             <button class="filter-btn active all" onclick="filterRisk('all')">Tutti</button>
@@ -314,15 +314,15 @@
         </div>
 
         <div id="studentCards" class="student-cards">
-            <div style="text-align: center; padding: 2rem; color: var(--text-light);">Caricamento...</div>
+            <div>Caricamento...</div>
         </div>
     </div>
 
     <!-- Anomalies -->
     <div class="anomalies-section">
-        <h2 style="margin-bottom: 1.5rem;">🔍 Anomalie Rilevate</h2>
+        <h2>🔍 Anomalie Rilevate</h2>
         <div id="anomaliesList">
-            <div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessuna anomalia rilevata</div>
+            <div>Nessuna anomalia rilevata</div>
         </div>
     </div>
 </div>
@@ -330,9 +330,9 @@
 <!-- Intervention Plan Modal -->
 <div id="interventionModal" class="modal">
     <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 style="margin: 0;">📋 Piano di Intervento</h2>
-            <button onclick="closeInterventionModal()" style="background: var(--darker); border: none; color: var(--text); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">✕ Chiudi</button>
+        <div>
+            <h2> Piano di Intervento</h2>
+            <button onclick="closeInterventionModal()">✕ Chiudi</button>
         </div>
         <div id="interventionContent"></div>
     </div>
@@ -409,7 +409,7 @@ function displayStudents(students) {
     const filtered = currentFilter === 'all' ? students : students.filter(s => s.risk_level === currentFilter);
     
     if (filtered.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light);">Nessuno studente in questa categoria</div>';
+        container.innerHTML = '<div>Nessuno studente in questa categoria</div>';
         return;
     }
     
@@ -423,7 +423,7 @@ function displayStudents(students) {
             </div>
             
             <div class="risk-factors">
-                ${student.factors.map(f => `<div class="factor-tag">⚠️ ${f}</div>`).join('')}
+                ${student.factors.map(f => `<div class="factor-tag"> ${f}</div>`).join('')}
             </div>
             
             <div class="intervention-preview">
@@ -433,7 +433,7 @@ function displayStudents(students) {
             
             <div class="action-buttons">
                 <button class="action-btn primary" onclick="viewIntervention(${student.id})">
-                    📋 Piano Completo
+                     Piano Completo
                 </button>
                 <button class="action-btn secondary" onclick="contactFamily(${student.id})">
                     📞 Contatta Famiglia
@@ -460,13 +460,13 @@ function viewIntervention(studentId) {
     
     const interventionHTML = `
         <div class="intervention-plan">
-            <h3 style="margin-bottom: 1rem;">${student.nome}</h3>
-            <div style="margin-bottom: 1.5rem;">
+            <h3>${student.nome}</h3>
+            <div>
                 <strong>Livello Rischio:</strong> 
                 <span class="risk-badge ${student.risk_level}">${student.risk_level.toUpperCase()}</span>
             </div>
             
-            <h4 style="margin: 1.5rem 0 1rem;">🎯 Obiettivi</h4>
+            <h4> Obiettivi</h4>
             <div class="plan-step">
                 <strong>1. Migliorare presenza</strong><br>
                 Target: 90% presenze entro 30 giorni
@@ -476,14 +476,14 @@ function viewIntervention(studentId) {
                 Target: Media 6.5 in tutte le materie
             </div>
             
-            <h4 style="margin: 1.5rem 0 1rem;">📅 Timeline</h4>
+            <h4> Timeline</h4>
             <div class="plan-step">
                 <strong>Settimana 1-2:</strong> Colloquio famiglia + analisi cause<br>
                 <strong>Settimana 3-4:</strong> Tutoraggio peer + materiali extra<br>
                 <strong>Settimana 5-6:</strong> Verifica progressi + aggiustamenti
             </div>
             
-            <h4 style="margin: 1.5rem 0 1rem;">👥 Stakeholder</h4>
+            <h4>👥 Stakeholder</h4>
             <div class="plan-step">
                 • Coordinatore di classe<br>
                 • Famiglia (colloqui settimanali)<br>
@@ -527,11 +527,11 @@ async function loadAnomalies() {
     list.innerHTML = anomalies.map(a => `
         <div class="anomaly-card">
             <div class="anomaly-header">
-                <span class="anomaly-type">${a.type === 'grade_drop' ? '📉 Calo Voti' : '📅 Cambio Presenze'}</span>
-                <span style="color: var(--text-light); font-size: 0.85rem;">${a.date}</span>
+                <span class="anomaly-type">${a.type === 'grade_drop' ? ' Calo Voti' : ' Cambio Presenze'}</span>
+                <span>${a.date}</span>
             </div>
             <strong>${a.student}</strong><br>
-            <span style="color: var(--text-light);">${a.description}</span>
+            <span>${a.description}</span>
         </div>
     `).join('');
 }

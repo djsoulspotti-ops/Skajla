@@ -219,20 +219,20 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Report Automatici</h1>
+            <h1> Report Automatici</h1>
             <p>Sistema di reporting aziendale SKAILA</p>
         </div>
         
         <!-- Statistiche -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="icon">📈</div>
+                <div class="icon"></div>
                 <div class="value">{{ stats.total_reports or 0 }}</div>
                 <div class="label">Report Totali</div>
             </div>
             
             <div class="stat-card">
-                <div class="icon">📅</div>
+                <div class="icon"></div>
                 <div class="value">{{ stats.weekly_count or 0 }}</div>
                 <div class="label">Report Settimanali</div>
             </div>
@@ -303,7 +303,7 @@
                 </tbody>
             </table>
             {% else %}
-            <p style="text-align: center; color: #666; padding: 40px 0;">
+            <p>
                 Nessun report generato ancora. Usa i pulsanti sopra per testare!
             </p>
             {% endif %}

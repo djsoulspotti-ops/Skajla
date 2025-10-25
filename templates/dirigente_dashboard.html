@@ -20,83 +20,83 @@
             <div class="personal-codes-section">
                 <h4>Codici Personali</h4>
                 
-                <div class="automation-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <div class="automation-section">
                     <h3>🚀 Sistema Distribuzione Automatica</h3>
                     <p>Genera e distribuisci codici personali in 3 semplici passaggi:</p>
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2rem;">📋</div>
+                    <div>
+                        <div>
+                            <div></div>
                             <strong>1. Carica Email</strong>
-                            <p style="font-size: 0.9rem; margin: 5px 0;">Importa CSV con email scuola</p>
+                            <p>Importa CSV con email scuola</p>
                         </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2rem;">🔑</div>
+                        <div>
+                            <div>🔑</div>
                             <strong>2. Genera Codici</strong>
-                            <p style="font-size: 0.9rem; margin: 5px 0;">Click automatico genera tutto</p>
+                            <p>Click automatico genera tutto</p>
                         </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2rem;">📧</div>
+                        <div>
+                            <div>📧</div>
                             <strong>3. Email Inviate</strong>
-                            <p style="font-size: 0.9rem; margin: 5px 0;">Ogni persona riceve il suo codice</p>
+                            <p>Ogni persona riceve il suo codice</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Upload CSV Email -->
-                <div class="csv-upload-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px dashed #667eea;">
-                    <h4>📋 Passo 1: Carica Lista Email Scuola</h4>
+                <div class="csv-upload-section">
+                    <h4> Passo 1: Carica Lista Email Scuola</h4>
                     <p>Scarica il template, compila con le email della tua scuola, e ricaricalo qui.</p>
                     
-                    <div style="margin: 15px 0;">
-                        <a href="/schools/dashboard/dirigente/download_csv_template" class="btn-secondary" style="display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                    <div>
+                        <a href="/schools/dashboard/dirigente/download_csv_template" class="btn-secondary">
                             ⬇️ Scarica Template CSV
                         </a>
                     </div>
                     
-                    <form method="POST" action="/schools/dashboard/dirigente/upload_emails" enctype="multipart/form-data" style="margin-top: 15px;">
+                    <form method="POST" action="/schools/dashboard/dirigente/upload_emails" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         
-                        <div style="margin: 15px 0;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Seleziona file CSV:</label>
-                            <input type="file" name="emails_csv" accept=".csv" required style="padding: 10px; border: 2px solid #667eea; border-radius: 5px; width: 100%; max-width: 400px;">
+                        <div>
+                            <label>Seleziona file CSV:</label>
+                            <input type="file" name="emails_csv" accept=".csv" required>
                         </div>
                         
-                        <button type="submit" class="btn-primary" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                        <button type="submit" class="btn-primary">
                             📤 Carica Email Scuola
                         </button>
                         
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">
+                        <p>
                             <strong>Formato CSV richiesto:</strong> Colonne <code>email</code> e <code>role</code> (professore o studente)
                         </p>
                     </form>
                 </div>
                 
                 <!-- Genera Codici Automaticamente -->
-                <div class="generate-section" style="background: #d4edda; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                <div class="generate-section">
                     <h4>🔑 Passo 2: Genera Codici Automaticamente</h4>
                     
                     {% if school_data.codes and school_data.codes|length > 0 %}
-                        <p style="color: #155724;">✅ Hai già generato <strong>{{ school_data.codes|length }} codici</strong> personali.</p>
+                        <p>✅ Hai già generato <strong>{{ school_data.codes|length }} codici</strong> personali.</p>
                         
-                        <form method="POST" action="/schools/dashboard/dirigente/generate_personal_codes" style="margin-top: 15px;">
+                        <form method="POST" action="/schools/dashboard/dirigente/generate_personal_codes">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn-secondary" style="background: #ffc107; color: #000; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                            <button type="submit" class="btn-secondary">
                                 🔄 Rigenera Tutti i Codici
                             </button>
-                            <p style="font-size: 0.85rem; color: #856404; margin-top: 10px;">
-                                ⚠️ Questo invaliderà i codici esistenti non ancora usati
+                            <p>
+                                 Questo invaliderà i codici esistenti non ancora usati
                             </p>
                         </form>
                     {% else %}
                         <p>Dopo aver caricato le email, genera automaticamente i codici personali per tutti.</p>
                         
-                        <form method="POST" action="/schools/dashboard/dirigente/generate_personal_codes" style="margin-top: 15px;">
+                        <form method="POST" action="/schools/dashboard/dirigente/generate_personal_codes">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn-primary" style="background: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 1.1rem;">
+                            <button type="submit" class="btn-primary">
                                 🚀 Genera e Invia Codici Automaticamente
                             </button>
-                            <p style="font-size: 0.85rem; color: #155724; margin-top: 10px;">
+                            <p>
                                 ✅ Ogni persona riceverà una email con il proprio codice univoco
                             </p>
                         </form>
@@ -106,32 +106,32 @@
                 <!-- Tabella Codici Generati -->
                 {% if school_data.codes and school_data.codes|length > 0 %}
                 <div class="codes-table-section">
-                    <h4>📊 Codici Generati ({{ school_data.codes|length }})</h4>
+                    <h4> Codici Generati ({{ school_data.codes|length }})</h4>
                     
-                    <table class="codes-table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <table class="codes-table">
                         <thead>
-                            <tr style="background: #667eea; color: white;">
-                                <th style="padding: 12px; text-align: left;">Codice</th>
-                                <th style="padding: 12px; text-align: left;">Email</th>
-                                <th style="padding: 12px; text-align: left;">Ruolo</th>
-                                <th style="padding: 12px; text-align: center;">Stato</th>
-                                <th style="padding: 12px; text-align: left;">Generato</th>
+                            <tr>
+                                <th>Codice</th>
+                                <th>Email</th>
+                                <th>Ruolo</th>
+                                <th>Stato</th>
+                                <th>Generato</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for code in school_data.codes %}
-                            <tr style="border-bottom: 1px solid #ddd;">
-                                <td style="padding: 10px;"><strong style="color: #667eea;">{{ code.code }}</strong></td>
-                                <td style="padding: 10px;">{{ code.email }}</td>
-                                <td style="padding: 10px;">{{ code.role|capitalize }}</td>
-                                <td style="padding: 10px; text-align: center;">
+                            <tr>
+                                <td><strong>{{ code.code }}</strong></td>
+                                <td>{{ code.email }}</td>
+                                <td>{{ code.role|capitalize }}</td>
+                                <td>
                                     {% if code.used %}
-                                        <span style="background: #28a745; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem;">✅ Usato</span>
+                                        <span>✅ Usato</span>
                                     {% else %}
-                                        <span style="background: #ffc107; color: #000; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem;">⏳ Disponibile</span>
+                                        <span>⏳ Disponibile</span>
                                     {% endif %}
                                 </td>
-                                <td style="padding: 10px; font-size: 0.9rem; color: #666;">{{ code.created_at }}</td>
+                                <td>{{ code.created_at }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

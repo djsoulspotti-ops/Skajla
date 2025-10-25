@@ -1845,7 +1845,7 @@
                     </div>
                 </div>
                 <div class="chat-actions">
-                    <a href="/" class="action-btn" style="background: rgba(255,255,255,0.3); font-weight: bold; text-decoration: none; color: white; border: 2px solid rgba(255,255,255,0.5);">
+                    <a href="/" class="action-btn">
                         <i class="fas fa-home"></i> 🏠 Homepage
                     </a>
                     <button class="action-btn" onclick="openNewChatModal()">
@@ -1884,7 +1884,7 @@
 
         <!-- MAIN CHAT AREA -->
         <div class="main-chat">
-            <div class="chat-header" id="chatHeader" style="display: none;">
+            <div class="chat-header" id="chatHeader">
                 <div class="current-chat-info">
                     <div class="current-chat-avatar" id="currentChatAvatar">
                         <!-- Current chat avatar -->
@@ -1908,7 +1908,7 @@
                 <!-- Area messaggi vuota inizialmente -->
             </div>
 
-            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <div class="typing-indicator" id="typingIndicator">
                 <div class="typing-dots">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
@@ -1918,15 +1918,15 @@
             </div>
 
             <!-- Scroll to bottom button -->
-            <div class="scroll-to-bottom" id="scrollToBottomBtn" style="display: none;" onclick="scrollToBottom(true)">
+            <div class="scroll-to-bottom" id="scrollToBottomBtn" onclick="scrollToBottom(true)">
                 <i class="fas fa-arrow-down"></i>
                 <span>Nuovi messaggi</span>
             </div>
 
-            <div class="message-input-container" id="messageInputContainer" style="display: none;">
+            <div class="message-input-container" id="messageInputContainer">
                 <div class="message-input-wrapper">
                     <div class="input-actions">
-                        <input type="file" id="fileInput" style="display: none;" accept="*/*" onchange="handleFileSelect(this)">
+                        <input type="file" id="fileInput" accept="*/*" onchange="handleFileSelect(this)">
                         <button class="input-action" onclick="document.getElementById('fileInput').click()">
                             <i class="fas fa-paperclip"></i>
                         </button>
@@ -1980,7 +1980,7 @@
 
     <!-- MODAL: GAMIFICATION -->
     <div class="modal" id="gamificationModal">
-        <div class="modal-content" id="gamificationContent" style="max-width: 90%; width: 80%; max-height: 90vh;">
+        <div class="modal-content" id="gamificationContent">
             <!-- Gamification dashboard content will be loaded here -->
         </div>
     </div>
@@ -2110,7 +2110,7 @@
             } catch (error) {
                 console.error('Errore nel caricamento conversazioni:', error);
                 document.getElementById('conversationsList').innerHTML = 
-                    '<div class="loading">⚠️ Errore nel caricamento</div>';
+                    '<div class="loading"> Errore nel caricamento</div>';
             }
         }
 
@@ -2120,10 +2120,10 @@
 
             if (!conversations.length) {
                 container.innerHTML = `
-                    <div style="padding: 40px 20px; text-align: center; color: var(--gray-600);">
-                        <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+                    <div>
+                        <i class="fas fa-comments"></i>
                         <p>Nessuna conversazione</p>
-                        <p style="font-size: 12px; margin-top: 8px;">Crea la tua prima chat!</p>
+                        <p>Crea la tua prima chat!</p>
                     </div>
                 `;
                 return;
@@ -2216,7 +2216,7 @@
             } catch (error) {
                 console.error('Errore caricamento messaggi:', error);
                 document.getElementById('messagesContainer').innerHTML = `
-                    <div class="loading">⚠️ Errore nel caricamento messaggi</div>
+                    <div class="loading"> Errore nel caricamento messaggi</div>
                 `;
             }
         }
@@ -2227,10 +2227,10 @@
 
             if (!messages.length) {
                 container.innerHTML = `
-                    <div style="padding: 40px 20px; text-align: center; color: var(--gray-600);">
-                        <i class="fas fa-comment-alt" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+                    <div>
+                        <i class="fas fa-comment-alt"></i>
                         <p>Nessun messaggio ancora</p>
-                        <p style="font-size: 12px; margin-top: 8px;">Inizia la conversazione!</p>
+                        <p>Inizia la conversazione!</p>
                     </div>
                 `;
                 return;
@@ -2272,7 +2272,7 @@
                     fileHtml = `
                         <div class="message-file">
                             <img src="${message.file_url}" alt="${escapeHtml(message.file_nome)}" 
-                                 style="max-width: 300px; max-height: 300px; border-radius: 12px;">
+                                >
                         </div>
                     `;
                 } else {
@@ -2456,10 +2456,10 @@
             const preview = document.createElement('div');
             preview.className = 'file-preview';
             preview.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--gray-100); border-radius: 8px; margin: 8px;">
-                    <i class="fas fa-file" style="color: var(--primary);"></i>
-                    <span style="font-size: 12px; color: var(--gray-700);">${escapeHtml(fileData.file_name)}</span>
-                    <button onclick="clearSelectedFile()" style="border: none; background: none; color: var(--gray-500); cursor: pointer;">
+                <div>
+                    <i class="fas fa-file"></i>
+                    <span>${escapeHtml(fileData.file_name)}</span>
+                    <button onclick="clearSelectedFile()">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -2519,7 +2519,7 @@
                 } catch (error) {
                     console.error('Errore ricerca utenti:', error);
                     document.getElementById('usersList').innerHTML = `
-                        <div class="loading">⚠️ Errore nella ricerca</div>
+                        <div class="loading"> Errore nella ricerca</div>
                     `;
                 }
             }, 300);
@@ -2531,8 +2531,8 @@
 
             if (!users.length) {
                 container.innerHTML = `
-                    <div style="padding: 20px; text-align: center; color: var(--gray-600);">
-                        <i class="fas fa-user-slash" style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;"></i>
+                    <div>
+                        <i class="fas fa-user-slash"></i>
                         <p>Nessun utente trovato</p>
                     </div>
                 `;
@@ -2743,7 +2743,7 @@
             const content = document.getElementById('gamificationContent');
 
             modal.style.display = 'block';
-            content.innerHTML = '<div class="loading">📊 Caricamento dashboard gamification...</div>';
+            content.innerHTML = '<div class="loading"> Caricamento dashboard gamification...</div>';
 
             try {
                 // Carica il contenuto della dashboard

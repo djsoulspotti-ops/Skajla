@@ -280,7 +280,7 @@
                 <div class="credit-icon">🪙</div>
                 <div class="credit-value">{{ credits.avatar_coins }}</div>
                 <div class="credit-label">Avatar Coins</div>
-                <p style="color: var(--text-light); font-size: 0.9rem;">
+                <p>
                     Usa per comprare avatar e temi personalizzati
                 </p>
             </div>
@@ -290,25 +290,25 @@
                 <div class="credit-icon">⚡</div>
                 <div class="credit-value">{{ credits.total_xp }}</div>
                 <div class="credit-label">Punti Esperienza Totali</div>
-                <p style="color: var(--text-light); font-size: 0.9rem;">
+                <p>
                     {{ credits.level_title }}
                 </p>
             </div>
 
             <!-- Level Progress -->
             <div class="credit-card">
-                <div class="credit-icon">📈</div>
+                <div class="credit-icon"></div>
                 <div class="credit-value">{{ credits.current_level }}</div>
                 <div class="credit-label">Livello Attuale</div>
                 {% if credits.xp_needed_next_level > 0 %}
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: {{ credits.level_progress }}%"></div>
+                    <div class="progress-fill"></div>
                 </div>
-                <p style="color: var(--text-light); font-size: 0.9rem;">
+                <p>
                     {{ credits.xp_needed_next_level }} XP al prossimo livello
                 </p>
                 {% else %}
-                <p style="color: var(--success); font-size: 0.9rem; font-weight: 600;">
+                <p>
                     🌟 Livello Massimo Raggiunto!
                 </p>
                 {% endif %}
@@ -373,7 +373,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+                <p>
                     🌟 Inizia ad essere attivo su SKAILA per vedere le tue attività qui!
                 </p>
             {% endif %}

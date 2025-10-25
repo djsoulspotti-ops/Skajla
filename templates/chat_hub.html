@@ -99,8 +99,8 @@
                 {% endif %}
                 
                 {% if available_users and available_users|length > 0 %}
-                    <div style="grid-column: 1 / -1; margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--border-secondary);">
-                        <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-4);">Inizia una nuova conversazione:</p>
+                    <div class="chat-divider">
+                        <p class="chat-hint">Inizia una nuova conversazione:</p>
                         <div class="chat-grid">
                             {% for user in available_users[:5] %}
                             <div class="chat-card" onclick="window.location.href='/chat/private/{{ user.id }}'">

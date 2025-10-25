@@ -246,7 +246,7 @@
                 </div>
             </div>
 
-            <div class="message-input-container" style="display: none;" id="message-input-container">
+            <div class="message-input-container" id="message-input-container">
                 <form class="message-input-form" id="message-form">
                     <input type="text" class="message-input" id="message-input" placeholder="Scrivi un messaggio..." autocomplete="off">
                     <button type="submit" class="send-button">
@@ -268,7 +268,7 @@
             .then(data => {
                 userStats = data;
                 document.getElementById('user-info').innerHTML = `
-                    🎓 ${data.nome} ${data.cognome}<br>
+                     ${data.nome} ${data.cognome}<br>
                     🏆 Livello ${data.livello} • ${data.xp_totale} XP
                 `;
                 document.getElementById('user-stats').innerHTML = `

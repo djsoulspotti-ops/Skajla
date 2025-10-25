@@ -296,7 +296,7 @@
         <!-- Stats Overview -->
         <div class="stats-overview">
             <div class="stat-card">
-                <div class="stat-icon">👨‍🎓</div>
+                <div class="stat-icon">👨‍</div>
                 <div class="stat-number">{{ stats.studenti_classe }}</div>
                 <div class="stat-label">Studenti in Classe</div>
             </div>
@@ -306,7 +306,7 @@
                 <div class="stat-label">Chat Moderate</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📊</div>
+                <div class="stat-icon"></div>
                 <div class="stat-number">{{ stats.messaggi_studenti_oggi }}</div>
                 <div class="stat-label">Messaggi Oggi</div>
             </div>
@@ -339,8 +339,8 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p style="text-align: center; color: var(--text-light); padding: 2rem;">
-                            📚 Nessuno studente trovato per la classe {{ user.classe or 'assegnata' }}
+                        <p>
+                             Nessuno studente trovato per la classe {{ user.classe or 'assegnata' }}
                         </p>
                     {% endif %}
                 </div>
@@ -424,7 +424,7 @@
         }
 
         function exportData() {
-            alert('📊 Funzionalità in sviluppo: Export dati classe!');
+            alert(' Funzionalità in sviluppo: Export dati classe!');
         }
 
         function createTeamChallenge() {
@@ -443,7 +443,7 @@
         }
 
         function viewAnalytics() {
-            alert('📈 Funzionalità in sviluppo: Analytics avanzate!');
+            alert(' Funzionalità in sviluppo: Analytics avanzate!');
         }
 
         // Auto-refresh ogni minuto

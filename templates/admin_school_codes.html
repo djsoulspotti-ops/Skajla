@@ -146,21 +146,21 @@
 </head>
 <body>
     <div class="codes-container">
-        <h1>🎓 Gestione Codici Scuole Partner</h1>
-        <p style="color: #64748b; margin-bottom: 30px;">Sistema modulare per le prime 10 scuole SKAILA</p>
+        <h1> Gestione Codici Scuole Partner</h1>
+        <p>Sistema modulare per le prime 10 scuole SKAILA</p>
         
         <div id="alert" class="alert"></div>
         
         <div class="stats-cards">
             <div class="stat-card">
-                <h3>📊 Codici Totali</h3>
+                <h3> Codici Totali</h3>
                 <p class="number">{{ total_count }}</p>
             </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <div class="stat-card">
                 <h3>✅ Disponibili</h3>
                 <p class="number">{{ available_count }}</p>
             </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <div class="stat-card">
                 <h3>🔒 Assegnati</h3>
                 <p class="number">{{ total_count - available_count }}</p>
             </div>
@@ -173,10 +173,10 @@
             <button onclick="exportCodes()" class="btn btn-success">
                 📥 Esporta Codici (TXT)
             </button>
-            <button onclick="location.reload()" class="btn" style="background: #64748b; color: white;">
+            <button onclick="location.reload()" class="btn">
                 🔄 Aggiorna
             </button>
-            <a href="/dashboard" class="btn" style="background: #cbd5e1; color: #334155; text-decoration: none;">
+            <a href="/dashboard" class="btn">
                 ← Torna alla Dashboard
             </a>
         </div>
@@ -201,15 +201,15 @@
                         <td>{{ code.school_name }}</td>
                         <td>
                             <span class="code-badge">{{ code.school_code }}</span>
-                            <button class="copy-btn" onclick="copyToClipboard('{{ code.school_code }}')">📋</button>
+                            <button class="copy-btn" onclick="copyToClipboard('{{ code.school_code }}')"></button>
                         </td>
                         <td>
                             <span class="code-badge">{{ code.teacher_code }}</span>
-                            <button class="copy-btn" onclick="copyToClipboard('{{ code.teacher_code }}')">📋</button>
+                            <button class="copy-btn" onclick="copyToClipboard('{{ code.teacher_code }}')"></button>
                         </td>
                         <td>
                             <span class="code-badge">{{ code.director_code }}</span>
-                            <button class="copy-btn" onclick="copyToClipboard('{{ code.director_code }}')">📋</button>
+                            <button class="copy-btn" onclick="copyToClipboard('{{ code.director_code }}')"></button>
                         </td>
                         <td>
                             {% if code.assigned %}
@@ -218,7 +218,7 @@
                                 <span class="status-badge status-available">Disponibile</span>
                             {% endif %}
                         </td>
-                        <td style="color: #64748b; font-size: 13px;">
+                        <td>
                             {{ code.created_at.strftime('%d/%m/%Y %H:%M') if code.created_at else 'N/A' }}
                         </td>
                     </tr>

@@ -374,8 +374,8 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p style="text-align: center; color: var(--text-light); padding: 2rem;">
-                            📊 Nessuna attività recente
+                        <p>
+                             Nessuna attività recente
                         </p>
                     {% endif %}
                 </div>
@@ -424,7 +424,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+                <p>
                     💬 Nessuna attività chat oggi
                 </p>
             {% endif %}
@@ -437,7 +437,7 @@
         }
 
         function createSchoolCode() {
-            const schoolName = prompt('📚 Nome della scuola:');
+            const schoolName = prompt(' Nome della scuola:');
             if (schoolName) {
                 fetch('/api/school/invite-code', {
                     method: 'POST',
@@ -457,7 +457,7 @@
         function systemBackup() {
             if (confirm('🔄 Vuoi creare un backup del sistema?')) {
                 // TODO: Implementare backup
-                alert('💾 Backup avviato! Riceverai una notifica quando sarà completato.');
+                alert(' Backup avviato! Riceverai una notifica quando sarà completato.');
             }
         }
 
@@ -466,7 +466,7 @@
         }
 
         function systemMaintenance() {
-            if (confirm('⚠️ ATTENZIONE: Questo metterà il sistema in manutenzione. Continuare?')) {
+            if (confirm(' ATTENZIONE: Questo metterà il sistema in manutenzione. Continuare?')) {
                 alert('🔧 Modalità manutenzione attivata. Tutti gli utenti saranno disconnessi.');
             }
         }

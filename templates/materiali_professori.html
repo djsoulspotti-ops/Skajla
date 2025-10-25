@@ -331,8 +331,8 @@
     <!-- Header -->
     <div class="materiali-header">
         <div>
-            <h1 style="margin: 0;">📚 Materiali Didattici</h1>
-            <p style="margin: 0.5rem 0 0; opacity: 0.9;">Carica e gestisci i tuoi materiali di insegnamento</p>
+            <h1> Materiali Didattici</h1>
+            <p>Carica e gestisci i tuoi materiali di insegnamento</p>
         </div>
         <button class="upload-btn" onclick="toggleUploadForm()">
             ➕ Nuovo Materiale
@@ -344,7 +344,7 @@
         <div class="drag-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <div class="upload-icon">📁</div>
             <h3>Trascina i file qui o clicca per selezionare</h3>
-            <p style="color: var(--text-light); margin-top: 0.5rem;">
+            <p>
                 Supportati: PDF, DOC, DOCX, PPT, PPTX, immagini, video, audio<br>
                 Dimensione massima: 50MB
             </p>
@@ -353,7 +353,7 @@
 
         <!-- Upload Form (hidden by default) -->
         <div id="uploadForm" class="upload-form">
-            <h3 style="margin-bottom: 1.5rem;">Dettagli Materiale</h3>
+            <h3>Dettagli Materiale</h3>
             <form id="materialForm" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
@@ -395,11 +395,11 @@
                         </select>
                     </div>
 
-                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                        <button type="submit" class="upload-btn" style="flex: 1;">
+                    <div>
+                        <button type="submit" class="upload-btn">
                             📤 Carica Materiale
                         </button>
-                        <button type="button" class="upload-btn" onclick="cancelUpload()" style="background: var(--accent); flex: 1;">
+                        <button type="button" class="upload-btn" onclick="cancelUpload()">
                             ❌ Annulla
                         </button>
                     </div>
@@ -410,12 +410,12 @@
     <!-- Filters -->
     <div class="filters-section">
         <div class="filter-item">
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">🔍 Cerca</label>
-            <input type="text" id="searchFilter" placeholder="Cerca per titolo..." oninput="filterMaterials()" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text);">
+            <label>🔍 Cerca</label>
+            <input type="text" id="searchFilter" placeholder="Cerca per titolo..." oninput="filterMaterials()">
         </div>
         <div class="filter-item">
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">📚 Materia</label>
-            <select id="subjectFilter" onchange="filterMaterials()" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 2px solid var(--border); background: var(--darker); color: var(--text);">
+            <label> Materia</label>
+            <select id="subjectFilter" onchange="filterMaterials()">
                 <option value="">Tutte</option>
                 <option value="matematica">Matematica</option>
                 <option value="italiano">Italiano</option>
@@ -433,7 +433,7 @@
 
     <!-- Statistics Section -->
     <div class="stats-section">
-        <h2 style="margin-bottom: 1rem;">📊 Le Tue Statistiche</h2>
+        <h2> Le Tue Statistiche</h2>
         <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
                 <div class="stat-value" id="totalMaterials">0</div>
@@ -583,10 +583,10 @@ function displayMaterials(materials) {
 
     const fileIcons = {
         pdf: '📄',
-        doc: '📝',
-        docx: '📝',
-        ppt: '📊',
-        pptx: '📊',
+        doc: '',
+        docx: '',
+        ppt: '',
+        pptx: '',
         jpg: '🖼️',
         jpeg: '🖼️',
         png: '🖼️',
@@ -602,14 +602,14 @@ function displayMaterials(materials) {
             <div class="material-card">
                 <div class="material-header">
                     <div class="file-icon">${icon}</div>
-                    <div style="flex: 1;">
+                    <div>
                         <div class="material-title">${mat.title}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-light);">${mat.filename}</div>
+                        <div>${mat.filename}</div>
                     </div>
                 </div>
 
                 <div class="material-meta">
-                    <div class="meta-tag">📚 ${mat.subject}</div>
+                    <div class="meta-tag"> ${mat.subject}</div>
                     <div class="meta-tag">👥 ${mat.class || 'Tutte'}</div>
                     <div class="meta-tag">⬇️ ${mat.downloads || 0}</div>
                 </div>

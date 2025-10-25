@@ -166,28 +166,28 @@
                 {% for quiz in available_quizzes %}
                 <div class="category-card" onclick="window.location.href='/quiz/start/{{ quiz.id }}'">
                     <div class="category-icon">
-                        {% if quiz.materia == 'Matematica' %}📐
-                        {% elif quiz.materia == 'Fisica' %}🔬
-                        {% elif quiz.materia == 'Italiano' %}📖
+                        {% if quiz.materia == 'Matematica' %}
+                        {% elif quiz.materia == 'Fisica' %}
+                        {% elif quiz.materia == 'Italiano' %}
                         {% elif quiz.materia == 'Storia' %}🏛️
-                        {% elif quiz.materia == 'Inglese' %}🇬🇧
+                        {% elif quiz.materia == 'Inglese' %}
                         {% elif quiz.materia == 'Scienze' %}🧪
-                        {% else %}📚{% endif %}
+                        {% else %}{% endif %}
                     </div>
                     <div class="category-title">{{ quiz.titolo or quiz.materia }}</div>
                     <div class="category-meta">Difficoltà: {{ quiz.difficolta }}</div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div style="grid-column: 1/-1; text-align: center; padding: 3rem; opacity: 0.7;">
-                    <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                <div>
+                    <i class="fas fa-graduation-cap"></i>
                     <p>Nessun quiz disponibile al momento</p>
                 </div>
             {% endif %}
         </div>
 
         <div class="stats-section">
-            <h2 style="margin-bottom: 1rem;">📊 Le Tue Statistiche</h2>
+            <h2> Le Tue Statistiche</h2>
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-value">{{ quiz_completati or 0 }}</div>

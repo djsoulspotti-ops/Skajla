@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Materiali Didattici - SKAILA</title>
+    <title> Materiali Didattici - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -160,7 +160,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Materiali Didattici</h1>
+            <h1> Materiali Didattici</h1>
             <a href="/dashboard" class="btn">
                 <i class="fas fa-arrow-left"></i> Dashboard
             </a>
@@ -183,9 +183,9 @@
                 </div>
                 <div class="material-title">{{ material.titolo }}</div>
                 <div class="material-meta">
-                    📖 {{ material.materia }}<br>
+                     {{ material.materia }}<br>
                     👨‍🏫 {{ material.professore }}<br>
-                    📅 {{ material.data_upload }}
+                     {{ material.data_upload }}
                 </div>
                 <button class="download-btn" onclick="window.location.href='/api/materiali/download/{{ material.id }}'">
                     <i class="fas fa-download"></i> Scarica
@@ -197,7 +197,7 @@
         <div class="empty-state">
             <i class="fas fa-folder-open"></i>
             <h2>Nessun materiale disponibile</h2>
-            <p style="opacity: 0.7; margin-top: 1rem;">I tuoi professori non hanno ancora caricato materiali didattici</p>
+            <p>I tuoi professori non hanno ancora caricato materiali didattici</p>
         </div>
         {% endif %}
     </div>

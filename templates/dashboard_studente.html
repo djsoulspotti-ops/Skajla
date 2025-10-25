@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 Dashboard SKAILA - {{ user.nome }}</title>
+    <title> Dashboard SKAILA - {{ user.nome }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -543,11 +543,11 @@
                 <div class="user-avatar">{{ user.nome[0] }}</div>
                 <div>
                     <h1>SKAILA</h1>
-                    <p style="opacity: 0.7; font-size: 0.85rem;">{{ user.nome }} {{ user.cognome }} • {{ user.classe or 'Studente' }}</p>
+                    <p>{{ user.nome }} {{ user.cognome }} • {{ user.classe or 'Studente' }}</p>
                 </div>
             </div>
             <div class="user-menu">
-                <a href="/gamification" class="nav-btn"><i class="fas fa-trophy"></i> <span class="stat-value" style="font-size: 0.9rem;">{{ stats.total_xp }}</span> XP</a>
+                <a href="/gamification" class="nav-btn"><i class="fas fa-trophy"></i> <span class="stat-value">{{ stats.total_xp }}</span> XP</a>
                 <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </nav>
@@ -560,7 +560,7 @@
                 <div class="stat-label">Giorni Streak</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">🎯</div>
+                <div class="stat-icon"></div>
                 <div class="stat-value">Lvl {{ stats.current_level }}</div>
                 <div class="stat-label">Livello</div>
             </div>
@@ -583,7 +583,7 @@
                 <!-- QUICK ACTIONS - Accesso Ultra-Rapido -->
                 <div class="quick-actions-section">
                     <div class="section-header">
-                        <i class="fas fa-bolt" style="font-size: 1.2rem; color: var(--accent-pink);"></i>
+                        <i class="fas fa-bolt"></i>
                         <h3>Azioni Rapide</h3>
                     </div>
                     <div class="quick-actions-grid">
@@ -623,13 +623,13 @@
                 <!-- MATERIALI DIDATTICI - Accesso Diretto -->
                 <div class="materiali-section">
                     <div class="section-header">
-                        <i class="fas fa-book" style="font-size: 1.2rem;"></i>
+                        <i class="fas fa-book"></i>
                         <h3>Materiali Recenti</h3>
-                        <a href="/materiali" style="margin-left: auto; color: var(--accent-pink); font-size: 0.85rem; text-decoration: none;">Vedi tutti →</a>
+                        <a href="/materiali">Vedi tutti →</a>
                     </div>
                     
                     <div class="material-item" onclick="window.location.href='/materiali'">
-                        <div class="material-icon">📐</div>
+                        <div class="material-icon"></div>
                         <div class="material-info">
                             <h4>Equazioni di secondo grado</h4>
                             <p>Matematica • Prof. Rossi • 2 giorni fa</p>
@@ -637,7 +637,7 @@
                     </div>
 
                     <div class="material-item" onclick="window.location.href='/materiali'">
-                        <div class="material-icon">🔬</div>
+                        <div class="material-icon"></div>
                         <div class="material-info">
                             <h4>Leggi di Newton - Appunti</h4>
                             <p>Fisica • Prof. Bianchi • 3 giorni fa</p>
@@ -645,7 +645,7 @@
                     </div>
 
                     <div class="material-item" onclick="window.location.href='/materiali'">
-                        <div class="material-icon">📚</div>
+                        <div class="material-icon"></div>
                         <div class="material-info">
                             <h4>Divina Commedia - Canto III</h4>
                             <p>Italiano • Prof. Verdi • 5 giorni fa</p>
@@ -659,17 +659,17 @@
                 <!-- SKAILA AI - Tutor Personale -->
                 <div class="ai-assistant-section">
                     <div class="section-header">
-                        <i class="fas fa-robot" style="font-size: 1.2rem;"></i>
+                        <i class="fas fa-robot"></i>
                         <h3>SKAILA AI - Tutor Personale</h3>
                     </div>
-                    <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 1rem;">Chiedimi qualsiasi cosa su qualsiasi materia!</p>
+                    <p>Chiedimi qualsiasi cosa su qualsiasi materia!</p>
                     
                     <div class="ai-quick-chat">
                         <input type="text" placeholder="Scrivi la tua domanda..." onclick="window.location.href='/ai-chat'">
                         <div class="ai-suggestions">
                             <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">🧮 Aiuto Matematica</button>
-                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">📖 Riassunto Testo</button>
-                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">🔬 Spiegazione Fisica</button>
+                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'"> Riassunto Testo</button>
+                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'"> Spiegazione Fisica</button>
                         </div>
                     </div>
                 </div>
@@ -677,14 +677,14 @@
                 <!-- REGISTRO ONLINE -->
                 <div class="registro-section">
                     <div class="section-header">
-                        <i class="fas fa-clipboard-list" style="font-size: 1.2rem;"></i>
+                        <i class="fas fa-clipboard-list"></i>
                         <h3>Ultimi Voti</h3>
-                        <a href="/registro-online" style="margin-left: auto; color: var(--accent-pink); font-size: 0.85rem; text-decoration: none;">Tutti →</a>
+                        <a href="/registro-online">Tutti →</a>
                     </div>
                     
                     <div class="registro-item">
                         <div class="registro-info">
-                            <h4>📐 Matematica</h4>
+                            <h4> Matematica</h4>
                             <p>Verifica • 15/01/2025</p>
                         </div>
                         <div class="grade-badge">8.5</div>
@@ -692,7 +692,7 @@
 
                     <div class="registro-item">
                         <div class="registro-info">
-                            <h4>🔬 Fisica</h4>
+                            <h4> Fisica</h4>
                             <p>Interrogazione • 12/01/2025</p>
                         </div>
                         <div class="grade-badge">9.0</div>
@@ -700,7 +700,7 @@
 
                     <div class="registro-item">
                         <div class="registro-info">
-                            <h4>📚 Italiano</h4>
+                            <h4> Italiano</h4>
                             <p>Tema • 10/01/2025</p>
                         </div>
                         <div class="grade-badge">7.5</div>
@@ -710,7 +710,7 @@
                 <!-- SKAILA CONNECT -->
                 <div class="connect-section">
                     <div class="section-header">
-                        <i class="fas fa-briefcase" style="font-size: 1.2rem;"></i>
+                        <i class="fas fa-briefcase"></i>
                         <h3>SKAILA Connect</h3>
                     </div>
                     
@@ -730,7 +730,7 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p style="opacity: 0.7; font-size: 0.85rem; text-align: center; padding: 1rem;">Nessuna opportunità al momento</p>
+                        <p>Nessuna opportunità al momento</p>
                     {% endif %}
                 </div>
             </div>
@@ -740,29 +740,29 @@
         <div class="bottom-grid">
             <div class="calendar-widget">
                 <div class="section-header">
-                    <i class="fas fa-calendar-alt" style="font-size: 1.2rem;"></i>
+                    <i class="fas fa-calendar-alt"></i>
                     <h3>Prossimi Eventi</h3>
                 </div>
                 
                 <div class="event-item">
-                    <h4>📝 Verifica Matematica</h4>
+                    <h4> Verifica Matematica</h4>
                     <p>20 Gennaio 2025 • 09:00-10:30</p>
                 </div>
 
                 <div class="event-item">
-                    <h4>📚 Consegna Tema Italiano</h4>
+                    <h4> Consegna Tema Italiano</h4>
                     <p>25 Gennaio 2025 • Entro 23:59</p>
                 </div>
 
                 <div class="event-item">
-                    <h4>🎓 Assemblea di Classe</h4>
+                    <h4> Assemblea di Classe</h4>
                     <p>28 Gennaio 2025 • 11:00-12:00</p>
                 </div>
             </div>
 
             <div class="calendar-widget">
                 <div class="section-header">
-                    <i class="fas fa-comments" style="font-size: 1.2rem;"></i>
+                    <i class="fas fa-comments"></i>
                     <h3>Chat Recenti</h3>
                 </div>
                 
@@ -777,7 +777,7 @@
                 </div>
 
                 <div class="event-item">
-                    <h4>📐 Prof. Rossi (Matematica)</h4>
+                    <h4> Prof. Rossi (Matematica)</h4>
                     <p>Nuovi materiali caricati • 1 giorno fa</p>
                 </div>
             </div>
