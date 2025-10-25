@@ -8,188 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="/static/css/tokens.css" rel="stylesheet">
     <link href="/static/css/professional.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --purple-start: #667eea;
-            --purple-end: #764ba2;
-            --accent-pink: #f093fb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--purple-start) 0%, var(--purple-end) 100%);
-            min-height: 100vh;
-            color: white;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-        }
-
-        .back-btn {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-        }
-
-        .stat-card .icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-card .value {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card .label {
-            opacity: 0.8;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .tab {
-            padding: 1rem 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .tab.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .table-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            font-weight: 700;
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .grade-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .grade-excellent { background: var(--success); }
-        .grade-good { background: #3b82f6; }
-        .grade-average { background: var(--warning); }
-        .grade-poor { background: var(--danger); }
-
-        .presence-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .presente { background: var(--success); }
-        .assente { background: var(--danger); }
-        .ritardo { background: var(--warning); }
-    </style>
+    <link href="/static/css/layouts.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Registro Online</h1>
+            <h1>Registro Online</h1>
             <a href="/dashboard" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Torna alla Dashboard
             </a>
@@ -208,7 +32,7 @@
                 </div>
                 <div class="value">{{ "%.1f"|format(media[1]) }}</div>
                 <div class="label">{{ media[0] }}</div>
-                <small style="opacity: 0.7;">({{ media[2] }} voti)</small>
+                <small>({{ media[2] }} voti)</small>
             </div>
             {% endfor %}
         </div>
@@ -227,7 +51,7 @@
 
         <div id="voti" class="content-section active">
             <div class="table-container">
-                <h2 style="margin-bottom: 1.5rem;">📊 I Tuoi Voti</h2>
+                <h2>I Tuoi Voti</h2>
                 {% if voti %}
                 <table>
                     <thead>
@@ -256,14 +80,14 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p style="text-align: center; opacity: 0.7; padding: 3rem;">Nessun voto ancora registrato</p>
+                <p>Nessun voto ancora registrato</p>
                 {% endif %}
             </div>
         </div>
 
         <div id="presenze" class="content-section">
             <div class="table-container">
-                <h2 style="margin-bottom: 1.5rem;">📅 Registro Presenze</h2>
+                <h2>Registro Presenze</h2>
                 {% if presenze %}
                 <table>
                     <thead>
@@ -301,17 +125,17 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p style="text-align: center; opacity: 0.7; padding: 3rem;">Nessuna presenza registrata</p>
+                <p>Nessuna presenza registrata</p>
                 {% endif %}
             </div>
         </div>
 
         <div id="statistiche" class="content-section">
             <div class="table-container">
-                <h2 style="margin-bottom: 1.5rem;">📈 Statistiche Dettagliate</h2>
-                <div style="padding: 2rem;">
-                    <h3 style="margin-bottom: 1rem;">🎯 Media Generale</h3>
-                    <p style="font-size: 3rem; font-weight: 900; text-align: center; margin: 2rem 0;">
+                <h2>Statistiche Dettagliate</h2>
+                <div>
+                    <h3>Media Generale</h3>
+                    <p>
                         {% if medie %}
                             {{ "%.2f"|format(medie|sum(attribute='1')/medie|length) }}
                         {% else %}
@@ -319,15 +143,15 @@
                         {% endif %}
                     </p>
                     
-                    <h3 style="margin: 2rem 0 1rem;">📊 Performance per Materia</h3>
+                    <h3>Performance per Materia</h3>
                     {% for media in medie %}
-                    <div style="margin-bottom: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <div>
+                        <div>
                             <span>{{ media[0] }}</span>
                             <strong>{{ "%.1f"|format(media[1]) }}/10</strong>
                         </div>
-                        <div style="background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden;">
-                            <div style="background: {% if media[1] >= 8 %}var(--success){% elif media[1] >= 7 %}#3b82f6{% elif media[1] >= 6 %}var(--warning){% else %}var(--danger){% endif %}; height: 100%; width: {{ (media[1]/10*100)|int }}%; transition: width 0.5s ease;"></div>
+                        <div>
+                            <div></div>
                         </div>
                     </div>
                     {% endfor %}
