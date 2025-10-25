@@ -1,812 +1,620 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard SKAILA - {{ user.nome }}</title>
+    <title>Dashboard Studente - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
         }
 
-        :root {
-            --purple-start: #667eea;
-            --purple-end: #764ba2;
-            --accent-pink: #f093fb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --white: #ffffff;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-strong: rgba(255, 255, 255, 0.95);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--purple-start) 0%, var(--purple-end) 100%);
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
             min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-            animation: pulse 10s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .dashboard-wrapper {
-            position: relative;
-            z-index: 1;
-            padding: 1.5rem;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* COMPACT TOP NAV */
-        .top-nav {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border-primary);
+            padding: 2rem 1rem;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-direction: column;
         }
 
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo-section h1 {
-            font-size: 1.5rem;
-            font-weight: 900;
-            background: linear-gradient(to right, white, var(--accent-pink));
+        .sidebar-brand {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-extrabold);
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 3rem;
+            text-align: center;
         }
 
-        .user-menu {
+        .nav-menu {
+            list-style: none;
+            margin-bottom: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, rgba(0, 59, 115, 0.08) 0%, rgba(0, 116, 217, 0.05) 100%);
+            color: var(--color-blue-800);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-primary);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            margin-bottom: 0.75rem;
         }
 
         .user-avatar {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-pink), white);
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .nav-btn {
-            padding: 0.6rem 1.2rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 12px;
             color: white;
-            font-weight: 600;
+            font-weight: var(--font-bold);
+            font-size: var(--text-sm);
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
+            transition: all 0.2s ease;
+            display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
-            font-size: 0.9rem;
+            text-decoration: none;
         }
 
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: var(--color-ruby-500);
+            color: var(--color-ruby-600);
         }
 
-        /* COMPACT STATS - 4 colonne orizzontali */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
         }
 
-        .stat-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            padding: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            text-align: center;
+        .page-header {
+            margin-bottom: 2.5rem;
         }
 
-        .stat-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .stat-icon {
-            font-size: 1.8rem;
+        .page-title {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
         }
 
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 0.3rem;
+        .page-subtitle {
+            font-size: var(--text-base);
+            color: var(--text-secondary);
         }
 
-        .stat-label {
-            font-size: 0.8rem;
-            opacity: 0.8;
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
         }
 
-        /* MAIN GRID LAYOUT - 2 colonne principali */
-        .main-grid {
+        .kpi-card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--color-blue-600);
+            box-shadow: var(--shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .kpi-value {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-label {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            font-weight: var(--font-medium);
+        }
+
+        .kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-full);
+            margin-top: 0.5rem;
+        }
+
+        .kpi-trend.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-emerald-600);
+        }
+
+        .kpi-trend.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-ruby-600);
+        }
+
+        /* Content Grid */
+        .content-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 1.5rem;
             margin-bottom: 1.5rem;
         }
 
-        /* LEFT COLUMN - Azioni Rapide e Materiali */
-        .left-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        /* QUICK ACTIONS - Risolve pain point: accesso lento in Classroom */
-        .quick-actions-section {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
+        .card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
             padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .section-header {
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1rem;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
         }
 
-        .section-header h3 {
-            font-size: 1.2rem;
-            font-weight: 800;
-        }
-
-        .quick-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .quick-action {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-            border-radius: 12px;
-            padding: 1.5rem 1rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-decoration: none;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .quick-action:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: var(--accent-pink);
-            background: linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(102, 126, 234, 0.2));
-        }
-
-        .quick-action i {
-            font-size: 2.5rem;
-            margin-bottom: 0.8rem;
-            display: block;
-        }
-
-        .quick-action h4 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-        }
-
-        .quick-action p {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        /* MATERIALI DIDATTICI - Pain point: difficile trovare file in Classroom */
-        .materiali-section {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .material-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
+        .card-title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 1rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .material-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(5px);
-        }
-
-        .material-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
-            background: var(--accent-pink);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-        }
-
-        .material-info {
-            flex: 1;
-        }
-
-        .material-info h4 {
-            font-size: 0.95rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .material-info p {
-            font-size: 0.75rem;
-            opacity: 0.7;
-        }
-
-        /* RIGHT COLUMN - AI + Registro + SKAILA Connect */
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        /* SKAILA AI - Pain point: nessun supporto AI in Classroom */
-        .ai-assistant-section {
-            background: linear-gradient(135deg, rgba(255, 107, 237, 0.25), rgba(102, 126, 234, 0.15));
-            border: 2px solid var(--accent-pink);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            position: relative;
-        }
-
-        .ai-assistant-section::after {
-            content: '⭐ AI NATIVA';
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--accent-pink);
-            color: white;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 0.3rem 0.7rem;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-        }
-
-        .ai-quick-chat {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-
-        .ai-quick-chat input {
-            width: 100%;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 0.9rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .ai-suggestions {
-            display: flex;
-            flex-wrap: wrap;
             gap: 0.5rem;
         }
 
-        .ai-suggestion-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.5rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .card-action {
+            font-size: var(--text-sm);
+            color: var(--color-blue-700);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            transition: color 0.2s ease;
         }
 
-        .ai-suggestion-btn:hover {
-            background: var(--accent-pink);
-            transform: scale(1.05);
+        .card-action:hover {
+            color: var(--color-blue-900);
+            text-decoration: underline;
         }
 
-        /* REGISTRO ONLINE - Pain point: Classroom non ha registro */
-        .registro-section {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* Quick Actions */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
         }
 
-        .registro-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 0.8rem;
-            margin-bottom: 0.8rem;
+        .action-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .action-card:hover {
+            border-color: var(--color-blue-600);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: var(--color-blue-700);
+            margin-bottom: 0.75rem;
+        }
+
+        .action-title {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .action-desc {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
+
+        /* Activity List */
+        .activity-list {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        .registro-info h4 {
-            font-size: 0.9rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .registro-info p {
-            font-size: 0.75rem;
-            opacity: 0.7;
-        }
-
-        .grade-badge {
-            padding: 0.4rem 0.8rem;
-            background: var(--success);
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        /* SKAILA CONNECT */
-        .connect-section {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .company-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .company-card:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(3px);
-        }
-
-        .company-header {
+        .activity-item {
             display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 0.8rem;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-secondary);
         }
 
-        .company-logo {
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-icon-wrapper {
             width: 40px;
             height: 40px;
-            border-radius: 10px;
-            background: white;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            flex-shrink: 0;
         }
 
-        .company-info h4 {
-            font-size: 0.95rem;
-            margin-bottom: 0.2rem;
+        .activity-icon-wrapper i {
+            color: var(--color-blue-700);
         }
 
-        .company-info p {
-            font-size: 0.75rem;
-            opacity: 0.7;
+        .activity-content {
+            flex: 1;
         }
 
-        .connect-btn {
-            width: 100%;
-            padding: 0.6rem;
-            background: linear-gradient(135deg, var(--accent-pink), white);
-            color: var(--purple-end);
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .activity-title {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
         }
 
-        .connect-btn:hover {
-            transform: scale(1.03);
+        .activity-desc {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
         }
 
-        /* BOTTOM SECTION - Calendario + Chat Recenti */
-        .bottom-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        .activity-time {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            text-align: right;
         }
 
-        .calendar-widget {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .event-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 0.8rem;
-            margin-bottom: 0.8rem;
-            border-left: 4px solid var(--accent-pink);
-        }
-
-        .event-item h4 {
-            font-size: 0.9rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .event-item p {
-            font-size: 0.75rem;
-            opacity: 0.7;
-        }
-
-        @media (max-width: 1200px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-container {
+        /* Responsive */
+        @media (max-width: 1280px) {
+            .kpi-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
-            .quick-actions-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .bottom-grid {
+            .content-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 768px) {
-            .stats-container {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .quick-actions-grid {
+        @media (max-width: 1024px) {
+            .dashboard-layout {
                 grid-template-columns: 1fr;
             }
+            .sidebar {
+                display: none;
+            }
+        }
 
-            .top-nav {
-                flex-direction: column;
-                gap: 1rem;
+        @media (max-width: 640px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            .actions-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <!-- COMPACT TOP NAV -->
-        <nav class="top-nav">
-            <div class="logo-section">
-                <div class="user-avatar">{{ user.nome[0] }}</div>
-                <div>
-                    <h1>SKAILA</h1>
-                    <p>{{ user.nome }} {{ user.cognome }} • {{ user.classe or 'Studente' }}</p>
-                </div>
-            </div>
-            <div class="user-menu">
-                <a href="/gamification" class="nav-btn"><i class="fas fa-trophy"></i> <span class="stat-value">{{ stats.total_xp }}</span> XP</a>
-                <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i></a>
-            </div>
-        </nav>
-
-        <!-- COMPACT STATS -->
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon">🔥</div>
-                <div class="stat-value">{{ stats.current_streak }}</div>
-                <div class="stat-label">Giorni Streak</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"></div>
-                <div class="stat-value">Lvl {{ stats.current_level }}</div>
-                <div class="stat-label">Livello</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💬</div>
-                <div class="stat-value">{{ stats.messages_today }}</div>
-                <div class="stat-label">Messaggi Oggi</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🤖</div>
-                <div class="stat-value">{{ stats.ai_questions_today }}</div>
-                <div class="stat-label">AI Oggi</div>
-            </div>
-        </div>
-
-        <!-- MAIN GRID: 2 COLONNE -->
-        <div class="main-grid">
-            <!-- LEFT COLUMN -->
-            <div class="left-column">
-                <!-- QUICK ACTIONS - Accesso Ultra-Rapido -->
-                <div class="quick-actions-section">
-                    <div class="section-header">
-                        <i class="fas fa-bolt"></i>
-                        <h3>Azioni Rapide</h3>
-                    </div>
-                    <div class="quick-actions-grid">
-                        <a href="/chat" class="quick-action">
-                            <i class="fas fa-comments"></i>
-                            <h4>Chat Classe</h4>
-                            <p>Messaggi in tempo reale</p>
-                        </a>
-                        <a href="/materiali" class="quick-action">
-                            <i class="fas fa-folder-open"></i>
-                            <h4>Materiali</h4>
-                            <p>Documenti e risorse</p>
-                        </a>
-                        <a href="/calendario" class="quick-action">
-                            <i class="fas fa-calendar-alt"></i>
-                            <h4>Calendario</h4>
-                            <p>Eventi e scadenze</p>
-                        </a>
-                        <a href="/registro-online" class="quick-action">
-                            <i class="fas fa-chart-line"></i>
-                            <h4>Voti</h4>
-                            <p>Registro e medie</p>
-                        </a>
-                        <a href="/registro-online#presenze" class="quick-action">
-                            <i class="fas fa-calendar-check"></i>
-                            <h4>Presenze</h4>
-                            <p>Assenze e giustificazioni</p>
-                        </a>
-                        <a href="/gamification" class="quick-action">
-                            <i class="fas fa-trophy"></i>
-                            <h4>Gamification</h4>
-                            <p>Badge e sfide</p>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- MATERIALI DIDATTICI - Accesso Diretto -->
-                <div class="materiali-section">
-                    <div class="section-header">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">SKAILA</div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/dashboard" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/calendario" class="nav-link">
+                        <i class="fas fa-calendar"></i>
+                        <span>Calendario</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/registro" class="nav-link">
                         <i class="fas fa-book"></i>
-                        <h3>Materiali Recenti</h3>
-                        <a href="/materiali">Vedi tutti →</a>
-                    </div>
-                    
-                    <div class="material-item" onclick="window.location.href='/materiali'">
-                        <div class="material-icon"></div>
-                        <div class="material-info">
-                            <h4>Equazioni di secondo grado</h4>
-                            <p>Matematica • Prof. Rossi • 2 giorni fa</p>
-                        </div>
-                    </div>
-
-                    <div class="material-item" onclick="window.location.href='/materiali'">
-                        <div class="material-icon"></div>
-                        <div class="material-info">
-                            <h4>Leggi di Newton - Appunti</h4>
-                            <p>Fisica • Prof. Bianchi • 3 giorni fa</p>
-                        </div>
-                    </div>
-
-                    <div class="material-item" onclick="window.location.href='/materiali'">
-                        <div class="material-icon"></div>
-                        <div class="material-info">
-                            <h4>Divina Commedia - Canto III</h4>
-                            <p>Italiano • Prof. Verdi • 5 giorni fa</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT COLUMN -->
-            <div class="right-column">
-                <!-- SKAILA AI - Tutor Personale -->
-                <div class="ai-assistant-section">
-                    <div class="section-header">
+                        <span>Registro</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/materiali" class="nav-link">
+                        <i class="fas fa-folder"></i>
+                        <span>Materiali</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/chat" class="nav-link">
+                        <i class="fas fa-comments"></i>
+                        <span>Messaggi</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/skaila-ai" class="nav-link">
                         <i class="fas fa-robot"></i>
-                        <h3>SKAILA AI - Tutor Personale</h3>
+                        <span>AI Coach</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">{{ user.nome[0]|upper }}{{ user.cognome[0]|upper }}</div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.nome }} {{ user.cognome }}</div>
+                        <div class="user-role">Studente</div>
                     </div>
-                    <p>Chiedimi qualsiasi cosa su qualsiasi materia!</p>
-                    
-                    <div class="ai-quick-chat">
-                        <input type="text" placeholder="Scrivi la tua domanda..." onclick="window.location.href='/ai-chat'">
-                        <div class="ai-suggestions">
-                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'">🧮 Aiuto Matematica</button>
-                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'"> Riassunto Testo</button>
-                            <button class="ai-suggestion-btn" onclick="window.location.href='/ai-chat'"> Spiegazione Fisica</button>
+                </div>
+                <a href="/logout" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Esci</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Benvenuto, {{ user.nome }}!</h1>
+                <p class="page-subtitle">Ecco un riepilogo delle tue attività e progressi</p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ gamification.livello|default(1) }}</div>
+                    <div class="kpi-label">Livello Attuale</div>
+                    <span class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i> +2 questo mese
+                    </span>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ gamification.xp_totale|default(0) }}</div>
+                    <div class="kpi-label">Punti Esperienza</div>
+                    <span class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i> +150 XP
+                    </span>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">8.5</div>
+                    <div class="kpi-label">Media Voti</div>
+                    <span class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i> +0.3
+                    </span>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">95%</div>
+                    <div class="kpi-label">Presenze</div>
+                    <span class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i> Ottimo
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Left Column -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-bolt"></i>
+                                Azioni Rapide
+                            </h2>
+                        </div>
+                        <div class="actions-grid">
+                            <a href="/quiz" class="action-card">
+                                <div class="action-icon"><i class="fas fa-brain"></i></div>
+                                <div class="action-title">Quiz Adattivo</div>
+                                <p class="action-desc">Inizia un quiz personalizzato</p>
+                            </a>
+                            <a href="/materiali" class="action-card">
+                                <div class="action-icon"><i class="fas fa-folder-open"></i></div>
+                                <div class="action-title">Materiali</div>
+                                <p class="action-desc">Accedi ai materiali didattici</p>
+                            </a>
+                            <a href="/chat" class="action-card">
+                                <div class="action-icon"><i class="fas fa-comments"></i></div>
+                                <div class="action-title">Messaggi</div>
+                                <p class="action-desc">Comunicazioni con docenti</p>
+                            </a>
+                            <a href="/calendario" class="action-card">
+                                <div class="action-icon"><i class="fas fa-calendar-alt"></i></div>
+                                <div class="action-title">Calendario</div>
+                                <p class="action-desc">Vedi lezioni ed eventi</p>
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- REGISTRO ONLINE -->
-                <div class="registro-section">
-                    <div class="section-header">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h3>Ultimi Voti</h3>
-                        <a href="/registro-online">Tutti →</a>
-                    </div>
-                    
-                    <div class="registro-item">
-                        <div class="registro-info">
-                            <h4> Matematica</h4>
-                            <p>Verifica • 15/01/2025</p>
+                <!-- Right Column -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-history"></i>
+                                Attività Recenti
+                            </h2>
+                            <a href="#" class="card-action">Vedi tutte</a>
                         </div>
-                        <div class="grade-badge">8.5</div>
-                    </div>
-
-                    <div class="registro-item">
-                        <div class="registro-info">
-                            <h4> Fisica</h4>
-                            <p>Interrogazione • 12/01/2025</p>
-                        </div>
-                        <div class="grade-badge">9.0</div>
-                    </div>
-
-                    <div class="registro-item">
-                        <div class="registro-info">
-                            <h4> Italiano</h4>
-                            <p>Tema • 10/01/2025</p>
-                        </div>
-                        <div class="grade-badge">7.5</div>
-                    </div>
-                </div>
-
-                <!-- SKAILA CONNECT -->
-                <div class="connect-section">
-                    <div class="section-header">
-                        <i class="fas fa-briefcase"></i>
-                        <h3>SKAILA Connect</h3>
-                    </div>
-                    
-                    {% if companies and companies|length > 0 %}
-                        {% for company in companies[:2] %}
-                        <div class="company-card">
-                            <div class="company-header">
-                                <div class="company-logo">{{ company[4] }}</div>
-                                <div class="company-info">
-                                    <h4>{{ company[1] }}</h4>
-                                    <p>{{ company[6] }}</p>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon-wrapper">
+                                    <i class="fas fa-book"></i>
                                 </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Nuova lezione caricata</div>
+                                    <p class="activity-desc">Matematica - Equazioni differenziali</p>
+                                </div>
+                                <div class="activity-time">2h fa</div>
                             </div>
-                            <button class="connect-btn" onclick="connectWithCompany({{ company[0] }})">
-                                <i class="fas fa-paper-plane"></i> Candidati
-                            </button>
+                            <div class="activity-item">
+                                <div class="activity-icon-wrapper">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Achievement sbloccato</div>
+                                    <p class="activity-desc">Quiz Master - 10 quiz completati</p>
+                                </div>
+                                <div class="activity-time">1g fa</div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon-wrapper">
+                                    <i class="fas fa-comment"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Nuovo messaggio</div>
+                                    <p class="activity-desc">Prof. Bianchi - Feedback compito</p>
+                                </div>
+                                <div class="activity-time">2g fa</div>
+                            </div>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <p>Nessuna opportunità al momento</p>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- BOTTOM GRID: Calendario + Chat Recenti -->
-        <div class="bottom-grid">
-            <div class="calendar-widget">
-                <div class="section-header">
-                    <i class="fas fa-calendar-alt"></i>
-                    <h3>Prossimi Eventi</h3>
-                </div>
-                
-                <div class="event-item">
-                    <h4> Verifica Matematica</h4>
-                    <p>20 Gennaio 2025 • 09:00-10:30</p>
-                </div>
-
-                <div class="event-item">
-                    <h4> Consegna Tema Italiano</h4>
-                    <p>25 Gennaio 2025 • Entro 23:59</p>
-                </div>
-
-                <div class="event-item">
-                    <h4> Assemblea di Classe</h4>
-                    <p>28 Gennaio 2025 • 11:00-12:00</p>
-                </div>
-            </div>
-
-            <div class="calendar-widget">
-                <div class="section-header">
-                    <i class="fas fa-comments"></i>
-                    <h3>Chat Recenti</h3>
-                </div>
-                
-                <div class="event-item">
-                    <h4>💬 Classe 3A - Generale</h4>
-                    <p>Giulia: "Qualcuno ha fatto l'esercizio 15?" • 2h fa</p>
-                </div>
-
-                <div class="event-item">
-                    <h4>👥 Gruppo Studio Matematica</h4>
-                    <p>Marco: "Ci vediamo alle 16?" • 4h fa</p>
-                </div>
-
-                <div class="event-item">
-                    <h4> Prof. Rossi (Matematica)</h4>
-                    <p>Nuovi materiali caricati • 1 giorno fa</p>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
-
-    <script>
-        function connectWithCompany(companyId) {
-            fetch('/api/skaila-connect/apply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ company_id: companyId })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      const xpMessage = data.xp_gained > 0 ? ` +${data.xp_gained} XP!` : '';
-                      alert(`🎉 ${data.message}${xpMessage}`);
-                      if (data.xp_gained > 0) {
-                          setTimeout(() => location.reload(), 1500);
-                      }
-                  } else {
-                      alert(`❌ ${data.error || 'Errore nell\'invio della candidatura.'}`);
-                  }
-              })
-              .catch(err => {
-                  console.error('Error:', err);
-                  alert('❌ Errore di connessione.');
-              });
-        }
-    </script>
 </body>
 </html>
