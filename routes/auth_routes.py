@@ -179,16 +179,32 @@ def register():
                 if scuola_id_input:
                     scuola_id = int(scuola_id_input)
                 else:
-                    # Lookup scuola predefinita
+                    # Usa sempre scuola predefinita se non specificato
                     default_school = db_manager.query(
                         'SELECT id FROM scuole WHERE codice_pubblico = %s', 
                         ('DEFAULT_SCHOOL',), one=True
                     )
                     if default_school:
                         scuola_id = default_school['id']
+                        print(f"✅ Registrazione semplice: assegnato a scuola predefinita (ID: {scuola_id})")
                     else:
-                        flash('❌ Inserisci un codice scuola oppure seleziona una scuola esistente.', 'error')
-                        return render_template('register.html', scuole=school_system.get_user_schools())
+                        # Crea scuola predefinita al volo se non esiste
+                        try:
+                            with db_manager.get_connection() as conn:
+                                cursor = conn.cursor()
+                                cursor.execute("""
+                                    INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, 
+                                                      codice_dirigente, attiva, created_at)
+                                    VALUES (%s, %s, %s, %s, TRUE, CURRENT_TIMESTAMP)
+                                    RETURNING id
+                                """, ('SKAILA Community', 'DEFAULT_SCHOOL', 'DEFAULT_TEACHER', 'DEFAULT_DIRECTOR'))
+                                scuola_id = cursor.fetchone()[0]
+                                conn.commit()
+                                print(f"✅ Scuola predefinita creata (ID: {scuola_id})")
+                        except Exception as e:
+                            print(f"❌ Errore creazione scuola predefinita: {e}")
+                            flash('Errore durante la registrazione. Riprova.', 'error')
+                            return render_template('register.html', scuole=school_system.get_user_schools())
             
             classe_nome = request.form.get('classe_nome', '').strip()
             codice_docente = request.form.get('codice_docente', '').strip()
