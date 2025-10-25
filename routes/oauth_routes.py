@@ -4,7 +4,6 @@ Gestisce login/callback per Google e Microsoft OAuth
 """
 
 from flask import Blueprint, redirect, url_for, session, flash, request
-from flask_login import login_user, logout_user, current_user
 import logging
 import os
 
@@ -104,8 +103,14 @@ def init_oauth_routes(app, oauth_manager, db_manager):
                 flash('Errore durante la creazione dell\'account. Riprova.', 'error')
                 return redirect(url_for('auth.login'))
             
-            # Login utente con Flask-Login
-            login_user(user, remember=True)
+            # Login utente usando session di SKAILA (no Flask-Login)
+            session.permanent = True
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            session['email'] = user['email']
+            session['ruolo'] = user['ruolo']
+            session['nome'] = user['nome']
+            session['cognome'] = user['cognome']
             
             # Flash success message
             provider_name = 'Google' if provider == 'google' else 'Microsoft'
@@ -115,7 +120,7 @@ def init_oauth_routes(app, oauth_manager, db_manager):
             session.pop('oauth_provider', None)
             
             # Redirect a dashboard
-            return redirect(url_for('main.dashboard'))
+            return redirect('/dashboard')
         
         except Exception as e:
             logger.error(f"Errore OAuth callback ({provider}): {e}")
@@ -156,17 +161,15 @@ def init_oauth_routes(app, oauth_manager, db_manager):
                     db_manager.execute_update(update_query, (provider, oauth_id, user['id']))
                     logger.info(f"✅ OAuth info aggiornate per utente {email}")
                 
-                # Crea oggetto User per Flask-Login
-                from collections import namedtuple
-                User = namedtuple('User', ['id', 'username', 'email', 'ruolo', 'nome', 'cognome'])
-                return User(
-                    id=user['id'],
-                    username=user['username'],
-                    email=user['email'],
-                    ruolo=user['ruolo'],
-                    nome=user.get('nome', ''),
-                    cognome=user.get('cognome', '')
-                )
+                # Ritorna user dict per session
+                return {
+                    'id': user['id'],
+                    'username': user['username'],
+                    'email': user['email'],
+                    'ruolo': user['ruolo'],
+                    'nome': user.get('nome', ''),
+                    'cognome': user.get('cognome', '')
+                }
             
             else:
                 # Nuovo utente - crealo
@@ -188,17 +191,15 @@ def init_oauth_routes(app, oauth_manager, db_manager):
                     new_user_id = result[0]['id']
                     logger.info(f"✅ Nuovo utente OAuth creato: {email} (ID: {new_user_id})")
                     
-                    # Crea oggetto User
-                    from collections import namedtuple
-                    User = namedtuple('User', ['id', 'username', 'email', 'ruolo', 'nome', 'cognome'])
-                    return User(
-                        id=new_user_id,
-                        username=username,
-                        email=email,
-                        ruolo='studente',
-                        nome=nome,
-                        cognome=cognome
-                    )
+                    # Ritorna user dict per session
+                    return {
+                        'id': new_user_id,
+                        'username': username,
+                        'email': email,
+                        'ruolo': 'studente',
+                        'nome': nome,
+                        'cognome': cognome
+                    }
                 else:
                     return None
         
