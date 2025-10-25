@@ -107,7 +107,7 @@ def private_chat(recipient_id):
             # Aggiungi partecipanti
             conn.execute('''
                 INSERT INTO partecipanti_chat (chat_id, utente_id)
-                VALUES (%s, %s), (?, ?)
+                VALUES (%s, %s), (%s, %s)
             ''', (chat_id, user_id, chat_id, recipient_id))
             conn.commit()
     
@@ -127,7 +127,7 @@ def group_chat_materia(materia):
         WHERE tipo = 'materia' 
         AND scuola_id = %s 
         AND classe = %s
-        AND nome LIKE ?
+        AND nome LIKE %s
         LIMIT 1
     ''', (school_id, classe, f'%{materia}%'), one=True)
     
@@ -146,7 +146,7 @@ def group_chat_materia(materia):
             # Aggiungi tutti gli studenti della classe
             conn.execute('''
                 INSERT INTO partecipanti_chat (chat_id, utente_id)
-                SELECT ?, id FROM utenti 
+                SELECT %s, id FROM utenti 
                 WHERE classe = %s AND scuola_id = %s AND ruolo = 'studente' AND attivo = true
             ''', (chat_id, classe, school_id))
             conn.commit()
