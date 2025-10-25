@@ -520,6 +520,78 @@ a:hover {
     margin-bottom: var(--space-4);
 }
 
+/* ========== OAUTH BUTTONS ========== */
+
+.oauth-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--space-6) 0 var(--space-4) 0;
+    text-align: center;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.oauth-divider span {
+    padding: 0 var(--space-3);
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.oauth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: var(--font-medium);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.oauth-btn:hover {
+    background: rgba(45, 212, 191, 0.05);
+    border-color: var(--color-teal-400);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.oauth-btn:active {
+    transform: translateY(0);
+}
+
+.oauth-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.oauth-google:hover .oauth-icon {
+    color: #4285F4;
+}
+
+.oauth-microsoft:hover .oauth-icon {
+    color: #00A4EF;
+}
+
 /* ========== RESPONSIVE ========== */
 
 @media (max-width: 1024px) {
