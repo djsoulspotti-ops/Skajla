@@ -3,380 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💬 {{ chat.nome or 'Chat' }} - SKAILA</title>
+    <title>{{ chat.nome or 'Chat' }} - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: var(--bg-primary);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
-        
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            padding: 1rem 2rem;
+
+        .chat-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-primary);
+            padding: var(--space-4) var(--space-6);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
         }
-        
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
         }
-        
-        .back-btn {
-            padding: 0.6rem 1.2rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
+
+        .chat-title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .chat-meta {
+            color: var(--text-tertiary);
+            font-size: var(--text-sm);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
             text-decoration: none;
-            transition: all 0.3s ease;
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
+            transition: all var(--transition-fast);
         }
-        
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+
+        .btn-back:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-accent);
         }
-        
+
         .chat-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 2rem;
+            overflow: hidden;
         }
-        
+
         .messages-container {
             flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
             overflow-y: auto;
-            max-height: calc(100vh - 250px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: var(--space-6);
+            background: var(--bg-primary);
+            scroll-behavior: smooth;
         }
-        
+
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--color-teal-500);
+            border-radius: var(--radius-full);
+        }
+
         .message {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
+            max-width: 60%;
+            margin-bottom: var(--space-4);
             animation: fadeIn 0.3s ease;
         }
-        
-        .message.own {
-            background: rgba(102, 126, 234, 0.3);
-            margin-left: 20%;
-        }
-        
-        .message.other {
-            background: rgba(255, 255, 255, 0.15);
-            margin-right: 20%;
-        }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
+        .message.own {
+            margin-left: auto;
+        }
+
+        .message.other {
+            margin-right: auto;
+        }
+
+        .message-bubble {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-4);
+        }
+
+        .message.own .message-bubble {
+            background: rgba(45, 212, 191, 0.1);
+            border-color: rgba(45, 212, 191, 0.3);
+        }
+
         .message-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+            margin-bottom: var(--space-2);
         }
-        
+
         .message-author {
-            font-weight: 700;
-            color: #f093fb;
+            font-weight: var(--font-semibold);
+            font-size: var(--text-sm);
+            color: var(--text-primary);
         }
-        
+
+        .message.own .message-author {
+            color: var(--color-teal-400);
+        }
+
         .message-time {
-            opacity: 0.7;
-            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-size: var(--text-xs);
         }
-        
+
         .message-content {
-            font-size: 1rem;
-            line-height: 1.5;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            line-height: var(--leading-relaxed);
+            word-wrap: break-word;
         }
-        
+
         .input-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-primary);
+            padding: var(--space-4) var(--space-6);
             display: flex;
-            gap: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            gap: var(--space-3);
+            flex-shrink: 0;
         }
-        
+
         .message-input {
             flex: 1;
-            padding: 1rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            font-family: inherit;
+            padding: var(--space-3) var(--space-4);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-size: var(--text-sm);
+            font-family: var(--font-sans);
+            resize: none;
+            max-height: 120px;
+            transition: all var(--transition-fast);
         }
-        
+
         .message-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
         }
-        
+
         .message-input:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.25);
+            border-color: var(--color-teal-500);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
         }
-        
+
         .send-btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
+            padding: var(--space-3) var(--space-6);
+            background: var(--color-teal-500);
             color: white;
-            font-weight: 700;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            font-size: var(--text-sm);
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
         }
-        
+
         .send-btn:hover {
+            background: var(--color-teal-600);
+            box-shadow: var(--glow-teal);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        
+
         .send-btn:active {
             transform: translateY(0);
         }
-        
-        .participants {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
-        
+
+        .participants-panel {
+            padding: var(--space-4) var(--space-6);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .participants-title {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .participants-list {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-2);
             flex-wrap: wrap;
-            margin-top: 0.5rem;
         }
-        
+
         .participant-badge {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+            border: 1px solid var(--border-primary);
         }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            margin-right: 0.3rem;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
+
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
-            opacity: 0.7;
+            padding: var(--space-12);
+            color: var(--text-tertiary);
         }
-        
+
         .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: var(--text-4xl);
+            color: var(--text-muted);
+            margin-bottom: var(--space-4);
             opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                max-width: 80%;
+            }
+
+            .chat-header {
+                padding: var(--space-3) var(--space-4);
+            }
+
+            .chat-title {
+                font-size: var(--text-lg);
+            }
+
+            .input-container {
+                padding: var(--space-3) var(--space-4);
+            }
+
+            .send-btn span {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>💬 {{ chat.nome or 'Chat' }}</h1>
-        <a href="/chat" class="back-btn">
-            <i class="fas fa-arrow-left"></i> Chat Hub
-        </a>
-    </div>
-    
-    <div class="chat-container">
-        {% if participants and participants|length > 0 %}
-        <div class="participants">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span class="status-indicator"></span>
-                <strong>{{ participants|length }} partecipanti</strong>
-            </div>
-            <div class="participants-list">
-                {% for p in participants %}
-                <span class="participant-badge">{{ p.nome }} {{ p.cognome }}</span>
-                {% endfor %}
-            </div>
+    <header class="chat-header">
+        <div class="chat-header-left">
+            <h1 class="chat-title">{{ chat.nome or 'Chat' }}</h1>
+            {% if chat.tipo %}
+            <span class="chat-meta">{{ chat.tipo }}</span>
+            {% endif %}
         </div>
-        {% endif %}
-        
+        <a href="/chat" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            <span>Indietro</span>
+        </a>
+    </header>
+
+    <div class="chat-container">
         <div class="messages-container" id="messagesContainer">
             {% if messages and messages|length > 0 %}
                 {% for msg in messages %}
-                <div class="message {% if msg.utente_id == user.user_id %}own{% else %}other{% endif %}">
-                    <div class="message-header">
-                        <span class="message-author">{{ msg.nome }} {{ msg.cognome }}</span>
-                        <span class="message-time">{{ msg.timestamp.strftime('%H:%M') if msg.timestamp else '' }}</span>
+                <div class="message {% if msg.utente_id == current_user_id %}own{% else %}other{% endif %}">
+                    <div class="message-bubble">
+                        <div class="message-header">
+                            <span class="message-author">{{ msg.nome }} {{ msg.cognome }}</span>
+                            <span class="message-time">{{ msg.created_at.strftime('%H:%M') if msg.created_at else '' }}</span>
+                        </div>
+                        <div class="message-content">{{ msg.contenuto }}</div>
                     </div>
-                    <div class="message-content">{{ msg.contenuto }}</div>
                 </div>
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
                     <i class="fas fa-comments"></i>
-                    <h3>Nessun messaggio ancora</h3>
-                    <p>Inizia la conversazione scrivendo un messaggio!</p>
+                    <p>Nessun messaggio. Inizia la conversazione!</p>
                 </div>
             {% endif %}
         </div>
-        
+
         <div class="input-container">
-            <input 
-                type="text" 
+            <textarea 
                 id="messageInput" 
                 class="message-input" 
                 placeholder="Scrivi un messaggio..."
-                autocomplete="off"
-            >
-            <button class="send-btn" onclick="sendMessage()">
-                <i class="fas fa-paper-plane"></i> Invia
+                rows="1"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+                <span>Invia</span>
             </button>
         </div>
+
+        {% if participants and participants|length > 0 %}
+        <div class="participants-panel">
+            <div class="participants-title">Partecipanti ({{ participants|length }})</div>
+            <div class="participants-list">
+                {% for participant in participants %}
+                <span class="participant-badge">{{ participant.nome }} {{ participant.cognome }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
-    
+
     <script>
         const chatId = {{ chat.id }};
-        const userId = {{ user.user_id }};
-        const userName = "{{ user.nome }} {{ user.cognome }}";
-        
-        // Connetti a Socket.IO
+        const currentUserId = {{ current_user_id }};
         const socket = io();
-        
-        // Join chat room
-        socket.on('connect', function() {
-            console.log('✅ Socket.IO connesso');
-            socket.emit('join_conversation', {
-                conversation_id: chatId
-            });
+
+        // Auto-resize textarea
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
         });
-        
-        // Ricevi nuovo messaggio
-        socket.on('new_message', function(message) {
-            console.log('📨 Nuovo messaggio:', message);
-            addMessageToUI(message);
-        });
-        
-        // Error handling
-        socket.on('error', function(data) {
-            console.error('❌ Errore Socket.IO:', data);
-            alert('Errore: ' + (data.message || 'Errore sconosciuto'));
-        });
-        
-        // Conferma join
-        socket.on('joined_conversation', function(data) {
-            console.log('✅ Unito alla chat:', data);
-        });
-        
-        // Invia messaggio
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const contenuto = input.value.trim();
-            
-            if (!contenuto) {
-                alert('⚠️ Scrivi un messaggio prima di inviare!');
-                return;
-            }
-            
-            // Invia via Socket.IO
-            socket.emit('send_message', {
-                conversation_id: chatId,
-                contenuto: contenuto
-            });
-            
-            // Pulisci input
-            input.value = '';
-            input.focus();
-        }
-        
-        // Aggiungi messaggio a UI
-        function addMessageToUI(message) {
-            const container = document.getElementById('messagesContainer');
-            
-            // Rimuovi empty state se presente
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
-            
-            const isOwn = message.utente_id === userId;
-            const timestamp = new Date(message.data_invio || message.timestamp);
-            const timeStr = timestamp.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'});
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="message-author">${message.nome} ${message.cognome}</span>
-                    <span class="message-time">${timeStr}</span>
-                </div>
-                <div class="message-content">${escapeHtml(message.contenuto)}</div>
-            `;
-            
-            container.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        // Escape HTML per sicurezza
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        // Invia con Enter
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+
+        // Send on Enter (without Shift)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 sendMessage();
             }
         });
-        
-        // Auto-scroll all'inizio
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('messagesContainer');
-            container.scrollTop = container.scrollHeight;
+
+        // Socket.IO connection
+        socket.on('connect', function() {
+            console.log('Connected to server');
+            socket.emit('join_conversation', { chat_id: chatId });
+        });
+
+        socket.on('new_message', function(data) {
+            appendMessage(data);
+        });
+
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if (!content) return;
+
+            const data = {
+                chat_id: chatId,
+                contenuto: content
+            };
+
+            socket.emit('send_message', data);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        }
+
+        function appendMessage(data) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            // Remove empty state if present
+            const emptyState = messagesContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const isOwn = data.utente_id === currentUserId;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            
+            const now = new Date();
+            const time = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div class="message-header">
+                        <span class="message-author">${data.nome} ${data.cognome}</span>
+                        <span class="message-time">${time}</span>
+                    </div>
+                    <div class="message-content">${escapeHtml(data.contenuto)}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // Auto-scroll to bottom on load
+        window.addEventListener('load', function() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
     </script>
 </body>
