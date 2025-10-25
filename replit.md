@@ -1,6 +1,6 @@
 # Overview
 
-SKAILA is an educational platform for schools, offering a multi-role messaging system, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. It connects students, teachers, parents, and administrators in real-time. The platform is a Flask web application with Socket.IO for real-time communication, designed to be scalable and specifically tailored for the Italian education system. It aims to enhance learning engagement and provide robust tools for school management.
+SKAILA is an educational platform for schools, connecting students, teachers, parents, and administrators in real-time. It offers a multi-role messaging system, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. Designed as a Flask web application with Socket.IO for real-time communication, SKAILA is scalable and tailored for the Italian education system, aiming to enhance learning engagement and provide robust tools for school management with a focus on business vision and market potential.
 
 # User Preferences
 
@@ -11,132 +11,62 @@ Preferred communication style: Simple, everyday language.
 ## Backend Framework
 The application uses Flask with a modular architecture, separating concerns into blueprints for authentication, dashboards, and APIs.
 
-## Centralized Configuration System (SSoT) - Oct 18, 2025
-SKAILA implements Single Source of Truth principles with centralized, modular configuration:
--   **Core Configurations** (`core/config/`):
-    -   `settings.py`: App settings, security configs, cache settings, feature flags
-    -   `gamification_config.py`: XP actions (40+ types), multipliers, levels, badges, streaks
--   **Shared Validators** (`shared/validators/`):
-    -   `input_validators.py`: Email, password, username validation, SQL injection protection, XSS sanitization
--   **Shared Formatters** (`shared/formatters/`):
-    -   `date_formatters.py`: Italian date formatting utilities
-    -   `file_formatters.py`: File size formatting (KB, MB, GB)
--   **Benefits Achieved**:
-    -   ~60% code reduction through DRY principles
-    -   Consistent validation across all modules
-    -   Security hardening with centralized input sanitization
-    -   Easy configuration updates without touching business logic
-    -   Improved maintainability and testability
+## Centralized Configuration System (SSoT)
+SKAILA implements Single Source of Truth principles with centralized, modular configuration for core settings, security, caching, feature flags, gamification parameters (XP actions, multipliers, levels, badges, streaks), and shared validators/formatters. This approach reduces code, ensures consistency, and improves maintainability.
 
 ## Database Layer
-Supports both SQLite (development) and PostgreSQL (production) with a custom `DatabaseManager` for connection pooling and fallback mechanisms. The schema supports multi-tenant school management, users, chat, gamification, and AI interaction tracking.
+Supports both SQLite (development) and PostgreSQL (production) with a custom `DatabaseManager` for connection pooling. The schema supports multi-tenant school management, users, chat, gamification, and AI interaction tracking.
 
 ## Multi-Tenant School System
-SKAILA includes a comprehensive school, class, and teacher management system with dynamic class creation, role-based registration, and automated chat room creation, supporting isolated data for unlimited schools.
+Includes a comprehensive school, class, and teacher management system with dynamic class creation, role-based registration, and automated chat room creation, supporting isolated data for unlimited schools.
 
 ## Real-time Communication
-Socket.IO provides real-time messaging with automatic reconnection and room-based chat for various chat types (class-based, thematic, administrative).
+Socket.IO provides real-time messaging with automatic reconnection and room-based chat for various types (class-based, thematic, administrative).
 
 ## AI Integration
-A native SKAILA AI system powers personalized learning:
--   **SKAILA AI Brain Engine**: Analyzes student profiles for context, subject detection, sentiment, and prioritizes responses with 8 types of personalized feedback.
--   **Adaptive Quiz System**: Features a multi-subject quiz database (34+ quizzes) that adapts difficulty, focuses on weak topics, and integrates with XP and badge systems.
--   **Social Learning System**: Facilitates peer help matching, study group creation, and awards collaborative XP.
--   **Subject Progress Analytics**: Provides comprehensive overview of student performance, identifies weak areas, generates learning paths, and offers AI-driven suggestions.
+A native SKAILA AI system powers personalized learning through:
+-   **SKAILA AI Brain Engine**: Analyzes student profiles for context, subject, sentiment, and provides personalized feedback.
+-   **Adaptive Quiz System**: Multi-subject quizzes adapt difficulty and focus on weak topics, integrating with gamification.
+-   **Social Learning System**: Facilitates peer help and study groups, awarding collaborative XP.
+-   **Subject Progress Analytics**: Provides performance overview, identifies weak areas, and offers AI-driven learning path suggestions.
+-   **AI Insights Engine**: Uses statistical methods and regression analysis for grade trend analysis, attendance pattern detection, weak subject identification, and future performance predictions.
 
-## Gamification Engine (REFACTORED - Oct 18, 2025)
-Production-ready XP and leveling system with PostgreSQL integration:
--   **Atomic XP Operations**: award_xp uses INSERT ON CONFLICT DO UPDATE with transactions - no race conditions
--   **Concurrency-Safe**: Multiple simultaneous XP awards increment correctly (tested: 50 + 5 = 55 XP)
--   **Centralized Configuration**: XPConfig in core/config/gamification_config.py with 40+ action types and 9 multipliers
--   **Database Tables**: 7 auto-created tables (user_gamification, user_achievements, user_badges, daily_analytics, etc.)
--   **Level System**: Dynamic thresholds up to level 100 with title progression
--   **Daily Analytics**: Automatic tracking of XP earned, quizzes completed, study time per day
--   **Future-Ready**: Badge/achievement tables created, logic can be added incrementally
+## Gamification Engine
+A production-ready XP and leveling system with PostgreSQL integration, featuring atomic and concurrency-safe XP operations, centralized configuration for over 40 action types and multipliers, dynamic level progression up to 100, and daily analytics tracking.
 
 ## Performance Optimization
 Includes multi-level caching, Redis-backed session management, performance monitoring, and database connection pooling.
 
 ## Security Features
-Uses bcrypt for password hashing, rate limiting for brute-force prevention, and role-based access control.
+Uses bcrypt for password hashing, rate limiting, and role-based access control.
 
-## Robust Authentication System (UPDATED - Oct 2025)
-SKAILA features a production-ready, user-friendly authentication system:
--   **Auto-Managed SECRET_KEY**: Automatically generates and persists SECRET_KEY in `.env.secrets` file, eliminating session reset issues. Falls back to Replit Secrets in production.
--   **Remember Me Feature**: Users can choose 30-day persistent sessions (default) or 1-day sessions, improving user experience.
--   **Smart Lockout Protection**: After multiple failed login attempts, users receive accurate countdown messages ("Try again in X minutes") with proper time calculation.
--   **Enhanced Feedback**: Clear error messages for lockout, invalid credentials, and success messages.
--   **Professional Login UI**: Clean, professional login page with custom checkbox styling, autocomplete support for password managers, and smooth animations.
--   **Session Persistence**: Sessions no longer reset on server restart thanks to persistent SECRET_KEY storage.
--   **PostgreSQL Database**: Online production-ready database (Neon) for secure user storage with bcrypt password hashing.
+## Robust Authentication System
+Features a production-ready system with auto-managed `SECRET_KEY`, "Remember Me" functionality (30-day or 1-day sessions), smart lockout protection with countdown messages, enhanced feedback, and a professional UI.
 
-## Professional UI Design System (Oct 25, 2025)
-SKAILA features a completely redesigned professional UI suitable for business users:
--   **Centralized CSS Design System**: 3-file modular architecture (tokens.css, professional.css, layouts.css) with 1200+ lines
--   **Enterprise Color Palette**: Dark slate (#0f172a, #1e293b) backgrounds, navy (#0f4c75) depth, teal (#2dd4bf) accents, copper warnings
--   **Professional Components**: Flat cards, clean buttons, minimalist badges, enterprise tables - no gaming aesthetics
--   **Typography**: Inter font family (400/500/600/700 weights), consistent type scale (12-48px), optimal line heights
--   **Zero Inline Styles**: All CSS externalized for cacheability and maintainability (~55% template size reduction)
--   **Professional Iconography**: Font Awesome icons throughout, all emoji removed
--   **Utility Classes**: .hidden, .text-center, .icon, spacing utilities for flexible layouts
--   **Accessibility**: WCAG AA compliant, keyboard navigation, semantic HTML, responsive (640/768/1024/1280px breakpoints)
--   **Removed Gaming Aesthetics**: No animated gradients, cyber grids, neon glows, glassmorphism, floating particles
--   **Intelligent Layout**: Grid-based responsive design (2fr 1fr) that adapts to screen sizes
--   **Smooth Animations**: Hover effects, fade-in animations, and transform transitions for premium feel
--   **Removed Clutter**: Eliminated "Azioni Rapide" section for cleaner, more focused experience
+## Enterprise UI Design System
+SKAILA features an ultra-professional, enterprise-grade UI redesigned for corporate teams. Key elements include:
+-   **Design Tokens & Color System**: New enterprise palette with deep corporate blues, steel greys, classic gold accents, and semantic colors. Utilizes Inter, IBM Plex Sans, and JetBrains Mono fonts, a 4px spacing system, and sophisticated shadow elevation.
+-   **Redesigned Templates**: All pages (Homepage, Login, Registration, Student/Teacher Dashboards, Calendar) have been rebuilt with professional layouts, clean forms, and intuitive navigation. The calendar features dynamic JavaScript for full month/year navigation and interactive day cells.
+-   **Professional Components**: Standardized cards, buttons, forms, tables, and KPI cards with clean aesthetics and proper states.
+-   **Removed Gaming Elements**: Eliminates neon glows, animated grids, and vibrant color schemes for a clean, flat design with subtle depth.
+-   **Technical Implementation**: Centralized `tokens.css` (350+ lines), modular CSS, mobile-first responsive design, WCAG AA accessibility, and optimized performance.
 
-## SKAILA Connect - Student Career Portal (Oct 16, 2025)
-Revolutionary feature connecting students with real companies for internships and job opportunities:
--   **Company Database**: Structured table with companies, sectors, positions, requirements, and compensation
--   **Smart Application System**: One-click applications with XP rewards (50 XP for first application only)
--   **Anti-Farming Protection**: Duplicate applications detected, XP awarded only for new submissions
--   **API Endpoints**: `/api/skaila-connect/companies`, `/apply`, `/my-applications`
--   **Input Validation**: Complete validation (company existence, active status) with proper error handling
--   **Dynamic UI**: Company cards loaded from database with logo emojis, descriptions, and action buttons
--   **5 Partner Companies**: TechStart Italia, Innovation Lab, Creative Digital, Green Energy Corp, MediaTech Solutions
+## SKAILA Connect - Student Career Portal
+A feature connecting students with companies for internships and job opportunities, including a company database, smart one-click application system with XP rewards, anti-farming protection, and dynamic UI for company listings.
 
-## Integrated Online Register (Oct 16, 2025)
-Complete digital register system replacing obsolete school systems:
--   **Database Tables**: `voti` (grades 1-10 scale), `presenze` (attendance tracking)
--   **Student View**: Tabs for Grades, Attendance, Statistics with responsive design
--   **Grade Tracking**: Subject-wise grades, evaluation types (written/oral), teacher notes
--   **Attendance System**: Daily presence tracking, justified absences, tardiness recording
--   **Statistics Dashboard**: Automated average calculation per subject, visual progress bars, overall performance metrics
--   **Teacher Interface**: Separate view for professors to manage class grades and attendance
--   **Purple Gradient Theme**: Consistent design language across all register pages
+## Integrated Online Register
+A complete digital register system with database tables for grades (`voti`) and attendance (`presenze`). It provides student views for grades, attendance, and statistics, a teacher interface for management, and automated average calculations and progress bars.
 
-## AI Insights Engine with Machine Learning (Oct 16, 2025)
-Advanced predictive analytics system using statistical methods and regression analysis:
--   **Grade Trend Analysis**: Linear regression for performance predictions, identifies improvement/decline patterns
--   **Attendance Pattern Detection**: Calculates rates and streak analysis for early intervention
--   **Weak Subject Identification**: Uses z-scores and standard deviation to pinpoint struggling areas
--   **Future Performance Predictions**: Compares recent vs historical grades for trend forecasting
--   **Gamification Progress Tracking**: Analyzes XP velocity and achievement patterns
--   **Data-Driven Insights**: Generates top 3 prioritized recommendations based on statistical significance
--   *Note: Temporarily disabled for database schema optimization*
+## Granular Messaging System
+A complete messaging infrastructure with a central chat hub, supporting 1-to-1 direct messages, subject-based group chats, and class-wide chats, with dedicated database schemas and API endpoints ready for real-time Socket.IO integration.
 
-## Granular Messaging System (Oct 16, 2025)
-Complete messaging infrastructure with multiple communication channels:
--   **Chat Hub Central**: Unified interface for all messaging types (`/chat-hub`)
--   **1-to-1 Direct Messages**: Private student-teacher and peer conversations (`/direct-messages/<user_id>`)
--   **Subject-Based Groups**: Dedicated chat rooms per academic subject (`/group-chats/<materia>`)
--   **Class-Wide Chats**: Announcements and discussions for entire classes
--   **Database Schema**: Tables for `direct_messages`, `group_chats`, `group_members` with timestamps
--   **Backend Routes**: Complete API endpoints in `messaging_routes.py` for all message types
--   **Real-time Support**: Socket.IO integration ready for live message delivery
-
-## Complete Backend Infrastructure (Oct 16, 2025)
-Comprehensive routing system for educational features:
--   **Materials Management**: Routes for uploading/downloading teaching resources (`/materiali`)
--   **Quiz System**: Adaptive quiz delivery and scoring endpoints (`/quiz`)
--   **Calendar Integration**: Academic calendar with events and deadlines (`/calendario`)
--   **API Layer**: RESTful endpoints for SKAILA Connect, applications, and user data
--   **Modular Architecture**: Separated blueprints for dashboard, messaging, and API concerns
+## Complete Backend Infrastructure
+Comprehensive routing system with modular architecture for educational features, including materials management, quiz system, calendar integration, and API layers for SKAILA Connect and user data.
 
 ## New Features
--   **Teaching Materials Management System**: Allows teachers to upload, organize, and manage various file types (PDF, DOC, images, video) with class-based access control and download analytics.
--   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance tracking, grade recording (Italian 1-10 scale), disciplinary notes, and a lesson calendar.
--   **Parent Communication System**: Generates automated weekly and monthly reports with attendance, grades, behavior updates, homework tracking, and AI insights. It also provides real-time notifications for important events.
+-   **Teaching Materials Management System**: Allows teachers to upload, organize, and manage files with class-based access control.
+-   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance, grades (Italian 1-10 scale), disciplinary notes, and lesson calendar.
+-   **Parent Communication System**: Generates automated weekly/monthly reports with attendance, grades, behavior updates, homework, and AI insights, plus real-time notifications.
 
 # External Dependencies
 
