@@ -61,28 +61,14 @@ Includes multi-level caching, Redis-backed session management, performance monit
 Uses bcrypt for password hashing, rate limiting for brute-force prevention, and role-based access control.
 
 ## Robust Authentication System (UPDATED - Oct 2025)
-SKAILA now features a production-ready, user-friendly authentication system:
+SKAILA features a production-ready, user-friendly authentication system:
 -   **Auto-Managed SECRET_KEY**: Automatically generates and persists SECRET_KEY in `.env.secrets` file, eliminating session reset issues. Falls back to Replit Secrets in production.
 -   **Remember Me Feature**: Users can choose 30-day persistent sessions (default) or 1-day sessions, improving user experience.
 -   **Smart Lockout Protection**: After multiple failed login attempts, users receive accurate countdown messages ("Try again in X minutes") with proper time calculation.
--   **Enhanced Feedback**: Clear error messages for lockout, invalid credentials, and success messages ("👋 Welcome back, [name]!").
--   **Modern UI**: Beautiful purple gradient login page with custom checkbox styling, autocomplete support for password managers, and smooth animations.
+-   **Enhanced Feedback**: Clear error messages for lockout, invalid credentials, and success messages.
+-   **Professional Login UI**: Clean, professional login page with custom checkbox styling, autocomplete support for password managers, and smooth animations.
 -   **Session Persistence**: Sessions no longer reset on server restart thanks to persistent SECRET_KEY storage.
-
-## OAuth 2.0 Integration (Oct 25, 2025)
-SKAILA supports seamless single sign-on with Google and Microsoft accounts:
--   **Modular OAuth Architecture**: Centralized `auth/oauth_manager.py` using Authlib library for secure token exchange
--   **Dual Provider Support**: Complete OAuth 2.0 flows for Google (OAuth 2.0) and Microsoft (Azure AD v2.0)
--   **Session-Based Integration**: OAuth users auto-login via SKAILA's session system (no Flask-Login dependency)
--   **Database Schema**: `oauth_provider` (google/microsoft/null), `oauth_id` (provider user ID), `email_verified` flag
--   **Auto User Creation**: First-time OAuth users automatically created with verified email, default 'studente' role
--   **Professional UI**: Login page features official brand-colored OAuth buttons (Google blue #4285f4, Microsoft #00a4ef)
--   **Graceful Fallback**: OAuth disabled automatically when credentials missing, traditional login still works
--   **Security**: State parameter CSRF protection, email verification enforcement, secure token handling
--   **Configuration Required**: Add to Replit Secrets:
-    -   `GOOGLE_OAUTH_CLIENT_ID` + `GOOGLE_OAUTH_CLIENT_SECRET` (from Google Cloud Console)
-    -   `MICROSOFT_CLIENT_ID` + `MICROSOFT_CLIENT_SECRET` (from Azure Portal)
--   **Routes**: `/oauth/login/<provider>` (initiate), `/oauth/callback/<provider>` (handle response)
+-   **PostgreSQL Database**: Online production-ready database (Neon) for secure user storage with bcrypt password hashing.
 
 ## Professional UI Design System (Oct 25, 2025)
 SKAILA features a completely redesigned professional UI suitable for business users:
