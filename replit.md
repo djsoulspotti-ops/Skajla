@@ -75,18 +75,86 @@ Comprehensive routing system with modular architecture for educational features,
 -   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance, grades (Italian 1-10 scale), disciplinary notes, and lesson calendar.
 -   **Parent Communication System**: Generates automated weekly/monthly reports with attendance, grades, behavior updates, homework, and AI insights, plus real-time notifications.
 
+# Project Structure (October 2025 - Reorganized)
+
+```
+/
+├── main.py                    # Application entry point
+├── wsgi.py                    # WSGI configuration
+├── gunicorn.conf.py          # Gunicorn production config
+├── requirements.txt          # Python dependencies (updated)
+├── replit.md                 # This file
+│
+├── services/                 # Business logic organized by domain
+│   ├── ai/                   # AI & Chatbot services
+│   │   ├── ai_chatbot.py
+│   │   ├── coaching_engine.py
+│   │   ├── skaila_ai_brain.py
+│   │   └── ai_insights_engine.py
+│   ├── gamification/         # XP, levels, badges system
+│   │   ├── gamification.py
+│   │   └── skaila_quiz_manager.py
+│   ├── school/              # School management
+│   │   ├── school_system.py
+│   │   ├── registro_elettronico.py
+│   │   └── teaching_materials_manager.py
+│   ├── database/            # Database layer
+│   │   ├── database_manager.py
+│   │   └── database_keep_alive.py
+│   ├── monitoring/          # Performance & caching
+│   │   ├── performance_cache.py
+│   │   └── production_monitor.py
+│   ├── reports/             # Report generation
+│   │   ├── report_scheduler.py
+│   │   └── report_generator.py
+│   ├── security/            # Security modules
+│   │   └── csrf_protection.py
+│   └── utils/               # Shared utilities
+│       ├── environment_manager.py
+│       ├── session_manager.py
+│       └── email_sender.py
+│
+├── routes/                  # HTTP endpoints (blueprints)
+│   ├── auth_routes.py
+│   ├── dashboard_routes.py
+│   ├── messaging_routes.py
+│   ├── api_routes.py
+│   └── demo_routes.py (secure isolated demo)
+│
+├── templates/               # Jinja2 HTML templates
+├── static/                  # CSS, JS, images
+│   └── css/
+│       └── tokens.css       # Enterprise design system
+│
+├── scripts/                 # Maintenance & utility scripts
+├── docs/                    # Project documentation (NEW)
+│   ├── API_REGISTRO_ELETTRONICO.md
+│   ├── BACKEND_COMPLETATO.md
+│   └── GUIDA_SVILUPPATORI.md
+│
+└── examples/                # Code examples & integration templates
+```
+
+**Note:** Bridge files exist in root for backward compatibility during migration. All actual code is in organized `/services` folders.
+
 # External Dependencies
 
--   **Flask**: Web framework.
--   **Flask-SocketIO**: Real-time communication.
--   **bcrypt**: Password hashing.
--   **psutil**: System performance monitoring.
--   **SQLite**: Development database.
--   **PostgreSQL**: Production database (via psycopg2).
--   **Redis**: Optional session storage and caching.
--   **Font Awesome**: Icon library.
--   **Google Fonts (Inter)**: Typography.
--   **Chart.js**: Data visualization.
--   **Gunicorn**: WSGI HTTP server.
--   **python-dotenv**: Environment variable management.
--   **eventlet**: Asynchronous networking.
+-   **Flask**: Web framework
+-   **Flask-SocketIO**: Real-time communication
+-   **Flask-Compress**: Response compression
+-   **Flask-Limiter**: Rate limiting
+-   **bcrypt**: Password hashing
+-   **PyJWT**: JWT token handling
+-   **authlib**: OAuth integration
+-   **psutil**: System performance monitoring
+-   **PostgreSQL**: Production database (via psycopg2)
+-   **redis**: Caching layer
+-   **APScheduler**: Task scheduling
+-   **replit-object-storage**: File storage
+-   **openai**: AI integration (optional)
+-   **Font Awesome**: Icon library
+-   **Google Fonts (Inter)**: Typography
+-   **Chart.js**: Data visualization
+-   **Gunicorn**: WSGI HTTP server
+-   **python-dotenv**: Environment variable management
+-   **eventlet**: Asynchronous networking
