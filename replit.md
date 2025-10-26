@@ -38,10 +38,17 @@ A production-ready XP and leveling system with PostgreSQL integration, featuring
 Includes multi-level caching, Redis-backed session management, performance monitoring, and database connection pooling.
 
 ## Security Features
-Uses bcrypt for password hashing, rate limiting, and role-based access control.
+**Production-Grade Security Implementation (October 2025):**
+-   **Password Security**: bcrypt hashing with robust password validation policy (8+ characters, uppercase, number, lowercase required) via `services/password_validator.py`
+-   **Session Management**: Per-user session expiry tracking with automatic timeout handling and flash notifications
+-   **SQL Injection Prevention**: All queries use PostgreSQL parameterized placeholders (%s), zero raw string interpolation
+-   **Security Headers**: Comprehensive HTTP headers (HSTS, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, CSP) implemented in main.py
+-   **Demo Mode Isolation**: Secure demo system via `routes/demo_routes.py` using only mock data, zero database access for demo users (-999/-998)
+-   **CSRF Protection**: Already present and functional across forms and API endpoints
+-   **Rate Limiting**: Flask-Limiter integration for critical routes
 
 ## Robust Authentication System
-Features a production-ready system with auto-managed `SECRET_KEY`, "Remember Me" functionality (30-day or 1-day sessions), smart lockout protection with countdown messages, enhanced feedback, and a professional UI.
+Features a production-ready system with auto-managed `SECRET_KEY`, "Remember Me" functionality (30-day or 1-day sessions), smart lockout protection with countdown messages, enhanced feedback, and a professional UI. Includes intelligent registration flow with auto-class detection and instant chat room access.
 
 ## Enterprise UI Design System
 SKAILA features an ultra-professional, enterprise-grade UI redesigned for corporate teams. Key elements include:
@@ -57,8 +64,8 @@ A feature connecting students with companies for internships and job opportuniti
 ## Integrated Online Register
 A complete digital register system with database tables for grades (`voti`) and attendance (`presenze`). It provides student views for grades, attendance, and statistics, a teacher interface for management, and automated average calculations and progress bars.
 
-## Granular Messaging System
-A complete messaging infrastructure with a central chat hub, supporting 1-to-1 direct messages, subject-based group chats, and class-wide chats, with dedicated database schemas and API endpoints ready for real-time Socket.IO integration.
+## Granular Messaging System with Auto-Enrollment
+A complete messaging infrastructure with a central chat hub, supporting 1-to-1 direct messages, subject-based group chats, and class-wide chats. **NEW (October 2025):** Intelligent auto-creation and enrollment into class chat rooms during student registration - new students are automatically added to their class chat room for immediate peer communication.
 
 ## Complete Backend Infrastructure
 Comprehensive routing system with modular architecture for educational features, including materials management, quiz system, calendar integration, and API layers for SKAILA Connect and user data.
