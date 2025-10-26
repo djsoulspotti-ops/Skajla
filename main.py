@@ -367,6 +367,14 @@ class SkailaApp:
                         self.create_demo_data()
                     else:
                         print("✅ Database PostgreSQL esistente trovato")
+                        # CRITICAL FIX: Verifica sempre se esistono utenti demo
+                        cursor.execute("SELECT COUNT(*) FROM utenti WHERE ruolo = 'admin'")
+                        admin_exists = cursor.fetchone()[0]
+                        if admin_exists == 0:
+                            print("⚠️ Nessun admin trovato - creazione account demo...")
+                            self.create_demo_data()
+                        else:
+                            print(f"✅ {admin_exists} account admin esistenti")
             except Exception as e:
                 print(f"🔧 Inizializzazione database PostgreSQL: {e}")
                 self.create_database_schema()
@@ -621,18 +629,23 @@ class SkailaApp:
                     password_hash = auth_service.hash_password(password)
 
                     if db_manager.db_type == 'postgresql':
+                        # CRITICAL FIX: Usa ON CONFLICT per email (non username) perché email è UNIQUE
                         cursor.execute('''
                             INSERT INTO utenti
-                            (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, false)
-                            ON CONFLICT (username) DO NOTHING
+                            (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso, attivo)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, false, true)
+                            ON CONFLICT (email) DO UPDATE SET
+                                password_hash = EXCLUDED.password_hash,
+                                attivo = true
                         ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                        print(f"✅ Account demo creato/aggiornato: {email}")
                     else:
                         cursor.execute('''
                             INSERT OR REPLACE INTO utenti
-                            (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
+                            (username, email, password_hash, nome, cognome, classe, ruolo, primo_accesso, attivo)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, 0, 1)
                         ''', (username, email, password_hash, nome, cognome, classe, ruolo))
+                        print(f"✅ Account demo creato: {email}")
 
                 # Crea chat demo
                 chat_rooms = [
@@ -644,11 +657,19 @@ class SkailaApp:
                 ]
 
                 for nome, descrizione, tipo, classe in chat_rooms:
-                    conn.execute('''
-                        INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
-                        VALUES (%s, %s, %s, %s)
-                    ''', (nome, descrizione, tipo, classe))
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute('''
+                            INSERT INTO chat (nome, descrizione, tipo, classe, attiva)
+                            VALUES (%s, %s, %s, %s, true)
+                            ON CONFLICT (nome) DO NOTHING
+                        ''', (nome, descrizione, tipo, classe))
+                    else:
+                        cursor.execute('''
+                            INSERT OR IGNORE INTO chat (nome, descrizione, tipo, classe)
+                            VALUES (%s, %s, %s, %s)
+                        ''', (nome, descrizione, tipo, classe))
 
+                conn.commit()
                 print("✅ Dati demo creati con successo")
 
     def run(self, host='0.0.0.0', port=5000, debug=False):
