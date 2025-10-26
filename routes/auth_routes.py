@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, redirect, session, flash
 from csrf_protection import csrf_protect
 
 from services.auth_service import auth_service
+from services.password_validator import validate_password
 from gamification import gamification_system  
 from school_system import school_system
 from database_manager import db_manager
@@ -52,17 +53,16 @@ def login():
             session['scuola_id'] = user.get('scuola_id')
             session['classe_id'] = user.get('classe_id')
             
-            # Gestione Remember Me: 30 giorni se attivo, 1 giorno altrimenti
-            session.permanent = True
+            # Gestione Remember Me: salva preferenza in sessione (NO modifica globale!)
+            session.permanent = True  # Usa il lifetime configurato in main.py (30 giorni)
+            session['remember_me'] = remember_me
             if remember_me:
-                from datetime import timedelta
-                from flask import current_app
-                current_app.permanent_session_lifetime = timedelta(days=30)
                 print(f"✅ Remember Me attivo: sessione 30 giorni")
             else:
-                from datetime import timedelta
-                from flask import current_app
-                current_app.permanent_session_lifetime = timedelta(days=1)
+                # Sessione breve: salva timestamp per controllo scadenza
+                from datetime import datetime, timedelta
+                session['session_expires'] = (datetime.utcnow() + timedelta(days=1)).isoformat()
+                print(f"✅ Sessione breve: 1 giorno")
             
             # Aggiorna gamification
             try:
@@ -89,6 +89,12 @@ def register():
             password = request.form['password']
             nome = request.form['nome']
             cognome = request.form['cognome']
+            
+            # Validazione password robusta
+            is_valid, message = validate_password(password)
+            if not is_valid:
+                flash(f'❌ Password non valida: {message}', 'error')
+                return render_template('register.html', scuole=school_system.get_user_schools())
             
             # NUOVO SISTEMA: Codici Scuola Premium (PRIORITÀ ASSOLUTA)
             codice_scuola_premium = request.form.get('codice_scuola_premium', '').strip().upper()
@@ -285,16 +291,57 @@ def register():
                                             classe_nome, scuola_id, classe_id)
             
             if result['success']:
+                user_id = result['user_id']
+                
                 # IMPORTANTE: Marca codice personale come usato se utilizzato
                 if personal_code_id is not None:
-                    school_system.mark_personal_code_used(personal_code_id, result['user_id'])
+                    school_system.mark_personal_code_used(personal_code_id, user_id)
                     flash(f'Registrazione completata! Codice personale {personal_code} consumato.', 'success')
                 else:
                     flash('Registrazione completata! Effettua il login.', 'success')
                 
                 # Se è un professore, associalo alla classe
-                if ruolo == 'professore' and classe_id and 'user_id' in result:
-                    school_system.assign_teacher_to_class(result['user_id'], classe_id)
+                if ruolo == 'professore' and classe_id:
+                    school_system.assign_teacher_to_class(user_id, classe_id)
+                
+                # AUTO-CREAZIONE CHAT ROOM DI CLASSE (Task 14)
+                if classe_nome and scuola_id:
+                    try:
+                        # Cerca o crea chat room di classe
+                        chat_nome = f"Classe {classe_nome} - Chat Generale"
+                        chat_room = db_manager.query('''
+                            SELECT id FROM chat 
+                            WHERE scuola_id = %s AND classe = %s AND tipo = %s
+                        ''', (scuola_id, classe_nome, 'classe'), one=True)
+                        
+                        if not chat_room:
+                            # Crea nuova chat room di classe
+                            chat_id = db_manager.query('''
+                                INSERT INTO chat (nome, tipo, classe, scuola_id, created_at, attiva)
+                                VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, TRUE)
+                                RETURNING id
+                            ''', (chat_nome, 'classe', classe_nome, scuola_id), one=True)['id']
+                            print(f"✅ Chat room classe {classe_nome} creata (ID: {chat_id})")
+                        else:
+                            chat_id = chat_room['id']
+                            print(f"✅ Chat room classe {classe_nome} trovata (ID: {chat_id})")
+                        
+                        # Aggiungi utente alla chat room
+                        existing_participant = db_manager.query('''
+                            SELECT id FROM partecipanti_chat 
+                            WHERE chat_id = %s AND utente_id = %s
+                        ''', (chat_id, user_id), one=True)
+                        
+                        if not existing_participant:
+                            db_manager.execute('''
+                                INSERT INTO partecipanti_chat (chat_id, utente_id, joined_at)
+                                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                            ''', (chat_id, user_id))
+                            print(f"✅ Utente {user_id} aggiunto a chat {chat_id}")
+                            flash(f'🎉 Sei stato automaticamente aggiunto alla chat della tua classe!', 'success')
+                    except Exception as e:
+                        print(f"⚠️ Errore auto-creazione chat (non-blocking): {e}")
+                
                 return redirect('/login')
             else:
                 flash(result['message'], 'error')

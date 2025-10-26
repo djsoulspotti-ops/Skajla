@@ -8,7 +8,7 @@ import os
 import time
 import threading  # Import threading for the keep-alive thread
 from datetime import timedelta
-from flask import Flask, render_template, redirect, session, make_response, request, g
+from flask import Flask, render_template, redirect, session, make_response, request, g, flash
 from flask_socketio import SocketIO
 from flask_compress import Compress
 
@@ -97,7 +97,17 @@ class SkailaApp:
         # Headers per Replit e sicurezza produzione
         @self.app.after_request
         def after_request_headers(response):
+            # Security Headers (OWASP Best Practices)
             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+            response.headers['X-XSS-Protection'] = '1; mode=block'
+            response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+            
+            # HSTS (solo in produzione)
+            if not env_manager.is_development():
+                response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+            
+            # CSP (Content Security Policy)
             response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
 
             # CORS sicuro: restrictive in produzione, permissive in development
@@ -125,6 +135,22 @@ class SkailaApp:
 
     def register_routes(self):
         """Registra tutti i blueprint delle routes"""
+        
+        # Before request: controlla scadenza sessioni brevi (senza remember_me)
+        @self.app.before_request
+        def check_session_expiry():
+            """Controlla scadenza sessioni senza remember_me"""
+            if 'user_id' in session and 'session_expires' in session:
+                from datetime import datetime
+                try:
+                    expires = datetime.fromisoformat(session['session_expires'])
+                    if datetime.utcnow() > expires:
+                        print(f"⏰ Sessione scaduta per user {session.get('user_id')}")
+                        session.clear()
+                        flash('⏰ Sessione scaduta. Effettua nuovamente il login.', 'info')
+                        return redirect('/login')
+                except (ValueError, TypeError):
+                    pass  # Timestamp invalido, ignora
 
         # Route principali
         @self.app.route('/')
@@ -136,35 +162,20 @@ class SkailaApp:
         @self.app.route('/chat')
         def chat():
             if 'user_id' not in session:
-                # Modalità demo
-                session['user_id'] = 'demo_user'
-                session['nome'] = 'Demo'
-                session['cognome'] = 'User'
-                session['email'] = 'demo@skaila.it'
-                session['ruolo'] = 'studente'
-                session['classe'] = '3A'
-                session['scuola_id'] = 1
-                session['demo_mode'] = True
+                return redirect('/login')
 
-            # Modalità demo: mostra chat vuote
-            if session.get('demo_mode'):
-                return render_template('chat.html',
-                                     user=session,
-                                     chats=[],
-                                     utenti_online=[])
+            # Usa db_manager.query per query parametrizzate sicure PostgreSQL
+            if session['ruolo'] == 'admin':
+                chats = db_manager.query('SELECT * FROM chat ORDER BY nome') or []
+            else:
+                chats = db_manager.query('''
+                    SELECT c.* FROM chat c
+                    JOIN partecipanti_chat pc ON c.id = pc.chat_id
+                    WHERE pc.utente_id = %s OR c.classe = %s
+                    ORDER BY c.nome
+                ''', (session['user_id'], session.get('classe', ''))) or []
 
-            with db_manager.get_connection() as conn:
-                if session['ruolo'] == 'admin':
-                    chats = conn.execute('SELECT * FROM chat ORDER BY nome').fetchall()
-                else:
-                    chats = conn.execute('''
-                        SELECT c.* FROM chat c
-                        JOIN partecipanti_chat pc ON c.id = pc.chat_id
-                        WHERE pc.utente_id = ? OR c.classe = ?
-                        ORDER BY c.nome
-                    ''', (session['user_id'], session.get('classe', ''))).fetchall()
-
-                utenti_online = user_service.get_online_users(session['user_id'])
+            utenti_online = user_service.get_online_users(session['user_id'])
 
             return render_template('chat.html',
                                  user=session,
@@ -174,29 +185,13 @@ class SkailaApp:
         @self.app.route('/ai-chat')
         def ai_chat():
             if 'user_id' not in session:
-                # Modalità demo
-                session['user_id'] = 'demo_user'
-                session['nome'] = 'Demo'
-                session['cognome'] = 'User'
-                session['email'] = 'demo@skaila.it'
-                session['ruolo'] = 'studente'
-                session['classe'] = '3A'
-                session['scuola_id'] = 1
-                session['demo_mode'] = True
+                return redirect('/login')
             return render_template('ai_chat.html', user=session)
 
         @self.app.route('/gamification')
         def gamification_dashboard():
             if 'user_id' not in session:
-                # Modalità demo
-                session['user_id'] = 'demo_user'
-                session['nome'] = 'Demo'
-                session['cognome'] = 'User'
-                session['email'] = 'demo@skaila.it'
-                session['ruolo'] = 'studente'
-                session['classe'] = '3A'
-                session['scuola_id'] = 1
-                session['demo_mode'] = True
+                return redirect('/login')
 
             response = make_response(render_template('gamification_dashboard.html', user=session))
             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
@@ -213,6 +208,10 @@ class SkailaApp:
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
+        
+        # Demo routes sicure (solo dati mock)
+        from routes.demo_routes import demo_bp
+        self.app.register_blueprint(demo_bp)
         
         # Registro Elettronico API
         from routes.registro_routes import registro_bp

@@ -14,19 +14,10 @@ from ai_insights_engine import ai_insights_engine
 dashboard_bp = Blueprint('dashboard', __name__)
 
 def require_login(f):
-    """Decorator per richiedere login (con modalità demo)"""
+    """Decorator per richiedere login - redirect a /login se non autenticato"""
     def wrapper(*args, **kwargs):
-        # Modalità demo: permetti accesso senza login
         if 'user_id' not in session:
-            # Crea sessione demo temporanea
-            session['user_id'] = 'demo_user'
-            session['nome'] = 'Demo'
-            session['cognome'] = 'User'
-            session['email'] = 'demo@skaila.it'
-            session['ruolo'] = session.get('ruolo', 'studente')
-            session['classe'] = '3A'
-            session['scuola_id'] = 1
-            session['demo_mode'] = True
+            return redirect('/login')
         return f(*args, **kwargs)
     wrapper.__name__ = f.__name__
     return wrapper
@@ -51,40 +42,6 @@ def dashboard():
 def dashboard_studente():
     """Dashboard studente con gamification"""
     user_id = session['user_id']
-    
-    # Modalità demo: usa dati di esempio
-    if session.get('demo_mode'):
-        gamification_data = {
-            'profile': {
-                'livello': 12,
-                'xp_totale': 2450,
-                'current_streak': 7,
-                'total_xp': 2450,
-                'current_level': 12
-            },
-            'progress': {
-                'xp_for_next_level': 3000,
-                'progress_percentage': 82
-            }
-        }
-        
-        dashboard_stats = {
-            'messages_today': 8,
-            'ai_questions_today': 5,
-            'current_streak': 7,
-            'total_xp': 2450,
-            'current_level': 12
-        }
-        
-        companies = []
-        ai_insights = []
-        
-        return render_template('dashboard_studente.html', 
-                             user=session, 
-                             gamification=gamification_data,
-                             stats=dashboard_stats,
-                             companies=companies,
-                             ai_insights=ai_insights)
     
     # Dati gamification (con fallback se profilo non esiste)
     try:
@@ -142,28 +99,8 @@ def dashboard_studente():
 @require_login
 def dashboard_professore():
     """Dashboard professore"""
-    # Permetti accesso demo anche per professori
-    if session.get('ruolo') != 'professore' and not session.get('demo_mode'):
-        # In modalità demo, forza ruolo professore
-        if session.get('demo_mode'):
-            session['ruolo'] = 'professore'
-        else:
-            return redirect('/dashboard')
-    
-    # Modalità demo: usa dati di esempio
-    if session.get('demo_mode'):
-        stats = {
-            'total_studenti': 24,
-            'classi_attive': 2,
-            'students_count': 24,
-            'recent_activity': []
-        }
-        
-        return render_template('dashboard_professore.html', 
-                             user=session, 
-                             stats=stats,
-                             total_studenti=24,
-                             classi_attive=2)
+    if session.get('ruolo') != 'professore':
+        return redirect('/dashboard')
     
     try:
         # SECURITY: Tenant guard - filtra per school_id
