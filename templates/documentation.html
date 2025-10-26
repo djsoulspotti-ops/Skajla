@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentazione - SKAILA</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <link href="/static/css/professional.css" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-secondary);
+        }
+
+        .documentation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .doc-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
+            border-radius: var(--radius-2xl);
+            color: white;
+        }
+
+        .doc-header h1 {
+            font-size: var(--text-5xl);
+            font-weight: var(--font-bold);
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .doc-header p {
+            font-size: var(--text-lg);
+            opacity: 0.9;
+            color: white;
+        }
+
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .doc-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-primary);
+            transition: all 0.3s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--color-blue-600);
+        }
+
+        .doc-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .doc-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .doc-card h3 {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .doc-card p {
+            font-size: var(--text-base);
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: var(--leading-relaxed);
+        }
+
+        .doc-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .doc-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--color-blue-800);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: var(--font-semibold);
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background: var(--color-blue-900);
+            transform: translateX(4px);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            margin-bottom: 2rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--color-blue-800);
+        }
+
+        .info-section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-primary);
+            margin-top: 3rem;
+        }
+
+        .info-section h2 {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-section li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-secondary);
+            color: var(--text-secondary);
+        }
+
+        .info-section li:last-child {
+            border-bottom: none;
+        }
+
+        .info-section li i {
+            color: var(--color-blue-700);
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="documentation-container">
+        <a href="/" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            <span>Torna alla Home</span>
+        </a>
+
+        <div class="doc-header">
+            <h1><i class="fas fa-file-alt"></i> Documentazione SKAILA</h1>
+            <p>Risorse complete per compliance, guide utente e documentazione tecnica</p>
+        </div>
+
+        <div class="docs-grid">
+            <div class="doc-card">
+                <div class="doc-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Compliance & Privacy</h3>
+                <div class="doc-meta">
+                    <span><i class="fas fa-file-word"></i> DOCX</span>
+                    <span><i class="fas fa-calendar"></i> Aggiornato 2025</span>
+                </div>
+                <p>
+                    Documentazione completa sulla conformità GDPR, sicurezza dei dati, 
+                    normative italiane per l'istruzione e policy di privacy della piattaforma.
+                </p>
+                <a href="/documentation/download/compliance" class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Scarica Documento</span>
+                </a>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon" style="background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%);">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3>Guida Utente</h3>
+                <div class="doc-meta">
+                    <span><i class="fas fa-file-pdf"></i> PDF</span>
+                    <span><i class="fas fa-book-open"></i> 45 pagine</span>
+                </div>
+                <p>
+                    Manuale completo per studenti, professori e amministratori. 
+                    Tutorial passo-passo, FAQ e best practices per l'utilizzo ottimale.
+                </p>
+                <a href="/documentation/download/guida_utente" class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Scarica Guida</span>
+                </a>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon" style="background: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 100%);">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>Documentazione Tecnica</h3>
+                <div class="doc-meta">
+                    <span><i class="fas fa-file-pdf"></i> PDF</span>
+                    <span><i class="fas fa-server"></i> API v2.0</span>
+                </div>
+                <p>
+                    Architettura del sistema, API REST, integrazioni possibili, 
+                    specifiche tecniche per sviluppatori e amministratori di sistema.
+                </p>
+                <a href="#" class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Scarica Documentazione</span>
+                </a>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon" style="background: linear-gradient(135deg, var(--color-ruby-600) 0%, var(--color-ruby-500) 100%);">
+                    <i class="fas fa-gavel"></i>
+                </div>
+                <h3>Termini di Servizio</h3>
+                <div class="doc-meta">
+                    <span><i class="fas fa-file-pdf"></i> PDF</span>
+                    <span><i class="fas fa-stamp"></i> Legale</span>
+                </div>
+                <p>
+                    Condizioni d'uso della piattaforma, responsabilità, 
+                    diritti degli utenti e termini contrattuali per le scuole.
+                </p>
+                <a href="/documentation/download/termini_servizio" class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Scarica Termini</span>
+                </a>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon" style="background: linear-gradient(135deg, var(--color-amber-600) 0%, var(--color-amber-500) 100%);">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                <h3>Privacy Policy</h3>
+                <div class="doc-meta">
+                    <span><i class="fas fa-file-pdf"></i> PDF</span>
+                    <span><i class="fas fa-lock"></i> GDPR</span>
+                </div>
+                <p>
+                    Informativa completa sul trattamento dei dati personali, 
+                    cookie policy e diritti degli utenti secondo GDPR.
+                </p>
+                <a href="/documentation/download/privacy_policy" class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Scarica Policy</span>
+                </a>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3>Registro Codici Scuole</h3>
+                <div class="doc-meta">
+                    <span><i class="fas fa-file-alt"></i> TXT</span>
+                    <span><i class="fas fa-school"></i> Scuole</span>
+                </div>
+                <p>
+                    Elenco completo dei codici di accesso per scuole, 
+                    istruzioni per la registrazione e gestione account dirigenti.
+                </p>
+                <a href="/GUIDA_REGISTRAZIONE_CODICI.md" class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Scarica Guida</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-info-circle"></i> Informazioni Utili</h2>
+            <ul>
+                <li><i class="fas fa-check"></i> Tutta la documentazione è conforme alle normative italiane ed europee</li>
+                <li><i class="fas fa-check"></i> I documenti vengono aggiornati regolarmente per riflettere le ultime modifiche</li>
+                <li><i class="fas fa-check"></i> Per assistenza o domande, contatta: <strong>support@skaila.app</strong></li>
+                <li><i class="fas fa-check"></i> Versione corrente della piattaforma: <strong>SKAILA v2.0 - Enterprise Edition</strong></li>
+                <li><i class="fas fa-check"></i> Ultimo aggiornamento documentazione: <strong>Gennaio 2025</strong></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

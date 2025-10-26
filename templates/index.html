@@ -376,6 +376,85 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
+        /* Documentation Section Styles */
+        .btn-documentation {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
+            color: white;
+            padding: 1.25rem 3rem;
+            border-radius: var(--radius-xl);
+            font-weight: var(--font-bold);
+            font-size: var(--text-lg);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 59, 115, 0.25);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-documentation:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 59, 115, 0.35);
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            text-decoration: none;
+        }
+
+        .btn-documentation i {
+            font-size: 1.5rem;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            border-color: var(--color-blue-600);
+        }
+
+        /* Enhanced Feature Cards */
+        .feature-card-enterprise {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card-enterprise::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-blue-800), var(--color-gold-500));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card-enterprise:hover::before {
+            opacity: 1;
+        }
+
+        /* Stats Card Enhancements */
+        .stat-card-enterprise {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-enterprise::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card-enterprise:hover::after {
+            opacity: 1;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .features-grid-enterprise {
@@ -400,6 +479,10 @@
             .footer-content {
                 flex-direction: column;
                 gap: 2rem;
+            }
+            .btn-documentation {
+                padding: 1rem 2rem;
+                font-size: var(--text-base);
             }
         }
     </style>
@@ -611,6 +694,52 @@
                         <span>Accedi al tuo Account</span>
                     </a>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentazione Section -->
+    <section style="padding: 80px 0; background: var(--color-steel-100);">
+        <div class="container">
+            <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+                <div class="section-subtitle" style="margin-bottom: 1.5rem;">
+                    <i class="fas fa-file-alt"></i> RISORSE UFFICIALI
+                </div>
+                <h2 class="section-title" style="margin-bottom: 1.5rem;">Documentazione Completa</h2>
+                <p style="font-size: var(--text-lg); color: var(--text-secondary); margin-bottom: 3rem;">
+                    Accedi alla documentazione ufficiale SKAILA, guide compliance e informazioni tecniche complete sulla piattaforma
+                </p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+                    <div style="background: white; padding: 2rem; border-radius: var(--radius-xl); border: 1px solid var(--border-primary); transition: all 0.3s ease;" class="doc-card">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                            <i class="fas fa-shield-alt" style="font-size: 1.75rem; color: white;"></i>
+                        </div>
+                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.75rem;">Compliance & Privacy</h3>
+                        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 1.5rem;">GDPR, sicurezza dati, normative italiane</p>
+                    </div>
+
+                    <div style="background: white; padding: 2rem; border-radius: var(--radius-xl); border: 1px solid var(--border-primary); transition: all 0.3s ease;" class="doc-card">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                            <i class="fas fa-book" style="font-size: 1.75rem; color: white;"></i>
+                        </div>
+                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.75rem;">Guide Utente</h3>
+                        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 1.5rem;">Tutorial, FAQ, best practices</p>
+                    </div>
+
+                    <div style="background: white; padding: 2rem; border-radius: var(--radius-xl); border: 1px solid var(--border-primary); transition: all 0.3s ease;" class="doc-card">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                            <i class="fas fa-code" style="font-size: 1.75rem; color: white;"></i>
+                        </div>
+                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.75rem;">Documentazione Tecnica</h3>
+                        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 1.5rem;">API, integrazioni, architettura</p>
+                    </div>
+                </div>
+
+                <a href="/documentation" class="btn-documentation">
+                    <i class="fas fa-file-download"></i>
+                    <span>ACCEDI ALLA DOCUMENTAZIONE COMPLETA</span>
+                </a>
             </div>
         </div>
     </section>

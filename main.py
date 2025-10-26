@@ -41,6 +41,7 @@ from routes.messaging_routes import messaging_bp
 from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
+from routes.documentation_routes import documentation_bp
 
 # Import services
 from services.auth_service import auth_service
@@ -102,11 +103,11 @@ class SkailaApp:
             response.headers['X-Content-Type-Options'] = 'nosniff'
             response.headers['X-XSS-Protection'] = '1; mode=block'
             response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-            
+
             # HSTS (solo in produzione)
             if not env_manager.is_development():
                 response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-            
+
             # CSP (Content Security Policy)
             response.headers['Content-Security-Policy'] = "frame-ancestors 'self' *.replit.com *.repl.co"
 
@@ -135,7 +136,7 @@ class SkailaApp:
 
     def register_routes(self):
         """Registra tutti i blueprint delle routes"""
-        
+
         # Before request: controlla scadenza sessioni brevi (senza remember_me)
         @self.app.before_request
         def check_session_expiry():
@@ -208,11 +209,11 @@ class SkailaApp:
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
-        
+
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp
         self.app.register_blueprint(demo_bp)
-        
+
         # Registro Elettronico API
         from routes.registro_routes import registro_bp
         self.app.register_blueprint(registro_bp)
@@ -220,6 +221,9 @@ class SkailaApp:
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp
         self.app.register_blueprint(monitoring_bp)
+
+        # Registra blueprint documentazione
+        self.app.register_blueprint(documentation_bp)
 
         # Aggiungi CSRF protection context processor
         from csrf_protection import inject_csrf_token
