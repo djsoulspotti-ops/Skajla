@@ -9,6 +9,7 @@ from csrf_protection import csrf_protect
 
 from services.auth_service import auth_service
 from services.password_validator import validate_password
+from services.email_validator import validate_email, normalize_email
 from gamification import gamification_system  
 from school_system import school_system
 from database_manager import db_manager
@@ -89,6 +90,15 @@ def register():
             password = request.form['password']
             nome = request.form['nome']
             cognome = request.form['cognome']
+            
+            # Validazione email
+            is_valid_email, email_message = validate_email(email)
+            if not is_valid_email:
+                flash(f'❌ Email non valida: {email_message}', 'error')
+                return render_template('register.html', scuole=school_system.get_user_schools())
+            
+            # Normalizza email
+            email = normalize_email(email)
             
             # Validazione password robusta
             is_valid, message = validate_password(password)

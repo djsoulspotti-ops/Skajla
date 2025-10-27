@@ -32,6 +32,7 @@ from report_scheduler import ReportScheduler
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
+from routes.api_auth_routes import api_auth_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.api_routes import api_bp
 from routes.school_routes import school_bp
@@ -201,6 +202,7 @@ class SkailaApp:
 
         # Registra blueprints
         self.app.register_blueprint(auth_bp)
+        self.app.register_blueprint(api_auth_bp)
         self.app.register_blueprint(dashboard_bp)
         self.app.register_blueprint(api_bp)
         self.app.register_blueprint(school_bp)
