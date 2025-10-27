@@ -174,39 +174,36 @@ class UserService:
     @staticmethod
     def get_user_by_email(email):
         """Ottieni utente per email"""
-        with db_manager.get_connection() as conn:
-            user = conn.execute('''
-                SELECT * FROM utenti WHERE email = ? AND attivo = 1
-            ''', (email,)).fetchone()
-            return dict(user) if user else None
+        return db_manager.query('''
+            SELECT * FROM utenti WHERE email = %s AND attivo = true
+        ''', (email,), one=True)
     
     @staticmethod
     def update_user_status(user_id, online=True):
         """Aggiorna status online utente"""
-        with db_manager.get_connection() as conn:
-            conn.execute('''
-                UPDATE utenti 
-                SET status_online = ?, ultimo_accesso = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (1 if online else 0, user_id))
+        db_manager.execute('''
+            UPDATE utenti 
+            SET status_online = %s, ultimo_accesso = CURRENT_TIMESTAMP
+            WHERE id = %s
+        ''', (online, user_id))
     
     @staticmethod
     def get_online_users(exclude_user_id=None):
         """Ottieni utenti online"""
-        with db_manager.get_connection() as conn:
+        if exclude_user_id:
             query = '''
                 SELECT nome, cognome, ruolo, classe FROM utenti 
-                WHERE status_online = 1 AND attivo = 1
+                WHERE status_online = true AND attivo = true AND id != %s
+                ORDER BY nome
             '''
-            params = []
-            
-            if exclude_user_id:
-                query += ' AND id != ?'
-                params.append(exclude_user_id)
-            
-            query += ' ORDER BY nome'
-            
-            return [dict(user) for user in conn.execute(query, params).fetchall()]
+            return db_manager.query(query, (exclude_user_id,)) or []
+        else:
+            query = '''
+                SELECT nome, cognome, ruolo, classe FROM utenti 
+                WHERE status_online = true AND attivo = true
+                ORDER BY nome
+            '''
+            return db_manager.query(query) or []
     
     @staticmethod
     def create_user(user_data):
@@ -232,17 +229,16 @@ class UserService:
     @staticmethod
     def get_users_by_role(role, limit=None):
         """Ottieni utenti per ruolo"""
-        with db_manager.get_connection() as conn:
-            query = '''
-                SELECT * FROM utenti 
-                WHERE ruolo = ? AND attivo = 1
-                ORDER BY nome, cognome
-            '''
-            
-            if limit:
-                query += f' LIMIT {limit}'
-            
-            return [dict(user) for user in conn.execute(query, (role,)).fetchall()]
+        query = '''
+            SELECT * FROM utenti 
+            WHERE ruolo = %s AND attivo = true
+            ORDER BY nome, cognome
+        '''
+        
+        if limit:
+            query += f' LIMIT {limit}'
+        
+        return db_manager.query(query, (role,)) or []
 
 # Istanza globale
 user_service = UserService()
