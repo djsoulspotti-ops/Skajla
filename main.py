@@ -39,6 +39,7 @@ from routes.school_routes import school_bp
 from routes.credits_routes import credits_bp
 from routes.admin_school_codes_routes import admin_codes_bp
 from routes.messaging_routes import messaging_bp
+from routes.messaging_api import messaging_api_bp
 from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
@@ -179,7 +180,8 @@ class SkailaApp:
 
             utenti_online = user_service.get_online_users(session['user_id'])
 
-            return render_template('chat.html',
+            # Usa il nuovo template moderno
+            return render_template('chat_modern.html',
                                  user=session,
                                  chats=chats,
                                  utenti_online=utenti_online)
@@ -209,6 +211,7 @@ class SkailaApp:
         self.app.register_blueprint(credits_bp)
         self.app.register_blueprint(admin_codes_bp)
         self.app.register_blueprint(messaging_bp)
+        self.app.register_blueprint(messaging_api_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
 
