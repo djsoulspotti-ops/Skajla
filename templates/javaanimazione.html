@@ -1,0 +1,35 @@
+<script>
+// Effetto fade-in per le sezioni al caricamento
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.style.opacity = 0;
+  document.body.style.transition = "opacity 1s ease";
+  requestAnimationFrame(() => {
+    document.body.style.opacity = 1;
+  });
+});
+
+// Gestione finto login
+const loginButton = document.querySelector("a[href='dashboard.html']");
+if (loginButton) {
+  loginButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    loginButton.textContent = "Caricamento...";
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1000);
+  });
+}
+
+// Effetto hover più fluido per le card
+const cards = document.querySelectorAll(".rounded-2xl");
+cards.forEach(card => {
+  card.addEventListener("mouseenter", () => {
+    card.style.transform = "translateY(-3px)";
+    card.style.transition = "transform 0.3s ease";
+  });
+  card.addEventListener("mouseleave", () => {
+    card.style.transform = "translateY(0)";
+  });
+});
+</script>
+
