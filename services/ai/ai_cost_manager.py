@@ -1,5 +1,10 @@
+"""
+SKAILA AI Cost Manager - Sistema di tracciamento e ottimizzazione costi AI
+Gestisce budget, cache intelligente, e ottimizzazione modelli OpenAI
+Refactored per PostgreSQL con db_manager
+"""
 
-import sqlite3
+from database_manager import db_manager
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
@@ -16,55 +21,70 @@ class AICostManager:
         
     def init_cost_tracking_tables(self):
         """Inizializza tabelle per tracking costi e cache"""
-        conn = sqlite3.connect('skaila.db')
-        
-        # Tabella per tracking costi
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS ai_cost_tracking (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                model_used TEXT,
-                input_tokens INTEGER,
-                output_tokens INTEGER,
-                cost_usd REAL,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                request_type TEXT,
-                cached BOOLEAN DEFAULT 0
-            )
-        ''')
-        
-        # Tabella per cache intelligente
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS ai_response_cache (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                request_hash TEXT UNIQUE,
-                user_context_hash TEXT,
-                message TEXT,
-                response TEXT,
-                model_used TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                hit_count INTEGER DEFAULT 1,
-                last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        # Tabella per budget limits per utente
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS ai_user_limits (
-                user_id INTEGER PRIMARY KEY,
-                daily_limit REAL DEFAULT 2.0,
-                monthly_limit REAL DEFAULT 30.0,
-                current_daily_usage REAL DEFAULT 0.0,
-                current_monthly_usage REAL DEFAULT 0.0,
-                last_reset_daily DATE,
-                last_reset_monthly DATE,
-                FOREIGN KEY (user_id) REFERENCES utenti (id)
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
-        print("✅ Tabelle AI Cost Manager inizializzate")
+        try:
+            # Tabella per tracking costi
+            db_manager.execute('''
+                CREATE TABLE IF NOT EXISTS ai_cost_tracking (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES utenti(id) ON DELETE CASCADE,
+                    model_used VARCHAR(50),
+                    input_tokens INTEGER,
+                    output_tokens INTEGER,
+                    cost_usd DECIMAL(10, 6),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    request_type VARCHAR(50),
+                    cached BOOLEAN DEFAULT FALSE
+                )
+            ''')
+            
+            # Tabella per cache intelligente
+            db_manager.execute('''
+                CREATE TABLE IF NOT EXISTS ai_response_cache (
+                    id SERIAL PRIMARY KEY,
+                    request_hash VARCHAR(32) UNIQUE,
+                    user_context_hash VARCHAR(32),
+                    message TEXT,
+                    response TEXT,
+                    model_used VARCHAR(50),
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    hit_count INTEGER DEFAULT 1,
+                    last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Tabella per budget limits per utente
+            db_manager.execute('''
+                CREATE TABLE IF NOT EXISTS ai_user_limits (
+                    user_id INTEGER PRIMARY KEY REFERENCES utenti(id) ON DELETE CASCADE,
+                    daily_limit DECIMAL(10, 2) DEFAULT 2.0,
+                    monthly_limit DECIMAL(10, 2) DEFAULT 30.0,
+                    current_daily_usage DECIMAL(10, 6) DEFAULT 0.0,
+                    current_monthly_usage DECIMAL(10, 6) DEFAULT 0.0,
+                    last_reset_daily DATE,
+                    last_reset_monthly DATE
+                )
+            ''')
+            
+            # Indici per ottimizzazione query
+            db_manager.execute('''
+                CREATE INDEX IF NOT EXISTS idx_ai_cost_user_timestamp 
+                ON ai_cost_tracking(user_id, timestamp DESC)
+            ''')
+            
+            db_manager.execute('''
+                CREATE INDEX IF NOT EXISTS idx_ai_cache_hash 
+                ON ai_response_cache(request_hash)
+            ''')
+            
+            db_manager.execute('''
+                CREATE INDEX IF NOT EXISTS idx_ai_cache_timestamp 
+                ON ai_response_cache(timestamp DESC)
+            ''')
+            
+            print("✅ Tabelle AI Cost Manager inizializzate (PostgreSQL)")
+            
+        except Exception as e:
+            print(f"⚠️ Errore init AI Cost Manager tables: {e}")
 
     def calculate_cost(self, model: str, input_tokens: int, output_tokens: int) -> float:
         """Calcola il costo per una richiesta OpenAI"""
@@ -72,6 +92,10 @@ class AICostManager:
             'gpt-4': {
                 'input': 0.03 / 1000,  # $0.03 per 1K token
                 'output': 0.06 / 1000  # $0.06 per 1K token
+            },
+            'gpt-4o': {
+                'input': 0.0025 / 1000,  # $0.0025 per 1K token
+                'output': 0.01 / 1000    # $0.01 per 1K token
             },
             'gpt-3.5-turbo': {
                 'input': 0.0015 / 1000,  # $0.0015 per 1K token
@@ -104,31 +128,29 @@ class AICostManager:
         try:
             request_hash = self.generate_request_hash(message, user_context)
             
-            conn = sqlite3.connect('skaila.db')
-            
             # Cerca nella cache (non più vecchia di cache_duration_hours)
-            cached = conn.execute('''
+            cached = db_manager.query('''
                 SELECT response, id FROM ai_response_cache 
-                WHERE request_hash = ? 
-                AND timestamp > datetime('now', '-{} hours')
+                WHERE request_hash = %s 
+                AND timestamp > NOW() - INTERVAL '%s hours'
                 ORDER BY hit_count DESC, last_accessed DESC
                 LIMIT 1
-            '''.format(self.cache_duration_hours), (request_hash,)).fetchone()
+            ''', (request_hash, self.cache_duration_hours), one=True)
             
             if cached:
+                response = cached.get('response')
+                cache_id = cached.get('id')
+                
                 # Aggiorna statistiche cache
-                conn.execute('''
+                db_manager.execute('''
                     UPDATE ai_response_cache 
                     SET hit_count = hit_count + 1, last_accessed = CURRENT_TIMESTAMP
-                    WHERE id = ?
-                ''', (cached[1],))
-                conn.commit()
-                conn.close()
+                    WHERE id = %s
+                ''', (cache_id,))
                 
                 print(f"✅ Cache hit per richiesta: {message[:30]}...")
-                return cached[0]
+                return response
                 
-            conn.close()
             return None
             
         except Exception as e:
@@ -141,17 +163,18 @@ class AICostManager:
             request_hash = self.generate_request_hash(message, user_context)
             user_context_hash = hashlib.md5(user_context.encode()).hexdigest()
             
-            conn = sqlite3.connect('skaila.db')
-            
-            # Inserisci o aggiorna cache
-            conn.execute('''
-                INSERT OR REPLACE INTO ai_response_cache 
-                (request_hash, user_context_hash, message, response, model_used)
-                VALUES (%s, %s, %s, %s, %s)
+            # Inserisci o aggiorna cache (PostgreSQL UPSERT)
+            db_manager.execute('''
+                INSERT INTO ai_response_cache 
+                (request_hash, user_context_hash, message, response, model_used, timestamp, last_accessed)
+                VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ON CONFLICT (request_hash) DO UPDATE SET
+                    response = EXCLUDED.response,
+                    model_used = EXCLUDED.model_used,
+                    timestamp = CURRENT_TIMESTAMP,
+                    last_accessed = CURRENT_TIMESTAMP,
+                    hit_count = ai_response_cache.hit_count + 1
             ''', (request_hash, user_context_hash, message, response, model_used))
-            
-            conn.commit()
-            conn.close()
             
             print(f"💾 Risposta salvata in cache: {message[:30]}...")
             
@@ -161,57 +184,61 @@ class AICostManager:
     def check_budget_limits(self, user_id: int, estimated_cost: float) -> Tuple[bool, str]:
         """Controlla se l'utente può fare la richiesta senza superare i limiti"""
         try:
-            conn = sqlite3.connect('skaila.db')
-            
             # Ottieni o crea record budget utente
-            user_limits = conn.execute('''
-                SELECT * FROM ai_user_limits WHERE user_id = ?
-            ''', (user_id,)).fetchone()
+            user_limits = db_manager.query('''
+                SELECT user_id, daily_limit, monthly_limit, current_daily_usage, 
+                       current_monthly_usage, last_reset_daily, last_reset_monthly
+                FROM ai_user_limits WHERE user_id = %s
+            ''', (user_id,), one=True)
             
             today = datetime.now().date()
             current_month = today.replace(day=1)
             
             if not user_limits:
                 # Crea record per nuovo utente
-                conn.execute('''
+                db_manager.execute('''
                     INSERT INTO ai_user_limits 
                     (user_id, last_reset_daily, last_reset_monthly)
                     VALUES (%s, %s, %s)
                 ''', (user_id, today, current_month))
-                conn.commit()
-                user_limits = conn.execute('''
-                    SELECT * FROM ai_user_limits WHERE user_id = ?
-                ''', (user_id,)).fetchone()
+                
+                user_limits = db_manager.query('''
+                    SELECT user_id, daily_limit, monthly_limit, current_daily_usage, 
+                           current_monthly_usage, last_reset_daily, last_reset_monthly
+                    FROM ai_user_limits WHERE user_id = %s
+                ''', (user_id,), one=True)
+            
+            daily_limit = user_limits.get('daily_limit')
+            monthly_limit = user_limits.get('monthly_limit')
+            daily_usage = user_limits.get('current_daily_usage')
+            monthly_usage = user_limits.get('current_monthly_usage')
+            last_reset_daily = user_limits.get('last_reset_daily')
+            last_reset_monthly = user_limits.get('last_reset_monthly')
             
             # Reset giornaliero se necessario
-            if user_limits[5] != today.isoformat():  # last_reset_daily
-                conn.execute('''
+            if last_reset_daily != today:
+                db_manager.execute('''
                     UPDATE ai_user_limits 
-                    SET current_daily_usage = 0.0, last_reset_daily = ?
-                    WHERE user_id = ?
+                    SET current_daily_usage = 0.0, last_reset_daily = %s
+                    WHERE user_id = %s
                 ''', (today, user_id))
+                daily_usage = 0.0
             
             # Reset mensile se necessario
-            if user_limits[6] != current_month.isoformat():  # last_reset_monthly
-                conn.execute('''
+            if last_reset_monthly != current_month:
+                db_manager.execute('''
                     UPDATE ai_user_limits 
-                    SET current_monthly_usage = 0.0, last_reset_monthly = ?
-                    WHERE user_id = ?
+                    SET current_monthly_usage = 0.0, last_reset_monthly = %s
+                    WHERE user_id = %s
                 ''', (current_month, user_id))
-            
-            # Ricarica dati aggiornati
-            user_limits = conn.execute('''
-                SELECT * FROM ai_user_limits WHERE user_id = ?
-            ''', (user_id,)).fetchone()
-            
-            daily_limit = user_limits[1]    # daily_limit
-            monthly_limit = user_limits[2]  # monthly_limit
-            daily_usage = user_limits[3]    # current_daily_usage
-            monthly_usage = user_limits[4]  # current_monthly_usage
-            
-            conn.close()
+                monthly_usage = 0.0
             
             # Controlli limiti
+            daily_usage = float(daily_usage) if daily_usage else 0.0
+            monthly_usage = float(monthly_usage) if monthly_usage else 0.0
+            daily_limit = float(daily_limit) if daily_limit else 2.0
+            monthly_limit = float(monthly_limit) if monthly_limit else 30.0
+            
             if daily_usage + estimated_cost > daily_limit:
                 return False, f"Limite giornaliero superato (${daily_usage:.3f}/${daily_limit:.2f})"
             
@@ -238,7 +265,7 @@ class AICostManager:
         if (user_role in ['admin', 'professore'] or 
             message_complexity == 'high' or 
             difficulty_pref == 'advanced'):
-            return 'gpt-4'
+            return 'gpt-4o'
         
         return 'gpt-3.5-turbo'
 
@@ -246,10 +273,8 @@ class AICostManager:
                    output_tokens: int, cost: float, request_type: str = 'chat', cached: bool = False):
         """Traccia il costo di una richiesta"""
         try:
-            conn = sqlite3.connect('skaila.db')
-            
             # Salva tracking costo
-            conn.execute('''
+            db_manager.execute('''
                 INSERT INTO ai_cost_tracking 
                 (user_id, model_used, input_tokens, output_tokens, cost_usd, request_type, cached)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -257,15 +282,12 @@ class AICostManager:
             
             # Aggiorna budget utente se non cached
             if not cached:
-                conn.execute('''
+                db_manager.execute('''
                     UPDATE ai_user_limits 
-                    SET current_daily_usage = current_daily_usage + ?,
-                        current_monthly_usage = current_monthly_usage + ?
-                    WHERE user_id = ?
+                    SET current_daily_usage = current_daily_usage + %s,
+                        current_monthly_usage = current_monthly_usage + %s
+                    WHERE user_id = %s
                 ''', (cost, cost, user_id))
-            
-            conn.commit()
-            conn.close()
             
             print(f"💰 Costo tracciato: ${cost:.4f} ({model_used}) per user {user_id}")
             
@@ -275,48 +297,49 @@ class AICostManager:
     def get_usage_stats(self, user_id: int) -> Dict:
         """Ottieni statistiche di utilizzo per un utente"""
         try:
-            conn = sqlite3.connect('skaila.db')
-            
             # Statistiche generali
-            stats = conn.execute('''
+            stats = db_manager.query('''
                 SELECT 
                     COUNT(*) as total_requests,
-                    SUM(cost_usd) as total_cost,
-                    AVG(cost_usd) as avg_cost,
-                    SUM(CASE WHEN cached = 1 THEN 1 ELSE 0 END) as cache_hits
+                    COALESCE(SUM(cost_usd), 0) as total_cost,
+                    COALESCE(AVG(cost_usd), 0) as avg_cost,
+                    SUM(CASE WHEN cached = TRUE THEN 1 ELSE 0 END) as cache_hits
                 FROM ai_cost_tracking 
-                WHERE user_id = ?
-            ''', (user_id,)).fetchone()
+                WHERE user_id = %s
+            ''', (user_id,), one=True)
             
             # Statistiche per modello
-            model_stats = conn.execute('''
-                SELECT model_used, COUNT(*) as count, SUM(cost_usd) as total_cost
+            model_stats = db_manager.query('''
+                SELECT model_used, COUNT(*) as count, COALESCE(SUM(cost_usd), 0) as total_cost
                 FROM ai_cost_tracking 
-                WHERE user_id = ?
+                WHERE user_id = %s
                 GROUP BY model_used
-            ''', (user_id,)).fetchall()
+            ''', (user_id,), many=True)
             
             # Limiti correnti
-            limits = conn.execute('''
+            limits = db_manager.query('''
                 SELECT daily_limit, monthly_limit, current_daily_usage, current_monthly_usage
                 FROM ai_user_limits 
-                WHERE user_id = ?
-            ''', (user_id,)).fetchone()
+                WHERE user_id = %s
+            ''', (user_id,), one=True)
             
-            conn.close()
+            total_requests = stats.get('total_requests') if stats else 0
+            total_cost = stats.get('total_cost') if stats else 0.0
+            avg_cost = stats.get('avg_cost') if stats else 0.0
+            cache_hits = stats.get('cache_hits') if stats else 0
             
             return {
-                'total_requests': stats[0] or 0,
-                'total_cost': stats[1] or 0.0,
-                'avg_cost': stats[2] or 0.0,
-                'cache_hits': stats[3] or 0,
-                'cache_rate': (stats[3] / max(stats[0], 1)) * 100,
-                'model_usage': [{'model': row[0], 'count': row[1], 'cost': row[2]} for row in model_stats],
+                'total_requests': int(total_requests) if total_requests else 0,
+                'total_cost': float(total_cost) if total_cost else 0.0,
+                'avg_cost': float(avg_cost) if avg_cost else 0.0,
+                'cache_hits': int(cache_hits) if cache_hits else 0,
+                'cache_rate': (int(cache_hits) / max(int(total_requests), 1)) * 100 if cache_hits else 0.0,
+                'model_usage': [{'model': row.get('model_used'), 'count': int(row.get('count')), 'cost': float(row.get('total_cost'))} for row in model_stats] if model_stats else [],
                 'limits': {
-                    'daily_limit': limits[0] if limits else 2.0,
-                    'monthly_limit': limits[1] if limits else 30.0,
-                    'daily_usage': limits[2] if limits else 0.0,
-                    'monthly_usage': limits[3] if limits else 0.0
+                    'daily_limit': float(limits.get('daily_limit')) if limits else 2.0,
+                    'monthly_limit': float(limits.get('monthly_limit')) if limits else 30.0,
+                    'daily_usage': float(limits.get('current_daily_usage')) if limits else 0.0,
+                    'monthly_usage': float(limits.get('current_monthly_usage')) if limits else 0.0
                 } if limits else None
             }
             
@@ -327,20 +350,19 @@ class AICostManager:
     def optimize_cache(self):
         """Ottimizza la cache rimuovendo vecchie entry"""
         try:
-            conn = sqlite3.connect('skaila.db')
-            
             # Rimuovi cache più vecchia di 7 giorni
-            deleted = conn.execute('''
+            result = db_manager.execute('''
                 DELETE FROM ai_response_cache 
-                WHERE timestamp < datetime('now', '-7 days')
-            ''').rowcount
+                WHERE timestamp < NOW() - INTERVAL '7 days'
+            ''')
             
             # Rimuovi cache con hit_count basso se abbiamo più di 1000 entry
-            total_cache = conn.execute('SELECT COUNT(*) FROM ai_response_cache').fetchone()[0]
+            total_cache = db_manager.query('SELECT COUNT(*) as count FROM ai_response_cache', one=True)
+            total_count = total_cache.get('count') if total_cache else 0
             
-            if total_cache > 1000:
+            if total_count > 1000:
                 # Mantieni solo le 800 entry più utilizzate
-                conn.execute('''
+                db_manager.execute('''
                     DELETE FROM ai_response_cache 
                     WHERE id NOT IN (
                         SELECT id FROM ai_response_cache 
@@ -349,11 +371,7 @@ class AICostManager:
                     )
                 ''')
                 
-            conn.commit()
-            conn.close()
-            
-            if deleted > 0:
-                print(f"🧹 Cache ottimizzata: {deleted} entry rimosse")
+            print(f"🧹 Cache ottimizzata: vecchie entry rimosse")
                 
         except Exception as e:
             print(f"❌ Errore ottimizzazione cache: {e}")
