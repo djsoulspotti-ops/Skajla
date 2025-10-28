@@ -11,29 +11,10 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #F8F9FA;
             min-height: 100vh;
-            color: white;
+            color: #1E293B;
             padding: 2rem;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-            animation: pulse 10s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         .container {
@@ -44,27 +25,28 @@
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
+            background: white;
+            border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .header h1 {
             font-size: 2.5rem;
             font-weight: 900;
+            color: #001F3F;
         }
 
         .btn {
             padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
+            background: #003B73;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             color: white;
             font-weight: 600;
             cursor: pointer;
@@ -72,12 +54,13 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+            background: #001F3F;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 59, 115, 0.2);
         }
 
         .quiz-categories {
@@ -88,18 +71,19 @@
         }
 
         .category-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
+            background: white;
+            border-radius: 12px;
             padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #E2E8F0;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .category-card:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-5px);
+            border-color: #003B73;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 59, 115, 0.1);
         }
 
         .category-icon {
@@ -111,19 +95,24 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            color: #001F3F;
         }
 
         .category-meta {
-            opacity: 0.8;
+            color: #64748B;
             font-size: 0.9rem;
         }
 
         .stats-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
+            background: white;
+            border-radius: 16px;
             padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-section h2 {
+            color: #001F3F;
         }
 
         .stats-grid {
@@ -136,18 +125,20 @@
         .stat-box {
             text-align: center;
             padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: #F8F9FA;
             border-radius: 12px;
+            border: 1px solid #E2E8F0;
         }
 
         .stat-value {
             font-size: 2.5rem;
             font-weight: 900;
             margin-bottom: 0.5rem;
+            color: #003B73;
         }
 
         .stat-label {
-            opacity: 0.8;
+            color: #64748B;
             font-size: 0.9rem;
         }
     </style>
