@@ -132,7 +132,7 @@ class AICostManager:
             cached = db_manager.query('''
                 SELECT response, id FROM ai_response_cache 
                 WHERE request_hash = %s 
-                AND timestamp > NOW() - INTERVAL '%s hours'
+                AND timestamp > NOW() - INTERVAL '1 hour' * %s
                 ORDER BY hit_count DESC, last_accessed DESC
                 LIMIT 1
             ''', (request_hash, self.cache_duration_hours), one=True)
