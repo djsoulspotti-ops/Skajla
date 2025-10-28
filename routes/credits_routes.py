@@ -87,7 +87,7 @@ def api_credits():
         return jsonify({'error': 'Non autorizzato'}), 401
     
     user_id = session['user_id']
-    profile = gamification_system.get_or_create_user_profile(user_id)
+    profile = gamification_system.get_or_create_profile(user_id)
     
     return jsonify({
         'avatar_coins': profile['avatar_coins'],
