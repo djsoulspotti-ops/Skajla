@@ -33,7 +33,6 @@ class AuthService:
                                   hashed.encode('utf-8'))
         except:
             # Fallback per hash SHA-256 esistenti (retrocompatibilità)
-            import hashlib
             return hashlib.sha256(password.encode()).hexdigest() == hashed
 
     def is_locked_out(self, email: str) -> bool:

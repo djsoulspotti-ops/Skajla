@@ -1,15 +1,10 @@
-
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 # Rate limiter
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per hour"],
-    storage_uri="memory://"
-)
-
-
+limiter = Limiter(key_func=get_remote_address,
+                  default_limits=["200 per hour"],
+                  storage_uri="memory://")
 """
 SKAILA - API Routes
 Tutte le API REST centralizzate
@@ -28,6 +23,7 @@ api_bp = Blueprint('api', __name__, url_prefix='/api')
 # Inizializza AI bot
 ai_bot = AISkailaBot()
 
+
 @api_bp.route('/conversations')
 def conversations():
     if 'user_id' not in session:
@@ -36,11 +32,11 @@ def conversations():
     try:
         # SECURITY: Tenant guard
         school_id = get_current_school_id()
-        
+
         user_id = session['user_id']
         user_role = session['ruolo']
         cache_key = f"conversations_{user_id}_{user_role}_{school_id}"
-        
+
         # Controlla cache
         cached = cache_manager.get_user_data(user_id, 'conversations')
         if cached:
@@ -48,7 +44,8 @@ def conversations():
 
         if user_role == 'admin':
             # SECURITY: Admin vede solo chat della sua scuola
-            conversations = db_manager.query('''
+            conversations = db_manager.query(
+                '''
                 SELECT c.*, 
                        COUNT(DISTINCT pc.utente_id) as partecipanti_count,
                        m.contenuto as ultimo_messaggio,
@@ -62,10 +59,11 @@ def conversations():
                 WHERE c.scuola_id = %s
                 GROUP BY c.id
                 ORDER BY COALESCE(ultimo_messaggio_data, '1900-01-01') DESC
-            ''', (school_id,))
+            ''', (school_id, ))
         else:
             # SECURITY: Utenti vedono solo chat della loro scuola + membership
-            conversations = db_manager.query('''
+            conversations = db_manager.query(
+                '''
                 SELECT c.*, 
                        COUNT(DISTINCT pc.utente_id) as partecipanti_count,
                        m.contenuto as ultimo_messaggio,
@@ -82,15 +80,19 @@ def conversations():
             ''', (school_id, user_id, session.get('classe', '')))
 
         conversations_list = conversations
-        
+
         # Cache risultato
-        cache_manager.cache_user_data(user_id, 'conversations', conversations_list, ttl=30)
+        cache_manager.cache_user_data(user_id,
+                                      'conversations',
+                                      conversations_list,
+                                      ttl=30)
         return jsonify(conversations_list)
 
     except TenantGuardException as e:
         return jsonify({'error': 'Accesso non autorizzato alla scuola'}), 403
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @api_bp.route('/messages/<int:conversation_id>')
 def messages(conversation_id):
@@ -101,9 +103,12 @@ def messages(conversation_id):
         # SECURITY: Tenant guard - verifica che chat appartenga alla scuola
         school_id = get_current_school_id()
         if not verify_chat_belongs_to_school(conversation_id, school_id):
-            return jsonify({'error': 'Accesso non autorizzato a questa conversazione'}), 403
-        
-        messages = db_manager.query('''
+            return jsonify(
+                {'error':
+                 'Accesso non autorizzato a questa conversazione'}), 403
+
+        messages = db_manager.query(
+            '''
             SELECT m.*, u.nome, u.cognome, u.username, u.ruolo,
                    m.timestamp as data_invio
             FROM messaggi m
@@ -120,6 +125,7 @@ def messages(conversation_id):
         return jsonify({'error': 'Accesso non autorizzato alla scuola'}), 403
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @api_bp.route('/ai/chat', methods=['POST'])
 @limiter.limit("30 per minute")
@@ -139,19 +145,12 @@ def ai_chat():
             return jsonify({'error': 'Messaggio vuoto'}), 400
 
         # Genera risposta AI (salva automaticamente in coaching_interactions)
-        response = ai_bot.generate_response(
-            message, 
-            session['nome'], 
-            session['ruolo'],
-            session['user_id']
-        )
+        response = ai_bot.generate_response(message, session['nome'],
+                                            session['ruolo'],
+                                            session['user_id'])
 
         # Gamification (già gestito dentro _save_conversation, ma aggiungiamo per interazione chat)
-        gamification_system.award_xp(
-            session['user_id'], 
-            'ai_interaction', 
-            description="Coaching con SKAILA Coach"
-        )
+        gamification_system.award_xp(session['user_id'], 'ai_interaction')
 
         return jsonify({
             'response': response,
@@ -162,7 +161,9 @@ def ai_chat():
 
     except Exception as e:
         print(f"Errore API /ai/chat: {e}")
-        return jsonify({'error': 'Errore durante la generazione della risposta'}), 500
+        return jsonify(
+            {'error': 'Errore durante la generazione della risposta'}), 500
+
 
 @api_bp.route('/gamification/profile')
 def gamification_profile():
@@ -170,10 +171,11 @@ def gamification_profile():
         return jsonify({'error': 'Non autorizzato'}), 401
 
     try:
-        profile = gamification_system.get_or_create_user_profile(session['user_id'])
+        profile = gamification_system.get_or_create_profile(session['user_id'])
         return jsonify(profile)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @api_bp.route('/gamification/leaderboard')
 def gamification_leaderboard():
@@ -185,10 +187,7 @@ def gamification_leaderboard():
         class_filter = request.args.get('class_filter', session.get('classe'))
 
         leaderboard_data = gamification_system.get_leaderboard(
-            session['user_id'], 
-            period, 
-            class_filter
-        )
+            session['user_id'], period, class_filter)
         return jsonify(leaderboard_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

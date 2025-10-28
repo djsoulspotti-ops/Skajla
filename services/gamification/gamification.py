@@ -158,7 +158,7 @@ class SKAILAGamification:
         except Exception as e:
             print(f"⚠️ Errore creazione tabelle gamification: {e}")
 
-    def award_xp(self, user_id: int, action: str, multiplier: float = 1.0, context: str = None) -> Dict[str, Any]:
+    def award_xp(self, user_id: int, action: str, multiplier: float = 1.0, context: str = "") -> Dict[str, Any]:
         """Assegna XP per un'azione e persiste nel database (atomico, concurrency-safe)"""
         try:
             xp_amount = int(self.xp_actions.get(action, 10) * multiplier)
@@ -219,7 +219,7 @@ class SKAILAGamification:
                 return level
         return 1
 
-    def get_user_stats(self, user_id: int) -> Dict[str, Any]:
+    def get_user_stats(self, user_id: int) :
         """Ottieni statistiche utente (stub minimal)"""
         try:
             result = db_manager.query(
@@ -227,14 +227,8 @@ class SKAILAGamification:
                 (user_id,),
                 one=True
             )
-            if result:
-                return dict(result)
-            return {
-                'user_id': user_id,
-                'total_xp': 0,
-                'current_level': 1,
-                'current_streak': 0
-            }
+            
+            return result
         except Exception as e:
             print(f"⚠️ Errore get_user_stats: {e}")
             return {'user_id': user_id, 'total_xp': 0, 'current_level': 1}

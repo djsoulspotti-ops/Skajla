@@ -32,7 +32,7 @@ def register_socket_events(socketio):
                     'nome': session['nome'],
                     'cognome': session['cognome'],
                     'ruolo': session['ruolo']
-                }, room=f"school_{school_id}")
+                }, to=f"school_{school_id}")
             except TenantGuardException:
                 # User senza school_id, skip presence broadcast
                 pass
@@ -51,7 +51,7 @@ def register_socket_events(socketio):
                 emit('user_disconnected', {
                     'nome': session['nome'],
                     'cognome': session['cognome']
-                }, room=f"school_{school_id}")
+                }, to=f"school_{school_id}")
                 
                 leave_room(f"school_{school_id}")
             except TenantGuardException:
@@ -151,7 +151,7 @@ def register_socket_events(socketio):
         # Gamification
         gamification_system.award_xp(session['user_id'], 'message_sent', multiplier=1.0, context="Messaggio in chat")
 
-        emit('new_message', dict(messaggio), room=f"chat_{conversation_id}")
+        emit('new_message', dict(messaggio), to=f"chat_{conversation_id}")
 
     @socketio.on('typing_start')
     def handle_typing_start(data):
@@ -183,7 +183,7 @@ def register_socket_events(socketio):
             'conversation_id': conversation_id,
             'user_name': session['nome'],
             'typing': True
-        }, room=f"chat_{conversation_id}", include_self=False)
+        }, to=f"chat_{conversation_id}", include_self=False)
 
     @socketio.on('typing_stop')
     def handle_typing_stop(data):
@@ -215,7 +215,7 @@ def register_socket_events(socketio):
             'conversation_id': conversation_id,
             'user_name': session['nome'],
             'typing': False
-        }, room=f"chat_{conversation_id}", include_self=False)
+        }, to=f"chat_{conversation_id}", include_self=False)
 
     @socketio.on('ai_message')
     def handle_ai_message(data):
@@ -248,7 +248,7 @@ def register_socket_events(socketio):
             gamification_system.award_xp(
                 session['user_id'], 
                 'ai_interaction', 
-                description="Interazione con SKAILA Coach"
+                context="Interazione con SKAILA Coach"
             )
             
         except Exception as e:

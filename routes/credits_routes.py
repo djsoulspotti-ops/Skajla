@@ -19,7 +19,7 @@ def view_credits():
     user_id = session['user_id']
     
     # Ottieni profilo gamification
-    profile = gamification_system.get_or_create_user_profile(user_id)
+    profile = gamification_system.get_or_create_profile(user_id)
     
     # Ottieni statistiche dettagliate
     with db_manager.get_connection() as conn:
