@@ -40,6 +40,7 @@ from routes.credits_routes import credits_bp
 from routes.admin_school_codes_routes import admin_codes_bp
 from routes.messaging_routes import messaging_bp
 from routes.messaging_api import messaging_api_bp
+from routes.ai_chat_routes import ai_chat_bp
 from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
@@ -190,7 +191,7 @@ class SkailaApp:
         def ai_chat():
             if 'user_id' not in session:
                 return redirect('/login')
-            return render_template('ai_chat.html', user=session)
+            return render_template('ai_coach_modern.html', user=session)
 
         @self.app.route('/gamification')
         def gamification_dashboard():
@@ -212,6 +213,7 @@ class SkailaApp:
         self.app.register_blueprint(admin_codes_bp)
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(messaging_api_bp)
+        self.app.register_blueprint(ai_chat_bp)
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
 
