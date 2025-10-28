@@ -612,7 +612,7 @@
                                     <div style="background: #10b981; height: 100%; width: {{ gamification.level_info.progress_percent|default(0) }}%; border-radius: 4px;"></div>
                                 </div>
                             </div>
-                            <a href="/gamification" style="display: block; margin-top: 1rem; text-align: center; background: rgba(255,255,255,0.9); color: #667eea; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;">
+                            <a href="/gamification" style="display: block; margin-top: 1rem; text-align: center; background: white; color: #003B73; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; border: 1px solid #E2E8F0;">
                                 🏆 Vedi Badge, Achievement & Classifica
                             </a>
                         </div>
@@ -627,36 +627,41 @@
                             <a href="#" class="card-action">Vedi tutte</a>
                         </div>
                         <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-icon-wrapper">
-                                    <i class="fas fa-book"></i>
+                            {% if recent_activities and recent_activities|length > 0 %}
+                                {% for activity in recent_activities %}
+                                <div class="activity-item">
+                                    <div class="activity-icon-wrapper">
+                                        {% if 'quiz' in activity.action_type.lower() %}
+                                            <i class="fas fa-brain"></i>
+                                        {% elif 'messag' in activity.action_type.lower() or 'chat' in activity.action_type.lower() %}
+                                            <i class="fas fa-comment"></i>
+                                        {% elif 'badge' in activity.action_type.lower() or 'achievement' in activity.action_type.lower() %}
+                                            <i class="fas fa-trophy"></i>
+                                        {% elif 'login' in activity.action_type.lower() %}
+                                            <i class="fas fa-sign-in-alt"></i>
+                                        {% else %}
+                                            <i class="fas fa-star"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">{{ activity.title }}</div>
+                                        <p class="activity-desc">{{ activity.description }}{% if activity.xp_earned and activity.xp_earned > 0 %} - +{{ activity.xp_earned }} XP{% endif %}</p>
+                                    </div>
+                                    <div class="activity-time">
+                                        {% if activity.timestamp.hour is defined %}
+                                            {{ activity.timestamp.strftime('%d/%m %H:%M') }}
+                                        {% else %}
+                                            {{ activity.timestamp.strftime('%d/%m') }}
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Nuova lezione caricata</div>
-                                    <p class="activity-desc">Matematica - Equazioni differenziali</p>
+                                {% endfor %}
+                            {% else %}
+                                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;"></i>
+                                    <p>Nessuna attività recente</p>
                                 </div>
-                                <div class="activity-time">2h fa</div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon-wrapper">
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Achievement sbloccato</div>
-                                    <p class="activity-desc">Quiz Master - 10 quiz completati</p>
-                                </div>
-                                <div class="activity-time">1g fa</div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon-wrapper">
-                                    <i class="fas fa-comment"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Nuovo messaggio</div>
-                                    <p class="activity-desc">Prof. Bianchi - Feedback compito</p>
-                                </div>
-                                <div class="activity-time">2g fa</div>
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

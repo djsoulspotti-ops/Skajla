@@ -88,12 +88,64 @@ def dashboard_studente():
     # AI Insights intelligenti (ML + statistica) - Temporaneamente disabilitato
     ai_insights = []  # ai_insights_engine.generate_insights(user_id)
     
+    # Attività recenti (dai daily_analytics e achievements)
+    recent_activities_list = []
+    
+    # Achievement recenti
+    achievements = db_manager.query('''
+        SELECT achievement_id, xp_earned, unlocked_at
+        FROM user_achievements
+        WHERE user_id = %s
+        ORDER BY unlocked_at DESC
+        LIMIT 3
+    ''', (user_id,)) or []
+    
+    for ach in achievements:
+        recent_activities_list.append({
+            'action_type': 'achievement',
+            'title': 'Achievement Sbloccato',
+            'description': ach['achievement_id'].replace('_', ' ').title(),
+            'xp_earned': ach['xp_earned'],
+            'timestamp': ach['unlocked_at']
+        })
+    
+    # Attività da daily analytics (ultimi 7 giorni)
+    daily_stats = db_manager.query('''
+        SELECT date, quizzes_completed, messages_sent, ai_interactions, xp_earned
+        FROM daily_analytics
+        WHERE user_id = %s AND date >= CURRENT_DATE - INTERVAL '7 days'
+        ORDER BY date DESC
+        LIMIT 5
+    ''', (user_id,)) or []
+    
+    for stat in daily_stats:
+        if stat['quizzes_completed'] and stat['quizzes_completed'] > 0:
+            recent_activities_list.append({
+                'action_type': 'quiz',
+                'title': 'Quiz Completato',
+                'description': f"{stat['quizzes_completed']} quiz completati",
+                'xp_earned': 0,
+                'timestamp': stat['date']
+            })
+        if stat['messages_sent'] and stat['messages_sent'] > 0:
+            recent_activities_list.append({
+                'action_type': 'message',
+                'title': 'Messaggi Inviati',
+                'description': f"{stat['messages_sent']} messaggi",
+                'xp_earned': 0,
+                'timestamp': stat['date']
+            })
+    
+    # Ordina per timestamp e prendi i primi 5
+    recent_activities = sorted(recent_activities_list, key=lambda x: x['timestamp'], reverse=True)[:5]
+    
     return render_template('dashboard_studente.html', 
                          user=session, 
                          gamification=gamification_data,
                          stats=dashboard_stats,
                          companies=companies,
-                         ai_insights=ai_insights)
+                         ai_insights=ai_insights,
+                         recent_activities=recent_activities)
 
 @dashboard_bp.route('/dashboard/professore')
 @require_login
