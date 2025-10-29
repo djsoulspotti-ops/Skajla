@@ -7,16 +7,9 @@ from flask import Blueprint, render_template, session, redirect, request, jsonif
 from database_manager import db_manager
 from services.tenant_guard import get_current_school_id
 from gamification import gamification_system
+from shared.middleware.auth import require_login
 
 messaging_bp = Blueprint('messaging', __name__)
-
-def require_login(f):
-    def wrapper(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect('/login')
-        return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__
-    return wrapper
 
 @messaging_bp.route('/chat')
 @require_login

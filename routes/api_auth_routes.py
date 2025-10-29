@@ -4,29 +4,15 @@ Endpoint REST JSON per autenticazione (mantiene sistema session-based)
 """
 
 from flask import Blueprint, request, jsonify, session
-from functools import wraps
 from services.auth_service import auth_service
 from services.password_validator import validate_password
 from services.email_validator import validate_email, normalize_email
 from school_system import school_system
 from gamification import gamification_system
 from database_manager import db_manager
+from shared.middleware.auth import api_auth_required
 
 api_auth_bp = Blueprint('api_auth', __name__, url_prefix='/api')
-
-
-def api_auth_required(f):
-    """Decorator per proteggere endpoint API (verifica sessione)"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({
-                'success': False,
-                'error': 'Non autenticato',
-                'message': 'Devi effettuare il login per accedere a questa risorsa'
-            }), 401
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 @api_auth_bp.route('/register', methods=['POST'])

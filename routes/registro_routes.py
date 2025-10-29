@@ -4,32 +4,14 @@ Gestione voti, presenze, note disciplinari, calendario lezioni
 """
 
 from flask import Blueprint, request, jsonify, session
-from functools import wraps
 from datetime import datetime, date
 from registro_elettronico import registro
 from database_manager import db_manager
 from services.tenant_guard import get_current_school_id
 from shared.validators.input_validators import validator, sql_protector
+from shared.middleware.auth import require_auth, require_teacher
 
 registro_bp = Blueprint('registro_api', __name__)
-
-def require_auth(f):
-    """Decorator per richiedere autenticazione"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({'error': 'Non autenticato'}), 401
-        return f(*args, **kwargs)
-    return decorated
-
-def require_teacher(f):
-    """Decorator per richiedere ruolo professore o dirigente"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if session.get('ruolo') not in ['professore', 'dirigente']:
-            return jsonify({'error': 'Accesso negato - Solo professori'}), 403
-        return f(*args, **kwargs)
-    return decorated
 
 # ============== PRESENZE ==============
 

@@ -4,18 +4,9 @@ Routes Admin per gestione codici scuole
 
 from flask import Blueprint, render_template, session, redirect, jsonify, request
 from services.school_codes_manager import school_codes_manager
-from functools import wraps
+from shared.middleware.auth import require_admin
 
 admin_codes_bp = Blueprint('admin_codes', __name__)
-
-def require_admin(f):
-    """Decorator per richiedere ruolo admin"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session or session.get('ruolo') != 'admin':
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
 
 @admin_codes_bp.route('/admin/school-codes')
 @require_admin

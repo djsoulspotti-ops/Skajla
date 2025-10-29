@@ -10,17 +10,9 @@ from gamification import gamification_system
 from services.tenant_guard import get_school_stats, get_current_school_id, TenantGuardException
 from ai_chatbot import AISkailaBot
 from ai_insights_engine import ai_insights_engine
+from shared.middleware.auth import require_login
 
 dashboard_bp = Blueprint('dashboard', __name__)
-
-def require_login(f):
-    """Decorator per richiedere login - redirect a /login se non autenticato"""
-    def wrapper(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect('/login')
-        return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__
-    return wrapper
 
 @dashboard_bp.route('/dashboard')
 @require_login

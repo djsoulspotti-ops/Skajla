@@ -11,6 +11,14 @@ Preferred communication style: Simple, everyday language.
 ## Backend Framework
 The application uses Flask with a modular architecture, separating concerns into blueprints for authentication, dashboards, and APIs.
 
+## Shared Middleware (October 2025 - Refactoring)
+**Centralized Authentication & Authorization**: All authentication decorators consolidated in `shared/middleware/auth.py` eliminating 5+ code duplications. Provides:
+- `require_login`: Web route authentication with redirect
+- `require_auth` / `api_auth_required`: API authentication with JSON response
+- `require_role(*roles)`: Multi-role authorization
+- `require_admin`, `require_teacher`, `require_student`: Role-specific shortcuts
+- Utility functions: `get_current_user()`, `is_authenticated()`, `has_role()`, `has_any_role()`
+
 ## Centralized Configuration System (SSoT)
 SKAILA implements Single Source of Truth principles with centralized, modular configuration for core settings, security, caching, feature flags, gamification parameters (XP actions, multipliers, levels, badges, streaks), and shared validators/formatters. This approach reduces code, ensures consistency, and improves maintainability.
 
