@@ -22,29 +22,27 @@ def view_credits():
     profile = gamification_system.get_or_create_profile(user_id)
     
     # Ottieni statistiche dettagliate
-    with db_manager.get_connection() as conn:
-        # XP guadagnati oggi
-        today_xp = conn.execute('''
-            SELECT COALESCE(SUM(xp_earned), 0) 
-            FROM xp_activity_log 
-            WHERE user_id = %s AND DATE(timestamp) = CURRENT_DATE
-        ''', (user_id,)).fetchone()[0]
-        
-        # XP questa settimana
-        week_xp = conn.execute('''
-            SELECT COALESCE(SUM(xp_earned), 0) 
-            FROM xp_activity_log 
-            WHERE user_id = %s AND DATE(timestamp) > DATE('now', '-7 days')
-        ''', (user_id,)).fetchone()[0]
-        
-        # Attività recenti che hanno dato XP
-        recent_activities = conn.execute('''
-            SELECT action_type, xp_earned, description, timestamp
-            FROM xp_activity_log
-            WHERE user_id = %s
-            ORDER BY timestamp DESC
-            LIMIT 10
-        ''', (user_id,)).fetchall()
+    today_xp_result = db_manager.query('''
+        SELECT COALESCE(SUM(xp_earned), 0) as total
+        FROM xp_activity_log 
+        WHERE user_id = %s AND DATE(timestamp) = CURRENT_DATE
+    ''', (user_id,), one=True)
+    today_xp = today_xp_result['total'] if today_xp_result else 0
+    
+    week_xp_result = db_manager.query('''
+        SELECT COALESCE(SUM(xp_earned), 0) as total
+        FROM xp_activity_log 
+        WHERE user_id = %s AND timestamp > CURRENT_TIMESTAMP - INTERVAL '7 days'
+    ''', (user_id,), one=True)
+    week_xp = week_xp_result['total'] if week_xp_result else 0
+    
+    recent_activities = db_manager.query('''
+        SELECT action_type, xp_earned, description, timestamp
+        FROM xp_activity_log
+        WHERE user_id = %s
+        ORDER BY timestamp DESC
+        LIMIT 10
+    ''', (user_id,)) or []
     
     # Calcola livello successivo e progresso
     current_level = profile['current_level']
