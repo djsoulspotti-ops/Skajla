@@ -234,6 +234,10 @@ class SkailaApp:
         # Registra blueprint documentazione
         self.app.register_blueprint(documentation_bp)
 
+        # Admin Features Management
+        from routes.admin_features_routes import admin_features_bp
+        self.app.register_blueprint(admin_features_bp)
+
         # Aggiungi CSRF protection context processor
         from csrf_protection import inject_csrf_token
         self.app.context_processor(inject_csrf_token)

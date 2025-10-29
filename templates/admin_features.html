@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Moduli - SKAILA Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        h1 {
+            color: var(--color-blue-800);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-action {
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: var(--color-blue-800);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--color-blue-900);
+            transform: translateY(-2px);
+        }
+        
+        .features-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .feature-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .feature-info h3 {
+            color: var(--color-blue-800);
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-info p {
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--color-blue-800);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+            margin-left: 1rem;
+        }
+        
+        .status-active {
+            background: #10b98114;
+            color: #10b981;
+        }
+        
+        .status-inactive {
+            background: #ef444414;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cogs"></i> Gestione Moduli SKAILA</h1>
+            <p>Abilita o disabilita i moduli disponibili per la tua scuola</p>
+            
+            <div class="quick-action">
+                <button class="btn btn-primary" onclick="setGamificationOnly()">
+                    🎮 Attiva Solo Gamification
+                </button>
+            </div>
+        </div>
+        
+        <div class="features-grid">
+            {% for feature_id, feature_data in available_features.items() %}
+            <div class="feature-card">
+                <div class="feature-info">
+                    <h3>{{ feature_data.name }}</h3>
+                    <p>{{ feature_data.description }}</p>
+                    <span class="status-badge {{ 'status-active' if enabled_features.get(feature_id, True) else 'status-inactive' }}">
+                        {{ 'Attivo' if enabled_features.get(feature_id, True) else 'Disattivo' }}
+                    </span>
+                </div>
+                
+                <label class="toggle-switch">
+                    <input type="checkbox" 
+                           data-feature="{{ feature_id }}"
+                           {{ 'checked' if enabled_features.get(feature_id, True) else '' }}
+                           onchange="toggleFeature('{{ feature_id }}', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+        async function toggleFeature(featureName, enabled) {
+            try {
+                const response = await fetch('/api/admin/features/toggle', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        feature_name: featureName,
+                        enabled: enabled
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Errore: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Errore toggle feature:', error);
+                alert('Errore di connessione');
+            }
+        }
+        
+        async function setGamificationOnly() {
+            if (!confirm('Vuoi attivare SOLO la Gamification e disabilitare tutti gli altri moduli?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/features/gamification-only', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Modalità Solo Gamification attivata!');
+                    location.reload();
+                } else {
+                    alert('Errore: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore di connessione');
+            }
+        }
+    </script>
+</body>
+</html>

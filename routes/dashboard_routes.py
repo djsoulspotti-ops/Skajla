@@ -12,6 +12,7 @@ from ai_chatbot import AISkailaBot
 from ai_insights_engine import ai_insights_engine
 from shared.middleware.auth import require_login
 from services.dashboard.dashboard_service import dashboard_service
+from services.school.school_features_manager import school_features_manager
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -35,17 +36,25 @@ def dashboard():
 def dashboard_studente():
     """Dashboard studente con gamification"""
     user_id = session['user_id']
+    school_id = get_current_school_id()
+    
+    # Ottieni feature abilitate per questa scuola
+    enabled_features = school_features_manager.get_school_features(school_id)
     
     # Dati gamification (con fallback se profilo non esiste)
-    try:
-        gamification_data = gamification_system.get_user_dashboard(user_id)
-        profile = gamification_data.get('profile', {})
-    except Exception as e:
-        print(f"⚠️ Gamification error for user {user_id}: {e}")
-        # Crea profilo minimo di fallback
-        gamification_system.get_or_create_profile(user_id)
-        gamification_data = gamification_system.get_user_dashboard(user_id)
-        profile = gamification_data.get('profile', {})
+    gamification_data = None
+    profile = {}
+    
+    if enabled_features.get('gamification', True):
+        try:
+            gamification_data = gamification_system.get_user_dashboard(user_id)
+            profile = gamification_data.get('profile', {})
+        except Exception as e:
+            print(f"⚠️ Gamification error for user {user_id}: {e}")
+            # Crea profilo minimo di fallback
+            gamification_system.get_or_create_profile(user_id)
+            gamification_data = gamification_system.get_user_dashboard(user_id)
+            profile = gamification_data.get('profile', {})
     
     # Statistiche recenti - usando DashboardService
     daily_stats = dashboard_service.get_user_daily_stats(user_id)
@@ -120,9 +129,10 @@ def dashboard_studente():
                          user=session, 
                          gamification=gamification_data,
                          stats=dashboard_stats,
-                         companies=companies,
-                         ai_insights=ai_insights,
-                         recent_activities=recent_activities)
+                         companies=companies if enabled_features.get('skaila_connect', True) else [],
+                         ai_insights=ai_insights if enabled_features.get('ai_coach', True) else [],
+                         recent_activities=recent_activities,
+                         enabled_features=enabled_features)
 
 @dashboard_bp.route('/dashboard/professore')
 @require_login
