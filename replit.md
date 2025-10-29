@@ -91,6 +91,14 @@ Comprehensive routing system with modular architecture for educational features,
 - **Modular Frontend**: Created `templates/partials/` (head, navbar, sidebar, footer) and `templates/base.html` for DRY templates
 - **Code Quality**: Reduced duplication, improved readability, enhanced maintainability with Single Responsibility Principle
 
+**NEW: MVC + ORM Architecture (October 2025)**
+- **SQLAlchemy ORM**: Professional database layer with type-safe operations
+- **MVC Pattern**: Complete separation of Models, Controllers, Views
+- **Custom Exceptions**: 8 specific exception types with contextual error messages
+- **Professional Logging**: Structured logging with colors, levels (DEBUG/INFO/WARNING/ERROR)
+- **Example Module**: Complete `Courses` module in `core/` demonstrating best practices
+- **Migration Guide**: See `MIGRATION_GUIDE.md` for step-by-step migration instructions
+
 # Project Structure (October 2025 - Reorganized & Refactored)
 
 ```
@@ -101,7 +109,18 @@ Comprehensive routing system with modular architecture for educational features,
 ├── requirements.txt          # Python dependencies (updated)
 ├── replit.md                 # This file
 │
-├── shared/                    # NEW: Shared utilities and middleware
+├── core/                      # NEW: MVC + ORM architecture (October 2025)
+│   ├── config/
+│   │   ├── database.py       # SQLAlchemy ORM setup with connection pooling
+│   │   └── logging_config.py # Professional structured logging
+│   ├── exceptions/
+│   │   └── __init__.py       # Custom exception classes (8 types)
+│   ├── models/
+│   │   └── course.py         # Example: Course ORM model
+│   └── controllers/
+│       └── course_controller.py  # Example: Course business logic
+│
+├── shared/                    # Shared utilities and middleware
 │   └── middleware/
 │       ├── auth.py           # Centralized auth decorators (require_login, require_role, etc.)
 │       └── __init__.py

@@ -22,6 +22,8 @@ flask-compress = "^1.20"
 flask-limiter = "^4.0.0"
 apscheduler = "^3.11.0"
 authlib = "^1.6.5"
+sqlalchemy = "^2.0.44"
+alembic = "^1.17.1"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
