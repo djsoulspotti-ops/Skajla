@@ -816,6 +816,14 @@ class SchoolSystem:
             # Crea chat per la classe
             self.create_class_chat(class_id, scuola_id, nome)
             
+            # Crea gruppi materia predefiniti per la classe
+            try:
+                from services.messaging.subject_groups_initializer import initialize_subject_groups_for_class
+                initialize_subject_groups_for_class(scuola_id, nome)
+                print(f"✅ Gruppi materia inizializzati per classe {nome}")
+            except Exception as e:
+                print(f"⚠️ Errore inizializzando gruppi materia per classe {nome}: {e}")
+            
             conn.commit()
             return class_id
     

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ company.nome }} - SKAILA Connect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            transition: all 0.2s ease;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back:hover {
+            border-color: var(--color-blue-600);
+            color: var(--color-blue-700);
+        }
+
+        .company-detail-card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+        }
+
+        .company-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .company-title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .company-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            font-size: var(--text-base);
+            color: var(--text-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-item i {
+            color: var(--color-blue-600);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--color-blue-600);
+        }
+
+        .section-content {
+            font-size: var(--text-base);
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            background: var(--bg-surface);
+            padding: 1.25rem;
+            border-radius: var(--radius-lg);
+        }
+
+        .info-label {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: var(--font-medium);
+        }
+
+        .info-value {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+        }
+
+        .btn-apply {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 2rem;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 59, 115, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/skaila-connect" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            <span>Tutte le opportunità</span>
+        </a>
+
+        <div class="company-detail-card">
+            <div class="company-header">
+                <h1 class="company-title">{{ company.nome }}</h1>
+                <div class="company-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-industry"></i>
+                        <span>{{ company.settore }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ company.citta }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="badge">{{ company.tipo_opportunita }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-building"></i>
+                    Chi Siamo
+                </h2>
+                <p class="section-content">{{ company.descrizione }}</p>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-briefcase"></i>
+                    Posizione Offerta
+                </h2>
+                <p class="section-content" style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--color-blue-800);">
+                    {{ company.posizione_offerta }}
+                </p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Retribuzione</div>
+                    <div class="info-value">{{ company.retribuzione }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Durata</div>
+                    <div class="info-value">{{ company.durata }}</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-check-circle"></i>
+                    Requisiti
+                </h2>
+                <p class="section-content">{{ company.requisiti }}</p>
+            </div>
+
+            <button class="btn-apply" onclick="applyToCompany('{{ company.nome }}')">
+                <i class="fas fa-paper-plane"></i> Candidati per questa posizione
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function applyToCompany(companyName) {
+            alert(`🎉 Candidatura inviata a ${companyName}!\n\nRiceverai una conferma via email entro 48 ore.\nIl tuo profilo è stato inviato all'azienda per valutazione.`);
+            // In futuro: chiamata API POST /api/applications
+        }
+    </script>
+</body>
+</html>

@@ -45,6 +45,7 @@ from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
 from routes.documentation_routes import documentation_bp
+from routes.skaila_connect_routes import skaila_connect_bp
 
 # Import services
 from services.auth_service import auth_service
@@ -214,6 +215,7 @@ class SkailaApp:
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(messaging_api_bp)
         self.app.register_blueprint(ai_chat_bp)
+        self.app.register_blueprint(skaila_connect_bp)  # SKAILA Connect - Alternanza Scuola-Lavoro
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
 

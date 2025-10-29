@@ -349,6 +349,14 @@ def register():
                             ''', (chat_id, user_id))
                             print(f"✅ Utente {user_id} aggiunto a chat {chat_id}")
                             flash(f'🎉 Sei stato automaticamente aggiunto alla chat della tua classe!', 'success')
+                        
+                        # AUTO-AGGIUNTA AI GRUPPI MATERIA PREDEFINITI
+                        try:
+                            from services.messaging.subject_groups_initializer import add_student_to_subject_groups
+                            add_student_to_subject_groups(user_id, scuola_id, classe_nome)
+                            print(f"✅ Studente {user_id} aggiunto ai gruppi materia della classe {classe_nome}")
+                        except Exception as e:
+                            print(f"⚠️ Errore aggiungendo studente ai gruppi materia: {e}")
                     except Exception as e:
                         print(f"⚠️ Errore auto-creazione chat (non-blocking): {e}")
                 

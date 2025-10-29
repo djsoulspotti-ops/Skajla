@@ -457,13 +457,19 @@
                 <li class="nav-item">
                     <a href="/gamification" class="nav-link">
                         <i class="fas fa-gamepad"></i>
-                        <span>🎮 Gamification</span>
+                        <span>Gamification</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/skaila-connect" class="nav-link">
+                        <i class="fas fa-briefcase"></i>
+                        <span>SKAILA Connect</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="/crediti" class="nav-link">
                         <i class="fas fa-coins"></i>
-                        <span>💰 I Miei Crediti</span>
+                        <span>I Miei Crediti</span>
                     </a>
                 </li>
             </ul>
@@ -584,35 +590,35 @@
                 <!-- Right Column -->
                 <div>
                     <!-- Gamification Quick Widget -->
-                    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 1.5rem;">
-                        <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
-                            <h2 class="card-title" style="color: white;">
+                    <div class="card" style="margin-bottom: 1.5rem;">
+                        <div class="card-header">
+                            <h2 class="card-title">
                                 <i class="fas fa-gamepad"></i>
-                                🎮 Gamification
+                                Gamification
                             </h2>
-                            <a href="/gamification" class="card-action" style="color: white; background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none;">Dashboard Completa →</a>
+                            <a href="/gamification" class="card-action">Dashboard Completa →</a>
                         </div>
                         <div style="padding-top: 1rem;">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2rem; font-weight: bold;">{{ gamification.profile.current_level|default(1) }}</div>
-                                    <div style="font-size: 0.85rem; opacity: 0.9;">Livello</div>
+                                <div style="text-align: center; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
+                                    <div style="font-size: 2rem; font-weight: bold; color: var(--color-blue-800);">{{ gamification.profile.current_level|default(1) }}</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Livello</div>
                                 </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2rem; font-weight: bold;">{{ gamification.profile.total_xp|default(0) }}</div>
-                                    <div style="font-size: 0.85rem; opacity: 0.9;">XP Totali</div>
+                                <div style="text-align: center; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
+                                    <div style="font-size: 2rem; font-weight: bold; color: var(--color-blue-800);">{{ gamification.profile.total_xp|default(0) }}</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">XP Totali</div>
                                 </div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 0.75rem; margin-top: 1rem;">
+                            <div style="background: var(--bg-surface); border-radius: 10px; padding: 0.75rem; margin-top: 1rem;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                    <span style="font-size: 0.9rem;">Progresso Livello</span>
-                                    <span style="font-size: 0.9rem; font-weight: bold;">{{ gamification.level_info.progress_percent|default(0) }}%</span>
+                                    <span style="font-size: 0.9rem; color: var(--text-secondary);">Progresso Livello</span>
+                                    <span style="font-size: 0.9rem; font-weight: bold; color: var(--color-blue-800);">{{ gamification.level_info.progress_percent|default(0) }}%</span>
                                 </div>
-                                <div style="background: rgba(0,0,0,0.2); height: 8px; border-radius: 4px; overflow: hidden;">
-                                    <div style="background: #10b981; height: 100%; width: {{ gamification.level_info.progress_percent|default(0) }}%; border-radius: 4px;"></div>
+                                <div style="background: var(--border-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%); height: 100%; width: {{ gamification.level_info.progress_percent|default(0) }}%; border-radius: 4px;"></div>
                                 </div>
                             </div>
-                            <a href="/gamification" style="display: block; margin-top: 1rem; text-align: center; background: white; color: #003B73; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; border: 1px solid #E2E8F0;">
+                            <a href="/gamification" style="display: block; margin-top: 1rem; text-align: center; background: var(--color-blue-800); color: white; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;">
                                 🏆 Vedi Badge, Achievement & Classifica
                             </a>
                         </div>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKAILA Connect - Alternanza Scuola-Lavoro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: var(--text-lg);
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            transition: all 0.2s ease;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back:hover {
+            border-color: var(--color-blue-600);
+            color: var(--color-blue-700);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--color-blue-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .company-card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .company-card:hover {
+            border-color: var(--color-blue-600);
+            box-shadow: var(--shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .company-name {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .company-sector {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-surface);
+            border-radius: var(--radius-full);
+        }
+
+        .company-description {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .company-position {
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            color: var(--color-blue-800);
+            margin-bottom: 0.75rem;
+        }
+
+        .company-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-item i {
+            color: var(--color-blue-600);
+            width: 16px;
+        }
+
+        .company-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+        }
+
+        .btn-apply {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 59, 115, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .companies-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <div class="page-header">
+            <h1 class="page-title">🤝 SKAILA Connect</h1>
+            <p class="page-subtitle">Connetti il tuo futuro: Opportunità di stage, alternanza scuola-lavoro e apprendistato</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ companies|length }}</div>
+                <div class="stat-label">Aziende Partner</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.candidature_inviate }}</div>
+                <div class="stat-label">Tue Candidature</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.candidature_accettate }}</div>
+                <div class="stat-label">Candidature Accettate</div>
+            </div>
+        </div>
+
+        <h2 style="font-size: var(--text-2xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 1.5rem;">
+            <i class="fas fa-briefcase" style="color: var(--color-blue-700);"></i>
+            Opportunità Disponibili
+        </h2>
+
+        <div class="companies-grid">
+            {% for company in companies %}
+            <div class="company-card" onclick="window.location.href='/skaila-connect/company/{{ company.id }}'">
+                <div class="company-header">
+                    <div style="flex: 1;">
+                        <h3 class="company-name">{{ company.nome }}</h3>
+                        <span class="company-sector">{{ company.settore }}</span>
+                    </div>
+                </div>
+
+                <p class="company-description">{{ company.descrizione }}</p>
+
+                <div class="company-position">
+                    <i class="fas fa-briefcase"></i> {{ company.posizione_offerta }}
+                </div>
+
+                <div class="company-details">
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ company.citta }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ company.durata }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-euro-sign"></i>
+                        <span>{{ company.retribuzione }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-tag"></i>
+                        <span class="company-badge">{{ company.tipo_opportunita }}</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-secondary);">
+                    <strong style="font-size: var(--text-sm); color: var(--text-primary);">Requisiti:</strong>
+                    <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-top: 0.5rem;">{{ company.requisiti }}</p>
+                </div>
+
+                <button class="btn-apply" onclick="event.stopPropagation(); applyToCompany({{ company.id }}, '{{ company.nome }}')">
+                    <i class="fas fa-paper-plane"></i> Candidati Ora
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function applyToCompany(companyId, companyName) {
+            alert(`🎉 Candidatura inviata a ${companyName}!\n\nRiceverai una conferma via email. Il tuo profilo è stato inviato all'azienda.`);
+            // In futuro: chiamata API per registrare candidatura
+        }
+    </script>
+</body>
+</html>
