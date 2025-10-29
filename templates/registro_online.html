@@ -5,15 +5,302 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Online - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/professional.css" rel="stylesheet">
-    <link href="/static/css/layouts.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-primary);
+        }
+
+        h1 {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--color-blue-800);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h1 i {
+            color: var(--color-gold-600);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            border-color: var(--color-blue-600);
+            color: var(--color-blue-700);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--text-xl);
+        }
+
+        .stat-card .value {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--color-blue-800);
+        }
+
+        .stat-card .label {
+            font-size: var(--text-base);
+            color: var(--text-secondary);
+            font-weight: var(--font-medium);
+        }
+
+        .stat-card small {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-primary);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab:hover {
+            background: var(--bg-surface);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+        }
+
+        .table-container h2 {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--color-blue-800);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-surface);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-primary);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: var(--bg-surface);
+        }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-bold);
+            font-size: var(--text-lg);
+        }
+
+        .grade-excellent {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .grade-good {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+        }
+
+        .grade-average {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+
+        .grade-poor {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+        }
+
+        .presence-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+        }
+
+        .presence-badge.presente {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .presence-badge.assente {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .presence-badge.ritardo {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .stats-detail {
+            margin-top: 2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-surface);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+            border-radius: 100px;
+            transition: width 0.3s ease;
+        }
+
+        .subject-stat {
+            background: var(--bg-surface);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--color-blue-300);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Registro Online</h1>
+            <h1><i class="fas fa-book-open"></i> Registro Online</h1>
             <a href="/dashboard" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Torna alla Dashboard
             </a>
@@ -46,7 +333,7 @@
 
         <div id="voti" class="content-section active">
             <div class="table-container">
-                <h2>I Tuoi Voti</h2>
+                <h2><i class="fas fa-star"></i> I Tuoi Voti</h2>
                 {% if voti %}
                 <table>
                     <thead>
@@ -75,14 +362,17 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p>Nessun voto ancora registrato</p>
+                <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <p>Nessun voto ancora registrato</p>
+                </div>
                 {% endif %}
             </div>
         </div>
 
         <div id="presenze" class="content-section">
             <div class="table-container">
-                <h2>Registro Presenze</h2>
+                <h2><i class="fas fa-calendar-check"></i> Registro Presenze</h2>
                 {% if presenze %}
                 <table>
                     <thead>
@@ -99,9 +389,9 @@
                             <td><strong>{{ presenza[0] }}</strong></td>
                             <td>
                                 {% if presenza[1] %}
-                                    <span class="presence-badge presente">✓ Presente</span>
+                                    <span class="presence-badge presente"><i class="fas fa-check"></i> Presente</span>
                                 {% else %}
-                                    <span class="presence-badge assente">✗ Assente</span>
+                                    <span class="presence-badge assente"><i class="fas fa-times"></i> Assente</span>
                                 {% endif %}
                                 {% if presenza[2] %}
                                     <small>(Giustificato)</small>
@@ -109,7 +399,7 @@
                             </td>
                             <td>
                                 {% if presenza[3] > 0 %}
-                                    <span class="presence-badge ritardo">{{ presenza[3] }} min</span>
+                                    <span class="presence-badge ritardo"><i class="fas fa-clock"></i> {{ presenza[3] }} min</span>
                                 {% else %}
                                     -
                                 {% endif %}
@@ -120,34 +410,36 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p>Nessuna presenza registrata</p>
+                <div class="empty-state">
+                    <i class="fas fa-calendar-check"></i>
+                    <p>Nessuna presenza registrata</p>
+                </div>
                 {% endif %}
             </div>
         </div>
 
         <div id="statistiche" class="content-section">
             <div class="table-container">
-                <h2>Statistiche Dettagliate</h2>
-                <div>
-                    <h3>Media Generale</h3>
-                    <p>
+                <h2><i class="fas fa-chart-bar"></i> Statistiche Dettagliate</h2>
+                
+                <div class="stats-detail">
+                    <h3 style="color: var(--color-blue-800); margin-bottom: 1rem;">Media Generale</h3>
+                    <div style="font-size: var(--text-4xl); font-weight: var(--font-bold); color: var(--color-blue-800); margin-bottom: 2rem;">
                         {% if medie %}
-                            {{ "%.2f"|format(medie|sum(attribute='1')/medie|length) }}
+                            {{ "%.2f"|format(medie|sum(attribute='1')/medie|length) }}/10
                         {% else %}
                             N/A
                         {% endif %}
-                    </p>
+                    </div>
                     
-                    <h3>Performance per Materia</h3>
+                    <h3 style="color: var(--color-blue-800); margin-bottom: 1rem;">Performance per Materia</h3>
                     {% for media in medie %}
-                    <div>
-                        <div>
-                            <span>{{ media[0] }}</span>
-                            <strong>{{ "%.1f"|format(media[1]) }}/10</strong>
-                        </div>
-                        <div>
-                            <div></div>
-                        </div>
+                    <div class="subject-stat">
+                        <span style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ media[0] }}</span>
+                        <strong style="font-size: var(--text-xl); color: var(--color-blue-800);">{{ "%.1f"|format(media[1]) }}/10</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (media[1]/10*100)|int }}%"></div>
                     </div>
                     {% endfor %}
                 </div>
@@ -157,20 +449,15 @@
 
     <script>
         function switchTab(tabName) {
-            // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
             });
             
-            // Remove active from all tabs
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Show selected section
             document.getElementById(tabName).classList.add('active');
-            
-            // Activate selected tab
             event.target.closest('.tab').classList.add('active');
         }
     </script>
