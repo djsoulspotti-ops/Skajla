@@ -1,0 +1,125 @@
+<!-- SKAILA - Sidebar Navigation Partial -->
+<aside class="sidebar">
+    <nav class="sidebar-nav">
+        <ul>
+            <li>
+                <a href="/dashboard" class="sidebar-link {% if request.path == '/dashboard' or request.path.startswith('/dashboard/') %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            {% if user.ruolo == 'studente' %}
+            <li>
+                <a href="/gamification" class="sidebar-link {% if 'gamification' in request.path %}active{% endif %}">
+                    <i class="fas fa-trophy"></i>
+                    <span>Gamification</span>
+                </a>
+            </li>
+            <li>
+                <a href="/quiz" class="sidebar-link {% if 'quiz' in request.path %}active{% endif %}">
+                    <i class="fas fa-brain"></i>
+                    <span>Quiz</span>
+                </a>
+            </li>
+            <li>
+                <a href="/ai-chat" class="sidebar-link {% if 'ai-chat' in request.path %}active{% endif %}">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Coach</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <li>
+                <a href="/chat" class="sidebar-link {% if 'chat' in request.path %}active{% endif %}">
+                    <i class="fas fa-comments"></i>
+                    <span>Messaggi</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/materiali" class="sidebar-link {% if 'materiali' in request.path %}active{% endif %}">
+                    <i class="fas fa-book"></i>
+                    <span>Materiali</span>
+                </a>
+            </li>
+            
+            {% if user.ruolo in ['professore', 'dirigente'] %}
+            <li>
+                <a href="/registro" class="sidebar-link {% if 'registro' in request.path %}active{% endif %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Registro</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% if user.ruolo == 'admin' %}
+            <li>
+                <a href="/admin/school-codes" class="sidebar-link {% if 'school-codes' in request.path %}active{% endif %}">
+                    <i class="fas fa-key"></i>
+                    <span>Codici Scuole</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</aside>
+
+<style>
+.sidebar {
+    width: 250px;
+    background: white;
+    border-right: 1px solid var(--color-neutral-300);
+    height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+    overflow-y: auto;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: var(--spacing-4);
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: var(--spacing-2);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-4);
+    color: var(--color-neutral-700);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.sidebar-link i {
+    width: 20px;
+    text-align: center;
+    color: var(--color-neutral-500);
+}
+
+.sidebar-link:hover {
+    background: var(--color-neutral-100);
+    color: var(--color-primary);
+}
+
+.sidebar-link:hover i {
+    color: var(--color-primary);
+}
+
+.sidebar-link.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+}
+
+.sidebar-link.active i {
+    color: var(--color-primary);
+}
+</style>

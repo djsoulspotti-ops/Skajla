@@ -11,6 +11,7 @@ from services.tenant_guard import get_school_stats, get_current_school_id, Tenan
 from ai_chatbot import AISkailaBot
 from ai_insights_engine import ai_insights_engine
 from shared.middleware.auth import require_login
+from services.dashboard.dashboard_service import dashboard_service
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -46,22 +47,12 @@ def dashboard_studente():
         gamification_data = gamification_system.get_user_dashboard(user_id)
         profile = gamification_data.get('profile', {})
     
-    # Statistiche recenti
-    recent_messages_result = db_manager.query('''
-        SELECT COUNT(*) as count FROM messaggi 
-        WHERE utente_id = %s AND DATE(timestamp) = CURRENT_DATE
-    ''', (user_id,), one=True)
-    recent_messages = recent_messages_result['count'] if recent_messages_result else 0
-    
-    ai_interactions_result = db_manager.query('''
-        SELECT COUNT(*) as count FROM ai_conversations 
-        WHERE utente_id = %s AND DATE(timestamp) = CURRENT_DATE
-    ''', (user_id,), one=True)
-    ai_interactions = ai_interactions_result['count'] if ai_interactions_result else 0
+    # Statistiche recenti - usando DashboardService
+    daily_stats = dashboard_service.get_user_daily_stats(user_id)
     
     dashboard_stats = {
-        'messages_today': recent_messages,
-        'ai_questions_today': ai_interactions,
+        'messages_today': daily_stats['messages_today'],
+        'ai_questions_today': daily_stats['ai_interactions_today'],
         'current_streak': profile.get('current_streak', 0),
         'total_xp': profile.get('total_xp', 0),
         'current_level': profile.get('current_level', 1)
@@ -83,14 +74,8 @@ def dashboard_studente():
     # Attività recenti (dai daily_analytics e achievements)
     recent_activities_list = []
     
-    # Achievement recenti
-    achievements = db_manager.query('''
-        SELECT achievement_id, xp_earned, unlocked_at
-        FROM user_achievements
-        WHERE user_id = %s
-        ORDER BY unlocked_at DESC
-        LIMIT 3
-    ''', (user_id,)) or []
+    # Achievement recenti - usando DashboardService
+    achievements = dashboard_service.get_recent_achievements(user_id, limit=3)
     
     for ach in achievements:
         recent_activities_list.append({

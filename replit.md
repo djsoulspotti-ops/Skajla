@@ -83,7 +83,15 @@ Comprehensive routing system with modular architecture for educational features,
 -   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance, grades (Italian 1-10 scale), disciplinary notes, and lesson calendar.
 -   **Parent Communication System**: Generates automated weekly/monthly reports with attendance, grades, behavior updates, homework, and AI insights, plus real-time notifications.
 
-# Project Structure (October 2025 - Reorganized)
+# Recent Refactoring (October 2025)
+
+**Major Refactoring Completed:**
+- **Centralized Middleware**: Eliminated 5+ duplicate auth decorators, consolidated in `shared/middleware/auth.py`
+- **Service Layer Architecture**: Created `services/dashboard/` with DashboardService to eliminate 16+ inline queries, improve testability and reusability
+- **Modular Frontend**: Created `templates/partials/` (head, navbar, sidebar, footer) and `templates/base.html` for DRY templates
+- **Code Quality**: Reduced duplication, improved readability, enhanced maintainability with Single Responsibility Principle
+
+# Project Structure (October 2025 - Reorganized & Refactored)
 
 ```
 /
@@ -93,7 +101,15 @@ Comprehensive routing system with modular architecture for educational features,
 ├── requirements.txt          # Python dependencies (updated)
 ├── replit.md                 # This file
 │
+├── shared/                    # NEW: Shared utilities and middleware
+│   └── middleware/
+│       ├── auth.py           # Centralized auth decorators (require_login, require_role, etc.)
+│       └── __init__.py
+│
 ├── services/                 # Business logic organized by domain
+│   ├── dashboard/            # NEW: Dashboard service layer
+│   │   ├── dashboard_service.py  # Consolidates dashboard queries
+│   │   └── __init__.py
 │   ├── ai/                   # AI & Chatbot services
 │   │   ├── ai_chatbot.py
 │   │   ├── coaching_engine.py
@@ -130,6 +146,13 @@ Comprehensive routing system with modular architecture for educational features,
 │   └── demo_routes.py (secure isolated demo)
 │
 ├── templates/               # Jinja2 HTML templates
+│   ├── base.html            # NEW: Base template with modular structure
+│   └── partials/            # NEW: Reusable template components
+│       ├── head.html        # Common <head> section
+│       ├── navbar.html      # Navigation bar
+│       ├── sidebar.html     # Sidebar navigation
+│       └── footer.html      # Footer
+│
 ├── static/                  # CSS, JS, images
 │   └── css/
 │       └── tokens.css       # Enterprise design system
