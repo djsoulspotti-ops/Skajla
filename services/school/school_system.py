@@ -277,7 +277,7 @@ class SchoolSystem:
             if db_manager.db_type == 'postgresql':
                 cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
             else:
-                cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = %s', ('DEFAULT_SCHOOL',))
+                cursor.execute('SELECT id FROM scuole WHERE codice_pubblico = ?', ('DEFAULT_SCHOOL',))
             
             if not cursor.fetchone():
                 # Crea scuola predefinita
@@ -290,15 +290,19 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, codice_dirigente)
-                        VALUES (%s, %s, %s, %s)
+                        VALUES (?, ?, ?, ?)
                     ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code(), 'DIR2024'))
                     default_school_id = cursor.lastrowid
                 
-                # Migra utenti esistenti alla scuola predefinita
-                if db_manager.db_type == 'postgresql':
-                    cursor.execute('UPDATE utenti SET scuola_id = %s WHERE scuola_id IS NULL', (default_school_id,))
-                else:
-                    cursor.execute('UPDATE utenti SET scuola_id = %s WHERE scuola_id IS NULL', (default_school_id,))
+                # Migra utenti esistenti alla scuola predefinita (solo se tabella esiste)
+                try:
+                    if db_manager.db_type == 'postgresql':
+                        cursor.execute('UPDATE utenti SET scuola_id = %s WHERE scuola_id IS NULL', (default_school_id,))
+                    else:
+                        cursor.execute('UPDATE utenti SET scuola_id = ? WHERE scuola_id IS NULL', (default_school_id,))
+                except Exception as e:
+                    # Tabella utenti non esiste ancora (prima inizializzazione)
+                    pass
                 
                 conn.commit()
                 print(f"✅ Scuola predefinita creata (ID: {default_school_id})")
