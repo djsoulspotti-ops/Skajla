@@ -32,16 +32,20 @@ def chat_hub():
     
     # Gruppi materia (una sola chat per materia, ordinata per ultimo messaggio - più recente in cima)
     gruppi_materia = db_manager.query('''
-        WITH ranked_chats AS (
+        WITH chat_with_last_message AS (
             SELECT c.*, 
                    COUNT(DISTINCT m.id) as message_count,
-                   MAX(m.timestamp) as ultimo_messaggio,
-                   ROW_NUMBER() OVER (PARTITION BY c.materia ORDER BY MAX(m.timestamp) DESC NULLS LAST) as rn
+                   MAX(m.timestamp) as ultimo_messaggio
             FROM chat c
             LEFT JOIN messaggi m ON c.id = m.chat_id
             JOIN partecipanti_chat pc ON c.id = pc.chat_id
             WHERE c.scuola_id = %s AND c.tipo = 'materia' AND pc.utente_id = %s
             GROUP BY c.id
+        ),
+        ranked_chats AS (
+            SELECT *,
+                   ROW_NUMBER() OVER (PARTITION BY materia ORDER BY ultimo_messaggio DESC NULLS LAST) as rn
+            FROM chat_with_last_message
         )
         SELECT * FROM ranked_chats WHERE rn = 1
         ORDER BY ultimo_messaggio DESC NULLS LAST
