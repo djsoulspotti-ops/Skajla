@@ -46,6 +46,7 @@ from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
 from routes.documentation_routes import documentation_bp
 from routes.skaila_connect_routes import skaila_connect_bp
+from routes.bi_dashboard_routes import bi_bp # BI Dashboard Blueprint
 
 # Import services
 from services.auth_service import auth_service
@@ -218,6 +219,7 @@ class SkailaApp:
         self.app.register_blueprint(skaila_connect_bp)  # SKAILA Connect - Alternanza Scuola-Lavoro
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
+        self.app.register_blueprint(bi_bp) # BI Dashboard Blueprint
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp

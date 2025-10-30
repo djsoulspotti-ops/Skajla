@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Business Intelligence - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .bi-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .bi-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .bi-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .bi-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .kpi-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .kpi-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Organigramma */
+        .orgchart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        #orgchart {
+            width: 100%;
+            height: 600px;
+            overflow: auto;
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+        
+        .node {
+            cursor: pointer;
+        }
+        
+        .node rect {
+            fill: white;
+            stroke: #667eea;
+            stroke-width: 2px;
+            rx: 8px;
+        }
+        
+        .node.scuola rect {
+            fill: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .node.classe rect {
+            fill: #e0e7ff;
+        }
+        
+        .node.studente rect {
+            fill: #f0f4ff;
+        }
+        
+        .node text {
+            font-size: 12px;
+            fill: #333;
+            font-weight: 600;
+        }
+        
+        .node.scuola text {
+            fill: white;
+            font-size: 14px;
+        }
+        
+        .link {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 2px;
+        }
+        
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        /* Classes Table */
+        .classes-table {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        thead th {
+            padding: 1rem;
+            color: white;
+            font-weight: 600;
+            text-align: left;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid var(--border-secondary);
+            transition: background 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        tbody td {
+            padding: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge.success { background: #d1fae5; color: #065f46; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.danger { background: #fee2e2; color: #991b1b; }
+        
+        .btn-view {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn-view:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="bi-container">
+        <!-- Header -->
+        <div class="bi-header">
+            <h1 class="bi-title">📊 Business Intelligence Dashboard</h1>
+            <p class="bi-subtitle">Organigramma e statistiche visuali - {{ user.nome }} {{ user.cognome }} ({{ ruolo|title }})</p>
+        </div>
+        
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">🎒</div>
+                <div class="kpi-value">{{ school_kpi.totale_studenti }}</div>
+                <div class="kpi-label">Studenti Totali</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">👨‍🏫</div>
+                <div class="kpi-value">{{ school_kpi.totale_professori }}</div>
+                <div class="kpi-label">Professori</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">🏫</div>
+                <div class="kpi-value">{{ school_kpi.totale_classi }}</div>
+                <div class="kpi-label">Classi Attive</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">📈</div>
+                <div class="kpi-value">{{ school_kpi.media_generale_scuola or '0.0' }}</div>
+                <div class="kpi-label">Media Generale</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">✅</div>
+                <div class="kpi-value">{{ school_kpi.tasso_presenze }}%</div>
+                <div class="kpi-label">Tasso Presenze</div>
+            </div>
+        </div>
+        
+        <!-- Organigramma Visuale -->
+        <div class="orgchart-container">
+            <h2 class="section-title">
+                <i class="fas fa-sitemap"></i>
+                Organigramma Interattivo
+            </h2>
+            <div id="orgchart"></div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">📊 Performance per Classe</h3>
+                <canvas id="classPerformanceChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-title">👥 Distribuzione Studenti</h3>
+                <canvas id="studentsDistChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Tabella Classi -->
+        <div class="classes-table">
+            <h2 class="section-title">
+                <i class="fas fa-table"></i>
+                Dettaglio Classi
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Classe</th>
+                        <th>Studenti</th>
+                        <th>Media Voti</th>
+                        <th>Presenze</th>
+                        <th>Status</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for classe in classes_stats %}
+                    <tr>
+                        <td><strong>{{ classe.classe }}</strong></td>
+                        <td>{{ classe.studenti_count }}</td>
+                        <td>{{ classe.media_classe or 'N/A' }}</td>
+                        <td>{{ classe.tasso_presenze|round(1) if classe.tasso_presenze else 'N/A' }}%</td>
+                        <td>
+                            {% if classe.media_classe and classe.media_classe >= 7 %}
+                                <span class="badge success">Ottimo</span>
+                            {% elif classe.media_classe and classe.media_classe >= 6 %}
+                                <span class="badge warning">Buono</span>
+                            {% else %}
+                                <span class="badge danger">Attenzione</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn-view" onclick="viewClasseDetails('{{ classe.classe }}')">
+                                <i class="fas fa-eye"></i> Visualizza
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Modal Dettaglio Classe -->
+    <div id="classeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Dettaglio Classe</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalBody">
+                <!-- Contenuto dinamico -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Dati organigramma da backend
+        const orgData = {{ org_tree|tojson }};
+        
+        // Render organigramma con D3.js
+        function renderOrgChart() {
+            const width = document.getElementById('orgchart').clientWidth;
+            const height = 600;
+            
+            const svg = d3.select('#orgchart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            const g = svg.append('g')
+                .attr('transform', 'translate(40,40)');
+            
+            const tree = d3.tree()
+                .size([height - 80, width - 160]);
+            
+            const root = d3.hierarchy(orgData);
+            tree(root);
+            
+            // Links
+            g.selectAll('.link')
+                .data(root.links())
+                .enter()
+                .append('path')
+                .attr('class', 'link')
+                .attr('d', d3.linkHorizontal()
+                    .x(d => d.y)
+                    .y(d => d.x));
+            
+            // Nodes
+            const node = g.selectAll('.node')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('class', d => `node ${d.data.type}`)
+                .attr('transform', d => `translate(${d.y},${d.x})`)
+                .on('click', (event, d) => {
+                    if (d.data.type === 'classe') {
+                        viewClasseDetails(d.data.id);
+                    } else if (d.data.type === 'studente') {
+                        viewStudentDetails(d.data.id);
+                    }
+                });
+            
+            node.append('rect')
+                .attr('x', -60)
+                .attr('y', -20)
+                .attr('width', 120)
+                .attr('height', 40);
+            
+            node.append('text')
+                .attr('dy', '.35em')
+                .attr('text-anchor', 'middle')
+                .text(d => d.data.name);
+        }
+        
+        // Charts
+        function renderCharts() {
+            const classesData = {{ classes_stats|tojson }};
+            
+            // Performance Chart
+            new Chart(document.getElementById('classPerformanceChart'), {
+                type: 'bar',
+                data: {
+                    labels: classesData.map(c => c.classe),
+                    datasets: [{
+                        label: 'Media Voti',
+                        data: classesData.map(c => c.media_classe || 0),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, max: 10 }
+                    }
+                }
+            });
+            
+            // Distribution Chart
+            new Chart(document.getElementById('studentsDistChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: classesData.map(c => c.classe),
+                    datasets: [{
+                        data: classesData.map(c => c.studenti_count),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#4facfe',
+                            '#43e97b', '#fa709a', '#fee140', '#30cfd0'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+        
+        // View Classe Details
+        async function viewClasseDetails(classe) {
+            const response = await fetch(`/bi/api/classe/${classe}/stats`);
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('modalTitle').textContent = `Classe ${classe}`;
+                document.getElementById('modalBody').innerHTML = `
+                    <h3>Statistiche Aggregate</h3>
+                    <p><strong>Studenti:</strong> ${data.stats.total_studenti}</p>
+                    <p><strong>Media Voti:</strong> ${data.stats.media_voti}</p>
+                    <p><strong>Presenze:</strong> ${data.stats.tasso_presenze?.toFixed(1)}%</p>
+                    
+                    <h3>Performance per Materia</h3>
+                    <ul>
+                        ${data.voti_per_materia.map(m => `
+                            <li><strong>${m.subject}:</strong> ${m.media} (${m.count} voti)</li>
+                        `).join('')}
+                    </ul>
+                `;
+                document.getElementById('classeModal').classList.add('active');
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('classeModal').classList.remove('active');
+        }
+        
+        // Init
+        renderOrgChart();
+        renderCharts();
+    </script>
+</body>
+</html>
