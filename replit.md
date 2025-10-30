@@ -2,6 +2,14 @@
 
 SKAILA is an educational platform connecting students, teachers, parents, and administrators in real-time. It offers multi-role messaging, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. Designed as a Flask web application with Socket.IO, SKAILA is scalable, tailored for the Italian education system, and aims to enhance learning engagement and provide robust tools for school management.
 
+# Recent Changes (October 30, 2025)
+
+## Critical Bug Fixes
+1. **Security Fix: Multi-Tenant Isolation** - Fixed critical cross-school data leak in dashboard professore. Query `docenti_classi` now JOINs with `classi` table and filters by `scuola_id` to ensure tenant isolation.
+2. **Dashboard Professore Fix** - `classi_attive` now calculated dynamically from `docenti_classi` table instead of hardcoded placeholder value.
+3. **Role Consistency Fix** - Teaching materials manager now consistently supports `professore/docente/dirigente` roles across upload, list, and search operations.
+4. **Database Compatibility** - Database manager correctly converts PostgreSQL placeholders (`%s`) to SQLite placeholders (`?`) for cross-database compatibility.
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
