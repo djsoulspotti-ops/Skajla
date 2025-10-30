@@ -1,6 +1,6 @@
 # Overview
 
-SKAILA is an educational platform for schools, connecting students, teachers, parents, and administrators in real-time. It offers a multi-role messaging system, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. Designed as a Flask web application with Socket.IO for real-time communication, SKAILA is scalable and tailored for the Italian education system, aiming to enhance learning engagement and provide robust tools for school management with a focus on business vision and market potential.
+SKAILA is an educational platform connecting students, teachers, parents, and administrators in real-time. It offers multi-role messaging, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. Designed as a Flask web application with Socket.IO, SKAILA is scalable, tailored for the Italian education system, and aims to enhance learning engagement and provide robust tools for school management.
 
 # User Preferences
 
@@ -8,19 +8,11 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## Backend Framework
-The application uses Flask with a modular architecture, separating concerns into blueprints for authentication, dashboards, and APIs.
+## Core Framework & Patterns
+The application uses Flask with a modular architecture, adhering to MVC and ORM patterns. SQLAlchemy provides a type-safe database layer. A centralized configuration system implements Single Source of Truth principles for consistency across core settings, security, caching, feature flags, and gamification parameters.
 
-## Shared Middleware (October 2025 - Refactoring)
-**Centralized Authentication & Authorization**: All authentication decorators consolidated in `shared/middleware/auth.py` eliminating 5+ code duplications. Provides:
-- `require_login`: Web route authentication with redirect
-- `require_auth` / `api_auth_required`: API authentication with JSON response
-- `require_role(*roles)`: Multi-role authorization
-- `require_admin`, `require_teacher`, `require_student`: Role-specific shortcuts
-- Utility functions: `get_current_user()`, `is_authenticated()`, `has_role()`, `has_any_role()`
-
-## Centralized Configuration System (SSoT)
-SKAILA implements Single Source of Truth principles with centralized, modular configuration for core settings, security, caching, feature flags, gamification parameters (XP actions, multipliers, levels, badges, streaks), and shared validators/formatters. This approach reduces code, ensures consistency, and improves maintainability.
+## Authentication & Authorization
+A centralized middleware handles all authentication and authorization decorators, including web route and API authentication, multi-role authorization, and role-specific shortcuts.
 
 ## Database Layer
 Supports both SQLite (development) and PostgreSQL (production) with a custom `DatabaseManager` for connection pooling. The schema supports multi-tenant school management, users, chat, gamification, and AI interaction tracking.
@@ -29,163 +21,36 @@ Supports both SQLite (development) and PostgreSQL (production) with a custom `Da
 Includes a comprehensive school, class, and teacher management system with dynamic class creation, role-based registration, and automated chat room creation, supporting isolated data for unlimited schools.
 
 ## Real-time Communication
-Socket.IO provides real-time messaging with automatic reconnection and room-based chat for various types (class-based, thematic, administrative).
+Socket.IO provides real-time messaging with automatic reconnection and room-based chat for various types (class-based, thematic, administrative). Intelligent auto-creation and enrollment into class chat rooms occur during student registration.
 
 ## AI Integration
 A native SKAILA AI system powers personalized learning through:
--   **SKAILA AI Brain Engine**: Analyzes student profiles for context, subject, sentiment, and provides personalized feedback.
--   **Adaptive Quiz System**: Multi-subject quizzes adapt difficulty and focus on weak topics, integrating with gamification.
--   **Social Learning System**: Facilitates peer help and study groups, awarding collaborative XP.
--   **Subject Progress Analytics**: Provides performance overview, identifies weak areas, and offers AI-driven learning path suggestions.
--   **AI Insights Engine**: Uses statistical methods and regression analysis for grade trend analysis, attendance pattern detection, weak subject identification, and future performance predictions.
+-   **SKAILA AI Brain Engine**: Analyzes student profiles for context and sentiment.
+-   **Adaptive Quiz System**: Quizzes adapt difficulty and focus on weak topics.
+-   **Social Learning System**: Facilitates peer help and awards collaborative XP.
+-   **Subject Progress Analytics**: Provides performance overview and AI-driven learning path suggestions.
+-   **AI Insights Engine**: Uses statistical methods for grade trend analysis, attendance patterns, and performance predictions.
 
 ## Gamification Engine
-A production-ready XP and leveling system with PostgreSQL integration, featuring atomic and concurrency-safe XP operations, centralized configuration for over 40 action types and multipliers, dynamic level progression up to 100, and daily analytics tracking.
+A production-ready XP and leveling system with PostgreSQL integration, featuring atomic and concurrency-safe XP operations, centralized configuration for over 40 action types and multipliers, dynamic level progression, and daily analytics tracking. Integrated with the Study Timer for automatic XP rewards.
 
-## Performance Optimization
-Includes multi-level caching, Redis-backed session management, performance monitoring, and database connection pooling.
+## Study Timer System
+A production-ready time management system for student study session tracking with accurate pause/resume functionality. It includes a PostgreSQL table for session data, precise pause tracking, four session types (Focus, Pomodoro, Deep Work, Review) with XP multipliers, and a REST API with 8 endpoints. XP rewards are calculated at 2 XP per active minute plus a 50 XP bonus for sessions 25 minutes or longer.
 
 ## Security Features
-**Production-Grade Security Implementation (October 2025):**
--   **Password Security**: bcrypt hashing with robust password validation policy (8+ characters, uppercase, number, lowercase required) via `services/password_validator.py`
--   **Session Management**: Per-user session expiry tracking with automatic timeout handling and flash notifications
--   **SQL Injection Prevention**: All queries use PostgreSQL parameterized placeholders (%s), zero raw string interpolation
--   **Security Headers**: Comprehensive HTTP headers (HSTS, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, CSP) implemented in main.py
--   **Demo Mode Isolation**: Secure demo system via `routes/demo_routes.py` using only mock data, zero database access for demo users (-999/-998)
--   **CSRF Protection**: Already present and functional across forms and API endpoints
--   **Rate Limiting**: Flask-Limiter integration for critical routes
-
-## Robust Authentication System
-Features a production-ready system with auto-managed `SECRET_KEY`, "Remember Me" functionality (30-day or 1-day sessions), smart lockout protection with countdown messages, enhanced feedback, and a professional UI. Includes intelligent registration flow with auto-class detection and instant chat room access.
+Production-grade security includes bcrypt password hashing with strong validation, per-user session expiry, SQL injection prevention via parameterized queries, comprehensive HTTP security headers, CSRF protection, and Flask-Limiter for rate limiting. A secure demo mode uses mock data with no database access.
 
 ## Enterprise UI Design System
-SKAILA features an ultra-professional, enterprise-grade UI redesigned for corporate teams. Key elements include:
--   **Design Tokens & Color System**: New enterprise palette with deep corporate blues, steel greys, classic gold accents, and semantic colors. Utilizes Inter, IBM Plex Sans, and JetBrains Mono fonts, a 4px spacing system, and sophisticated shadow elevation.
--   **Redesigned Templates**: All pages (Homepage, Login, Registration, Student/Teacher Dashboards, Calendar) have been rebuilt with professional layouts, clean forms, and intuitive navigation. The calendar features dynamic JavaScript for full month/year navigation and interactive day cells.
--   **Professional Components**: Standardized cards, buttons, forms, tables, and KPI cards with clean aesthetics and proper states.
--   **Removed Gaming Elements**: Eliminates neon glows, animated grids, and vibrant color schemes for a clean, flat design with subtle depth.
--   **Technical Implementation**: Centralized `tokens.css` (350+ lines), modular CSS, mobile-first responsive design, WCAG AA accessibility, and optimized performance.
+SKAILA features an ultra-professional, enterprise-grade UI with a new design token and color system (deep corporate blues, steel greys, gold accents), Inter, IBM Plex Sans, and JetBrains Mono fonts, and a 4px spacing system. All templates are redesigned for professional layouts. The UI is mobile-first, WCAG AA accessible, and optimized for performance.
 
-## SKAILA Connect - Student Career Portal
-A feature connecting students with companies for internships and job opportunities, including a company database, smart one-click application system with XP rewards, anti-farming protection, and dynamic UI for company listings.
-
-## Integrated Online Register
-A complete digital register system with database tables for grades (`voti`) and attendance (`presenze`). It provides student views for grades, attendance, and statistics, a teacher interface for management, and automated average calculations and progress bars.
-
-## Granular Messaging System with Auto-Enrollment
-A complete messaging infrastructure with a central chat hub, supporting 1-to-1 direct messages, subject-based group chats, and class-wide chats. **NEW (October 2025):** Intelligent auto-creation and enrollment into class chat rooms during student registration - new students are automatically added to their class chat room for immediate peer communication.
-
-## Complete Backend Infrastructure
-Comprehensive routing system with modular architecture for educational features, including materials management, quiz system, calendar integration, and API layers for SKAILA Connect and user data.
-
-## New Features
+## Key Features
+-   **SKAILA Connect**: Student career portal with company database and smart application system.
+-   **Integrated Online Register**: Digital register for grades (`voti`) and attendance (`presenze`) with student and teacher interfaces.
 -   **Teaching Materials Management System**: Allows teachers to upload, organize, and manage files with class-based access control.
--   **Electronic Class Register (Registro Elettronico)**: Comprehensive student management including attendance, grades (Italian 1-10 scale), disciplinary notes, and lesson calendar.
--   **Parent Communication System**: Generates automated weekly/monthly reports with attendance, grades, behavior updates, homework, and AI insights, plus real-time notifications.
+-   **Parent Communication System**: Generates automated weekly/monthly reports with AI insights and real-time notifications.
 
-# Recent Refactoring (October 2025)
-
-**Major Refactoring Completed:**
-- **Centralized Middleware**: Eliminated 5+ duplicate auth decorators, consolidated in `shared/middleware/auth.py`
-- **Service Layer Architecture**: Created `services/dashboard/` with DashboardService to eliminate 16+ inline queries, improve testability and reusability
-- **Modular Frontend**: Created `templates/partials/` (head, navbar, sidebar, footer) and `templates/base.html` for DRY templates
-- **Code Quality**: Reduced duplication, improved readability, enhanced maintainability with Single Responsibility Principle
-
-**NEW: MVC + ORM Architecture (October 2025)**
-- **SQLAlchemy ORM**: Professional database layer with type-safe operations
-- **MVC Pattern**: Complete separation of Models, Controllers, Views
-- **Custom Exceptions**: 8 specific exception types with contextual error messages
-- **Professional Logging**: Structured logging with colors, levels (DEBUG/INFO/WARNING/ERROR)
-- **Example Module**: Complete `Courses` module in `core/` demonstrating best practices
-- **Migration Guide**: See `MIGRATION_GUIDE.md` for step-by-step migration instructions
-
-# Project Structure (October 2025 - Reorganized & Refactored)
-
-```
-/
-├── main.py                    # Application entry point
-├── wsgi.py                    # WSGI configuration
-├── gunicorn.conf.py          # Gunicorn production config
-├── requirements.txt          # Python dependencies (updated)
-├── replit.md                 # This file
-│
-├── core/                      # NEW: MVC + ORM architecture (October 2025)
-│   ├── config/
-│   │   ├── database.py       # SQLAlchemy ORM setup with connection pooling
-│   │   └── logging_config.py # Professional structured logging
-│   ├── exceptions/
-│   │   └── __init__.py       # Custom exception classes (8 types)
-│   ├── models/
-│   │   └── course.py         # Example: Course ORM model
-│   └── controllers/
-│       └── course_controller.py  # Example: Course business logic
-│
-├── shared/                    # Shared utilities and middleware
-│   └── middleware/
-│       ├── auth.py           # Centralized auth decorators (require_login, require_role, etc.)
-│       └── __init__.py
-│
-├── services/                 # Business logic organized by domain
-│   ├── dashboard/            # NEW: Dashboard service layer
-│   │   ├── dashboard_service.py  # Consolidates dashboard queries
-│   │   └── __init__.py
-│   ├── ai/                   # AI & Chatbot services
-│   │   ├── ai_chatbot.py
-│   │   ├── coaching_engine.py
-│   │   ├── skaila_ai_brain.py
-│   │   └── ai_insights_engine.py
-│   ├── gamification/         # XP, levels, badges system
-│   │   ├── gamification.py
-│   │   └── skaila_quiz_manager.py
-│   ├── school/              # School management
-│   │   ├── school_system.py
-│   │   ├── registro_elettronico.py
-│   │   └── teaching_materials_manager.py
-│   ├── database/            # Database layer
-│   │   ├── database_manager.py
-│   │   └── database_keep_alive.py
-│   ├── monitoring/          # Performance & caching
-│   │   ├── performance_cache.py
-│   │   └── production_monitor.py
-│   ├── reports/             # Report generation
-│   │   ├── report_scheduler.py
-│   │   └── report_generator.py
-│   ├── security/            # Security modules
-│   │   └── csrf_protection.py
-│   └── utils/               # Shared utilities
-│       ├── environment_manager.py
-│       ├── session_manager.py
-│       └── email_sender.py
-│
-├── routes/                  # HTTP endpoints (blueprints)
-│   ├── auth_routes.py
-│   ├── dashboard_routes.py
-│   ├── messaging_routes.py
-│   ├── api_routes.py
-│   └── demo_routes.py (secure isolated demo)
-│
-├── templates/               # Jinja2 HTML templates
-│   ├── base.html            # NEW: Base template with modular structure
-│   └── partials/            # NEW: Reusable template components
-│       ├── head.html        # Common <head> section
-│       ├── navbar.html      # Navigation bar
-│       ├── sidebar.html     # Sidebar navigation
-│       └── footer.html      # Footer
-│
-├── static/                  # CSS, JS, images
-│   └── css/
-│       └── tokens.css       # Enterprise design system
-│
-├── scripts/                 # Maintenance & utility scripts
-├── docs/                    # Project documentation (NEW)
-│   ├── API_REGISTRO_ELETTRONICO.md
-│   ├── BACKEND_COMPLETATO.md
-│   └── GUIDA_SVILUPPATORI.md
-│
-└── examples/                # Code examples & integration templates
-```
-
-**Note:** Bridge files exist in root for backward compatibility during migration. All actual code is in organized `/services` folders.
+## Project Structure
+The project utilizes a reorganized structure with `core/` for MVC and ORM architecture, `shared/` for utilities and middleware, `services/` for business logic by domain, `routes/` for HTTP endpoints, `templates/` for Jinja2 HTML templates, and `static/` for CSS, JS, and images.
 
 # External Dependencies
 
@@ -197,7 +62,7 @@ Comprehensive routing system with modular architecture for educational features,
 -   **PyJWT**: JWT token handling
 -   **authlib**: OAuth integration
 -   **psutil**: System performance monitoring
--   **PostgreSQL**: Production database (via psycopg2)
+-   **PostgreSQL**: Production database
 -   **redis**: Caching layer
 -   **APScheduler**: Task scheduling
 -   **replit-object-storage**: File storage
