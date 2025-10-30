@@ -18,28 +18,40 @@ def chat_hub():
     user_id = session['user_id']
     school_id = get_current_school_id()
     
-    # Chat classe
+    # Chat classe (ordinata per ultimo messaggio)
     chat_classe = db_manager.query('''
-        SELECT c.*, COUNT(DISTINCT m.id) as message_count
+        SELECT c.*, 
+               COUNT(DISTINCT m.id) as message_count,
+               MAX(m.timestamp) as ultimo_messaggio
         FROM chat c
         LEFT JOIN messaggi m ON c.id = m.chat_id
         WHERE c.scuola_id = %s AND c.classe = %s AND c.tipo = 'classe'
         GROUP BY c.id
+        ORDER BY ultimo_messaggio DESC NULLS LAST
     ''', (school_id, session.get('classe', '')))
     
-    # Gruppi materia
+    # Gruppi materia (DISTINCT per evitare duplicati materia, ordinati per ultimo messaggio)
     gruppi_materia = db_manager.query('''
-        SELECT c.*, COUNT(DISTINCT m.id) as message_count
+        SELECT DISTINCT ON (c.materia) 
+               c.*, 
+               COUNT(DISTINCT m.id) as message_count,
+               MAX(m.timestamp) as ultimo_messaggio
         FROM chat c
         LEFT JOIN messaggi m ON c.id = m.chat_id
         JOIN partecipanti_chat pc ON c.id = pc.chat_id
         WHERE c.scuola_id = %s AND c.tipo = 'materia' AND pc.utente_id = %s
-        GROUP BY c.id
+        GROUP BY c.id, c.materia
+        ORDER BY c.materia, ultimo_messaggio DESC NULLS LAST
     ''', (school_id, user_id))
     
-    # Conversazioni 1-to-1
+    # Conversazioni 1-to-1 (ordinate per ultimo messaggio)
     conversazioni_private = db_manager.query('''
-        SELECT c.*, u.nome, u.cognome, COUNT(DISTINCT m.id) as message_count
+        SELECT c.*, 
+               u.nome, 
+               u.cognome, 
+               u.ruolo,
+               COUNT(DISTINCT m.id) as message_count,
+               MAX(m.timestamp) as ultimo_messaggio
         FROM chat c
         JOIN partecipanti_chat pc ON c.id = pc.chat_id
         JOIN utenti u ON pc.utente_id = u.id
@@ -47,7 +59,8 @@ def chat_hub():
         WHERE c.scuola_id = %s AND c.tipo = 'privata' 
         AND c.id IN (SELECT chat_id FROM partecipanti_chat WHERE utente_id = %s)
         AND u.id != %s
-        GROUP BY c.id, u.id
+        GROUP BY c.id, u.id, u.nome, u.cognome, u.ruolo
+        ORDER BY ultimo_messaggio DESC NULLS LAST
     ''', (school_id, user_id, user_id))
     
     # Lista utenti per nuova chat 1-to-1
