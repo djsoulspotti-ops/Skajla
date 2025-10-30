@@ -137,40 +137,56 @@ def dashboard_studente():
 @dashboard_bp.route('/dashboard/professore')
 @require_login
 def dashboard_professore():
-    """Dashboard professore"""
+    """Dashboard professore - SOLO STATISTICHE AGGREGATE"""
     if session.get('ruolo') != 'professore':
         return redirect('/dashboard')
     
     try:
         # SECURITY: Tenant guard - filtra per school_id
         school_id = get_current_school_id()
+        classe = session.get('classe', '')
         
-        # Statistiche classe (con school_id)
+        # 📊 STATISTICHE AGGREGATE CLASSE (no dati individuali)
         students_count = db_manager.query('''
             SELECT COUNT(*) as count FROM utenti 
             WHERE ruolo = %s AND classe = %s AND scuola_id = %s AND attivo = %s
-        ''', ('studente', session.get('classe', ''), school_id, True), one=True)['count']
+        ''', ('studente', classe, school_id, True), one=True)['count']
         
-        # Messaggi recenti (con school_id)
-        recent_activity = db_manager.query('''
-            SELECT u.nome, u.cognome, m.contenuto, m.timestamp
-            FROM messaggi m
-            JOIN utenti u ON m.utente_id = u.id
-            JOIN chat c ON m.chat_id = c.id
-            WHERE u.classe = %s AND u.scuola_id = %s AND c.scuola_id = %s 
-            AND DATE(m.timestamp) = CURRENT_DATE
-            ORDER BY m.timestamp DESC
-            LIMIT 10
-        ''', (session.get('classe', ''), school_id, school_id))
+        # Media voti classe
+        avg_grades = db_manager.query('''
+            SELECT AVG(voto) as media_classe
+            FROM registro_voti rv
+            JOIN utenti u ON rv.student_id = u.id
+            WHERE u.classe = %s AND u.scuola_id = %s
+        ''', (classe, school_id), one=True)
+        
+        # Tasso presenze aggregato
+        attendance = db_manager.query('''
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'presente' THEN 1 ELSE 0 END) as presenti
+            FROM registro_presenze rp
+            JOIN utenti u ON rp.student_id = u.id
+            WHERE u.classe = %s AND u.scuola_id = %s
+        ''', (classe, school_id), one=True)
+        
+        presenza_perc = 0
+        if attendance and attendance['total'] > 0:
+            presenza_perc = round((attendance['presenti'] / attendance['total']) * 100, 1)
+        
+        # Classi attive (per dirigenti)
+        classi_attive = 1  # Placeholder
         
         stats = {
-            'students_count': students_count,
-            'recent_activity': recent_activity
+            'total_studenti': students_count,
+            'classi_attive': classi_attive,
+            'media_classe': round(avg_grades['media_classe'], 1) if avg_grades and avg_grades['media_classe'] else 0,
+            'tasso_presenze': presenza_perc
         }
         
         return render_template('dashboard_professore.html', 
                              user=session, 
-                             stats=stats)
+                             **stats)
     except TenantGuardException:
         # Session mancante o corrotta - redirect a login
         session.clear()

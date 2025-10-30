@@ -484,7 +484,7 @@
                     <div class="kpi-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="kpi-value">{{ total_studenti|default(0) }}</div>
+                    <div class="kpi-value">{{ total_studenti }}</div>
                     <div class="kpi-label">Studenti Totali</div>
                 </div>
 
@@ -492,7 +492,7 @@
                     <div class="kpi-icon">
                         <i class="fas fa-chalkboard"></i>
                     </div>
-                    <div class="kpi-value">{{ classi_attive|default(0) }}</div>
+                    <div class="kpi-value">{{ classi_attive }}</div>
                     <div class="kpi-label">Classi Attive</div>
                 </div>
 
@@ -500,70 +500,49 @@
                     <div class="kpi-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="kpi-value">8.2</div>
-                    <div class="kpi-label">Media Generale</div>
+                    <div class="kpi-value">{{ media_classe }}</div>
+                    <div class="kpi-label">Media Classe</div>
                 </div>
 
                 <div class="kpi-card">
                     <div class="kpi-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="kpi-value">92%</div>
+                    <div class="kpi-value">{{ tasso_presenze }}%</div>
                     <div class="kpi-label">Tasso Presenze</div>
                 </div>
             </div>
 
             <!-- Content Grid -->
             <div class="content-grid">
-                <!-- Left Column - Student List -->
+                <!-- Left Column - Statistiche Classe Aggregate -->
                 <div>
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">
-                                <i class="fas fa-users"></i>
-                                I Tuoi Studenti
+                                <i class="fas fa-chart-bar"></i>
+                                Statistiche Classe Aggregate
                             </h2>
-                            <a href="/gestione-classi" class="card-action">Vedi tutti</a>
                         </div>
-                        <table class="student-table">
-                            <thead>
-                                <tr>
-                                    <th>Studente</th>
-                                    <th>Classe</th>
-                                    <th>Media</th>
-                                    <th>Presenze</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <span class="student-avatar">MR</span>
-                                        Mario Rossi
-                                    </td>
-                                    <td>3A</td>
-                                    <td>8.5</td>
-                                    <td><span class="badge success">95%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="student-avatar">LB</span>
-                                        Laura Bianchi
-                                    </td>
-                                    <td>3A</td>
-                                    <td>9.2</td>
-                                    <td><span class="badge success">98%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="student-avatar">GV</span>
-                                        Giovanni Verdi
-                                    </td>
-                                    <td>3B</td>
-                                    <td>7.8</td>
-                                    <td><span class="badge warning">85%</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div style="padding: 1rem;">
+                            <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+                                🔒 Per motivi di privacy, puoi vedere solo dati aggregati della classe, non individuali.
+                            </p>
+                            <div style="display: grid; gap: 1rem;">
+                                <div style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
+                                    <strong style="color: var(--text-primary);">Totale Studenti:</strong>
+                                    <span style="float: right; font-size: var(--text-xl); font-weight: bold;">{{ total_studenti }}</span>
+                                </div>
+                                <div style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
+                                    <strong style="color: var(--text-primary);">Media Classe:</strong>
+                                    <span style="float: right; font-size: var(--text-xl); font-weight: bold;">{{ media_classe }}/10</span>
+                                </div>
+                                <div style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
+                                    <strong style="color: var(--text-primary);">Tasso Presenze:</strong>
+                                    <span style="float: right; font-size: var(--text-xl); font-weight: bold;">{{ tasso_presenze }}%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

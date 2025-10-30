@@ -97,11 +97,11 @@ def segna_presenze_classe():
 @registro_bp.route('/api/registro/presenze/studente/<int:student_id>', methods=['GET'])
 @require_auth
 def get_presenze_studente(student_id):
-    """Ottieni storico presenze studente"""
+    """Ottieni storico presenze studente - SOLO LO STUDENTE STESSO"""
     try:
-        # Verifica permessi: studente può vedere solo le sue, prof/dirigente tutte
-        if session.get('ruolo') == 'studente' and session.get('user_id') != student_id:
-            return jsonify({'error': 'Accesso negato'}), 403
+        # 🔒 PRIVACY: Solo lo studente può vedere i propri dati
+        if session.get('user_id') != student_id:
+            return jsonify({'error': 'Accesso negato: puoi vedere solo i tuoi dati'}), 403
         
         # Verifica tenant isolation
         school_id = get_current_school_id()
@@ -190,11 +190,11 @@ def inserisci_voto():
 @registro_bp.route('/api/registro/voti/studente/<int:student_id>', methods=['GET'])
 @require_auth
 def get_voti_studente(student_id):
-    """Ottieni voti studente"""
+    """Ottieni voti studente - SOLO LO STUDENTE STESSO"""
     try:
-        # Verifica permessi
-        if session.get('ruolo') == 'studente' and session.get('user_id') != student_id:
-            return jsonify({'error': 'Accesso negato'}), 403
+        # 🔒 PRIVACY: Solo lo studente può vedere i propri voti
+        if session.get('user_id') != student_id:
+            return jsonify({'error': 'Accesso negato: puoi vedere solo i tuoi voti'}), 403
         
         # Verifica tenant
         school_id = get_current_school_id()
@@ -274,11 +274,11 @@ def inserisci_nota():
 @registro_bp.route('/api/registro/note/studente/<int:student_id>', methods=['GET'])
 @require_auth
 def get_note_studente(student_id):
-    """Ottieni note disciplinari studente"""
+    """Ottieni note disciplinari studente - SOLO LO STUDENTE STESSO"""
     try:
-        # Verifica permessi
-        if session.get('ruolo') == 'studente' and session.get('user_id') != student_id:
-            return jsonify({'error': 'Accesso negato'}), 403
+        # 🔒 PRIVACY: Solo lo studente può vedere le proprie note
+        if session.get('user_id') != student_id:
+            return jsonify({'error': 'Accesso negato: puoi vedere solo le tue note'}), 403
         
         # Verifica tenant
         school_id = get_current_school_id()
@@ -295,6 +295,66 @@ def get_note_studente(student_id):
         
     except Exception as e:
         print(f"❌ Errore get_note_studente: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+
+# ============== STATISTICHE AGGREGATE CLASSE (Prof/Dirigenti) ==============
+
+@registro_bp.route('/api/registro/statistiche/classe/<classe>', methods=['GET'])
+@require_auth
+@require_teacher
+def get_statistiche_classe(classe):
+    """Ottieni statistiche AGGREGATE della classe (senza dati individuali)"""
+    try:
+        school_id = get_current_school_id()
+        
+        # Conta studenti
+        total_students = db_manager.query('''
+            SELECT COUNT(*) as count FROM utenti
+            WHERE classe = %s AND scuola_id = %s AND ruolo = 'studente'
+        ''', (classe, school_id), one=True)
+        
+        # Media voti classe (aggregata)
+        avg_grades = db_manager.query('''
+            SELECT AVG(voto) as media_classe
+            FROM registro_voti rv
+            JOIN utenti u ON rv.student_id = u.id
+            WHERE u.classe = %s AND u.scuola_id = %s
+        ''', (classe, school_id), one=True)
+        
+        # Tasso presenze classe (aggregato)
+        attendance_rate = db_manager.query('''
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'presente' THEN 1 ELSE 0 END) as presenti
+            FROM registro_presenze rp
+            JOIN utenti u ON rp.student_id = u.id
+            WHERE u.classe = %s AND u.scuola_id = %s
+        ''', (classe, school_id), one=True)
+        
+        presenza_percentuale = 0
+        if attendance_rate and attendance_rate['total'] > 0:
+            presenza_percentuale = round((attendance_rate['presenti'] / attendance_rate['total']) * 100, 1)
+        
+        # Note disciplinari totali (senza nomi)
+        total_notes = db_manager.query('''
+            SELECT COUNT(*) as count
+            FROM registro_note_disciplinari rnd
+            JOIN utenti u ON rnd.student_id = u.id
+            WHERE u.classe = %s AND u.scuola_id = %s
+        ''', (classe, school_id), one=True)
+        
+        return jsonify({
+            'classe': classe,
+            'totale_studenti': total_students['count'] if total_students else 0,
+            'media_voti_classe': round(avg_grades['media_classe'], 2) if avg_grades and avg_grades['media_classe'] else 0,
+            'tasso_presenze': presenza_percentuale,
+            'note_disciplinari_totali': total_notes['count'] if total_notes else 0
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Errore get_statistiche_classe: {e}")
         return jsonify({'error': str(e)}), 500
 
 # ============== CALENDARIO LEZIONI ==============
@@ -363,11 +423,11 @@ def get_lezioni_classe(classe):
 @registro_bp.route('/api/registro/statistiche/studente/<int:student_id>', methods=['GET'])
 @require_auth
 def get_statistiche_studente(student_id):
-    """Ottieni report completo studente"""
+    """Ottieni report completo studente - SOLO LO STUDENTE STESSO"""
     try:
-        # Verifica permessi
-        if session.get('ruolo') == 'studente' and session.get('user_id') != student_id:
-            return jsonify({'error': 'Accesso negato'}), 403
+        # 🔒 PRIVACY: Solo lo studente può vedere il proprio report completo
+        if session.get('user_id') != student_id:
+            return jsonify({'error': 'Accesso negato: puoi vedere solo il tuo report'}), 403
         
         # Verifica tenant
         school_id = get_current_school_id()
