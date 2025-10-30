@@ -79,10 +79,11 @@ class TeachingMaterialsManager:
                        subject: str, classe: Optional[str] = None, is_public: bool = False) -> Dict:
         """Upload materiale didattico"""
         
-        # Validate teacher
+        # FIX BUG CRITICO: Validate teacher - supporta sia 'professore' che 'docente' per retrocompatibilità
+        # Nel database SKAILA il ruolo è 'professore', ma manteniamo supporto per 'docente' se esistente
         teacher = db_manager.query('SELECT ruolo FROM utenti WHERE id = %s', (teacher_id,), one=True)
-        if not teacher or teacher['ruolo'] != 'docente':
-            return {'error': 'Solo i docenti possono caricare materiali'}
+        if not teacher or teacher['ruolo'] not in ['professore', 'docente', 'dirigente']:
+            return {'error': 'Solo i professori possono caricare materiali'}
         
         # Validate file
         if not file or not file.filename:
@@ -164,8 +165,8 @@ class TeachingMaterialsManager:
             query += ' AND (tm.is_public = TRUE OR tm.class = %s)'
             params.append(user['classe'])
         
-        # Teachers see their own + public
-        elif user['ruolo'] == 'docente':
+        # FIX BUG: Teachers see their own + public - supporta 'professore', 'docente', 'dirigente'
+        elif user['ruolo'] in ['professore', 'docente', 'dirigente']:
             query += ' AND (tm.teacher_id = %s OR tm.is_public = TRUE)'
             params.append(user_id)
         
@@ -431,10 +432,11 @@ class TeachingMaterialsManager:
         '''
         params = [f'%{query}%', f'%{query}%', f'%{query}%']
         
+        # FIX BUG: Filtro search per ruolo - supporta 'professore', 'docente', 'dirigente'
         if user['ruolo'] == 'studente':
             search_query += ' AND (tm.is_public = TRUE OR tm.class = %s)'
             params.append(user['classe'])
-        elif user['ruolo'] == 'docente':
+        elif user['ruolo'] in ['professore', 'docente', 'dirigente']:
             search_query += ' AND (tm.teacher_id = %s OR tm.is_public = TRUE)'
             params.append(user_id)
         
