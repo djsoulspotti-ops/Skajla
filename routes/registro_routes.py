@@ -130,7 +130,7 @@ def get_presenze_studente(student_id):
 @require_auth
 @require_teacher
 def inserisci_voto():
-    """Inserisci voto per uno studente"""
+    """Inserisci voto per uno studente - SOLO PER LE PROPRIE MATERIE"""
     try:
         data = request.get_json()
         student_id = data.get('student_id')
@@ -143,6 +143,19 @@ def inserisci_voto():
         # Validazione
         if not all([student_id, subject, grade]):
             return jsonify({'error': 'Parametri mancanti'}), 400
+        
+        # 🔒 PRIVACY: Verifica che il professore insegni questa materia
+        teacher_id = session['user_id']
+        teacher_subjects = db_manager.query('''
+            SELECT materie_insegnate FROM utenti WHERE id = %s
+        ''', (teacher_id,), one=True)
+        
+        if teacher_subjects and teacher_subjects.get('materie_insegnate'):
+            allowed_subjects = [s.strip() for s in teacher_subjects['materie_insegnate'].split(',')]
+            if subject not in allowed_subjects:
+                return jsonify({
+                    'error': f'Non sei autorizzato a inserire voti per {subject}. Materie assegnate: {", ".join(allowed_subjects)}'
+                }), 403
         
         # Validazione voto (scala italiana 1-10)
         try:
@@ -299,6 +312,57 @@ def get_note_studente(student_id):
 
 
 
+# ============== VOTI PER MATERIA INSEGNATA ==============
+
+@registro_bp.route('/api/registro/voti/mia-materia/<materia>', methods=['GET'])
+@require_auth
+@require_teacher
+def get_voti_mia_materia(materia):
+    """Ottieni voti studenti SOLO per la materia che insegni"""
+    try:
+        teacher_id = session['user_id']
+        school_id = get_current_school_id()
+        
+        # 🔒 PRIVACY: Verifica che il prof insegni questa materia
+        teacher = db_manager.query('''
+            SELECT materie_insegnate, classe FROM utenti WHERE id = %s
+        ''', (teacher_id,), one=True)
+        
+        if not teacher:
+            return jsonify({'error': 'Professore non trovato'}), 404
+        
+        allowed_subjects = []
+        if teacher.get('materie_insegnate'):
+            allowed_subjects = [s.strip() for s in teacher['materie_insegnate'].split(',')]
+        
+        if materia not in allowed_subjects:
+            return jsonify({
+                'error': f'Non sei autorizzato a vedere voti per {materia}'
+            }), 403
+        
+        # Ottieni voti SOLO per questa materia
+        voti = db_manager.query('''
+            SELECT 
+                rv.id, rv.voto, rv.tipo, rv.description, rv.date,
+                u.nome, u.cognome, u.id as student_id
+            FROM registro_voti rv
+            JOIN utenti u ON rv.student_id = u.id
+            WHERE rv.subject = %s 
+            AND u.classe = %s 
+            AND u.scuola_id = %s
+            ORDER BY rv.date DESC
+        ''', (materia, teacher['classe'], school_id))
+        
+        return jsonify({
+            'materia': materia,
+            'voti': voti
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Errore get_voti_mia_materia: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 # ============== STATISTICHE AGGREGATE CLASSE (Prof/Dirigenti) ==============
 
 @registro_bp.route('/api/registro/statistiche/classe/<classe>', methods=['GET'])
@@ -308,6 +372,12 @@ def get_statistiche_classe(classe):
     """Ottieni statistiche AGGREGATE della classe (senza dati individuali)"""
     try:
         school_id = get_current_school_id()
+        teacher_id = session['user_id']
+        
+        # 🔒 PRIVACY: Se è professore, filtra per sue materie
+        teacher = db_manager.query('''
+            SELECT materie_insegnate, ruolo FROM utenti WHERE id = %s
+        ''', (teacher_id,), one=True)
         
         # Conta studenti
         total_students = db_manager.query('''
@@ -315,13 +385,26 @@ def get_statistiche_classe(classe):
             WHERE classe = %s AND scuola_id = %s AND ruolo = 'studente'
         ''', (classe, school_id), one=True)
         
-        # Media voti classe (aggregata)
-        avg_grades = db_manager.query('''
-            SELECT AVG(voto) as media_classe
-            FROM registro_voti rv
-            JOIN utenti u ON rv.student_id = u.id
-            WHERE u.classe = %s AND u.scuola_id = %s
-        ''', (classe, school_id), one=True)
+        # Media voti classe (aggregata) - SOLO per materie del professore
+        if teacher and teacher['ruolo'] == 'professore' and teacher.get('materie_insegnate'):
+            allowed_subjects = [s.strip() for s in teacher['materie_insegnate'].split(',')]
+            placeholders = ','.join(['%s'] * len(allowed_subjects))
+            
+            avg_grades = db_manager.query(f'''
+                SELECT AVG(voto) as media_classe
+                FROM registro_voti rv
+                JOIN utenti u ON rv.student_id = u.id
+                WHERE u.classe = %s AND u.scuola_id = %s
+                AND rv.subject IN ({placeholders})
+            ''', tuple([classe, school_id] + allowed_subjects), one=True)
+        else:
+            # Dirigente vede tutte le materie
+            avg_grades = db_manager.query('''
+                SELECT AVG(voto) as media_classe
+                FROM registro_voti rv
+                JOIN utenti u ON rv.student_id = u.id
+                WHERE u.classe = %s AND u.scuola_id = %s
+            ''', (classe, school_id), one=True)
         
         # Tasso presenze classe (aggregato)
         attendance_rate = db_manager.query('''
