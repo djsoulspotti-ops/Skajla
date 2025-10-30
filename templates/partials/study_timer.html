@@ -1,0 +1,482 @@
+<!-- Study Timer Component - SKAILA -->
+<style>
+.timer-container {
+    background: white;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.timer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.timer-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-blue-800);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timer-display {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.timer-time {
+    font-size: 4rem;
+    font-weight: var(--font-bold);
+    font-family: var(--font-mono);
+    color: var(--color-blue-800);
+    margin-bottom: 0.5rem;
+}
+
+.timer-status {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.timer-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timer-btn-start {
+    background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
+    color: white;
+}
+
+.timer-btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.timer-btn-pause {
+    background: var(--color-gold-600);
+    color: white;
+}
+
+.timer-btn-stop {
+    background: var(--color-red-600);
+    color: white;
+}
+
+.timer-btn-resume {
+    background: #10B981;
+    color: white;
+}
+
+.timer-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.timer-settings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.timer-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.timer-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-secondary);
+}
+
+.timer-select, .timer-input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+}
+
+.timer-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border-secondary);
+}
+
+.timer-stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+}
+
+.timer-stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-blue-800);
+}
+
+.timer-stat-label {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.session-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--bg-surface);
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.timer-xp-reward {
+    background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: var(--font-bold);
+    display: none;
+}
+
+.timer-xp-reward.show {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<div class="timer-container" id="studyTimer">
+    <div class="timer-header">
+        <h2 class="timer-title">
+            <i class="fas fa-clock"></i>
+            Timer Studio
+        </h2>
+        <div class="session-type-badge" id="sessionTypeBadge">
+            <span id="sessionTypeIcon">🎯</span>
+            <span id="sessionTypeName">Focus</span>
+        </div>
+    </div>
+
+    <div class="timer-settings" id="timerSettings">
+        <div class="timer-input-group">
+            <label class="timer-label">Materia</label>
+            <input type="text" id="timerSubject" class="timer-input" placeholder="es. Matematica">
+        </div>
+        <div class="timer-input-group">
+            <label class="timer-label">Tipo Sessione</label>
+            <select id="timerType" class="timer-select">
+                <option value="focus">🎯 Focus (25 min)</option>
+                <option value="pomodoro">🍅 Pomodoro (25 min) +20% XP</option>
+                <option value="deep_work">🧠 Deep Work (90 min) +50% XP</option>
+                <option value="review">📚 Ripasso (15 min)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="timer-display">
+        <div class="timer-time" id="timerDisplay">00:00:00</div>
+        <div class="timer-status" id="timerStatus">Pronto per iniziare</div>
+    </div>
+
+    <div class="timer-controls">
+        <button class="timer-btn timer-btn-start" id="startBtn" onclick="startTimer()">
+            <i class="fas fa-play"></i> Inizia
+        </button>
+        <button class="timer-btn timer-btn-pause" id="pauseBtn" onclick="pauseTimer()" style="display:none;">
+            <i class="fas fa-pause"></i> Pausa
+        </button>
+        <button class="timer-btn timer-btn-resume" id="resumeBtn" onclick="resumeTimer()" style="display:none;">
+            <i class="fas fa-play"></i> Riprendi
+        </button>
+        <button class="timer-btn timer-btn-stop" id="stopBtn" onclick="stopTimer()" style="display:none;">
+            <i class="fas fa-stop"></i> Termina
+        </button>
+    </div>
+
+    <div class="timer-xp-reward" id="xpReward"></div>
+
+    <div class="timer-stats">
+        <div class="timer-stat">
+            <div class="timer-stat-value" id="statSessions">0</div>
+            <div class="timer-stat-label">Sessioni (7 gg)</div>
+        </div>
+        <div class="timer-stat">
+            <div class="timer-stat-value" id="statHours">0h</div>
+            <div class="timer-stat-label">Totale Studio</div>
+        </div>
+        <div class="timer-stat">
+            <div class="timer-stat-value" id="statXP">0</div>
+            <div class="timer-stat-label">XP Guadagnati</div>
+        </div>
+        <div class="timer-stat">
+            <div class="timer-stat-value" id="statAvg">0min</div>
+            <div class="timer-stat-label">Media Sessione</div>
+        </div>
+    </div>
+</div>
+
+<script>
+let timerInterval = null;
+let startTime = null;
+let elapsedSeconds = 0;
+let isPaused = false;
+
+async function loadActiveSession() {
+    try {
+        const response = await fetch('/api/timer/active');
+        const data = await response.json();
+        
+        if (data.success && data.session) {
+            const session = data.session;
+            elapsedSeconds = session.active_seconds;
+            startTime = new Date(session.start_time);
+            isPaused = session.is_paused;
+            
+            document.getElementById('timerSubject').value = session.subject || '';
+            document.getElementById('timerType').value = session.session_type;
+            
+            updateSessionTypeBadge(session.session_type);
+            
+            if (isPaused) {
+                showPausedState();
+            } else {
+                showActiveState();
+                startTimerInterval();
+            }
+        }
+    } catch (error) {
+        console.error('Errore load active session:', error);
+    }
+}
+
+async function loadStats() {
+    try {
+        const response = await fetch('/api/timer/stats?days=7');
+        const data = await response.json();
+        
+        if (data.success) {
+            const stats = data.stats;
+            document.getElementById('statSessions').textContent = stats.total_sessions;
+            document.getElementById('statHours').textContent = stats.total_hours + 'h';
+            document.getElementById('statXP').textContent = stats.total_xp;
+            document.getElementById('statAvg').textContent = stats.avg_duration_minutes + 'min';
+        }
+    } catch (error) {
+        console.error('Errore load stats:', error);
+    }
+}
+
+async function startTimer() {
+    const subject = document.getElementById('timerSubject').value;
+    const sessionType = document.getElementById('timerType').value;
+    
+    try {
+        const response = await fetch('/api/timer/start', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({subject, session_type: sessionType})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            elapsedSeconds = 0;
+            startTime = new Date();
+            isPaused = false;
+            
+            updateSessionTypeBadge(sessionType);
+            showActiveState();
+            startTimerInterval();
+            
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Errore avvio timer', 'error');
+    }
+}
+
+async function pauseTimer() {
+    try {
+        const response = await fetch('/api/timer/pause', {method: 'POST'});
+        const data = await response.json();
+        
+        if (data.success) {
+            isPaused = true;
+            stopTimerInterval();
+            showPausedState();
+            showNotification(data.message, 'info');
+        }
+    } catch (error) {
+        showNotification('Errore pausa timer', 'error');
+    }
+}
+
+async function resumeTimer() {
+    try {
+        const response = await fetch('/api/timer/resume', {method: 'POST'});
+        const data = await response.json();
+        
+        if (data.success) {
+            isPaused = false;
+            showActiveState();
+            startTimerInterval();
+            showNotification(data.message, 'success');
+        }
+    } catch (error) {
+        showNotification('Errore ripresa timer', 'error');
+    }
+}
+
+async function stopTimer() {
+    try {
+        const response = await fetch('/api/timer/stop', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({notes: ''})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            stopTimerInterval();
+            showIdleState();
+            
+            const xpReward = document.getElementById('xpReward');
+            xpReward.innerHTML = `🎉 ${data.message}<br><span style="font-size: 2rem;">+${data.xp_earned} XP</span>`;
+            xpReward.classList.add('show');
+            
+            setTimeout(() => {
+                xpReward.classList.remove('show');
+            }, 5000);
+            
+            loadStats();
+            
+            showNotification(`Sessione completata! +${data.xp_earned} XP`, 'success');
+        }
+    } catch (error) {
+        showNotification('Errore stop timer', 'error');
+    }
+}
+
+function startTimerInterval() {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        if (!isPaused) {
+            elapsedSeconds++;
+            updateDisplay();
+        }
+    }, 1000);
+}
+
+function stopTimerInterval() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function updateDisplay() {
+    const hours = Math.floor(elapsedSeconds / 3600);
+    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+    const seconds = elapsedSeconds % 60;
+    
+    const timeStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    document.getElementById('timerDisplay').textContent = timeStr;
+}
+
+function pad(num) {
+    return num.toString().padStart(2, '0');
+}
+
+function showActiveState() {
+    document.getElementById('timerSettings').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'inline-flex';
+    document.getElementById('resumeBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-flex';
+    document.getElementById('timerStatus').textContent = 'In corso...';
+}
+
+function showPausedState() {
+    document.getElementById('pauseBtn').style.display = 'none';
+    document.getElementById('resumeBtn').style.display = 'inline-flex';
+    document.getElementById('stopBtn').style.display = 'inline-flex';
+    document.getElementById('timerStatus').textContent = 'In pausa';
+}
+
+function showIdleState() {
+    document.getElementById('timerSettings').style.display = 'grid';
+    document.getElementById('startBtn').style.display = 'inline-flex';
+    document.getElementById('pauseBtn').style.display = 'none';
+    document.getElementById('resumeBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('timerStatus').textContent = 'Pronto per iniziare';
+    document.getElementById('timerDisplay').textContent = '00:00:00';
+    elapsedSeconds = 0;
+}
+
+function updateSessionTypeBadge(type) {
+    const types = {
+        'focus': {icon: '🎯', name: 'Focus'},
+        'pomodoro': {icon: '🍅', name: 'Pomodoro'},
+        'deep_work': {icon: '🧠', name: 'Deep Work'},
+        'review': {icon: '📚', name: 'Ripasso'}
+    };
+    
+    const typeData = types[type] || types['focus'];
+    document.getElementById('sessionTypeIcon').textContent = typeData.icon;
+    document.getElementById('sessionTypeName').textContent = typeData.name;
+}
+
+function showNotification(message, type) {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadActiveSession();
+    loadStats();
+});
+</script>
