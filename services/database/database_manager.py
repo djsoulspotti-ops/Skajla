@@ -256,8 +256,9 @@ class DatabaseManager:
             adapted_query = query.replace('?', '%s')
             return adapted_query, params
         else:
-            # SQLite usa ? - nessuna modifica necessaria
-            return query, params
+            # SQLite usa ? - converti %s in ?
+            adapted_query = query.replace('%s', '?')
+            return adapted_query, params
 
     def query(self, sql: str, params: Optional[Tuple] = None, one: bool = False, many: bool = True) -> Union[Optional[Dict[str, Any]], List[Dict[str, Any]], List[Any]]:
         """Wrapper unificato per SELECT con risultati dict-like"""
