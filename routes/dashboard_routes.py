@@ -174,8 +174,17 @@ def dashboard_professore():
         if attendance and attendance['total'] > 0:
             presenza_perc = round((attendance['presenti'] / attendance['total']) * 100, 1)
         
-        # Classi attive (per dirigenti)
-        classi_attive = 1  # Placeholder
+        # FIX BUG: Calcola numero reale di classi insegnate dal professore
+        # Query tabella docenti_classi per ottenere classi del professore corrente
+        user_id = session.get('user_id')
+        classi_query = db_manager.query('''
+            SELECT COUNT(DISTINCT classe_id) as count
+            FROM docenti_classi
+            WHERE docente_id = %s
+        ''', (user_id,), one=True)
+        
+        # Se non ci sono record in docenti_classi, fallback a 1 (classe principale del professore)
+        classi_attive = classi_query['count'] if classi_query and classi_query['count'] > 0 else 1
         
         stats = {
             'total_studenti': students_count,
