@@ -1129,6 +1129,113 @@ class SchoolSystem:
         except Exception as e:
             print(f"Errore recupero codici: {e}")
             return {'success': False, 'message': f'Errore: {str(e)}'}
+    
+    def has_feature(self, school_id, feature_name):
+        """
+        Verifica se una scuola ha accesso a una feature/modulo
+        
+        Args:
+            school_id: ID della scuola
+            feature_name: Nome del modulo (gamification, chatbot, registro, materiali, connect, analytics)
+        
+        Returns:
+            bool: True se la scuola ha accesso, False altrimenti
+        """
+        try:
+            column_name = f'modulo_{feature_name}'
+            
+            school = db_manager.query(
+                f'SELECT {column_name} FROM scuole WHERE id = %s',
+                (school_id,),
+                one=True
+            )
+            
+            if school:
+                return bool(school.get(column_name, False))
+            
+            return False
+            
+        except Exception as e:
+            print(f"Errore has_feature: {e}")
+            return True  # Default: permetti accesso in caso di errore
+    
+    def get_school_features(self, school_id):
+        """
+        Ottieni tutti i moduli attivi/disattivi per una scuola
+        
+        Returns:
+            dict: Dizionario con tutti i moduli e il loro stato
+        """
+        try:
+            school = db_manager.query('''
+                SELECT modulo_gamification, modulo_chatbot, modulo_registro, 
+                       modulo_materiali, modulo_connect, modulo_analytics
+                FROM scuole WHERE id = %s
+            ''', (school_id,), one=True)
+            
+            if school:
+                return {
+                    'gamification': bool(school.get('modulo_gamification', True)),
+                    'chatbot': bool(school.get('modulo_chatbot', True)),
+                    'registro': bool(school.get('modulo_registro', True)),
+                    'materiali': bool(school.get('modulo_materiali', True)),
+                    'connect': bool(school.get('modulo_connect', True)),
+                    'analytics': bool(school.get('modulo_analytics', False))
+                }
+            
+            # Default: tutti attivi tranne analytics
+            return {
+                'gamification': True,
+                'chatbot': True,
+                'registro': True,
+                'materiali': True,
+                'connect': True,
+                'analytics': False
+            }
+            
+        except Exception as e:
+            print(f"Errore get_school_features: {e}")
+            return {
+                'gamification': True,
+                'chatbot': True,
+                'registro': True,
+                'materiali': True,
+                'connect': True,
+                'analytics': False
+            }
+    
+    def toggle_feature(self, school_id, feature_name, enabled):
+        """
+        Attiva/disattiva un modulo per una scuola
+        
+        Args:
+            school_id: ID della scuola
+            feature_name: Nome del modulo
+            enabled: True per attivare, False per disattivare
+        
+        Returns:
+            dict: {'success': bool, 'message': str}
+        """
+        try:
+            column_name = f'modulo_{feature_name}'
+            
+            db_manager.execute(
+                f'UPDATE scuole SET {column_name} = %s WHERE id = %s',
+                (enabled, school_id)
+            )
+            
+            action = 'attivato' if enabled else 'disattivato'
+            return {
+                'success': True,
+                'message': f'Modulo {feature_name} {action} con successo'
+            }
+            
+        except Exception as e:
+            print(f"Errore toggle_feature: {e}")
+            return {
+                'success': False,
+                'message': f'Errore durante il toggle: {str(e)}'
+            }
 
 # Istanza globale sistema scolastico
 school_system = SchoolSystem()
