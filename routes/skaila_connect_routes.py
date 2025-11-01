@@ -5,6 +5,7 @@ Sistema per connettere scuole con aziende per alternanza scuola-lavoro
 
 from flask import Blueprint, render_template, session, redirect
 from shared.middleware.auth import require_login
+from shared.middleware.feature_guard import require_feature, Features
 from services.database.database_manager import DatabaseManager
 
 skaila_connect_bp = Blueprint('skaila_connect', __name__)

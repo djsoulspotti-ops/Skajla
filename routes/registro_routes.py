@@ -10,6 +10,7 @@ from database_manager import db_manager
 from services.tenant_guard import get_current_school_id
 from shared.validators.input_validators import validator, sql_protector
 from shared.middleware.auth import require_auth, require_teacher
+from shared.middleware.feature_guard import require_feature, Features
 
 registro_bp = Blueprint('registro_api', __name__)
 
@@ -18,6 +19,7 @@ registro_bp = Blueprint('registro_api', __name__)
 @registro_bp.route('/api/registro/presenze/segna', methods=['POST'])
 @require_auth
 @require_teacher
+@require_feature(Features.REGISTRO)
 def segna_presenza():
     """Segna presenza/assenza singolo studente"""
     try:

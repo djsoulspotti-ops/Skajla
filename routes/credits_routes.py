@@ -7,10 +7,12 @@ Gestione visualizzazione crediti e monete utente
 from flask import Blueprint, render_template, session, redirect, jsonify
 from database_manager import db_manager
 from gamification import gamification_system
+from shared.middleware.feature_guard import require_feature, Features
 
 credits_bp = Blueprint('credits', __name__)
 
 @credits_bp.route('/crediti')
+@require_feature(Features.GAMIFICATION)
 def view_credits():
     """Visualizza crediti utente"""
     if 'user_id' not in session:

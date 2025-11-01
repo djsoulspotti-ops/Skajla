@@ -5,11 +5,13 @@ API endpoints per AI Coach
 
 from flask import Blueprint, jsonify, session, request
 from ai_chatbot import ai_bot
+from shared.middleware.feature_guard import require_feature, Features
 
 ai_chat_bp = Blueprint('ai_chat', __name__, url_prefix='/api/ai')
 
 
 @ai_chat_bp.route('/chat', methods=['POST'])
+@require_feature(Features.AI_COACH)
 def chat_with_ai():
     """Endpoint per chattare con AI Coach"""
     if 'user_id' not in session:
