@@ -2,9 +2,20 @@
 
 SKAILA is an educational platform connecting students, teachers, parents, and administrators in real-time. It offers multi-role messaging, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. Designed as a Flask web application with Socket.IO, SKAILA is scalable, tailored for the Italian education system, and aims to enhance learning engagement and provide robust tools for school management.
 
-# Recent Changes (October 30, 2025)
+# Recent Changes (November 01, 2025)
 
-## Critical Bug Fixes
+## Feature Flags System - PRODUCTION READY ✅
+1. **Modular Feature Control** - Schools can now enable/disable specific modules (Gamification, AI Coach, Registro Elettronico, SKAILA Connect, Materiali Didattici, Calendario, Analytics) via admin panel at `/admin/features`.
+2. **Dual-Layer Security**:
+   - **UI Layer**: Disabled features show as greyed-out buttons with 🔒 icon, "Premium" badge, and tooltip messaging
+   - **Server Layer**: `before_request` hooks on all blueprints (registro_bp, credits_bp, ai_chat_bp, skaila_connect_bp) enforce feature flags with:
+     - API routes (`/api/...`): Return JSON 403 with `upgrade_required: true` flag
+     - Web routes: Redirect to dashboard with flash warning message
+3. **Path-Based Detection** - Uses `request.path.startswith('/api/')` for reliable API vs web differentiation (works for GET, POST, PUT, DELETE)
+4. **School Features Manager** - Centralized `school_features_manager` with `school_features` table for per-school, per-feature granular control
+5. **Admin Presets** - Quick "Gamification Only" preset available for schools wanting minimal feature set
+
+## Previous Bug Fixes (October 30, 2025)
 1. **Security Fix: Multi-Tenant Isolation** - Fixed critical cross-school data leak in dashboard professore. Query `docenti_classi` now JOINs with `classi` table and filters by `scuola_id` to ensure tenant isolation.
 2. **Dashboard Professore Fix** - `classi_attive` now calculated dynamically from `docenti_classi` table instead of hardcoded placeholder value.
 3. **Role Consistency Fix** - Teaching materials manager now consistently supports `professore/docente/dirigente` roles across upload, list, and search operations.
@@ -18,6 +29,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Core Framework & Patterns
 The application uses Flask with a modular architecture, adhering to MVC and ORM patterns. SQLAlchemy provides a type-safe database layer. A centralized configuration system implements Single Source of Truth principles for consistency across core settings, security, caching, feature flags, and gamification parameters.
+
+## Feature Flags System (NEW - Production Ready)
+A production-grade modular feature control system allowing schools to enable/disable specific modules:
+-   **Available Features**: `gamification`, `ai_coach`, `registro_elettronico`, `skaila_connect`, `materiali_didattici`, `calendario`, `analytics`
+-   **SchoolFeaturesManager** (`services/school/school_features_manager.py`): Centralized manager with `school_features` table (school_id, feature_name, enabled)
+-   **Feature Guard Middleware** (`shared/middleware/feature_guard.py`): 
+    - `check_feature_enabled(school_id, feature_name)` helper function
+    - `Features` class with constants to avoid typos
+-   **Blueprint Protection**: `before_request` hooks on all critical blueprints:
+    - `routes/registro_routes.py`: Protects all 12 registro API endpoints
+    - `routes/credits_routes.py`: Protects gamification views and API
+    - `routes/ai_chat_routes.py`: Protects AI Coach chat and suggestions
+    - `routes/skaila_connect_routes.py`: Protects career portal
+-   **Dual Response System**:
+    - API routes (`/api/*`): Return JSON 403 with structured error + `upgrade_required: true`
+    - Web routes: Redirect to dashboard with flash warning message
+-   **UI Integration**: Dashboard templates conditionally render disabled state with CSS classes, lock icons, premium badges, and tooltips
+-   **Admin Panel**: Directors can manage features at `/admin/features` with quick presets
 
 ## Authentication & Authorization
 A centralized middleware handles all authentication and authorization decorators, including web route and API authentication, multi-role authorization, and role-specific shortcuts.
