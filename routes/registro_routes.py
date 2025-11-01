@@ -3,23 +3,45 @@ SKAILA - Routes API Registro Elettronico
 Gestione voti, presenze, note disciplinari, calendario lezioni
 """
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, redirect, flash
 from datetime import datetime, date
 from registro_elettronico import registro
 from database_manager import db_manager
 from services.tenant_guard import get_current_school_id
 from shared.validators.input_validators import validator, sql_protector
 from shared.middleware.auth import require_auth, require_teacher
-from shared.middleware.feature_guard import require_feature, Features
+from shared.middleware.feature_guard import check_feature_enabled, Features
 
 registro_bp = Blueprint('registro_api', __name__)
+
+@registro_bp.before_request
+def check_registro_feature():
+    """Verifica che il modulo Registro sia abilitato prima di ogni request"""
+    if 'user_id' not in session:
+        return  # Auth middleware gestirà questo
+    
+    try:
+        school_id = get_current_school_id()
+        if not check_feature_enabled(school_id, Features.REGISTRO):
+            # API endpoint - ritorna JSON 403
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'error': 'Feature non disponibile',
+                    'message': 'Il Registro Elettronico non è disponibile per la tua scuola.',
+                    'feature': Features.REGISTRO,
+                    'upgrade_required': True
+                }), 403
+            # Web endpoint - redirect con flash
+            flash('⚠️ Il Registro Elettronico non è disponibile per la tua scuola.', 'warning')
+            return redirect('/dashboard')
+    except Exception:
+        pass  # Se errore, lascia passare (migliore UX)
 
 # ============== PRESENZE ==============
 
 @registro_bp.route('/api/registro/presenze/segna', methods=['POST'])
 @require_auth
 @require_teacher
-@require_feature(Features.REGISTRO)
 def segna_presenza():
     """Segna presenza/assenza singolo studente"""
     try:

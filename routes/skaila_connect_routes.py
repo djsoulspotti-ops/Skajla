@@ -3,13 +3,37 @@ SKAILA Connect Routes
 Sistema per connettere scuole con aziende per alternanza scuola-lavoro
 """
 
-from flask import Blueprint, render_template, session, redirect
+from flask import Blueprint, render_template, session, redirect, flash, jsonify, request
 from shared.middleware.auth import require_login
-from shared.middleware.feature_guard import require_feature, Features
+from shared.middleware.feature_guard import check_feature_enabled, Features
 from services.database.database_manager import DatabaseManager
+from services.tenant_guard import get_current_school_id
 
 skaila_connect_bp = Blueprint('skaila_connect', __name__)
 db_manager = DatabaseManager()
+
+@skaila_connect_bp.before_request
+def check_skaila_connect_feature():
+    """Verifica che SKAILA Connect sia abilitato prima di ogni request"""
+    if 'user_id' not in session:
+        return  # Auth middleware gestirà questo
+    
+    try:
+        school_id = get_current_school_id()
+        if not check_feature_enabled(school_id, Features.SKAILA_CONNECT):
+            # API endpoint - ritorna JSON 403
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'error': 'Feature non disponibile',
+                    'message': 'SKAILA Connect non è disponibile per la tua scuola.',
+                    'feature': Features.SKAILA_CONNECT,
+                    'upgrade_required': True
+                }), 403
+            # Web endpoint - redirect con flash
+            flash('⚠️ SKAILA Connect non è disponibile per la tua scuola.', 'warning')
+            return redirect('/dashboard')
+    except Exception:
+        pass
 
 # Shared mock data for fallback when companies table doesn't exist
 MOCK_COMPANIES = [

@@ -5,13 +5,31 @@ API endpoints per AI Coach
 
 from flask import Blueprint, jsonify, session, request
 from ai_chatbot import ai_bot
-from shared.middleware.feature_guard import require_feature, Features
+from shared.middleware.feature_guard import check_feature_enabled, Features
+from services.tenant_guard import get_current_school_id
 
 ai_chat_bp = Blueprint('ai_chat', __name__, url_prefix='/api/ai')
 
+@ai_chat_bp.before_request
+def check_ai_coach_feature():
+    """Verifica che AI Coach sia abilitato prima di ogni request"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autenticato'}), 401
+    
+    try:
+        school_id = get_current_school_id()
+        if not check_feature_enabled(school_id, Features.AI_COACH):
+            return jsonify({
+                'error': 'Feature non disponibile',
+                'message': 'AI Coach non è disponibile per la tua scuola.',
+                'feature': Features.AI_COACH,
+                'upgrade_required': True
+            }), 403
+    except Exception:
+        pass
+
 
 @ai_chat_bp.route('/chat', methods=['POST'])
-@require_feature(Features.AI_COACH)
 def chat_with_ai():
     """Endpoint per chattare con AI Coach"""
     if 'user_id' not in session:

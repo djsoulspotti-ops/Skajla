@@ -4,15 +4,38 @@ SKAILA - Routes Crediti
 Gestione visualizzazione crediti e monete utente
 """
 
-from flask import Blueprint, render_template, session, redirect, jsonify
+from flask import Blueprint, render_template, session, redirect, jsonify, flash, request
 from database_manager import db_manager
 from gamification import gamification_system
-from shared.middleware.feature_guard import require_feature, Features
+from shared.middleware.feature_guard import check_feature_enabled, Features
+from services.tenant_guard import get_current_school_id
 
 credits_bp = Blueprint('credits', __name__)
 
+@credits_bp.before_request
+def check_gamification_feature():
+    """Verifica che Gamification sia abilitata prima di ogni request"""
+    if 'user_id' not in session:
+        return  # Auth middleware gestirà questo
+    
+    try:
+        school_id = get_current_school_id()
+        if not check_feature_enabled(school_id, Features.GAMIFICATION):
+            # API endpoint - ritorna JSON 403
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'error': 'Feature non disponibile',
+                    'message': 'La Gamification non è disponibile per la tua scuola.',
+                    'feature': Features.GAMIFICATION,
+                    'upgrade_required': True
+                }), 403
+            # Web endpoint - redirect con flash
+            flash('⚠️ La Gamification non è disponibile per la tua scuola.', 'warning')
+            return redirect('/dashboard')
+    except Exception:
+        pass
+
 @credits_bp.route('/crediti')
-@require_feature(Features.GAMIFICATION)
 def view_credits():
     """Visualizza crediti utente"""
     if 'user_id' not in session:
