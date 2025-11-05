@@ -1,0 +1,163 @@
+/**
+ * SKAILA - Circulating Avatars Styles
+ * Smooth 60fps orbital animation around messaging button
+ */
+
+.circulating-avatars-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Orbit avatar positioning and animation */
+.orbit-avatar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--avatar-size, 28px);
+    height: var(--avatar-size, 28px);
+    margin-top: calc(var(--avatar-size, 28px) / -2);
+    margin-left: calc(var(--avatar-size, 28px) / -2);
+    pointer-events: all;
+    z-index: 10;
+    
+    /* GPU-accelerated animation */
+    animation: orbit var(--animation-duration, 15s) linear infinite;
+    animation-delay: var(--animation-delay, 0s);
+    transform-origin: center center;
+    will-change: transform;
+}
+
+/* Orbital motion keyframes */
+@keyframes orbit {
+    0% {
+        transform: 
+            rotate(var(--start-angle, 0deg))
+            translateX(var(--orbit-radius, 50px))
+            rotate(calc(-1 * var(--start-angle, 0deg)));
+    }
+    100% {
+        transform: 
+            rotate(calc(var(--start-angle, 0deg) + 360deg))
+            translateX(var(--orbit-radius, 50px))
+            rotate(calc(-1 * (var(--start-angle, 0deg) + 360deg)));
+    }
+}
+
+/* Avatar inner circle */
+.orbit-avatar-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #003B73 0%, #0074D9 100%);
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Hover effects */
+.orbit-avatar:hover .orbit-avatar-inner {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+}
+
+/* Pause animation on hover */
+.circulating-avatars-container:hover .orbit-avatar {
+    animation-play-state: paused;
+}
+
+/* Tooltip */
+.orbit-avatar-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 31, 63, 0.95);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Tooltip arrow */
+.orbit-avatar-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(0, 31, 63, 0.95);
+}
+
+/* Show tooltip on hover */
+.orbit-avatar:hover .orbit-avatar-tooltip {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .orbit-avatar {
+        --avatar-size: 24px !important;
+        --orbit-radius: 40px !important;
+    }
+    
+    .orbit-avatar-inner {
+        font-size: 10px;
+    }
+    
+    .orbit-avatar-tooltip {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+/* Smooth fade-in for new avatars */
+.orbit-avatar {
+    opacity: 0;
+    animation: 
+        orbit var(--animation-duration, 15s) linear infinite,
+        fadeIn 0.5s ease forwards;
+    animation-delay: var(--animation-delay, 0s);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: 
+            rotate(var(--start-angle, 0deg))
+            translateX(var(--orbit-radius, 50px))
+            rotate(calc(-1 * var(--start-angle, 0deg)))
+            scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: 
+            rotate(var(--start-angle, 0deg))
+            translateX(var(--orbit-radius, 50px))
+            rotate(calc(-1 * var(--start-angle, 0deg)))
+            scale(1);
+    }
+}
+
+/* Performance optimizations */
+.orbit-avatar,
+.orbit-avatar-inner {
+    backface-visibility: hidden;
+    perspective: 1000px;
+}

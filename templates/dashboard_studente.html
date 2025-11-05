@@ -467,6 +467,9 @@
             }
         }
     </style>
+    
+    <!-- Circulating Avatars Component -->
+    <link rel="stylesheet" href="/static/css/circulating-avatars.css">
 </head>
 <body>
     <div class="dashboard-layout">
@@ -504,7 +507,9 @@
                 </li>
                 <li class="nav-item">
                     <a href="/chat" class="nav-link">
-                        <i class="fas fa-comments"></i>
+                        <div id="messaging-avatars-container" class="circulating-avatars-container" style="display: inline-block;">
+                            <i class="fas fa-comments"></i>
+                        </div>
                         <span>Messaggi</span>
                     </a>
                 </li>
@@ -740,5 +745,41 @@
             </div>
         </main>
     </div>
+    
+    <!-- Socket.IO and Circulating Avatars -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="/static/js/circulating-avatars.js"></script>
+    <script>
+        // Initialize Socket.IO connection
+        window.socket = io({
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+        
+        socket.on('connect', function() {
+            console.log('✅ Socket.IO connected');
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('⚠️ Socket.IO disconnected');
+        });
+        
+        // Initialize Circulating Avatars around messaging button
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('messaging-avatars-container')) {
+                window.messagingAvatars = new CirculatingAvatars('messaging-avatars-container', {
+                    maxAvatars: 7,
+                    orbitRadius: 45,
+                    avatarSize: 26,
+                    animationDuration: 15,
+                    updateInterval: 30000
+                });
+                
+                console.log('✅ Circulating avatars initialized');
+            }
+        });
+    </script>
 </body>
 </html>

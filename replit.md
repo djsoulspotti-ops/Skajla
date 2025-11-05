@@ -2,9 +2,27 @@
 
 SKAILA is an educational platform connecting students, teachers, parents, and administrators in real-time. It offers multi-role messaging, an intelligent AI chatbot for personalized tutoring, gamification, and comprehensive analytics. Designed as a Flask web application with Socket.IO, SKAILA is scalable, tailored for the Italian education system, and aims to enhance learning engagement and provide robust tools for school management.
 
-# Recent Changes (November 01, 2025)
+# Recent Changes (November 05, 2025)
 
-## Feature Flags System - PRODUCTION READY ✅
+## Circulating Avatars - Real-Time Presence Indicator 🎯
+1. **Visual Presence System** - Online users' avatars now orbit smoothly around the messaging button, providing instant visual feedback of who's currently online in the school
+2. **Smooth 60fps Animation**:
+   - CSS GPU-accelerated orbital motion (15s full rotation)
+   - Avatars display user initials with color-coded backgrounds
+   - Hover to pause animation and see user tooltips with full names
+   - Responsive design (smaller avatars/orbit on mobile)
+3. **Real-Time Updates via Socket.IO**:
+   - Listens to `user_connected` and `user_disconnected` events
+   - Automatically refreshes online users list when presence changes
+   - Fallback periodic refresh every 30 seconds
+4. **Technical Implementation**:
+   - **API Endpoint**: `/api/online-users` returns up to 7 online users from same school
+   - **JavaScript Component**: `CirculatingAvatars` class in `static/js/circulating-avatars.js`
+   - **CSS Animations**: Keyframe-based orbit in `static/css/circulating-avatars.css`
+   - **Integration**: Dashboard sidebar messaging button wrapped in circulating avatar container
+5. **Features**: Color-coded avatars, smooth fade-in/out transitions, tooltip on hover, pause on hover, mobile-responsive
+
+## Feature Flags System - PRODUCTION READY ✅ (November 01, 2025)
 1. **Modular Feature Control** - Schools can now enable/disable specific modules (Gamification, AI Coach, Registro Elettronico, SKAILA Connect, Materiali Didattici, Calendario, Analytics) via admin panel at `/admin/features`.
 2. **Dual-Layer Security**:
    - **UI Layer**: Disabled features show as greyed-out buttons with 🔒 icon, "Premium" badge, and tooltip messaging
