@@ -1,0 +1,43 @@
+You are an expert AI agent on Replit tasked with enhancing the messaging system in the existing web app designed for M&A professionals. This app already includes core features like deal tracking, due diligence tools, and collaboration, and now you need to add a dynamic visual element to the messaging button to indicate online users.
+
+Your mission is to implement a feature where, around the messaging system button (e.g., a chat icon or button that opens the messaging interface), the profile icons (avatars) of users who are currently online circulate in a circular motion. This animation should be smooth, engaging, and non-intrusive, providing a real-time visual cue of active collaborators without overwhelming the UI.
+
+Follow these steps precisely and iteratively to create and integrate this feature:
+
+1. **Review the Existing Messaging Button**: Locate the messaging button in the current codebase (likely in the main navigation, sidebar, or header). Identify its HTML/CSS structure (e.g., a <button> or <div> with an icon like a speech bubble). Note any existing event handlers for opening the chat interface. If the app uses a framework like React, Vue, or plain JavaScript, adapt accordingly.
+
+2. **Set Up Online User Detection**:
+   - Implement or integrate a mechanism to detect and track online users. Use WebSockets (e.g., via Socket.io if not already set up) or a real-time database like Firebase/Realtime Database to maintain a list of active users.
+   - Store online users in a state or array, including their user IDs, names, and avatar URLs (e.g., profile pictures). Simulate this with dummy data initially if real-time backend isn't fully implemented, but ensure it's extensible to real users in an M&A team context.
+   - Update the online user list dynamically (e.g., every few seconds or on events like user login/logout).
+
+3. **Design the Circular Animation**:
+   - Create a container around the messaging button (e.g., a relative-positioned <div>).
+   - Dynamically generate small avatar icons (e.g., circular <img> elements, 20-30px in size) for each online user.
+   - Position these avatars in a circular orbit around the button using CSS animations or JavaScript (e.g., via requestAnimationFrame for smooth movement).
+   - Animation details:
+     - Avatars should rotate in a clockwise or counterclockwise circle (radius: 40-60px, adjustable based on button size).
+     - Speed: Slow and steady (e.g., full rotation in 10-20 seconds) to avoid distraction.
+     - Overlap handling: If many users (e.g., >5), limit to top 5-7 avatars or stack/group them intelligently.
+     - Hover/Interaction: On hover over the button, pause the animation and tooltip user names; on click, open the messaging interface as before.
+     - Responsiveness: Ensure it works on mobile/desktop; hide or simplify on small screens if needed.
+   - Use CSS for animation where possible (e.g., @keyframes for rotation) for performance, falling back to JS for dynamic positioning.
+
+4. **Technical Implementation**:
+   - If using plain HTML/CSS/JS: Add styles for .online-avatars class with transform: rotate() and animation properties.
+   - If React/Vue: Create a component (e.g., OnlineUsersOrbit) that renders avatars based on state and uses useEffect for animation loops.
+   - Handle edge cases: No online users (hide animation), user joins/leaves (smooth add/remove with transitions), performance optimization (throttle updates).
+   - Integrate with existing auth system to fetch real avatars (e.g., from a user database or placeholders like Gravatar).
+
+5. **Testing and Iteration**:
+   - Test the animation in various browsers and devices for smoothness (aim for 60fps).
+   - Simulate multiple online users and verify real-time updates.
+   - Ensure it doesn't interfere with M&A workflows (e.g., doesn't block button clicks).
+   - Iterate at least once: Gather simulated feedback (e.g., "too fast" or "cluttered") and refine.
+
+6. **Deployment and Documentation**:
+   - Commit changes incrementally on Replit.
+   - Update the README with details on this feature, including how it indicates online presence for collaborative M&A tasks.
+   - Ensure the app remains deployable and performant.
+
+Execute these steps step by step, outputting progress updates, code snippets, and explanations as you proceed. If clarifications are needed (e.g., exact button location or backend setup), ask before starting. Begin implementation now.
