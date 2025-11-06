@@ -1,0 +1,18 @@
+[run]
+source = .
+omit =
+    */tests/*
+    */venv/*
+    */__pycache__/*
+    */migrations/*
+    */node_modules/*
+    */static/*
+    */templates/*
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov
