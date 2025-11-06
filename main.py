@@ -57,6 +57,9 @@ from services.user_service import user_service
 # Import API documentation
 from docs.api_documentation import init_swagger
 
+# Import structured logging
+from shared.logging.structured_logger import auth_logger, api_logger
+
 class SkailaApp:
     """Classe principale per l'applicazione SKAILA"""
 
@@ -88,16 +91,24 @@ class SkailaApp:
         # Initialize Swagger API documentation
         init_swagger(self.app)
         print("📚 API Documentation available at /api/docs")
+        api_logger.info("Swagger API documentation initialized", endpoint="/api/docs")
 
         # Sessioni permanenti
         self.app.permanent_session_lifetime = timedelta(days=30)
 
         # Status info per monitoring
-        print(f"🔐 Environment: {'Production' if env_manager.is_production() else 'Development'}")
+        is_prod = env_manager.is_production()
+        print(f"🔐 Environment: {'Production' if is_prod else 'Development'}")
         ai_status = env_manager.get_ai_status()
         db_status = env_manager.get_database_status()
         print(f"🤖 AI Mode: {ai_status['mode']}")
         print(f"🗄️ Database: {db_status['primary']}")
+        
+        # Structured logging for startup
+        api_logger.info("SKAILA application startup", 
+                       environment="production" if is_prod else "development",
+                       ai_mode=ai_status['mode'],
+                       database=db_status['primary'])
 
         # TEMPORARILY DISABLED - Request monitoring hooks causing eventlet mainloop blocking
         # Will re-enable after implementing proper eventlet-compatible monitoring

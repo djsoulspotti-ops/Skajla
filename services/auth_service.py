@@ -12,6 +12,7 @@ from flask import request, session, render_template
 from database_manager import db_manager
 from shared.validators.input_validators import validator, sql_protector
 from core.config.settings import SecuritySettings
+from shared.logging.structured_logger import auth_logger, security_logger
 
 
 class AuthService:
@@ -54,11 +55,22 @@ class AuthService:
 
         self.login_attempts[email]['count'] += 1
         self.login_attempts[email]['last_attempt'] = time.time()
+        
+        # Structured logging for failed attempts
+        security_logger.warning("Failed login attempt",
+                              email=email,
+                              attempt_count=self.login_attempts[email]['count'],
+                              ip=request.remote_addr if request else "unknown")
 
     def reset_attempts(self, email: str):
         """Reset tentativi dopo login riuscito"""
         if email in self.login_attempts:
             del self.login_attempts[email]
+            
+        # Structured logging for successful login
+        auth_logger.info("Successful login", 
+                        email=email,
+                        ip=request.remote_addr if request else "unknown")
 
     def authenticate_user(self, email: str, password: str):
         """Autentica utente"""
