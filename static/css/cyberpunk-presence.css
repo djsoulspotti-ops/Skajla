@@ -1,0 +1,384 @@
+/**
+ * SKAILA - Cyberpunk Presence System Styles
+ * Neon glow effects, 3D depth, and immersive metaverse aesthetic
+ */
+
+/* Main container */
+.cyberpunk-presence-container {
+    position: relative;
+    display: inline-block;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(0, 20, 40, 0.95) 0%,
+        rgba(0, 10, 25, 0.98) 50%,
+        rgba(0, 5, 15, 1) 100%
+    );
+    border-radius: 20px;
+    box-shadow: 
+        0 0 40px rgba(0, 217, 255, 0.2),
+        inset 0 0 60px rgba(0, 102, 255, 0.1);
+    overflow: hidden;
+    perspective: 1000px;
+    border: 1px solid rgba(0, 217, 255, 0.3);
+}
+
+/* Animated background grid (cyberpunk aesthetic) */
+.cyberpunk-presence-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridPulse 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes gridPulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Animated scan line effect */
+.cyberpunk-presence-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 217, 255, 0.6) 50%,
+        transparent 100%
+    );
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.8);
+    animation: scanLine 3s linear infinite;
+    pointer-events: none;
+    z-index: 100;
+}
+
+@keyframes scanLine {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(600px);
+        opacity: 0;
+    }
+}
+
+/* SVG Canvas */
+.cyberpunk-canvas {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.3));
+}
+
+/* Particle groups */
+.cyberpunk-particle {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Particle core with neon glow */
+.particle-core {
+    transition: all 0.3s ease;
+}
+
+.cyberpunk-particle:hover .particle-core {
+    filter: drop-shadow(0 0 15px currentColor) brightness(1.3);
+}
+
+/* Outer glow pulsing */
+.particle-glow-outer {
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        opacity: 0.3;
+        stroke-width: 2;
+    }
+    50% {
+        opacity: 0.6;
+        stroke-width: 3;
+    }
+}
+
+/* Middle glow breathing effect */
+.particle-glow-middle {
+    animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% {
+        opacity: 0.15;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(1.05);
+    }
+}
+
+/* Particle initials */
+.particle-initials {
+    text-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.8),
+        0 0 10px currentColor;
+    animation: textGlow 2s ease-in-out infinite;
+}
+
+@keyframes textGlow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Connection lines */
+.particle-connection {
+    stroke-dasharray: 5, 5;
+    animation: dashFlow 1s linear infinite;
+}
+
+@keyframes dashFlow {
+    from {
+        stroke-dashoffset: 0;
+    }
+    to {
+        stroke-dashoffset: 10;
+    }
+}
+
+/* Cyberpunk tooltip */
+.cyberpunk-tooltip {
+    position: absolute;
+    padding: 12px 16px;
+    background: rgba(0, 15, 30, 0.95);
+    border: 1px solid rgba(0, 217, 255, 0.5);
+    border-radius: 8px;
+    color: white;
+    font-family: 'Inter', 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 217, 255, 0.3),
+        inset 0 0 20px rgba(0, 102, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.cyberpunk-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Tooltip name */
+.tooltip-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #00D9FF;
+    text-shadow: 0 0 10px rgba(0, 217, 255, 0.8);
+}
+
+/* Tooltip role */
+.tooltip-role {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Tooltip glow arrow */
+.cyberpunk-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(0, 217, 255, 0.5);
+}
+
+.cyberpunk-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid rgba(0, 15, 30, 0.95);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cyberpunk-presence-container {
+        width: 100%;
+        max-width: 400px;
+        height: 400px;
+    }
+    
+    .cyberpunk-canvas {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* 3D depth layers - particles closer appear larger and brighter */
+.cyberpunk-particle[data-depth="near"] {
+    filter: brightness(1.2) drop-shadow(0 0 20px currentColor);
+}
+
+.cyberpunk-particle[data-depth="mid"] {
+    filter: brightness(1) drop-shadow(0 0 15px currentColor);
+}
+
+.cyberpunk-particle[data-depth="far"] {
+    filter: brightness(0.8) drop-shadow(0 0 10px currentColor);
+    opacity: 0.8;
+}
+
+/* Parallax movement hint */
+.cyberpunk-presence-container:hover::before {
+    animation: gridPulse 2s ease-in-out infinite;
+}
+
+/* Loading state */
+.cyberpunk-presence-container.loading {
+    animation: containerPulse 2s ease-in-out infinite;
+}
+
+@keyframes containerPulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 40px rgba(0, 217, 255, 0.2),
+            inset 0 0 60px rgba(0, 102, 255, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 60px rgba(0, 217, 255, 0.4),
+            inset 0 0 80px rgba(0, 102, 255, 0.2);
+    }
+}
+
+/* Performance optimizations */
+.cyberpunk-particle,
+.particle-core,
+.particle-glow-outer,
+.particle-glow-middle {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Smooth color transitions for different particle types */
+.cyberpunk-particle.cyan .particle-core {
+    fill: #00D9FF;
+    stroke: #00F0FF;
+}
+
+.cyberpunk-particle.blue .particle-core {
+    fill: #0066FF;
+    stroke: #0088FF;
+}
+
+.cyberpunk-particle.violet .particle-core {
+    fill: #9D00FF;
+    stroke: #B833FF;
+}
+
+.cyberpunk-particle.magenta .particle-core {
+    fill: #FF00FF;
+    stroke: #FF33FF;
+}
+
+.cyberpunk-particle.teal .particle-core {
+    fill: #00FFAA;
+    stroke: #00FFCC;
+}
+
+.cyberpunk-particle.pink .particle-core {
+    fill: #FF0080;
+    stroke: #FF33AA;
+}
+
+/* Entrance animation for new particles */
+@keyframes particleEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2) rotate(180deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(360deg);
+    }
+}
+
+.cyberpunk-particle.entering {
+    animation: particleEntrance 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Exit animation for removing particles */
+@keyframes particleExit {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(-360deg);
+    }
+}
+
+.cyberpunk-particle.exiting {
+    animation: particleExit 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+/* Additional glow effects on hover */
+.cyberpunk-particle:hover {
+    filter: brightness(1.3) drop-shadow(0 0 30px currentColor);
+}
+
+/* Connection line hover effect */
+.cyberpunk-particle:hover ~ .particle-connection {
+    stroke-width: 2;
+    opacity: 0.8 !important;
+}

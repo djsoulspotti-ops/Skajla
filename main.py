@@ -49,6 +49,7 @@ from routes.skaila_connect_routes import skaila_connect_bp
 from routes.bi_dashboard_routes import bi_bp # BI Dashboard Blueprint
 from routes.timer_routes import timer_bp # Study Timer
 from routes.online_users_routes import online_users_bp # Online Users API
+from routes.cyberpunk_presence_routes import cyberpunk_presence_bp # Cyberpunk Presence Demo
 
 # Import services
 from services.auth_service import auth_service
@@ -242,6 +243,7 @@ class SkailaApp:
         self.app.register_blueprint(bi_bp) # BI Dashboard Blueprint
         self.app.register_blueprint(timer_bp) # Study Timer
         self.app.register_blueprint(online_users_bp) # Online Users API for circulating avatars
+        self.app.register_blueprint(cyberpunk_presence_bp) # Cyberpunk Presence Demo
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp

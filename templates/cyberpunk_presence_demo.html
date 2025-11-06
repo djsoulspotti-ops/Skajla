@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKAILA - Cyberpunk Presence System Demo</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Cyberpunk Presence Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cyberpunk-presence.css') }}">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #000814 0%, #001d3d 50%, #000814 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .demo-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00D9FF 0%, #0066FF 50%, #9D00FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            text-shadow: 0 0 40px rgba(0, 217, 255, 0.5);
+        }
+        
+        .demo-header p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .presence-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .info-panel {
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            margin-top: 40px;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.2);
+        }
+        
+        .info-panel h2 {
+            color: #00D9FF;
+            font-size: 24px;
+            margin-bottom: 16px;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.6);
+        }
+        
+        .info-panel h3 {
+            color: #0088FF;
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .info-panel ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-panel li {
+            padding: 8px 0;
+            color: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+        }
+        
+        .info-panel li:last-child {
+            border-bottom: none;
+        }
+        
+        .info-panel li::before {
+            content: '▸';
+            color: #00D9FF;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: rgba(0, 10, 20, 0.9);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #00FFAA;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(0, 102, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-box .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00D9FF;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.8);
+        }
+        
+        .stat-box .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🌐 Cyberpunk Presence System</h1>
+        <p>Real-time user visualization with 3D depth, neon glow effects, and smooth GSAP animations</p>
+    </div>
+    
+    <div class="presence-wrapper">
+        <!-- Cyberpunk Presence Container -->
+        <div id="cyberpunk-presence"></div>
+    </div>
+    
+    <div class="info-panel">
+        <h2>✨ Features</h2>
+        <ul>
+            <li><strong>Real-Time Updates</strong> - Automatically refreshes when users connect/disconnect via Socket.IO</li>
+            <li><strong>3D Parallax Effect</strong> - Particles float at different depths, move your mouse to see the effect!</li>
+            <li><strong>GSAP Animations</strong> - Buttery smooth 60fps floating motion with physics-like easing</li>
+            <li><strong>Neon Glow Effects</strong> - Cyberpunk aesthetic with electric cyan, blue, and violet colors</li>
+            <li><strong>Connection Lines</strong> - Dynamic lines appear between nearby users</li>
+            <li><strong>Interactive Tooltips</strong> - Hover over particles to see user details</li>
+            <li><strong>High Performance</strong> - GPU-accelerated SVG with requestAnimationFrame optimization</li>
+        </ul>
+        
+        <h3>📊 System Stats</h3>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="value" id="user-count">0</div>
+                <div class="label">Online Users</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">60 FPS</div>
+                <div class="label">Animation</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">3D</div>
+                <div class="label">Depth Layers</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">∞</div>
+                <div class="label">Connections</div>
+            </div>
+        </div>
+        
+        <h3>🔧 Integration Code</h3>
+        <div class="code-block">
+&lt;!-- Include GSAP (for smooth animations) --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- Include Cyberpunk Presence CSS --&gt;
+&lt;link rel="stylesheet" href="/static/css/cyberpunk-presence.css"&gt;
+
+&lt;!-- Include Cyberpunk Presence JS --&gt;
+&lt;script src="/static/js/cyberpunk-presence.js"&gt;&lt;/script&gt;
+
+&lt;!-- HTML Container --&gt;
+&lt;div id="cyberpunk-presence"&gt;&lt;/div&gt;
+
+&lt;!-- Initialize --&gt;
+&lt;script&gt;
+    const presence = new CyberpunkPresence('cyberpunk-presence', {
+        maxUsers: 12,
+        canvasWidth: 600,
+        canvasHeight: 600,
+        particleSize: 40,
+        enableParallax: true,
+        glowIntensity: 0.8
+    });
+&lt;/script&gt;
+        </div>
+    </div>
+    
+    <!-- Socket.IO (for real-time updates) -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
+    <!-- GSAP (for smooth animations) -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    
+    <!-- Cyberpunk Presence System -->
+    <script src="{{ url_for('static', filename='js/cyberpunk-presence.js') }}"></script>
+    
+    <script>
+        // Initialize Socket.IO connection
+        window.socket = io();
+        
+        // Initialize Cyberpunk Presence System
+        const presence = new CyberpunkPresence('cyberpunk-presence', {
+            maxUsers: 12,
+            canvasWidth: 600,
+            canvasHeight: 600,
+            particleSize: 40,
+            enableParallax: true,
+            glowIntensity: 0.8
+        });
+        
+        // Update user count display
+        setInterval(() => {
+            const count = presence.particles.length;
+            document.getElementById('user-count').textContent = count;
+        }, 1000);
+        
+        console.log('🌐 Cyberpunk Presence System initialized!');
+        console.log('💡 Hover over particles to see user details');
+        console.log('🖱️ Move your mouse to see 3D parallax effect');
+    </script>
+</body>
+</html>
