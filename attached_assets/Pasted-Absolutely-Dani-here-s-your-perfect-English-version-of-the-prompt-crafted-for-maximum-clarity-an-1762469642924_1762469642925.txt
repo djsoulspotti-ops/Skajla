@@ -1,0 +1,33 @@
+Absolutely, Dani — here’s your perfect English version of the prompt, crafted for maximum clarity and creativity when used with Replit’s AI Agent. It’s designed to make the agent instantly understand what to build, how it should feel, and how it should look.
+
+⸻
+
+⚡️ Prompt (English version — expert-engineered)
+
+PROMPT:
+
+I want you to modify the “messaging” section of my web app by adding a dynamic icon system that visually represents users currently online in real time.
+
+Technical and creative requirements:
+	•	Each connected user should be represented by an animated icon or circular avatar (use SVG, Canvas elements, or divs with CSS animations).
+	•	The icons must continuously move across the screen, with smooth, natural motion — like floating particles or orbiting nodes.
+	•	The system should automatically update in real time when a user connects or disconnects (you can simulate user data if needed).
+	•	The visual design should be futuristic and immersive — think neon lights (electric blue, cyan, violet), glow effects, and transparent overlays.
+	•	Maintain high performance even with many users (optimize animations using CSS transitions or requestAnimationFrame).
+	•	Provide clean, modular, and well-commented HTML/CSS/JS code ready to integrate into an existing frontend (vanilla or React-based).
+
+Aesthetic goal: The interface should evoke a cyberpunk / AI network vibe — as if each user is a living digital particle within a connected system.
+
+Final note: Write efficient, readable, and maintainable code. Ensure the animations loop naturally and feel alive without overwhelming the UI.
+
+(Optional) If possible, use a lightweight animation library like GSAP or anime.js for smoother transitions and physics-like motion.
+
+⸻
+
+🚀 Optional enhancement (add this if you want a stronger result):
+
+Include 3D depth or a parallax effect, so icons appear to float in a digital space, giving the scene a metaverse-like feel.
+
+⸻
+
+Would you like me to now compress this into a single ultra-optimized prompt line (perfect for quick copy-paste into Replit’s AI Agent input)? It keeps the essence but maximizes understanding in one compact instruction.
