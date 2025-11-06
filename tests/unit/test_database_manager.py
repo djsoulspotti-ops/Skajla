@@ -9,9 +9,8 @@ class TestDatabaseManager:
     
     def test_connection_available(self):
         """Test database connection can be established"""
-        conn = db_manager.get_connection()
-        assert conn is not None
-        conn.close()
+        with db_manager.get_connection() as conn:
+            assert conn is not None
     
     def test_query_sanitization(self):
         """Test SQL injection protection"""

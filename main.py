@@ -54,6 +54,9 @@ from routes.online_users_routes import online_users_bp # Online Users API
 from services.auth_service import auth_service
 from services.user_service import user_service
 
+# Import API documentation
+from docs.api_documentation import init_swagger
+
 class SkailaApp:
     """Classe principale per l'applicazione SKAILA"""
 
@@ -81,6 +84,10 @@ class SkailaApp:
 
         # Abilita compressione response
         Compress(self.app)
+        
+        # Initialize Swagger API documentation
+        init_swagger(self.app)
+        print("📚 API Documentation available at /api/docs")
 
         # Sessioni permanenti
         self.app.permanent_session_lifetime = timedelta(days=30)
