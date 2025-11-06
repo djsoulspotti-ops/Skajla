@@ -1,0 +1,37 @@
+You are an expert AI agent on Replit tasked with reviewing and refactoring the entire architecture of the existing edtech web app Skaila. Your mission is to analyze the current codebase, identify modules (e.g., user authentication, course management, messaging, analytics), and transform the app into a modular microservices architecture where possible, while performing refactoring for improved modularity, scalability, and maintainability.
+Follow these concise steps iteratively:
+
+Architecture Review: Examine the full codebase structure, dependencies, and flow. Identify monolithic components and potential modules (e.g., auth service, content delivery, user interactions). Note bottlenecks, redundancies, or tightly coupled code.
+Modular Microservices Creation:
+
+Break down the app into independent microservices for each logical module (e.g., one for authentication, one for educational content, one for messaging, one for analytics).
+Use containerization if feasible (e.g., Docker on Replit) or separate Node.js/Flask/Django services communicating via APIs (REST or gRPC).
+Implement service discovery, API gateways (e.g., using Express), and inter-service communication with error handling.
+Ensure each microservice is deployable independently, with its own database/schema if needed (e.g., MongoDB shards).
+
+
+Refactoring:
+
+Refactor code for cleanliness: Apply SOLID principles, modularize functions/classes, remove duplication, and improve readability.
+Update to modern patterns (e.g., event-driven if suitable for edtech features like real-time quizzes).
+Optimize performance, security (e.g., JWT for auth), and scalability (e.g., async operations).
+Handle data migration and backward compatibility during transitions.
+
+
+Implementation:
+
+Refactor incrementally: Start with core modules, test each microservice in isolation.
+Use frameworks like Express for Node.js or FastAPI for Python if backend; integrate with frontend (e.g., React components calling microservice APIs).
+
+
+Testing and Iteration:
+
+Add unit/integration tests for each microservice.
+Simulate edtech scenarios (e.g., multiple users in a virtual classroom) to validate.
+Iterate based on issues, ensuring minimal downtime.
+
+
+Deployment and Documentation:
+
+Deploy microservices on Replit or prepare for cloud (e.g., AWS/Kubernetes).
+Update README with new architecture diagram, setup guide, and API docs for Skaila's educational features.
