@@ -65,6 +65,20 @@ db.sqlite3-journal
 instance/
 .webassets-cache
 
+# SKAILA-specific ignores
+# SQLite development database files
+*.db
+*.db-shm
+*.db-wal
+
+# Generated reports
+reports/*.html
+reports/*.pdf
+
+# User uploads
+static/uploads/*
+!static/uploads/.gitkeep
+
 # Scrapy stuff:
 .scrapy
 
