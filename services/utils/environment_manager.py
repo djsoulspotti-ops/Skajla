@@ -127,12 +127,19 @@ class EnvironmentManager:
             'UPLOAD_FOLDER': 'static/uploads',
             'MAX_CONTENT_LENGTH': self.get_max_upload_size(),
             
-            # Sicurezza cookies
-            'SESSION_COOKIE_SECURE': self.is_production(),
-            'SESSION_COOKIE_HTTPONLY': True,
-            'SESSION_COOKIE_SAMESITE': 'Lax',
-            'REMEMBER_COOKIE_SECURE': self.is_production(),
+            # 🔒 HARDENED Session Security (DevSecOps Best Practices)
+            'SESSION_COOKIE_SECURE': True,  # Always require HTTPS (use ngrok/replit proxy in dev)
+            'SESSION_COOKIE_HTTPONLY': True,  # Prevent JavaScript access (XSS protection)
+            'SESSION_COOKIE_SAMESITE': 'Strict',  # Prevent CSRF attacks (was 'Lax')
+            'SESSION_COOKIE_NAME': '__Secure-session',  # Security prefix
+            'PERMANENT_SESSION_LIFETIME': 7200,  # 2 hours in seconds
+            'SESSION_REFRESH_EACH_REQUEST': False,  # Manual rotation for security
+            
+            # Remember Me Cookie Security
+            'REMEMBER_COOKIE_SECURE': True,
             'REMEMBER_COOKIE_HTTPONLY': True,
+            'REMEMBER_COOKIE_SAMESITE': 'Strict',
+            'REMEMBER_COOKIE_DURATION': 604800,  # 7 days
             
             # Environment info
             'ENV': 'production' if self.is_production() else 'development',

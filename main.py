@@ -264,9 +264,8 @@ class SkailaApp:
         from routes.admin_features_routes import admin_features_bp
         self.app.register_blueprint(admin_features_bp)
 
-        # Aggiungi CSRF protection context processor
-        from csrf_protection import inject_csrf_token
-        self.app.context_processor(inject_csrf_token)
+        # 🔒 SECURITY: Initialize global security middlewares
+        self._init_security_middlewares()
 
         # Error handlers personalizzati
         @self.app.errorhandler(404)
@@ -345,6 +344,18 @@ class SkailaApp:
                 ])
 
         return cors_origins
+
+    def _init_security_middlewares(self):
+        """🔒 Initialize all security middlewares (CSRF, Tenant Isolation)"""
+        # CSRF Protection Middleware
+        from shared.middleware.csrf_middleware import init_csrf_protection
+        init_csrf_protection(self.app)
+        
+        # Tenant Isolation Middleware
+        from shared.middleware.tenant_guard import init_tenant_guard
+        init_tenant_guard(self.app)
+        
+        print("🔒 Security middlewares initialized (CSRF + Tenant Isolation)")
 
     def init_systems(self):
         """Inizializza sistemi ausiliari"""
