@@ -13,9 +13,9 @@ from flask_socketio import SocketIO
 from flask_compress import Compress
 
 # Import moduli personalizzati
-from database_manager import db_manager
-from environment_manager import env_manager
-from performance_cache import (
+from services.database.database_manager import db_manager
+from services.utils.environment_manager import env_manager
+from services.monitoring.performance_cache import (
     user_cache, chat_cache, message_cache, ai_cache, gamification_cache,
     cache_user_data, get_cached_user, cache_chat_messages, get_cached_chat_messages,
     invalidate_user_cache, get_cache_health
@@ -25,10 +25,10 @@ from services.monitoring_service import (
     ProductionLogger, MetricsCollector, PerformanceMonitor,
     RequestMonitor, DatabaseMonitor
 )
-from school_system import school_system
-from gamification import gamification_system
-from ai_chatbot import AISkailaBot
-from report_scheduler import ReportScheduler
+from services.school.school_system import school_system
+from services.gamification.gamification import gamification_system
+from services.ai.ai_chatbot import AISkailaBot
+from services.reports.report_scheduler import ReportScheduler
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
@@ -716,14 +716,21 @@ class SkailaApp:
         print(f"🚀 SKAILA Server starting on port {port}")
         print(f"🌐 URL: http://{host}:{port}")
         print(f"📊 Database: {db_manager.db_type}")
-        print(f"🤖 AI Bot: {'✅ Attivo' if self.ai_bot.openai_available else '⚠️ Mock mode'}")
+        
+        # Safe check for AI bot status
+        ai_status = '⚠️ Mock mode'
+        if self.ai_bot and hasattr(self.ai_bot, 'openai_available'):
+            ai_status = '✅ Attivo' if self.ai_bot.openai_available else '⚠️ Mock mode'
+        print(f"🤖 AI Bot: {ai_status}")
 
         self.socketio.run(
             self.app,
             host=host,
             port=port,
             debug=debug,
-            allow_unsafe_werkzeug=True
+            allow_unsafe_werkzeug=True,
+            use_reloader=False,
+            log_output=not debug
         )
 
 # Inizializzazione e avvio applicazione
