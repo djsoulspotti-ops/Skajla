@@ -9,10 +9,15 @@ import time
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import request, session, render_template
-from database_manager import db_manager
+from services.database.database_manager import db_manager
 from shared.validators.input_validators import validator, sql_protector
-from core.config.settings import SecuritySettings
 from shared.logging.structured_logger import auth_logger, security_logger
+
+
+class SecuritySettings:
+    """Security configuration constants"""
+    MAX_LOGIN_ATTEMPTS = 5
+    LOGIN_LOCKOUT_DURATION = 900
 
 
 class AuthService:

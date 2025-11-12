@@ -7,8 +7,8 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 import random
-from core.config.gamification_config import XPConfig, LevelConfig, BadgeConfig, StreakConfig
-from database_manager import db_manager
+from services.gamification.gamification_config import XPConfig, LevelConfig, BadgeConfig, StreakConfig
+from services.database.database_manager import db_manager
 
 class SKAILAGamification:
     def __init__(self):
