@@ -6,6 +6,16 @@ from performance_cache import user_cache, invalidate_user_cache
 import secrets
 import string
 
+# Error handling framework
+from shared.error_handling import (
+    DatabaseError,
+    ValidationError,
+    get_logger,
+    handle_errors
+)
+
+logger = get_logger(__name__)
+
 class SchoolSystem:
     """Sistema di gestione scuole, classi e associazioni professori"""
     
@@ -220,13 +230,21 @@ class SchoolSystem:
         """Estende tabella utenti per supportare scuole"""
         try:
             cursor.execute('ALTER TABLE utenti ADD COLUMN scuola_id INTEGER REFERENCES scuole(id)')
-        except Exception:
-            pass  # Colonna già esistente
+            logger.debug(event_type='migration_column_added', domain='database', table='utenti', column='scuola_id')
+        except Exception as e:
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.debug(event_type='migration_column_exists', domain='database', table='utenti', column='scuola_id')
+            else:
+                logger.warning(event_type='migration_column_error', domain='database', table='utenti', column='scuola_id', error=str(e))
             
         try:
             cursor.execute('ALTER TABLE utenti ADD COLUMN classe_id INTEGER REFERENCES classi(id)')
-        except Exception:
-            pass  # Colonna già esistente
+            logger.debug(event_type='migration_column_added', domain='database', table='utenti', column='classe_id')
+        except Exception as e:
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.debug(event_type='migration_column_exists', domain='database', table='utenti', column='classe_id')
+            else:
+                logger.warning(event_type='migration_column_error', domain='database', table='utenti', column='classe_id', error=str(e))
     
     def _extend_chat_table(self, cursor):
         """Estende tabella chat per supportare organizzazione scolastica"""
@@ -235,26 +253,42 @@ class SchoolSystem:
                 cursor.execute("ALTER TABLE chat ADD COLUMN tipo TEXT DEFAULT 'gruppo' CHECK (tipo IN ('scuola','classe','docenti','gruppo','privata'))")
             else:
                 cursor.execute("ALTER TABLE chat ADD COLUMN tipo TEXT DEFAULT 'gruppo'")
-        except Exception:
-            pass
+            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='tipo')
+        except Exception as e:
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='tipo')
+            else:
+                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='tipo', error=str(e))
             
         try:
             cursor.execute('ALTER TABLE chat ADD COLUMN scuola_id INTEGER REFERENCES scuole(id)')
-        except Exception:
-            pass
+            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='scuola_id')
+        except Exception as e:
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='scuola_id')
+            else:
+                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='scuola_id', error=str(e))
             
         try:
-            cursor.execute('ALTER TABLE chat ADD COLUMN classe_id INTEGER REFERENCES classi(id)')  
-        except Exception:
-            pass
+            cursor.execute('ALTER TABLE chat ADD COLUMN classe_id INTEGER REFERENCES classi(id)')
+            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='classe_id')
+        except Exception as e:
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='classe_id')
+            else:
+                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='classe_id', error=str(e))
             
         try:
             if db_manager.db_type == 'postgresql':
                 cursor.execute('ALTER TABLE chat ADD COLUMN sistema BOOLEAN DEFAULT false')
             else:
                 cursor.execute('ALTER TABLE chat ADD COLUMN sistema BOOLEAN DEFAULT 0')
-        except Exception:
-            pass
+            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='sistema')
+        except Exception as e:
+            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='sistema')
+            else:
+                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='sistema', error=str(e))
     
     def setup_default_school(self):
         """Configura scuola predefinita per migrazione"""
@@ -270,7 +304,13 @@ class SchoolSystem:
                 table_exists = cursor.fetchone() is not None
             
             if not table_exists:
-                print("📦 Tabella scuole non esiste ancora, skip setup scuola predefinita")
+                logger.debug(
+                    event_type='table_not_exists',
+                    domain='database',
+                    operation='setup_default_school',
+                    table='scuole',
+                    message='Tabella scuole non esiste ancora, skip setup scuola predefinita'
+                )
                 return
             
             # Verifica se scuola predefinita esiste
@@ -301,11 +341,22 @@ class SchoolSystem:
                     else:
                         cursor.execute('UPDATE utenti SET scuola_id = ? WHERE scuola_id IS NULL', (default_school_id,))
                 except Exception as e:
-                    # Tabella utenti non esiste ancora (prima inizializzazione)
-                    pass
+                    logger.debug(
+                        event_type='migration_users_skipped',
+                        domain='database',
+                        operation='setup_default_school',
+                        school_id=default_school_id,
+                        error=str(e),
+                        message='Tabella utenti non esiste ancora (prima inizializzazione)'
+                    )
                 
                 conn.commit()
-                print(f"✅ Scuola predefinita creata (ID: {default_school_id})")
+                logger.info(
+                    event_type='default_school_created',
+                    domain='school',
+                    school_id=default_school_id,
+                    message='Scuola predefinita creata'
+                )
     
     def _migrate_existing_database(self, cursor):
         """Migrazione sicura per database esistenti con SAVEPOINT per PostgreSQL"""
@@ -319,7 +370,13 @@ class SchoolSystem:
                 table_exists = cursor.fetchone() is not None
             
             if not table_exists:
-                print("📦 Tabella scuole non esiste ancora, skip migrazione")
+                logger.debug(
+                    event_type='table_not_exists',
+                    domain='database',
+                    operation='migrate_existing_database',
+                    table='scuole',
+                    message='Tabella scuole non esiste ancora, skip migrazione'
+                )
                 return
             
             # Verifica e aggiunge colonne mancanti alla tabella scuole
@@ -342,7 +399,13 @@ class SchoolSystem:
                         cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
                     else:
                         cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
-                    print(f"✅ Aggiunta colonna {column_name} alla tabella scuole")
+                    logger.debug(
+                        event_type='migration_column_added',
+                        domain='database',
+                        table='scuole',
+                        column=column_name,
+                        message=f'Aggiunta colonna {column_name} alla tabella scuole'
+                    )
                 except Exception as e:
                     # Rollback al savepoint invece di abortire intera transazione
                     if db_manager.db_type == 'postgresql':
@@ -350,22 +413,47 @@ class SchoolSystem:
                     
                     # Colonna già esiste o altro errore
                     if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
-                        pass  # Colonna già presente, ok
+                        logger.debug(
+                            event_type='migration_column_exists',
+                            domain='database',
+                            table='scuole',
+                            column=column_name,
+                            message='Colonna già presente'
+                        )
                     else:
-                        print(f"⚠️ Attenzione durante migrazione colonna {column_name}: {e}")
+                        logger.warning(
+                            event_type='migration_column_error',
+                            domain='database',
+                            table='scuole',
+                            column=column_name,
+                            error=str(e),
+                            message=f'Attenzione durante migrazione colonna {column_name}'
+                        )
                 finally:
                     # Release savepoint se tutto ok
                     if db_manager.db_type == 'postgresql':
                         try:
                             cursor.execute(f'RELEASE SAVEPOINT before_alter_{column_name}')
-                        except:
-                            pass
+                        except Exception as e:
+                            logger.debug(
+                                event_type='savepoint_release_failed',
+                                domain='database',
+                                column=column_name,
+                                error=str(e)
+                            )
                         
             # Gestione speciale per UNIQUE constraint su dirigente_invite_token
             self._ensure_dirigente_invite_token_unique(cursor)
                         
         except Exception as e:
-            print(f"⚠️ Errore durante migrazione database: {e}")
+            logger.error(
+                event_type='migration_error',
+                domain='database',
+                operation='migrate_existing_database',
+                error=str(e),
+                exc_info=True,
+                message='Errore durante migrazione database'
+            )
     
     def _ensure_dirigente_invite_token_unique(self, cursor):
         """Crea UNIQUE INDEX per dirigente_invite_token in modo sicuro - SENZA DELETE PERICOLOSI"""
@@ -385,7 +473,15 @@ class SchoolSystem:
                 ''')
                 affected_rows = cursor.rowcount
                 if affected_rows > 0:
-                    print(f"🔧 SAFE FIX: Impostato dirigente_invite_token = NULL per {affected_rows} duplicati (PostgreSQL)")
+                    logger.info(
+                        event_type='duplicates_fixed',
+                        domain='database',
+                        table='scuole',
+                        column='dirigente_invite_token',
+                        affected_rows=affected_rows,
+                        db_type='postgresql',
+                        message=f'SAFE FIX: Impostato dirigente_invite_token = NULL per {affected_rows} duplicati'
+                    )
                 
                 # Crea UNIQUE INDEX se non esiste
                 cursor.execute('''
@@ -408,7 +504,15 @@ class SchoolSystem:
                 ''')
                 affected_rows = cursor.rowcount
                 if affected_rows > 0:
-                    print(f"🔧 SAFE FIX: Impostato dirigente_invite_token = NULL per {affected_rows} duplicati (SQLite)")
+                    logger.info(
+                        event_type='duplicates_fixed',
+                        domain='database',
+                        table='scuole',
+                        column='dirigente_invite_token',
+                        affected_rows=affected_rows,
+                        db_type='sqlite',
+                        message=f'SAFE FIX: Impostato dirigente_invite_token = NULL per {affected_rows} duplicati'
+                    )
                 
                 # Crea UNIQUE INDEX se non esiste (SQLite usa CREATE UNIQUE INDEX IF NOT EXISTS)
                 cursor.execute('''
@@ -417,15 +521,33 @@ class SchoolSystem:
                     WHERE dirigente_invite_token IS NOT NULL
                 ''')
             
-            print("✅ UNIQUE constraint su dirigente_invite_token creato con successo - NESSUN DATO CANCELLATO")
+            logger.info(
+                event_type='unique_constraint_created',
+                domain='database',
+                table='scuole',
+                column='dirigente_invite_token',
+                message='UNIQUE constraint su dirigente_invite_token creato con successo - NESSUN DATO CANCELLATO'
+            )
             
         except Exception as e:
             # Se l'index esiste già, è OK
             if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                print("✅ UNIQUE index su dirigente_invite_token già esistente")
+                logger.debug(
+                    event_type='unique_index_exists',
+                    domain='database',
+                    table='scuole',
+                    column='dirigente_invite_token',
+                    message='UNIQUE index su dirigente_invite_token già esistente'
+                )
             else:
-                print(f"⚠️ Impossibile creare UNIQUE constraint su dirigente_invite_token: {e}")
-                # Non è un errore fatale - il sistema può funzionare senza
+                logger.warning(
+                    event_type='unique_constraint_failed',
+                    domain='database',
+                    table='scuole',
+                    column='dirigente_invite_token',
+                    error=str(e),
+                    message='Impossibile creare UNIQUE constraint su dirigente_invite_token - non è un errore fatale'
+                )
     
     def generate_personal_codes_for_school(self, scuola_id, user_id):
         """RIVOLUZIONARIO: Genera codici personali individuali per ogni persona della scuola"""
@@ -491,7 +613,16 @@ class SchoolSystem:
                 }
                 
         except Exception as e:
-            print(f"❌ Errore generazione codici personali: {e}")
+            logger.error(
+                event_type='personal_codes_generation_failed',
+                domain='school',
+                operation='generate_personal_codes_for_school',
+                school_id=scuola_id,
+                user_id=user_id,
+                error=str(e),
+                exc_info=True,
+                message='Errore generazione codici personali'
+            )
             return {'success': False, 'message': f'Errore: {e}'}
     
     def _get_school_email_list(self, scuola_id, domain):
@@ -512,7 +643,13 @@ class SchoolSystem:
                         'email': row.get('email', '').strip().lower(),
                         'role': row.get('role', 'studente').strip().lower()
                     })
-            print(f"📋 Caricate {len(emails_list)} email da CSV per scuola {scuola_id}")
+            logger.info(
+                event_type='csv_emails_loaded',
+                domain='school',
+                school_id=scuola_id,
+                count=len(emails_list),
+                message=f'Caricate {len(emails_list)} email da CSV'
+            )
             return emails_list
         
         # Fallback: query database per email già nel sistema
@@ -531,11 +668,22 @@ class SchoolSystem:
             
             db_emails = cursor.fetchall()
             if db_emails:
-                print(f"📋 Trovate {len(db_emails)} email nel database per scuola {scuola_id}")
+                logger.info(
+                    event_type='db_emails_loaded',
+                    domain='school',
+                    school_id=scuola_id,
+                    count=len(db_emails),
+                    message=f'Trovate {len(db_emails)} email nel database'
+                )
                 return [{'email': row[0], 'role': row[1]} for row in db_emails]
         
         # Ultimo fallback: lista demo per testing
-        print(f"⚠️ Nessuna email trovata - usando lista demo")
+        logger.warning(
+            event_type='using_demo_emails',
+            domain='school',
+            school_id=scuola_id,
+            message='Nessuna email trovata - usando lista demo'
+        )
         sample_emails = [
             {'email': f'mario.rossi@{domain}', 'role': 'professore'},
             {'email': f'anna.bianchi@{domain}', 'role': 'professore'},
@@ -586,6 +734,15 @@ class SchoolSystem:
             }
             
         except Exception as e:
+            logger.error(
+                event_type='csv_upload_failed',
+                domain='school',
+                operation='upload_school_emails_csv',
+                school_id=scuola_id,
+                error=str(e),
+                exc_info=True,
+                message='Errore caricamento CSV email scuola'
+            )
             return {'success': False, 'message': f'Errore: {str(e)}'}
     
     def _generate_unique_personal_code(self, scuola_id, email, role):
@@ -660,13 +817,15 @@ class SchoolSystem:
         
         # In produzione: integrazione SMTP reale
         # Per ora: simulazione professionale con logging
-        print(f"📧 EMAIL AUTOMATICA INVIATA:")
-        print(f"   A: {email}")
-        print(f"   Oggetto: 🎓 Il tuo codice personale SKAILA per {school_name}")
-        print(f"   Ruolo: {role_it}")
-        print(f"   Codice: {code}")
-        print(f"   ✅ Template HTML professionale generato")
-        print("   " + "="*70)
+        logger.info(
+            event_type='personal_code_email_sent',
+            domain='school',
+            email=email,
+            school_name=school_name,
+            role=role,
+            code=code,
+            message='Email automatica inviata con codice personale'
+        )
         
         # TODO: Integrazione SMTP reale per produzione
         # import smtplib
@@ -722,7 +881,15 @@ class SchoolSystem:
                     return {'success': False, 'message': 'Codice non valido o scaduto'}
                     
         except Exception as e:
-            print(f"❌ Errore verifica codice personale: {e}")
+            logger.error(
+                event_type='personal_code_verification_failed',
+                domain='school',
+                operation='verify_personal_code',
+                code=code,
+                error=str(e),
+                exc_info=True,
+                message='Errore verifica codice personale'
+            )
             return {'success': False, 'message': f'Errore: {e}'}
     
     def mark_personal_code_used(self, code_id, user_id):
@@ -748,7 +915,16 @@ class SchoolSystem:
                 return True
                 
         except Exception as e:
-            print(f"❌ Errore marcatura codice usato: {e}")
+            logger.error(
+                event_type='mark_personal_code_failed',
+                domain='school',
+                operation='mark_personal_code_used',
+                code_id=code_id,
+                user_id=user_id,
+                error=str(e),
+                exc_info=True,
+                message='Errore marcatura codice usato'
+            )
             return False
     
     def create_school(self, nome, dominio_email=None, admin_user_id=None):
@@ -824,9 +1000,23 @@ class SchoolSystem:
             try:
                 from services.messaging.subject_groups_initializer import initialize_subject_groups_for_class
                 initialize_subject_groups_for_class(scuola_id, nome)
-                print(f"✅ Gruppi materia inizializzati per classe {nome}")
+                logger.info(
+                    event_type='subject_groups_initialized',
+                    domain='school',
+                    school_id=scuola_id,
+                    class_name=nome,
+                    message='Gruppi materia inizializzati per classe'
+                )
             except Exception as e:
-                print(f"⚠️ Errore inizializzando gruppi materia per classe {nome}: {e}")
+                logger.warning(
+                    event_type='subject_groups_init_failed',
+                    domain='school',
+                    operation='create_class',
+                    school_id=scuola_id,
+                    class_name=nome,
+                    error=str(e),
+                    message='Errore inizializzando gruppi materia per classe'
+                )
             
             conn.commit()
             return class_id
@@ -851,6 +1041,17 @@ class SchoolSystem:
                 conn.commit()
                 return True
             except Exception as e:
+                logger.error(
+                    event_type='teacher_assignment_failed',
+                    domain='school',
+                    operation='assign_teacher_to_class',
+                    teacher_id=docente_id,
+                    class_id=classe_id,
+                    subject=materia,
+                    error=str(e),
+                    exc_info=True,
+                    message='Errore assegnazione professore a classe'
+                )
                 return False
     
     def create_system_chats(self, scuola_id):
@@ -1024,7 +1225,17 @@ class SchoolSystem:
                 }
                 
         except Exception as e:
-            print(f"Errore auto-registrazione scuola: {e}")
+            logger.error(
+                event_type='school_auto_registration_failed',
+                domain='school',
+                operation='register_school_auto',
+                school_name=nome,
+                domain_email=dominio_email,
+                dirigente_email=dirigente_email,
+                error=str(e),
+                exc_info=True,
+                message='Errore auto-registrazione scuola'
+            )
             return {'success': False, 'message': f'Errore durante la registrazione: {str(e)}'}
     
     def verify_dirigente_email(self, token):
@@ -1088,7 +1299,15 @@ class SchoolSystem:
                 }
                 
         except Exception as e:
-            print(f"Errore verifica dirigente: {e}")
+            logger.error(
+                event_type='dirigente_verification_failed',
+                domain='school',
+                operation='verify_dirigente_email',
+                token=token,
+                error=str(e),
+                exc_info=True,
+                message='Errore verifica dirigente'
+            )
             return {'success': False, 'message': f'Errore durante la verifica: {str(e)}'}
     
     def get_school_codes(self, school_id, user_id):
@@ -1127,7 +1346,16 @@ class SchoolSystem:
                 }
                 
         except Exception as e:
-            print(f"Errore recupero codici: {e}")
+            logger.error(
+                event_type='get_school_codes_failed',
+                domain='school',
+                operation='get_school_codes',
+                school_id=school_id,
+                user_id=user_id,
+                error=str(e),
+                exc_info=True,
+                message='Errore recupero codici scuola'
+            )
             return {'success': False, 'message': f'Errore: {str(e)}'}
     
     def has_feature(self, school_id, feature_name):
@@ -1156,7 +1384,15 @@ class SchoolSystem:
             return False
             
         except Exception as e:
-            print(f"Errore has_feature: {e}")
+            logger.warning(
+                event_type='has_feature_check_failed',
+                domain='school',
+                operation='has_feature',
+                school_id=school_id,
+                feature_name=feature_name,
+                error=str(e),
+                message='Errore verifica feature - permettendo accesso per sicurezza'
+            )
             return True  # Default: permetti accesso in caso di errore
     
     def get_school_features(self, school_id):
@@ -1194,7 +1430,14 @@ class SchoolSystem:
             }
             
         except Exception as e:
-            print(f"Errore get_school_features: {e}")
+            logger.warning(
+                event_type='get_school_features_failed',
+                domain='school',
+                operation='get_school_features',
+                school_id=school_id,
+                error=str(e),
+                message='Errore recupero features scuola - usando valori predefiniti'
+            )
             return {
                 'gamification': True,
                 'chatbot': True,
@@ -1231,7 +1474,17 @@ class SchoolSystem:
             }
             
         except Exception as e:
-            print(f"Errore toggle_feature: {e}")
+            logger.error(
+                event_type='toggle_feature_failed',
+                domain='school',
+                operation='toggle_feature',
+                school_id=school_id,
+                feature_name=feature_name,
+                enabled=enabled,
+                error=str(e),
+                exc_info=True,
+                message='Errore toggle feature'
+            )
             return {
                 'success': False,
                 'message': f'Errore durante il toggle: {str(e)}'
@@ -1240,4 +1493,8 @@ class SchoolSystem:
 # Istanza globale sistema scolastico
 school_system = SchoolSystem()
 
-print("✅ Sistema scuole-classi-professori inizializzato")
+logger.info(
+    event_type='school_system_initialized',
+    domain='school',
+    message='Sistema scuole-classi-professori inizializzato'
+)

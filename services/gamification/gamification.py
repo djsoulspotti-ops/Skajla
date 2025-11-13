@@ -9,6 +9,9 @@ from typing import Dict, List, Any, Tuple
 import random
 from services.gamification.gamification_config import XPConfig, LevelConfig, BadgeConfig, StreakConfig
 from services.database.database_manager import db_manager
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 class SKAILAGamification:
     def __init__(self):
@@ -153,10 +156,20 @@ class SKAILAGamification:
                 ''')
 
                 conn.commit()
-                print("✅ Tabelle gamification create con successo")
+                logger.info(
+                    event_type='tables_created',
+                    message='Tabelle gamification create con successo',
+                    domain='gamification'
+                )
                 
         except Exception as e:
-            print(f"⚠️ Errore creazione tabelle gamification: {e}")
+            logger.error(
+                event_type='table_creation_failed',
+                message='Errore creazione tabelle gamification',
+                domain='gamification',
+                error=str(e),
+                exc_info=True
+            )
 
     def award_xp(self, user_id: int, action: str, multiplier: float = 1.0, context: str = "") -> Dict[str, Any]:
         """Assegna XP per un'azione e persiste nel database (atomico, concurrency-safe)"""
@@ -199,6 +212,17 @@ class SKAILAGamification:
                 
                 conn.commit()
             
+            logger.info(
+                event_type='xp_awarded',
+                message='XP assegnato con successo',
+                domain='gamification',
+                user_id=user_id,
+                xp_amount=xp_amount,
+                action_type=action,
+                total_xp=new_xp,
+                level_up=level_up
+            )
+            
             return {
                 'success': True,
                 'xp_earned': xp_amount,
@@ -209,7 +233,16 @@ class SKAILAGamification:
                 'context': context
             }
         except Exception as e:
-            print(f"⚠️ Errore award_xp: {e}")
+            logger.error(
+                event_type='xp_award_failed',
+                message='Errore assegnazione XP - operazione atomica fallita',
+                domain='gamification',
+                user_id=user_id,
+                action_type=action,
+                xp_amount=int(self.xp_actions.get(action, 10) * multiplier),
+                error=str(e),
+                exc_info=True
+            )
             return {'success': False, 'error': str(e)}
     
     def _calculate_level_from_xp(self, total_xp: int) -> int:
@@ -230,7 +263,14 @@ class SKAILAGamification:
             
             return result
         except Exception as e:
-            print(f"⚠️ Errore get_user_stats: {e}")
+            logger.error(
+                event_type='get_stats_failed',
+                message='Errore recupero statistiche utente',
+                domain='gamification',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
             return {'user_id': user_id, 'total_xp': 0, 'current_level': 1}
 
     def get_or_create_profile(self, user_id: int) -> Dict[str, Any]:
@@ -256,9 +296,23 @@ class SKAILAGamification:
                 result = cursor.fetchone()
                 conn.commit()
                 
+                logger.info(
+                    event_type='profile_created',
+                    message='Profilo gamification creato',
+                    domain='gamification',
+                    user_id=user_id
+                )
+                
                 return dict(zip([desc[0] for desc in cursor.description], result))
         except Exception as e:
-            print(f"⚠️ Errore get_or_create_profile: {e}")
+            logger.error(
+                event_type='profile_creation_failed',
+                message='Errore creazione/recupero profilo gamification',
+                domain='gamification',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
             return {
                 'user_id': user_id,
                 'total_xp': 0,
@@ -303,7 +357,14 @@ class SKAILAGamification:
                 'recent_activity': []
             }
         except Exception as e:
-            print(f"⚠️ Errore get_user_dashboard: {e}")
+            logger.error(
+                event_type='dashboard_load_failed',
+                message='Errore caricamento dashboard gamification',
+                domain='gamification',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
             return {
                 'profile': {
                     'user_id': user_id,
@@ -329,9 +390,19 @@ def init_gamification():
     """Inizializza il sistema di gamification"""
     try:
         gamification_system.init_gamification_tables()
-        print("🎮 Sistema di Gamification SKAILA completo inizializzato!")
+        logger.info(
+            event_type='system_initialized',
+            message='Sistema di Gamification SKAILA completo inizializzato',
+            domain='gamification'
+        )
     except Exception as e:
-        print(f"⚠️ Errore inizializzazione gamification: {e}")
+        logger.error(
+            event_type='system_init_failed',
+            message='Errore inizializzazione gamification',
+            domain='gamification',
+            error=str(e),
+            exc_info=True
+        )
 
 if __name__ == "__main__":
     init_gamification()

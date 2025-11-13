@@ -5,6 +5,9 @@ Formattazione consistente di file size e nomi in tutta l'applicazione
 
 from typing import Optional
 import os
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 class FileFormatter:
     """Formattatore centralizzato per file"""
@@ -74,7 +77,15 @@ class FileFormatter:
             base = os.path.abspath(base_dir)
             target = os.path.abspath(os.path.join(base_dir, filename))
             return target.startswith(base)
-        except:
+        except Exception as e:
+            logger.warning(
+                event_type='path_safety_check_failed',
+                domain='security',
+                message='Failed to verify path safety',
+                filename=filename,
+                base_dir=base_dir,
+                error=str(e)
+            )
             return False
     
     @staticmethod

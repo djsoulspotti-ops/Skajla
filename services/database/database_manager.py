@@ -44,8 +44,18 @@ class DatabaseManager:
             else:
                 self.setup_sqlite_pool()
         except Exception as e:
-            print(f"Database connection failed: {e}")
-            print("Falling back to SQLite...")
+            logger.error(
+                event_type='postgres_connection_failed',
+                domain='database',
+                message=f'Database connection failed: {e}',
+                error=str(e),
+                exc_info=True
+            )
+            logger.warning(
+                event_type='sqlite_fallback',
+                domain='database',
+                message='Falling back to SQLite due to PostgreSQL connection failure'
+            )
             self.db_type = 'sqlite'
             self.setup_sqlite_pool()
 
@@ -63,7 +73,12 @@ class DatabaseManager:
             match = re.search(r'ep-[^@.]+', database_url)
             if match:
                 endpoint_id = match.group(0)
-                print(f"⚙️ PostgreSQL: Found endpoint {endpoint_id}")
+                logger.debug(
+                    event_type='postgres_endpoint_detected',
+                    domain='database',
+                    message=f'PostgreSQL: Found endpoint {endpoint_id}',
+                    endpoint_id=endpoint_id
+                )
 
                 # Rimuovi options esistenti dall'URL per evitare conflitti
                 if '?' in database_url:
@@ -89,9 +104,21 @@ class DatabaseManager:
                 # Ottimizzazioni combinate con endpoint SNI
                 options=combined_options
             )
-            print("✅ PostgreSQL pool Neon SNI configurato per produzione")
+            logger.info(
+                event_type='postgres_pool_configured',
+                domain='database',
+                message='PostgreSQL pool Neon SNI configurato per produzione',
+                min_connections=10,
+                max_connections=50
+            )
         except Exception as e:
-            print(f"Failed to create PostgreSQL connection pool: {e}")
+            logger.error(
+                event_type='postgres_pool_creation_failed',
+                domain='database',
+                message=f'Failed to create PostgreSQL connection pool: {e}',
+                error=str(e),
+                exc_info=True
+            )
             raise
 
     def setup_sqlite_pool(self):
@@ -177,16 +204,31 @@ class DatabaseManager:
                 return conn
 
         self.sqlite_pool = SQLitePool()
-        print("✅ SQLite pool ottimizzato configurato")
+        logger.info(
+            event_type='sqlite_pool_configured',
+            domain='database',
+            message='SQLite pool ottimizzato configurato',
+            max_connections=10
+        )
 
     def recreate_pool(self):
         """Chiude e ricrea il pool PostgreSQL"""
         if self.db_type == 'postgresql' and self.pool:
-            print("🔄 Chiudendo e ricreando il pool PostgreSQL...")
+            logger.info(
+                event_type='pool_recreating',
+                domain='database',
+                message='Chiudendo e ricreando il pool PostgreSQL'
+            )
             try:
                 self.pool.closeall()
             except Exception as e:
-                print(f"Errore durante la chiusura del pool: {e}")
+                logger.error(
+                    event_type='pool_close_error',
+                    domain='database',
+                    message=f'Errore durante la chiusura del pool: {e}',
+                    error=str(e),
+                    exc_info=True
+                )
             finally:
                 self.pool = None
             self.setup_postgresql_pool()
@@ -226,7 +268,14 @@ class DatabaseManager:
                     last_error = e
                     error_msg = str(e).lower()
 
-                    print(f"⚠️ Database error (attempt {retry_count}/{max_retries}): {error_msg[:100]}")
+                    logger.warning(
+                        event_type='database_retry',
+                        domain='database',
+                        message=f'Database error (attempt {retry_count}/{max_retries}): {error_msg[:100]}',
+                        retry_count=retry_count,
+                        max_retries=max_retries,
+                        error=error_msg[:100]
+                    )
 
                     # IMPORTANTE: Chiudi connessione fallita
                     if conn:
@@ -244,7 +293,12 @@ class DatabaseManager:
 
                     # Ricrea pool SOLO se errore di connessione/SSL
                     if any(keyword in error_msg for keyword in ['ssl', 'connection', 'closed', 'eof', 'timeout']):
-                        print("🔄 Neon sleep rilevato - ricreazione pool...")
+                        logger.warning(
+                            event_type='neon_sleep_detected',
+                            domain='database',
+                            message='Neon sleep rilevato - ricreazione pool',
+                            retry_count=retry_count
+                        )
                         self.recreate_pool()
 
                         # Attendi wake-up Neon (2s fissi per primo tentativo, poi progressivo)
@@ -261,7 +315,15 @@ class DatabaseManager:
 
                     # Ultimo tentativo fallito
                     if retry_count >= max_retries:
-                        print(f"❌ Database connection failed definitivamente")
+                        logger.error(
+                            event_type='database_connection_failed',
+                            domain='database',
+                            message='Database connection failed definitivamente',
+                            retry_count=retry_count,
+                            max_retries=max_retries,
+                            error=str(last_error) if last_error else 'Database unavailable',
+                            exc_info=True
+                        )
                         raise last_error if last_error else Exception("Database unavailable")
 
                 except Exception as e:
@@ -435,7 +497,6 @@ class DatabaseManager:
             domain='database',
             message='Database indexes optimized'
         )
-        print("✅ Indici database ottimizzati")
 
 # Istanza globale
 db_manager = DatabaseManager()

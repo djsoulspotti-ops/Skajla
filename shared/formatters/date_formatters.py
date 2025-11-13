@@ -5,6 +5,9 @@ Formattazione consistente di date e tempi in tutta l'applicazione
 
 from datetime import datetime, date, timedelta
 from typing import Optional, Union
+from shared.error_handling import get_logger
+
+logger = get_logger(__name__)
 
 class DateFormatter:
     """Formattatore centralizzato per date"""
@@ -24,7 +27,15 @@ class DateFormatter:
         if isinstance(dt, str):
             try:
                 dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
-            except:
+            except Exception as e:
+                logger.warning(
+                    event_type='date_parse_failed',
+                    message='Failed to parse ISO date string',
+                    domain='formatting',
+                    format_type='format_date',
+                    input_data=dt,
+                    error=str(e)
+                )
                 return dt
         
         if isinstance(dt, datetime):
@@ -43,7 +54,15 @@ class DateFormatter:
         if isinstance(dt, str):
             try:
                 dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
-            except:
+            except Exception as e:
+                logger.warning(
+                    event_type='datetime_parse_failed',
+                    message='Failed to parse ISO datetime string',
+                    domain='formatting',
+                    format_type='format_datetime',
+                    input_data=dt,
+                    error=str(e)
+                )
                 return dt
         
         if isinstance(dt, datetime):
@@ -60,7 +79,15 @@ class DateFormatter:
         if isinstance(dt, str):
             try:
                 dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
-            except:
+            except Exception as e:
+                logger.warning(
+                    event_type='time_parse_failed',
+                    message='Failed to parse ISO time string',
+                    domain='formatting',
+                    format_type='format_time',
+                    input_data=dt,
+                    error=str(e)
+                )
                 return dt
         
         if isinstance(dt, datetime):
@@ -77,7 +104,15 @@ class DateFormatter:
         if isinstance(dt, str):
             try:
                 dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
-            except:
+            except Exception as e:
+                logger.warning(
+                    event_type='relative_date_parse_failed',
+                    message='Failed to parse ISO date for relative formatting',
+                    domain='formatting',
+                    format_type='format_relative',
+                    input_data=dt,
+                    error=str(e)
+                )
                 return str(dt)
         
         if isinstance(dt, date) and not isinstance(dt, datetime):
@@ -117,10 +152,27 @@ class DateFormatter:
         
         try:
             return datetime.strptime(date_str, format).date()
-        except:
+        except Exception as e:
+            logger.warning(
+                event_type='date_strptime_failed',
+                message='Failed to parse date with specified format',
+                domain='formatting',
+                format_type='parse_date',
+                input_data=date_str,
+                expected_format=format,
+                error=str(e)
+            )
             try:
                 return datetime.fromisoformat(date_str).date()
-            except:
+            except Exception as e2:
+                logger.warning(
+                    event_type='date_iso_parse_failed',
+                    message='Failed to parse date as ISO format',
+                    domain='formatting',
+                    format_type='parse_date',
+                    input_data=date_str,
+                    error=str(e2)
+                )
                 return None
     
     @staticmethod
@@ -131,10 +183,27 @@ class DateFormatter:
         
         try:
             return datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
-        except:
+        except Exception as e:
+            logger.warning(
+                event_type='datetime_iso_parse_failed',
+                message='Failed to parse datetime as ISO format',
+                domain='formatting',
+                format_type='parse_datetime',
+                input_data=datetime_str,
+                error=str(e)
+            )
             try:
                 return datetime.strptime(datetime_str, DateFormatter.FORMAT_ISO_DATETIME)
-            except:
+            except Exception as e2:
+                logger.warning(
+                    event_type='datetime_strptime_failed',
+                    message='Failed to parse datetime with ISO datetime format',
+                    domain='formatting',
+                    format_type='parse_datetime',
+                    input_data=datetime_str,
+                    expected_format=DateFormatter.FORMAT_ISO_DATETIME,
+                    error=str(e2)
+                )
                 return None
     
     @staticmethod

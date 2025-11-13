@@ -7,6 +7,9 @@ import os
 import secrets
 from typing import Optional, Dict, Any
 from pathlib import Path
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 class EnvironmentManager:
     """Gestisce le variabili di ambiente e configurazione sicura"""
@@ -172,7 +175,13 @@ class EnvironmentManager:
                     cursor.execute('SELECT 1')
                     cursor.fetchone()
                     db_configured = True
-            except:
+            except Exception as e:
+                logger.warning(
+                    event_type='db_connectivity_check_failed',
+                    domain='environment',
+                    message='Database connectivity test failed',
+                    error=str(e)
+                )
                 db_configured = False
         
         return {
@@ -204,7 +213,14 @@ class EnvironmentManager:
             has_db = db_status.get('configured', False)
             
             return has_secret and has_db
-        except:
+        except Exception as e:
+            logger.error(
+                event_type='configuration_check_failed',
+                domain='environment',
+                message='Failed to check environment configuration',
+                error=str(e),
+                exc_info=True
+            )
             return False
 
 # Istanza globale

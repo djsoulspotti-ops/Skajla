@@ -11,6 +11,9 @@ from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, request
 from database_manager import db_manager
 from environment_manager import env_manager
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 monitoring_bp = Blueprint('monitoring', __name__)
 
@@ -67,7 +70,14 @@ def readiness_probe():
         # Basic environment configuration check
         flask_config = env_manager.get_flask_config()
         checks["environment"] = flask_config.get('SECRET_KEY') is not None
-    except:
+    except Exception as e:
+        logger.error(
+            event_type='readiness_check_failed',
+            domain='monitoring',
+            message='Failed to check environment/database readiness',
+            error=str(e),
+            exc_info=True
+        )
         checks["environment"] = False
         checks["database"] = False
     
@@ -110,7 +120,13 @@ def metrics_endpoint():
                 # SQLite - connection count sempre 1
                 db_connections = 1
         db_response_time = (time.time() - start_time) * 1000  # ms
-    except:
+    except Exception as e:
+        logger.warning(
+            event_type='db_metrics_failed',
+            domain='monitoring',
+            message='Failed to collect database metrics',
+            error=str(e)
+        )
         db_response_time = -1
     
     # Application metrics

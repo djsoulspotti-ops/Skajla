@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 import json
 import re
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 # Import calendario dopo definizione classe per evitare circular import
 calendario_module = None
@@ -130,7 +133,14 @@ class SkailaCoachingEngine:
                 }
         
         except Exception as e:
-            print(f"Errore analisi academic: {e}")
+            logger.error(
+                event_type='academic_analysis_failed',
+                domain='coaching',
+                message='Failed to analyze academic performance',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
         
         return academic
     
@@ -157,7 +167,14 @@ class SkailaCoachingEngine:
                     return 'declining'
             
             return 'stable'
-        except:
+        except Exception as e:
+            logger.warning(
+                event_type='grade_trend_calculation_failed',
+                domain='coaching',
+                message='Failed to calculate grade trend',
+                user_id=user_id,
+                error=str(e)
+            )
             return 'neutral'
     
     def _analyze_engagement(self, user_id: int) -> Dict[str, Any]:
@@ -213,7 +230,14 @@ class SkailaCoachingEngine:
                 }
         
         except Exception as e:
-            print(f"Errore analisi engagement: {e}")
+            logger.error(
+                event_type='engagement_analysis_failed',
+                domain='coaching',
+                message='Failed to analyze student engagement',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
         
         return engagement
     
@@ -247,7 +271,14 @@ class SkailaCoachingEngine:
                     social['social_level'] = 'low'
         
         except Exception as e:
-            print(f"Errore analisi social: {e}")
+            logger.error(
+                event_type='social_analysis_failed',
+                domain='coaching',
+                message='Failed to analyze social activity',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
         
         return social
     
@@ -279,7 +310,14 @@ class SkailaCoachingEngine:
                     career['career_readiness'] = 'interested'
         
         except Exception as e:
-            print(f"Errore analisi career: {e}")
+            logger.error(
+                event_type='career_analysis_failed',
+                domain='coaching',
+                message='Failed to analyze career activity',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
         
         return career
     
@@ -358,7 +396,13 @@ class SkailaCoachingEngine:
             return best_match if best_score > 1 else None
         
         except Exception as e:
-            print(f"Errore find_matching_template: {e}")
+            logger.error(
+                event_type='template_matching_failed',
+                domain='coaching',
+                message='Failed to find matching coaching template',
+                error=str(e),
+                exc_info=True
+            )
             return None
     
     def generate_personalized_response(self, message: str, user_name: str, user_id: int) -> str:
@@ -559,7 +603,14 @@ Dimmi cosa ti serve! 🤝"""
                 VALUES (%s, %s, %s, %s, %s, %s)
             ''', (user_id, message, category, ','.join(sentiment), response, json.dumps(student_data)))
         except Exception as e:
-            print(f"Errore save interaction: {e}")
+            logger.error(
+                event_type='save_interaction_failed',
+                domain='coaching',
+                message='Failed to save coaching interaction to database',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
 
 # Istanza globale
 coaching_engine = SkailaCoachingEngine()

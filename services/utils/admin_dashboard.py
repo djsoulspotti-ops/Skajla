@@ -7,6 +7,9 @@ from database_manager import db_manager
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import json
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 class AdminDashboard:
     """
@@ -88,7 +91,13 @@ class AdminDashboard:
                     })
         
         except Exception as e:
-            print(f"Errore get_active_alerts: {e}")
+            logger.error(
+                event_type='get_active_alerts_failed',
+                domain='admin_dashboard',
+                message='Failed to get active alerts',
+                error=str(e),
+                exc_info=True
+            )
         
         return alerts
     
@@ -135,7 +144,13 @@ class AdminDashboard:
                 )
         
         except Exception as e:
-            print(f"Errore get_coaching_statistics: {e}")
+            logger.error(
+                event_type='get_coaching_statistics_failed',
+                domain='admin_dashboard',
+                message='Failed to get coaching statistics',
+                error=str(e),
+                exc_info=True
+            )
         
         return stats
     
@@ -171,7 +186,14 @@ class AdminDashboard:
             ]
         
         except Exception as e:
-            print(f"Errore get_top_issues: {e}")
+            logger.error(
+                event_type='get_top_issues_failed',
+                domain='admin_dashboard',
+                message='Failed to get top issues',
+                days=days,
+                error=str(e),
+                exc_info=True
+            )
             return []
     
     def get_sentiment_distribution(self, days: int) -> Dict[str, Any]:
@@ -217,7 +239,14 @@ class AdminDashboard:
                 distribution['negative'] = round((distribution['negative'] / total) * 100, 1)
         
         except Exception as e:
-            print(f"Errore get_sentiment_distribution: {e}")
+            logger.error(
+                event_type='get_sentiment_distribution_failed',
+                domain='admin_dashboard',
+                message='Failed to get sentiment distribution',
+                days=days,
+                error=str(e),
+                exc_info=True
+            )
         
         return distribution
     
@@ -256,7 +285,14 @@ class AdminDashboard:
                 )
         
         except Exception as e:
-            print(f"Errore get_coaching_effectiveness: {e}")
+            logger.error(
+                event_type='get_coaching_effectiveness_failed',
+                domain='admin_dashboard',
+                message='Failed to calculate coaching effectiveness',
+                days=days,
+                error=str(e),
+                exc_info=True
+            )
         
         return effectiveness
     
@@ -300,8 +336,14 @@ class AdminDashboard:
                     if last_interaction and last_interaction['user_data_snapshot']:
                         try:
                             snapshot = json.loads(last_interaction['user_data_snapshot'])
-                        except:
-                            pass
+                        except Exception as e:
+                            logger.warning(
+                                event_type='json_parse_failed',
+                                domain='admin_dashboard',
+                                message='Failed to parse user data snapshot',
+                                user_id=student['user_id'],
+                                error=str(e)
+                            )
                     
                     at_risk.append({
                         'user_id': student['user_id'],
@@ -313,7 +355,13 @@ class AdminDashboard:
                     })
         
         except Exception as e:
-            print(f"Errore get_students_at_risk: {e}")
+            logger.error(
+                event_type='get_students_at_risk_failed',
+                domain='admin_dashboard',
+                message='Failed to get students at risk',
+                error=str(e),
+                exc_info=True
+            )
         
         return at_risk
     
@@ -349,7 +397,14 @@ class AdminDashboard:
             overview['avg_grade'] = round(avg['media'], 1) if avg and avg['media'] else 0
             
         except Exception as e:
-            print(f"Errore get_class_overview: {e}")
+            logger.error(
+                event_type='get_class_overview_failed',
+                domain='admin_dashboard',
+                message='Failed to get class overview',
+                classe_id=classe_id,
+                error=str(e),
+                exc_info=True
+            )
         
         return overview
 

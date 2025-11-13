@@ -5,6 +5,9 @@ Sistema per invio email report (tramite integrazione Resend)
 
 import os
 from datetime import datetime
+from shared.error_handling import get_logger
+
+logger = get_logger(__name__)
 
 class EmailSender:
     """Gestisce invio email tramite Resend"""
@@ -27,7 +30,13 @@ class EmailSender:
             bool: True se invio riuscito, False altrimenti
         """
         if not self.resend_available:
-            print("⚠️ Resend non configurato - Report salvato solo nel database")
+            logger.warning(
+                event_type='resend_not_configured',
+                domain='email',
+                recipient_email=recipient_email,
+                report_type=report_data.get('type'),
+                message='Resend API not configured, falling back to file save'
+            )
             return self._save_to_file(recipient_email, report_data, html_content)
         
         try:
@@ -50,14 +59,38 @@ class EmailSender:
             )
             
             if response.status_code == 200:
-                print(f"✅ Email report inviata a {recipient_email}")
+                logger.info(
+                    event_type='email_sent_success',
+                    domain='email',
+                    recipient_email=recipient_email,
+                    report_type=report_data.get('type'),
+                    report_period=report_data.get('period'),
+                    message='Email report sent successfully'
+                )
                 return True
             else:
-                print(f"❌ Errore invio email: {response.status_code} - {response.text}")
+                logger.error(
+                    event_type='email_send_failed',
+                    domain='email',
+                    recipient_email=recipient_email,
+                    report_type=report_data.get('type'),
+                    status_code=response.status_code,
+                    response_text=response.text,
+                    message='Failed to send email via Resend API'
+                )
                 return False
                 
         except Exception as e:
-            print(f"❌ Errore send_report_email: {e}")
+            logger.error(
+                event_type='email_send_exception',
+                domain='email',
+                recipient_email=recipient_email,
+                report_type=report_data.get('type'),
+                error=str(e),
+                error_type=type(e).__name__,
+                message='Exception during email send, falling back to file save',
+                exc_info=True
+            )
             return self._save_to_file(recipient_email, report_data, html_content)
     
     def _get_subject(self, report_data):
@@ -76,11 +109,26 @@ class EmailSender:
             with open(filename, 'w', encoding='utf-8') as f:
                 f.write(html_content)
             
-            print(f"💾 Report salvato come file: {filename}")
-            print(f"👉 Configurare Resend per invio automatico via email")
+            logger.info(
+                event_type='report_saved_to_file',
+                domain='email',
+                recipient_email=recipient_email,
+                report_type=report_data.get('type'),
+                filename=filename,
+                message='Report saved to file (Resend not configured)'
+            )
             return True
         except Exception as e:
-            print(f"❌ Errore save_to_file: {e}")
+            logger.error(
+                event_type='file_save_failed',
+                domain='email',
+                recipient_email=recipient_email,
+                report_type=report_data.get('type'),
+                error=str(e),
+                error_type=type(e).__name__,
+                message='Failed to save report to file',
+                exc_info=True
+            )
             return False
 
 # Istanza globale

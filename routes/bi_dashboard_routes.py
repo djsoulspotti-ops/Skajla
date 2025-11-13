@@ -8,8 +8,10 @@ from flask import Blueprint, render_template, session, redirect, jsonify
 from database_manager import db_manager
 from services.tenant_guard import get_current_school_id, TenantGuardException
 from shared.middleware.auth import require_login
+from shared.error_handling import get_logger
 from datetime import datetime, timedelta
 
+logger = get_logger(__name__)
 bi_bp = Blueprint('bi_dashboard', __name__, url_prefix='/bi')
 
 @bi_bp.route('/dashboard')
@@ -42,7 +44,15 @@ def bi_dashboard():
                              classes_stats=classes_stats,
                              ruolo=ruolo)
     
-    except TenantGuardException:
+    except TenantGuardException as e:
+        logger.warning(
+            event_type='tenant_guard_violation',
+            domain='bi_dashboard',
+            user_id=session.get('user_id'),
+            school_id=session.get('scuola_id'),
+            error=str(e),
+            message='Tenant guard exception in BI dashboard access'
+        )
         session.clear()
         return redirect('/login')
 
@@ -60,6 +70,16 @@ def api_organigramma():
         return jsonify({'success': True, 'data': org_tree})
     
     except Exception as e:
+        logger.error(
+            event_type='api_organigramma_error',
+            domain='bi_dashboard',
+            user_id=session.get('user_id'),
+            school_id=session.get('scuola_id'),
+            error=str(e),
+            error_type=type(e).__name__,
+            message='Failed to fetch organization tree data',
+            exc_info=True
+        )
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @bi_bp.route('/api/classe/<classe>/stats')
@@ -123,6 +143,17 @@ def api_classe_stats(classe):
         })
     
     except Exception as e:
+        logger.error(
+            event_type='api_classe_stats_error',
+            domain='bi_dashboard',
+            user_id=session.get('user_id'),
+            school_id=session.get('scuola_id'),
+            classe=classe,
+            error=str(e),
+            error_type=type(e).__name__,
+            message='Failed to fetch class statistics',
+            exc_info=True
+        )
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @bi_bp.route('/api/studente/<int:student_id>/dashboard')
@@ -176,6 +207,17 @@ def api_studente_dashboard(student_id):
         })
     
     except Exception as e:
+        logger.error(
+            event_type='api_studente_dashboard_error',
+            domain='bi_dashboard',
+            user_id=session.get('user_id'),
+            school_id=session.get('scuola_id'),
+            student_id=student_id,
+            error=str(e),
+            error_type=type(e).__name__,
+            message='Failed to fetch student dashboard data',
+            exc_info=True
+        )
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

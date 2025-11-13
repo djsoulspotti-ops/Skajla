@@ -3,6 +3,9 @@ import redis
 import json
 import os
 from datetime import datetime, timedelta
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 class ScalableSessionManager:
     """Gestione sessioni scalabile per 30+ utenti simultanei"""
@@ -18,9 +21,18 @@ class ScalableSessionManager:
                 self.redis_client = redis.from_url(redis_url)
                 self.redis_client.ping()
                 self.use_redis = True
-                print("✅ Redis disponibile per sessioni scalabili")
-        except:
-            print("⚠️ Redis non disponibile - usando memoria locale")
+                logger.info(
+                    event_type='redis_connected',
+                    domain='session',
+                    message='Redis disponibile per sessioni scalabili'
+                )
+        except Exception as e:
+            logger.warning(
+                event_type='redis_unavailable',
+                domain='session',
+                message='Redis non disponibile - usando memoria locale',
+                error=str(e)
+            )
     
     def set_session(self, session_id, user_data, expiry_hours=24):
         """Salva sessione utente"""

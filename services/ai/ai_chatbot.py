@@ -14,6 +14,15 @@ from typing import Dict, Any, List
 import json
 import re
 
+from shared.error_handling import (
+    AIServiceError,
+    DatabaseError,
+    get_logger,
+    log_ai_request
+)
+
+logger = get_logger(__name__)
+
 class AISkailaBot:
     """
     Chatbot SKAILA Potenziato - Coach AI intelligente per studenti
@@ -31,7 +40,11 @@ class AISkailaBot:
         # Soft skills action plans templates
         self.soft_skills_plans = self._init_soft_skills_plans()
         
-        print("✅ SKAILA Coach Potenziato inizializzato - Multi-funzione AI")
+        logger.info(
+            event_type='ai_chatbot_initialized',
+            message='SKAILA Coach Potenziato inizializzato',
+            domain='ai'
+        )
     
     def _init_subject_knowledge(self) -> Dict[str, Any]:
         """Knowledge base dettagliata per ogni materia"""
@@ -476,7 +489,14 @@ class AISkailaBot:
                 self._save_conversation(user_id, message, response)
                 return response
             except Exception as e:
-                print(f"Errore coaching engine: {e}")
+                logger.error(
+                    event_type='coaching_engine_error',
+                    message='Failed to generate coaching response',
+                    domain='ai',
+                    user_id=user_id,
+                    error=str(e),
+                    exc_info=True
+                )
         
         # LIVELLO 5: Info generali SKAILA
         try:
@@ -485,7 +505,14 @@ class AISkailaBot:
             self._save_conversation(user_id, message, response)
             return response
         except Exception as e:
-            print(f"Errore SKAILA brain: {e}")
+            logger.error(
+                event_type='skaila_brain_error',
+                message='Failed to generate SKAILA brain response, using fallback',
+                domain='ai',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
             return self._fallback_supportive_message(user_name)
     
     def _generate_action_plan_response(self, message: str, user_name: str, user_id: int) -> str:
@@ -514,7 +541,14 @@ class AISkailaBot:
         # Analizza contesto studente
         try:
             student_data = coaching_engine.analyze_student_ecosystem(user_id)
-        except:
+        except Exception as e:
+            logger.warning(
+                event_type='student_ecosystem_analysis_failed',
+                message='Failed to analyze student ecosystem for action plan',
+                domain='ai',
+                user_id=user_id,
+                error=str(e)
+            )
             student_data = {}
         
         # Genera risposta personalizzata con piano
@@ -585,7 +619,15 @@ Sei pronto a iniziare? 🚀
             student_data = coaching_engine.analyze_student_ecosystem(user_id)
             voti_summary = student_data.get('academic', {}).get('voti_summary', {})
             subject_grade = voti_summary.get(subject, {}).get('media', 0)
-        except:
+        except Exception as e:
+            logger.warning(
+                event_type='student_grades_retrieval_failed',
+                message='Failed to retrieve student grades for subject question',
+                domain='ai',
+                user_id=user_id,
+                subject=subject,
+                error=str(e)
+            )
             subject_grade = 0
         
         # Costruisci risposta
@@ -709,7 +751,14 @@ Vuoi consigli su come studiare meglio questa materia? 🤝"""
                 VALUES (%s, %s, %s, %s, %s, %s)
             ''', (user_id, message, category, ','.join(sentiment), response, json.dumps({'timestamp': datetime.now().isoformat()})))
         except Exception as e:
-            print(f"Errore save conversation: {e}")
+            logger.warning(
+                event_type='conversation_save_failed',
+                message='Failed to save conversation to database (non-critical)',
+                domain='ai',
+                user_id=user_id,
+                category=category,
+                error=str(e)
+            )
     
     def _fallback_supportive_message(self, user_name: str) -> str:
         """Messaggio di fallback"""
@@ -750,7 +799,14 @@ Cosa ti serve? 🤝"""
             
             return insights
         except Exception as e:
-            print(f"Errore dashboard insights: {e}")
+            logger.error(
+                event_type='dashboard_insights_error',
+                message='Failed to generate dashboard insights, using fallback',
+                domain='ai',
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
             return {
                 'summary': "Continua così! 🌟",
                 'alerts': [],

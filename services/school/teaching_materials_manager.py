@@ -10,15 +10,28 @@ from werkzeug.utils import secure_filename
 from database_manager import db_manager
 from shared.formatters.file_formatters import file_formatter
 from shared.validators.input_validators import validator
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 # Replit Object Storage - GRATUITO fino a 10GB
 try:
     from replit.object_storage import Client
     OBJECT_STORAGE_AVAILABLE = True
-    print("✅ Replit Object Storage disponibile (GRATUITO)")
+    logger.info(
+        event_type='storage_init',
+        message='Replit Object Storage disponibile',
+        domain='materials',
+        storage_type='object_storage'
+    )
 except ImportError:
     OBJECT_STORAGE_AVAILABLE = False
-    print("⚠️ Replit Object Storage non disponibile - fallback a filesystem")
+    logger.warning(
+        event_type='storage_fallback',
+        message='Replit Object Storage non disponibile - fallback a filesystem',
+        domain='materials',
+        storage_type='filesystem'
+    )
 
 class TeachingMaterialsManager:
     """Gestione materiali didattici con Replit Object Storage + Auto-cleanup"""
@@ -51,9 +64,20 @@ class TeachingMaterialsManager:
         if self.use_object_storage:
             try:
                 self.storage_client = Client()
-                print("✅ Object Storage client inizializzato")
+                logger.info(
+                    event_type='storage_client_init',
+                    message='Object Storage client inizializzato',
+                    domain='materials',
+                    storage_type='object_storage'
+                )
             except Exception as e:
-                print(f"⚠️ Object Storage fallback: {e}")
+                logger.error(
+                    event_type='storage_client_init_failed',
+                    message='Object Storage fallback a filesystem',
+                    domain='materials',
+                    error_type=type(e).__name__,
+                    exc_info=True
+                )
                 self.use_object_storage = False
         
         if not self.use_object_storage:
@@ -61,9 +85,24 @@ class TeachingMaterialsManager:
     
     def _ensure_upload_folder(self):
         """Crea cartella upload locale (fallback)"""
-        if not os.path.exists(self.UPLOAD_FOLDER):
-            os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
-            print(f"📁 Created local upload folder: {self.UPLOAD_FOLDER}")
+        try:
+            if not os.path.exists(self.UPLOAD_FOLDER):
+                os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
+                logger.info(
+                    event_type='upload_folder_created',
+                    message='Cartella upload locale creata',
+                    domain='materials',
+                    operation='folder_create'
+                )
+        except OSError as e:
+            logger.error(
+                event_type='upload_folder_create_failed',
+                message='Errore creazione cartella upload',
+                domain='materials',
+                operation='folder_create',
+                error_type=type(e).__name__,
+                exc_info=True
+            )
     
     def allowed_file(self, filename: str) -> bool:
         """Verifica se file è permesso"""
@@ -93,9 +132,21 @@ class TeachingMaterialsManager:
             return {'error': f'Tipo file non permesso. Usa: {", ".join(self.ALLOWED_EXTENSIONS.keys())}'}
         
         # Check file size (if available)
-        file.seek(0, os.SEEK_END)
-        file_size = file.tell()
-        file.seek(0)
+        try:
+            file.seek(0, os.SEEK_END)
+            file_size = file.tell()
+            file.seek(0)
+        except (OSError, IOError) as e:
+            logger.error(
+                event_type='file_size_check_failed',
+                message='Errore lettura dimensione file',
+                domain='materials',
+                operation='file_upload',
+                teacher_id=teacher_id,
+                error_type=type(e).__name__,
+                exc_info=True
+            )
+            return {'error': 'Errore lettura file'}
         
         if file_size > self.MAX_FILE_SIZE:
             return {'error': f'File troppo grande. Max {self.MAX_FILE_SIZE // (1024*1024)} MB'}
@@ -113,25 +164,89 @@ class TeachingMaterialsManager:
                 file_contents = file.read()
                 self.storage_client.upload_from_bytes(storage_path, file_contents)
                 file_path = storage_path  # Path virtuale
-                print(f"✅ File caricato su Object Storage: {storage_path}")
+                logger.info(
+                    event_type='file_uploaded',
+                    message='File caricato su Object Storage',
+                    domain='materials',
+                    operation='file_upload',
+                    teacher_id=teacher_id,
+                    file_size=file_size,
+                    file_type=self.get_file_type(original_filename),
+                    storage_type='object_storage'
+                )
             except Exception as e:
-                print(f"❌ Object Storage error: {e}")
+                logger.error(
+                    event_type='file_upload_failed',
+                    message='Errore upload Object Storage',
+                    domain='materials',
+                    operation='file_upload',
+                    teacher_id=teacher_id,
+                    file_size=file_size,
+                    error_type=type(e).__name__,
+                    storage_type='object_storage',
+                    exc_info=True
+                )
                 return {'error': 'Errore upload Object Storage'}
         else:
             # Fallback a filesystem locale
-            file_path = os.path.join(self.UPLOAD_FOLDER, filename)
-            file.save(file_path)
+            try:
+                file_path = os.path.join(self.UPLOAD_FOLDER, filename)
+                file.save(file_path)
+                logger.info(
+                    event_type='file_uploaded',
+                    message='File caricato su filesystem',
+                    domain='materials',
+                    operation='file_upload',
+                    teacher_id=teacher_id,
+                    file_size=file_size,
+                    file_type=self.get_file_type(original_filename),
+                    storage_type='filesystem'
+                )
+            except (OSError, IOError) as e:
+                logger.error(
+                    event_type='file_upload_failed',
+                    message='Errore salvataggio file su filesystem',
+                    domain='materials',
+                    operation='file_upload',
+                    teacher_id=teacher_id,
+                    error_type=type(e).__name__,
+                    storage_type='filesystem',
+                    exc_info=True
+                )
+                return {'error': 'Errore salvataggio file'}
         
         # Save to database
-        cursor = db_manager.execute('''
-            INSERT INTO teaching_materials 
-            (teacher_id, title, description, subject, class, file_name, file_path, 
-             file_type, file_size, is_public)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (teacher_id, title, description, subject, classe, original_filename, 
-              file_path, self.get_file_type(original_filename), file_size, is_public))
-        
-        material_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+        try:
+            cursor = db_manager.execute('''
+                INSERT INTO teaching_materials 
+                (teacher_id, title, description, subject, class, file_name, file_path, 
+                 file_type, file_size, is_public)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ''', (teacher_id, title, description, subject, classe, original_filename, 
+                  file_path, self.get_file_type(original_filename), file_size, is_public))
+            
+            material_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else 0
+            
+            logger.info(
+                event_type='material_created',
+                message='Materiale salvato nel database',
+                domain='materials',
+                operation='database_insert',
+                teacher_id=teacher_id,
+                material_id=material_id,
+                subject=subject
+            )
+        except Exception as e:
+            logger.error(
+                event_type='material_create_failed',
+                message='Errore salvataggio materiale nel database',
+                domain='materials',
+                operation='database_insert',
+                teacher_id=teacher_id,
+                error_type=type(e).__name__,
+                exc_info=True
+            )
+            return {'error': 'Errore salvataggio nel database'}
         
         return {
             'success': True,
@@ -198,7 +313,13 @@ class TeachingMaterialsManager:
                 'teacher': f"{mat['teacher_name']} {mat['teacher_surname']}",
                 'file_name': mat['file_name'],
                 'file_type': mat['file_type'],
-
+                'file_size': file_formatter.format_file_size(mat['file_size']),
+                'upload_date': mat['upload_date'],
+                'downloads': mat['downloads'],
+                'is_public': mat['is_public']
+            })
+        
+        return result
     
     def check_storage_usage(self) -> Dict:
         """Verifica uso storage e attiva pulizia se necessario"""
@@ -248,9 +369,24 @@ class TeachingMaterialsManager:
                 if result.get('success'):
                     cleaned_count += 1
             except Exception as e:
-                print(f"⚠️ Cleanup error per file {file_record['id']}: {e}")
+                logger.error(
+                    event_type='cleanup_file_failed',
+                    message='Errore eliminazione file durante cleanup',
+                    domain='materials',
+                    operation='auto_cleanup',
+                    material_id=file_record['id'],
+                    error_type=type(e).__name__,
+                    exc_info=True
+                )
         
-        print(f"🧹 Auto-cleanup: {cleaned_count} file eliminati (> {self.RETENTION_DAYS} giorni, < 5 download)")
+        logger.info(
+            event_type='auto_cleanup_completed',
+            message='Auto-cleanup completato',
+            domain='materials',
+            operation='auto_cleanup',
+            cleaned_count=cleaned_count,
+            retention_days=self.RETENTION_DAYS
+        )
         return cleaned_count
     
     def get_storage_stats(self) -> Dict:
@@ -286,14 +422,6 @@ class TeachingMaterialsManager:
                 for t in by_type
             ]
         }
-
-                'file_size': file_formatter.format_file_size(mat['file_size']),  # ✅ Formattatore centralizzato
-                'upload_date': mat['upload_date'],
-                'downloads': mat['downloads'],
-                'is_public': mat['is_public']
-            })
-        
-        return result
     
     def download_material(self, material_id: int, user_id: int) -> Dict:
         """Download materiale da Object Storage o filesystem"""
@@ -328,6 +456,15 @@ class TeachingMaterialsManager:
             try:
                 # Download da Object Storage
                 file_contents = self.storage_client.download_as_bytes(file_path)
+                logger.info(
+                    event_type='material_downloaded',
+                    message='Materiale scaricato da Object Storage',
+                    domain='materials',
+                    operation='file_download',
+                    material_id=material_id,
+                    user_id=user_id,
+                    storage_type='object_storage'
+                )
                 return {
                     'success': True,
                     'file_contents': file_contents,
@@ -336,10 +473,29 @@ class TeachingMaterialsManager:
                     'from_storage': True
                 }
             except Exception as e:
-                print(f"❌ Object Storage download error: {e}")
+                logger.error(
+                    event_type='material_download_failed',
+                    message='Errore download da Object Storage',
+                    domain='materials',
+                    operation='file_download',
+                    material_id=material_id,
+                    user_id=user_id,
+                    error_type=type(e).__name__,
+                    storage_type='object_storage',
+                    exc_info=True
+                )
                 return {'error': 'Errore download da Object Storage'}
         else:
             # Fallback filesystem locale
+            logger.info(
+                event_type='material_downloaded',
+                message='Materiale scaricato da filesystem',
+                domain='materials',
+                operation='file_download',
+                material_id=material_id,
+                user_id=user_id,
+                storage_type='filesystem'
+            )
             return {
                 'success': True,
                 'file_path': file_path,
@@ -370,17 +526,78 @@ class TeachingMaterialsManager:
             try:
                 # Delete da Object Storage
                 self.storage_client.delete(file_path)
-                print(f"✅ File eliminato da Object Storage: {file_path}")
+                logger.info(
+                    event_type='file_deleted',
+                    message='File eliminato da Object Storage',
+                    domain='materials',
+                    operation='file_delete',
+                    material_id=material_id,
+                    user_id=user_id,
+                    storage_type='object_storage'
+                )
             except Exception as e:
-                print(f"⚠️ Object Storage delete error: {e}")
+                logger.error(
+                    event_type='file_delete_failed',
+                    message='Errore eliminazione file da Object Storage',
+                    domain='materials',
+                    operation='file_delete',
+                    material_id=material_id,
+                    user_id=user_id,
+                    error_type=type(e).__name__,
+                    storage_type='object_storage',
+                    exc_info=True
+                )
         else:
             # Delete da filesystem locale
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    logger.info(
+                        event_type='file_deleted',
+                        message='File eliminato da filesystem',
+                        domain='materials',
+                        operation='file_delete',
+                        material_id=material_id,
+                        user_id=user_id,
+                        storage_type='filesystem'
+                    )
+            except OSError as e:
+                logger.error(
+                    event_type='file_delete_failed',
+                    message='Errore eliminazione file da filesystem',
+                    domain='materials',
+                    operation='file_delete',
+                    material_id=material_id,
+                    user_id=user_id,
+                    error_type=type(e).__name__,
+                    storage_type='filesystem',
+                    exc_info=True
+                )
         
         # Delete from database
-        db_manager.execute('DELETE FROM teaching_materials WHERE id = %s', (material_id,))
-        db_manager.execute('DELETE FROM material_downloads WHERE material_id = %s', (material_id,))
+        try:
+            db_manager.execute('DELETE FROM teaching_materials WHERE id = %s', (material_id,))
+            db_manager.execute('DELETE FROM material_downloads WHERE material_id = %s', (material_id,))
+            logger.info(
+                event_type='material_deleted',
+                message='Materiale eliminato dal database',
+                domain='materials',
+                operation='database_delete',
+                material_id=material_id,
+                user_id=user_id
+            )
+        except Exception as e:
+            logger.error(
+                event_type='material_delete_failed',
+                message='Errore eliminazione materiale dal database',
+                domain='materials',
+                operation='database_delete',
+                material_id=material_id,
+                user_id=user_id,
+                error_type=type(e).__name__,
+                exc_info=True
+            )
+            return {'error': 'Errore eliminazione dal database'}
         
         return {'success': True, 'message': 'Materiale eliminato'}
     
@@ -461,4 +678,8 @@ class TeachingMaterialsManager:
 
 # Initialize
 materials_manager = TeachingMaterialsManager()
-print("✅ Teaching Materials Manager inizializzato!")
+logger.info(
+    event_type='manager_initialized',
+    message='Teaching Materials Manager inizializzato',
+    domain='materials'
+)

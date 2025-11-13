@@ -11,6 +11,14 @@ from services.tenant_guard import get_current_school_id
 from shared.validators.input_validators import validator, sql_protector
 from shared.middleware.auth import require_auth, require_teacher
 from shared.middleware.feature_guard import check_feature_enabled, Features
+from shared.error_handling import (
+    DatabaseError,
+    ValidationError,
+    AuthenticationError,
+    get_logger
+)
+
+logger = get_logger(__name__)
 
 registro_bp = Blueprint('registro_api', __name__)
 
@@ -23,6 +31,13 @@ def check_registro_feature():
     try:
         school_id = get_current_school_id()
         if not check_feature_enabled(school_id, Features.REGISTRO):
+            logger.info(
+                event_type='feature_check_blocked',
+                domain='registro',
+                message='Registro feature not enabled for school',
+                school_id=school_id,
+                route=request.path
+            )
             # API endpoint - ritorna JSON 403
             if request.path.startswith('/api/'):
                 return jsonify({
@@ -34,8 +49,14 @@ def check_registro_feature():
             # Web endpoint - redirect con flash
             flash('⚠️ Il Registro Elettronico non è disponibile per la tua scuola.', 'warning')
             return redirect('/dashboard')
-    except Exception:
-        pass  # Se errore, lascia passare (migliore UX)
+    except Exception as e:
+        logger.debug(
+            event_type='feature_check_error',
+            domain='registro',
+            message='Error checking registro feature, allowing request',
+            error=str(e),
+            route=request.path
+        )
 
 # ============== PRESENZE ==============
 
@@ -86,7 +107,16 @@ def segna_presenza():
             return jsonify({'error': result.get('error')}), 400
             
     except Exception as e:
-        print(f"❌ Errore segna_presenza: {e}")
+        logger.error(
+            event_type='mark_attendance_error',
+            domain='registro',
+            message='Failed to mark student attendance',
+            user_id=session.get('user_id'),
+            student_id=data.get('student_id') if 'data' in locals() else None,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 @registro_bp.route('/api/registro/presenze/classe', methods=['POST'])
@@ -115,7 +145,16 @@ def segna_presenze_classe():
         return jsonify(result), 200
         
     except Exception as e:
-        print(f"❌ Errore segna_presenze_classe: {e}")
+        logger.error(
+            event_type='mark_class_attendance_error',
+            domain='registro',
+            message='Failed to mark class attendance',
+            user_id=session.get('user_id'),
+            classe=data.get('classe') if 'data' in locals() else None,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 @registro_bp.route('/api/registro/presenze/studente/<int:student_id>', methods=['GET'])
@@ -145,7 +184,16 @@ def get_presenze_studente(student_id):
         }), 200
         
     except Exception as e:
-        print(f"❌ Errore get_presenze_studente: {e}")
+        logger.error(
+            event_type='get_attendance_error',
+            domain='registro',
+            message='Failed to retrieve student attendance',
+            user_id=session.get('user_id'),
+            student_id=student_id,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 # ============== VOTI ==============
@@ -221,7 +269,17 @@ def inserisci_voto():
             return jsonify({'error': result.get('error')}), 400
             
     except Exception as e:
-        print(f"❌ Errore inserisci_voto: {e}")
+        logger.error(
+            event_type='insert_grade_error',
+            domain='registro',
+            message='Failed to insert grade',
+            user_id=session.get('user_id'),
+            student_id=data.get('student_id') if 'data' in locals() else None,
+            subject=data.get('subject') if 'data' in locals() else None,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 @registro_bp.route('/api/registro/voti/studente/<int:student_id>', methods=['GET'])
@@ -251,7 +309,16 @@ def get_voti_studente(student_id):
         }), 200
         
     except Exception as e:
-        print(f"❌ Errore get_voti_studente: {e}")
+        logger.error(
+            event_type='get_grades_error',
+            domain='registro',
+            message='Failed to retrieve student grades',
+            user_id=session.get('user_id'),
+            student_id=student_id,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 # ============== NOTE DISCIPLINARI ==============
@@ -305,7 +372,17 @@ def inserisci_nota():
             return jsonify({'error': result.get('error')}), 400
             
     except Exception as e:
-        print(f"❌ Errore inserisci_nota: {e}")
+        logger.error(
+            event_type='insert_disciplinary_note_error',
+            domain='registro',
+            message='Failed to insert disciplinary note',
+            user_id=session.get('user_id'),
+            student_id=data.get('student_id') if 'data' in locals() else None,
+            severity=data.get('severity') if 'data' in locals() else None,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 @registro_bp.route('/api/registro/note/studente/<int:student_id>', methods=['GET'])
@@ -331,7 +408,16 @@ def get_note_studente(student_id):
         return jsonify({'note': note}), 200
         
     except Exception as e:
-        print(f"❌ Errore get_note_studente: {e}")
+        logger.error(
+            event_type='get_disciplinary_notes_error',
+            domain='registro',
+            message='Failed to retrieve disciplinary notes',
+            user_id=session.get('user_id'),
+            student_id=student_id,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 
@@ -383,7 +469,16 @@ def get_voti_mia_materia(materia):
         }), 200
         
     except Exception as e:
-        print(f"❌ Errore get_voti_mia_materia: {e}")
+        logger.error(
+            event_type='get_subject_grades_error',
+            domain='registro',
+            message='Failed to retrieve grades for subject',
+            user_id=session.get('user_id'),
+            materia=materia,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 
@@ -461,7 +556,16 @@ def get_statistiche_classe(classe):
         }), 200
         
     except Exception as e:
-        print(f"❌ Errore get_statistiche_classe: {e}")
+        logger.error(
+            event_type='get_class_statistics_error',
+            domain='registro',
+            message='Failed to retrieve class statistics',
+            user_id=session.get('user_id'),
+            classe=classe,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 # ============== CALENDARIO LEZIONI ==============
@@ -502,7 +606,17 @@ def aggiungi_lezione():
             return jsonify({'error': result.get('error')}), 400
             
     except Exception as e:
-        print(f"❌ Errore aggiungi_lezione: {e}")
+        logger.error(
+            event_type='add_lesson_error',
+            domain='registro',
+            message='Failed to add lesson',
+            user_id=session.get('user_id'),
+            classe=data.get('class') if 'data' in locals() else None,
+            subject=data.get('subject') if 'data' in locals() else None,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 @registro_bp.route('/api/registro/lezioni/classe/<classe>', methods=['GET'])
@@ -522,7 +636,16 @@ def get_lezioni_classe(classe):
         return jsonify({'lezioni': lezioni}), 200
         
     except Exception as e:
-        print(f"❌ Errore get_lezioni_classe: {e}")
+        logger.error(
+            event_type='get_class_lessons_error',
+            domain='registro',
+            message='Failed to retrieve class lessons',
+            user_id=session.get('user_id'),
+            classe=classe,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500
 
 # ============== STATISTICHE ==============
@@ -550,5 +673,14 @@ def get_statistiche_studente(student_id):
         return jsonify(report), 200
         
     except Exception as e:
-        print(f"❌ Errore get_statistiche_studente: {e}")
+        logger.error(
+            event_type='get_student_statistics_error',
+            domain='registro',
+            message='Failed to retrieve student statistics',
+            user_id=session.get('user_id'),
+            student_id=student_id,
+            route=request.path,
+            error=str(e),
+            exc_info=True
+        )
         return jsonify({'error': str(e)}), 500

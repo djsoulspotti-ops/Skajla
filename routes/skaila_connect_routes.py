@@ -6,9 +6,11 @@ Sistema per connettere scuole con aziende per alternanza scuola-lavoro
 from flask import Blueprint, render_template, session, redirect, flash, jsonify, request
 from shared.middleware.auth import require_login
 from shared.middleware.feature_guard import check_feature_enabled, Features
+from shared.error_handling import get_logger
 from services.database.database_manager import DatabaseManager
 from services.tenant_guard import get_current_school_id
 
+logger = get_logger(__name__)
 skaila_connect_bp = Blueprint('skaila_connect', __name__)
 db_manager = DatabaseManager()
 
@@ -32,8 +34,17 @@ def check_skaila_connect_feature():
             # Web endpoint - redirect con flash
             flash('⚠️ SKAILA Connect non è disponibile per la tua scuola.', 'warning')
             return redirect('/dashboard')
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(
+            event_type='feature_check_error',
+            domain='skaila_connect',
+            user_id=session.get('user_id'),
+            school_id=session.get('scuola_id'),
+            feature=Features.SKAILA_CONNECT,
+            error=str(e),
+            error_type=type(e).__name__,
+            message='Error checking SKAILA Connect feature availability'
+        )
 
 # Shared mock data for fallback when companies table doesn't exist
 MOCK_COMPANIES = [
@@ -130,8 +141,16 @@ def connect_hub():
             LIMIT 20
         ''') or []
     except Exception as e:
-        # Se la tabella companies non esiste, usa dati mock
-        print(f"⚠️ Tabella companies non trovata, uso dati mock: {e}")
+        logger.warning(
+            event_type='companies_query_fallback',
+            domain='skaila_connect',
+            user_id=user_id,
+            school_id=school_id,
+            error=str(e),
+            error_type=type(e).__name__,
+            message='Companies table not found, using mock data',
+            fallback='MOCK_COMPANIES'
+        )
         companies = []
     
     # Se nessuna azienda trovata, usa dati mock (lista condivisa)
@@ -162,7 +181,17 @@ def company_detail(company_id):
             SELECT * FROM companies WHERE id = %s
         ''', (company_id,), one=True)
     except Exception as e:
-        print(f"⚠️ Errore query companies table (uso mock): {e}")
+        logger.warning(
+            event_type='company_detail_query_fallback',
+            domain='skaila_connect',
+            user_id=session.get('user_id'),
+            school_id=session.get('school_id'),
+            company_id=company_id,
+            error=str(e),
+            error_type=type(e).__name__,
+            message='Company detail query failed, using mock data',
+            fallback='MOCK_COMPANIES'
+        )
         company = None
     
     if not company:

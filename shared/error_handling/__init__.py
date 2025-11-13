@@ -43,6 +43,7 @@ from .exceptions import (
     ValidationError,
     ExternalServiceError,
     EmailServiceError,
+    map_exception,
 )
 
 from .decorators import (
@@ -81,6 +82,7 @@ __all__ = [
     'ValidationError',
     'ExternalServiceError',
     'EmailServiceError',
+    'map_exception',
     # Decorators
     'handle_errors',
     'retry_on',

@@ -9,6 +9,9 @@ from database_manager import db_manager
 from gamification import gamification_system
 from shared.middleware.feature_guard import check_feature_enabled, Features
 from services.tenant_guard import get_current_school_id
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 credits_bp = Blueprint('credits', __name__)
 
@@ -32,8 +35,14 @@ def check_gamification_feature():
             # Web endpoint - redirect con flash
             flash('⚠️ La Gamification non è disponibile per la tua scuola.', 'warning')
             return redirect('/dashboard')
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(
+            event_type='feature_check_failed',
+            domain='credits',
+            message='Failed to check gamification feature availability',
+            error=str(e),
+            exc_info=True
+        )
 
 @credits_bp.route('/crediti')
 def view_credits():

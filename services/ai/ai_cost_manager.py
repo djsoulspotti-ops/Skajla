@@ -9,6 +9,9 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 import hashlib
+from shared.error_handling import get_logger, log_ai_request
+
+logger = get_logger(__name__)
 
 class AICostManager:
     def __init__(self):
@@ -81,10 +84,20 @@ class AICostManager:
                 ON ai_response_cache(timestamp DESC)
             ''')
             
-            print("✅ Tabelle AI Cost Manager inizializzate (PostgreSQL)")
+            logger.info(
+                event_type='ai_cost_tables_initialized',
+                message='Tabelle AI Cost Manager inizializzate (PostgreSQL)',
+                domain='ai'
+            )
             
         except Exception as e:
-            print(f"⚠️ Errore init AI Cost Manager tables: {e}")
+            logger.error(
+                event_type='ai_cost_tables_init_failed',
+                message='Errore inizializzazione tabelle AI Cost Manager',
+                domain='ai',
+                error=str(e),
+                exc_info=True
+            )
 
     def calculate_cost(self, model: str, input_tokens: int, output_tokens: int) -> float:
         """Calcola il costo per una richiesta OpenAI"""
@@ -148,13 +161,26 @@ class AICostManager:
                     WHERE id = %s
                 ''', (cache_id,))
                 
-                print(f"✅ Cache hit per richiesta: {message[:30]}...")
+                logger.info(
+                    event_type='ai_cache_hit',
+                    message=f'Cache hit per richiesta: {message[:30]}...',
+                    domain='ai',
+                    request_hash=request_hash,
+                    cache_id=cache_id
+                )
                 return response
                 
             return None
             
         except Exception as e:
-            print(f"❌ Errore cache lookup: {e}")
+            logger.error(
+                event_type='ai_cache_lookup_failed',
+                message='Errore durante lookup cache AI',
+                domain='ai',
+                error=str(e),
+                request_preview=message[:30],
+                exc_info=True
+            )
             return None
 
     def cache_response(self, message: str, response: str, user_context: str, model_used: str):
@@ -176,10 +202,24 @@ class AICostManager:
                     hit_count = ai_response_cache.hit_count + 1
             ''', (request_hash, user_context_hash, message, response, model_used))
             
-            print(f"💾 Risposta salvata in cache: {message[:30]}...")
+            logger.info(
+                event_type='ai_response_cached',
+                message=f'Risposta salvata in cache: {message[:30]}...',
+                domain='ai',
+                request_hash=request_hash,
+                model_used=model_used
+            )
             
         except Exception as e:
-            print(f"❌ Errore salvataggio cache: {e}")
+            logger.error(
+                event_type='ai_cache_save_failed',
+                message='Errore durante salvataggio risposta in cache',
+                domain='ai',
+                error=str(e),
+                request_preview=message[:30],
+                model_used=model_used,
+                exc_info=True
+            )
 
     def check_budget_limits(self, user_id: int, estimated_cost: float) -> Tuple[bool, str]:
         """Controlla se l'utente può fare la richiesta senza superare i limiti"""
@@ -248,7 +288,15 @@ class AICostManager:
             return True, "OK"
             
         except Exception as e:
-            print(f"❌ Errore controllo budget: {e}")
+            logger.error(
+                event_type='ai_budget_check_failed',
+                message='Errore durante controllo limiti budget AI',
+                domain='ai',
+                error=str(e),
+                user_id=user_id,
+                estimated_cost=estimated_cost,
+                exc_info=True
+            )
             return True, "Errore controllo budget"
 
     def should_use_premium_model(self, user_profile: Dict, message_complexity: str) -> str:
@@ -272,6 +320,9 @@ class AICostManager:
     def track_cost(self, user_id: int, model_used: str, input_tokens: int, 
                    output_tokens: int, cost: float, request_type: str = 'chat', cached: bool = False):
         """Traccia il costo di una richiesta"""
+        cost_tracked = False
+        budget_updated = False
+        
         try:
             # Salva tracking costo
             db_manager.execute('''
@@ -279,6 +330,7 @@ class AICostManager:
                 (user_id, model_used, input_tokens, output_tokens, cost_usd, request_type, cached)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             ''', (user_id, model_used, input_tokens, output_tokens, cost, request_type, cached))
+            cost_tracked = True
             
             # Aggiorna budget utente se non cached
             if not cached:
@@ -288,11 +340,38 @@ class AICostManager:
                         current_monthly_usage = current_monthly_usage + %s
                     WHERE user_id = %s
                 ''', (cost, cost, user_id))
+                budget_updated = True
             
-            print(f"💰 Costo tracciato: ${cost:.4f} ({model_used}) per user {user_id}")
+            log_ai_request(
+                model=model_used,
+                tokens_used=input_tokens + output_tokens,
+                cost_usd=cost,
+                duration_ms=0,
+                success=True,
+                user_id=user_id,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                request_type=request_type,
+                cached=cached
+            )
             
         except Exception as e:
-            print(f"❌ Errore tracking costo: {e}")
+            logger.error(
+                event_type='ai_cost_tracking_failed',
+                message='Errore durante tracking costo AI',
+                domain='ai',
+                error=str(e),
+                user_id=user_id,
+                model_used=model_used,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                cost_usd=cost,
+                request_type=request_type,
+                cached=cached,
+                cost_tracked=cost_tracked,
+                budget_updated=budget_updated,
+                exc_info=True
+            )
 
     def get_usage_stats(self, user_id: int) -> Dict:
         """Ottieni statistiche di utilizzo per un utente"""
@@ -344,7 +423,14 @@ class AICostManager:
             }
             
         except Exception as e:
-            print(f"❌ Errore statistiche utilizzo: {e}")
+            logger.error(
+                event_type='ai_usage_stats_failed',
+                message='Errore durante recupero statistiche utilizzo AI',
+                domain='ai',
+                error=str(e),
+                user_id=user_id,
+                exc_info=True
+            )
             return {}
 
     def optimize_cache(self):
@@ -371,10 +457,20 @@ class AICostManager:
                     )
                 ''')
                 
-            print(f"🧹 Cache ottimizzata: vecchie entry rimosse")
+            logger.info(
+                event_type='ai_cache_optimized',
+                message='Cache AI ottimizzata: vecchie entry rimosse',
+                domain='ai'
+            )
                 
         except Exception as e:
-            print(f"❌ Errore ottimizzazione cache: {e}")
+            logger.error(
+                event_type='ai_cache_optimization_failed',
+                message='Errore durante ottimizzazione cache AI',
+                domain='ai',
+                error=str(e),
+                exc_info=True
+            )
 
 def analyze_message_complexity(message: str) -> str:
     """Analizza la complessità di un messaggio"""

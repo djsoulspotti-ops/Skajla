@@ -7,6 +7,9 @@ from database_manager import db_manager
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import json
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 class CalendarioIntegration:
     """
@@ -40,7 +43,15 @@ class CalendarioIntegration:
             return [dict(e) for e in events] if events else []
         
         except Exception as e:
-            print(f"Errore get_upcoming_events: {e}")
+            logger.error(
+                event_type='calendar_query_failed',
+                message='Failed to retrieve upcoming events from database',
+                domain='calendar',
+                user_id=user_id,
+                days_ahead=days_ahead,
+                error=str(e),
+                exc_info=True
+            )
             return []
     
     def get_critical_deadlines(self, user_id: int, days: int = 7) -> List[Dict]:
@@ -60,7 +71,15 @@ class CalendarioIntegration:
             return [dict(e) for e in events] if events else []
         
         except Exception as e:
-            print(f"Errore get_critical_deadlines: {e}")
+            logger.error(
+                event_type='critical_deadlines_query_failed',
+                message='Failed to retrieve critical deadlines from database',
+                domain='calendar',
+                user_id=user_id,
+                days=days,
+                error=str(e),
+                exc_info=True
+            )
             return []
     
     def calculate_study_load(self, user_id: int) -> Dict[str, Any]:
@@ -202,7 +221,16 @@ class CalendarioIntegration:
             ))
             return True
         except Exception as e:
-            print(f"Errore add_event: {e}")
+            logger.error(
+                event_type='calendar_event_creation_failed',
+                message='Failed to add event to calendar',
+                domain='calendar',
+                event_type_value=event_data.get('tipo'),
+                event_title=event_data.get('titolo'),
+                student_id=event_data.get('studente_id'),
+                error=str(e),
+                exc_info=True
+            )
             return False
     
     def mark_completed(self, event_id: int, user_id: int) -> bool:
@@ -215,7 +243,15 @@ class CalendarioIntegration:
             ''', (event_id, user_id))
             return True
         except Exception as e:
-            print(f"Errore mark_completed: {e}")
+            logger.error(
+                event_type='calendar_event_update_failed',
+                message='Failed to mark calendar event as completed',
+                domain='calendar',
+                event_id=event_id,
+                user_id=user_id,
+                error=str(e),
+                exc_info=True
+            )
             return False
     
     def get_calendar_summary(self, user_id: int) -> str:
