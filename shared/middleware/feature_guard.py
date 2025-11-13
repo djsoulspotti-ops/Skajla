@@ -7,6 +7,7 @@ from functools import wraps
 from flask import session, redirect, flash, jsonify, request
 from services.tenant_guard import get_current_school_id
 from services.school.school_features_manager import school_features_manager
+from shared.error_handling import AuthorizationError, DatabaseError
 
 def require_feature(feature_name):
     """
@@ -73,6 +74,35 @@ def check_feature_enabled(school_id, feature_name):
         bool: True se abilitata, False altrimenti
     """
     return school_features_manager.is_feature_enabled(school_id, feature_name)
+
+
+def require_feature_or_raise(school_id, feature_name):
+    """
+    Verifica che una feature sia abilitata, altrimenti solleva AuthorizationError
+    
+    Args:
+        school_id: ID della scuola
+        feature_name: Nome della feature
+    
+    Raises:
+        AuthorizationError: Se la feature non è abilitata
+        
+    Usage in API routes with @handle_errors decorator:
+        try:
+            require_feature_or_raise(school_id, Features.AI_COACH)
+        except AuthorizationError:
+            raise  # Let handle_errors decorator normalize response
+    """
+    if not school_features_manager.is_feature_enabled(school_id, feature_name):
+        raise AuthorizationError(
+            message=f'Feature {feature_name} non disponibile per questa scuola',
+            user_message=f'La funzionalità {feature_name} non è disponibile. Contatta l\'amministratore.',
+            context={
+                'school_id': school_id,
+                'feature': feature_name,
+                'upgrade_required': True
+            }
+        )
 
 
 # Feature name constants per evitare typo

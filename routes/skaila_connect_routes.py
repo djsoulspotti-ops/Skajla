@@ -35,7 +35,7 @@ def check_skaila_connect_feature():
             flash('⚠️ SKAILA Connect non è disponibile per la tua scuola.', 'warning')
             return redirect('/dashboard')
     except Exception as e:
-        logger.warning(
+        logger.error(
             event_type='feature_check_error',
             domain='skaila_connect',
             user_id=session.get('user_id'),
@@ -43,8 +43,16 @@ def check_skaila_connect_feature():
             feature=Features.SKAILA_CONNECT,
             error=str(e),
             error_type=type(e).__name__,
-            message='Error checking SKAILA Connect feature availability'
+            message='Error checking SKAILA Connect feature availability',
+            exc_info=True
         )
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'error': 'Errore di sistema',
+                'message': 'Impossibile verificare disponibilità feature. Riprova più tardi.'
+            }), 500
+        flash('⚠️ Errore nel verificare le funzionalità disponibili.', 'error')
+        return redirect('/dashboard')
 
 # Shared mock data for fallback when companies table doesn't exist
 MOCK_COMPANIES = [

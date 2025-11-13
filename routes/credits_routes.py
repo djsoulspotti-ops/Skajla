@@ -43,6 +43,13 @@ def check_gamification_feature():
             error=str(e),
             exc_info=True
         )
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'error': 'Errore di sistema',
+                'message': 'Impossibile verificare disponibilità feature. Riprova più tardi.'
+            }), 500
+        flash('⚠️ Errore nel verificare le funzionalità disponibili.', 'error')
+        return redirect('/dashboard')
 
 @credits_bp.route('/crediti')
 def view_credits():

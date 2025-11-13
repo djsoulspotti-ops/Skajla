@@ -50,13 +50,21 @@ def check_registro_feature():
             flash('⚠️ Il Registro Elettronico non è disponibile per la tua scuola.', 'warning')
             return redirect('/dashboard')
     except Exception as e:
-        logger.debug(
+        logger.error(
             event_type='feature_check_error',
             domain='registro',
-            message='Error checking registro feature, allowing request',
+            message='Error checking registro feature availability',
             error=str(e),
-            route=request.path
+            route=request.path,
+            exc_info=True
         )
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'error': 'Errore di sistema',
+                'message': 'Impossibile verificare disponibilità feature. Riprova più tardi.'
+            }), 500
+        flash('⚠️ Errore nel verificare le funzionalità disponibili.', 'error')
+        return redirect('/dashboard')
 
 # ============== PRESENZE ==============
 
