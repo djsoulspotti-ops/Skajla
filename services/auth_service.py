@@ -13,6 +13,20 @@ from services.database.database_manager import db_manager
 from shared.validators.input_validators import validator, sql_protector
 from shared.logging.structured_logger import auth_logger, security_logger
 
+# Error handling framework
+from shared.error_handling import (
+    AuthenticationError,
+    AuthorizationError,
+    SessionExpiredError,
+    AccountLockedError,
+    ValidationError,
+    get_logger,
+    log_security_event
+)
+
+# Initialize structured logger for authentication
+logger = get_logger(__name__)
+
 
 class SecuritySettings:
     """Security configuration constants"""
@@ -33,13 +47,59 @@ class AuthService:
                              bcrypt.gensalt()).decode('utf-8')
 
     def verify_password(self, password: str, hashed: str) -> bool:
-        """Verifica password con fallback per compatibilità"""
+        """
+        Verify password with bcrypt (primary) and SHA-256 fallback (legacy).
+        
+        Security Note: SHA-256 is insecure for password hashing (no salt, fast brute-force).
+        This fallback exists only for backward compatibility with legacy accounts.
+        TODO: Force bcrypt migration for all users - see DEVSECOPS_SECURITY_AUDIT_2025_11_12.md
+        """
         try:
-            return bcrypt.checkpw(password.encode('utf-8'),
-                                  hashed.encode('utf-8'))
-        except:
-            # Fallback per hash SHA-256 esistenti (retrocompatibilità)
-            return hashlib.sha256(password.encode()).hexdigest() == hashed
+            # Primary: bcrypt verification (secure)
+            is_valid = bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+            
+            if is_valid:
+                logger.debug(
+                    event_type='password_verify_success',
+                    domain='authentication',
+                    method='bcrypt'
+                )
+            
+            return is_valid
+            
+        except ValueError as e:
+            # bcrypt failed - likely a SHA-256 hash (legacy)
+            logger.warning(
+                event_type='password_verify_fallback',
+                domain='authentication',
+                method='sha256_legacy',
+                message='Using insecure SHA-256 fallback - schedule bcrypt migration',
+                error=str(e)
+            )
+            
+            # Fallback: SHA-256 verification (INSECURE - legacy only)
+            is_valid = hashlib.sha256(password.encode()).hexdigest() == hashed
+            
+            if is_valid:
+                # TODO: Trigger async password migration to bcrypt
+                logger.warning(
+                    event_type='legacy_password_detected',
+                    domain='security',
+                    message='User authenticated with SHA-256 hash - MIGRATION REQUIRED'
+                )
+                
+            return is_valid
+            
+        except Exception as e:
+            # Unexpected error - log and deny
+            logger.error(
+                event_type='password_verify_error',
+                domain='authentication',
+                error=str(e),
+                error_type=type(e).__name__,
+                exc_info=True
+            )
+            return False
 
     def is_locked_out(self, email: str) -> bool:
         """Controlla se account è bloccato"""

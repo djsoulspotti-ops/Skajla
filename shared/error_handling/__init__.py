@@ -27,15 +27,22 @@ from .exceptions import (
     DatabaseError,
     DatabaseTransientError,
     DatabaseConnectionError,
+    DatabaseQueryError,
     AuthError,
     AuthenticationError,
     AuthorizationError,
+    SessionExpiredError,
+    AccountLockedError,
     AIServiceError,
     AIQuotaExceededError,
+    AIResponseError,
     FileStorageError,
     FileValidationError,
+    FileUploadError,
+    FileNotFoundError,
     ValidationError,
     ExternalServiceError,
+    EmailServiceError,
 )
 
 from .decorators import (
@@ -47,6 +54,9 @@ from .decorators import (
 from .structured_logger import (
     get_logger,
     StructuredLogger,
+    log_security_event,
+    log_database_query,
+    log_ai_request,
 )
 
 __all__ = [
@@ -55,15 +65,22 @@ __all__ = [
     'DatabaseError',
     'DatabaseTransientError',
     'DatabaseConnectionError',
+    'DatabaseQueryError',
     'AuthError',
     'AuthenticationError',
     'AuthorizationError',
+    'SessionExpiredError',
+    'AccountLockedError',
     'AIServiceError',
     'AIQuotaExceededError',
+    'AIResponseError',
     'FileStorageError',
     'FileValidationError',
+    'FileUploadError',
+    'FileNotFoundError',
     'ValidationError',
     'ExternalServiceError',
+    'EmailServiceError',
     # Decorators
     'handle_errors',
     'retry_on',
@@ -71,4 +88,7 @@ __all__ = [
     # Logging
     'get_logger',
     'StructuredLogger',
+    'log_security_event',
+    'log_database_query',
+    'log_ai_request',
 ]

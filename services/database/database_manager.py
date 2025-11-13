@@ -8,6 +8,18 @@ import time
 from contextlib import contextmanager
 from typing import Optional, Union, Any, List, Dict, Tuple
 
+# Error handling framework
+from shared.error_handling import (
+    DatabaseError,
+    DatabaseTransientError,
+    DatabaseConnectionError,
+    DatabaseQueryError,
+    get_logger
+)
+
+# Initialize structured logger for database operations
+logger = get_logger(__name__)
+
 class CursorProxy:
     """Wrapper per simulare cursor.lastrowid in PostgreSQL"""
     def __init__(self, lastrowid: Optional[int] = None, rowcount: int = 0):
@@ -106,19 +118,58 @@ class DatabaseManager:
                     self.pool.put(conn)
 
             def getconn(self):
+                """Get connection from pool with fallback to temp connection"""
                 try:
                     # Use eventlet-compatible non-blocking get
                     return self.pool.get(block=True, timeout=5)
-                except:
-                    # Crea connessione temporanea se pool esaurito
+                except eventlet.queue.Empty:
+                    # Pool exhausted - create temporary connection
+                    logger.warning(
+                        event_type='pool_exhausted',
+                        domain='database',
+                        message='SQLite pool exhausted, creating temporary connection'
+                    )
+                    return self._create_connection()
+                except Exception as e:
+                    # Unexpected error getting connection
+                    logger.error(
+                        event_type='pool_get_error',
+                        domain='database',
+                        error=str(e),
+                        exc_info=True
+                    )
+                    # Fallback to temp connection
                     return self._create_connection()
 
             def putconn(self, conn):
+                """Return connection to pool or close if pool full"""
                 try:
                     # Use eventlet-compatible non-blocking put
                     self.pool.put(conn, block=True, timeout=1)
-                except:
+                except eventlet.queue.Full:
+                    # Pool is full - close the connection
+                    logger.debug(
+                        event_type='pool_full',
+                        domain='database',
+                        message='SQLite pool full, closing connection'
+                    )
                     conn.close()
+                except Exception as e:
+                    # Unexpected error returning connection - close it
+                    logger.warning(
+                        event_type='pool_put_error',
+                        domain='database',
+                        error=str(e),
+                        message='Error returning connection to pool, closing it'
+                    )
+                    try:
+                        conn.close()
+                    except Exception as close_error:
+                        logger.error(
+                            event_type='connection_close_error',
+                            domain='database',
+                            error=str(close_error)
+                        )
 
             def _create_connection(self):
                 conn = sqlite3.connect('skaila.db', timeout=30.0, check_same_thread=False)
@@ -181,8 +232,14 @@ class DatabaseManager:
                     if conn:
                         try:
                             self.pool.putconn(conn, close=True)
-                        except:
-                            pass
+                        except Exception as putconn_error:
+                            # Log error but continue - connection is already dead
+                            logger.debug(
+                                event_type='failed_connection_cleanup',
+                                domain='database',
+                                error=str(putconn_error),
+                                message='Error closing failed connection (expected)'
+                            )
                         conn = None
 
                     # Ricrea pool SOLO se errore di connessione/SSL
@@ -208,12 +265,25 @@ class DatabaseManager:
                         raise last_error if last_error else Exception("Database unavailable")
 
                 except Exception as e:
+                    # Non-database-specific error - log and raise
+                    logger.error(
+                        event_type='database_operation_error',
+                        domain='database',
+                        error=str(e),
+                        error_type=type(e).__name__,
+                        exc_info=True
+                    )
+                    
                     if conn:
                         try:
                             conn.rollback()
                             self.pool.putconn(conn)
-                        except:
-                            pass
+                        except Exception as cleanup_error:
+                            logger.warning(
+                                event_type='connection_cleanup_failed',
+                                domain='database',
+                                error=str(cleanup_error)
+                            )
                     raise e
         else:
             conn = self.sqlite_pool.getconn()
@@ -319,7 +389,12 @@ class DatabaseManager:
                                 return CursorProxy(lastrowid=inserted_id, rowcount=1)
                         except Exception as e:
                             # Tabella senza colonna id - fallback sicuro
-                            pass
+                            logger.debug(
+                                event_type='returning_fallback',
+                                domain='database',
+                                error=str(e),
+                                message='Table has no id column, using rowcount instead'
+                            )
 
                     # Fallback: usa rowcount (per ON CONFLICT o tabelle senza id)
                     return CursorProxy(lastrowid=0, rowcount=cursor.rowcount)
@@ -346,8 +421,20 @@ class DatabaseManager:
             try:
                 self.execute_query(index_sql)
             except Exception as e:
-                print(f"⚠️ Indice già esistente: {e}")
+                # Index already exists or creation failed - log but continue
+                # This is expected on subsequent runs
+                logger.debug(
+                    event_type='index_already_exists',
+                    domain='database',
+                    index_sql=index_sql[:100],
+                    error=str(e)
+                )
 
+        logger.info(
+            event_type='indexes_optimized',
+            domain='database',
+            message='Database indexes optimized'
+        )
         print("✅ Indici database ottimizzati")
 
 # Istanza globale
