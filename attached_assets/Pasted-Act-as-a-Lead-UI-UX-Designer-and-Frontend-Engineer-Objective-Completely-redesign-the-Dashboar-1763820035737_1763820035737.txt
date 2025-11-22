@@ -1,0 +1,36 @@
+Act as a Lead UI/UX Designer and Frontend Engineer.
+
+**Objective:**
+Completely redesign the Dashboard interfaces for the three core roles: **Student, Teacher, and Principal**.
+The goal is to achieve an "Excellent" user experience that is visually stunning, professional, and highly space-efficient.
+
+**Core Design Philosophy:**
+"Clean, Strategic, and Clutter-Free."
+Avoid filling the screen with huge buttons. Instead, use a structured layout where services and icons are positioned strategically based on frequency of use.
+
+Please execute the redesign following these guidelines:
+
+**1. Layout & Navigation (Space Efficiency):**
+* **Implement a Collapsible Sidebar or Compact Navbar:** Move the main navigation (Home, Register, Chat, Calendar) to the side or top to maximize the central workspace.
+* **"Bento Grid" Concept:** Display the main services (like "Latest Grades," "Next Lesson," "Messages") as compact, organized cards in a grid system. This prevents the "wall of text" effect.
+
+**2. Role-Specific Optimization (Strategic Placement):**
+* **Student Dashboard:**
+    * **Focus:** Immediate visibility of the "Next Lesson," "Gamification Level," and "Recent Grades."
+    * **Placement:** Put the schedule and current status at the top (Hero area). Keep less used services in a "Tools" dropdown.
+* **Teacher Dashboard:**
+    * **Focus:** Efficiency. Quick access to "Take Attendance" and "Input Grades."
+    * **Placement:** Create "Quick Action" buttons for the current active class. Don't force them to click 3 times to find the register.
+* **Principal Dashboard:**
+    * **Focus:** Overview. High-level statistics (School Attendance %, Active Users).
+    * **Placement:** An Analytics summary at the top, with administrative tools grouped below.
+
+**3. Visual Style:**
+* Use modern, high-quality icons (e.g., Lucide, Heroicons, or FontAwesome).
+* Use whitespace effectively to separate sections without using heavy borders.
+* Ensure the design is fully responsive (Mobile-friendly).
+
+**Constraint:**
+Do not remove functionality, only reorganize and restyle. The final result must look like a premium SaaS application, not a basic website.
+
+Start by describing the layout structure you plan to apply (e.g., Sidebar vs Topbar) before writing the code.
