@@ -6,6 +6,7 @@ Gestione utenti e profili - PostgreSQL Edition
 from database_manager import db_manager
 from cache_manager import cache_manager
 from datetime import datetime
+from config import config
 
 class UserService:
     
@@ -84,16 +85,26 @@ class UserService:
     @staticmethod
     def get_users_by_role(role, limit=None):
         """Ottieni utenti per ruolo"""
+        # ✅ SECURITY FIX: Validate limit to prevent SQL injection
+        if limit is not None:
+            # Ensure limit is a positive integer
+            try:
+                limit = int(limit)
+                if limit < 0 or limit > config.API_PAGINATION_MAX:
+                    limit = config.API_PAGINATION_MAX
+            except (ValueError, TypeError):
+                limit = config.API_PAGINATION_MAX
+        else:
+            limit = config.API_PAGINATION_DEFAULT
+        
         query = '''
             SELECT * FROM utenti 
             WHERE ruolo = %s AND attivo = true
             ORDER BY nome, cognome
+            LIMIT %s
         '''
         
-        if limit:
-            query += f' LIMIT {limit}'
-        
-        return db_manager.query(query, (role,)) or []
+        return db_manager.query(query, (role, limit)) or []
 
 # Istanza globale
 user_service = UserService()
