@@ -76,11 +76,58 @@ Includes bcrypt password hashing, per-user session expiry, SQL injection prevent
 ## Enterprise UI Design System
 Features an ultra-professional, enterprise-grade UI with a new design token and color system, modern fonts (Inter, IBM Plex Sans, JetBrains Mono), and a 4px spacing system. It is mobile-first, WCAG AA accessible, and performance-optimized.
 
+## Smart Calendar & Agenda System (November 22, 2025)
+A personal and school-wide calendar system with role-specific behaviors and integrated electronic register workflows:
+
+**Architecture:**
+-   **Flexible JSON Storage**: PostgreSQL JSONB for event metadata (subjects, assignments, resources)
+-   **Two-Table Design**: `schedules` (personal/class events) + `school_wide_events` (principal-created school events)
+-   **FullCalendar.js Integration**: Interactive drag-and-drop UI with month/week/day views
+-   **REST API**: Complete CRUD endpoints with role-based authorization
+
+**Role-Specific Behaviors (Architect-Approved):**
+-   **Students**: Pure read-only calendar (no create/edit/drag controls, 403 on POST)
+-   **Teachers**: Quick "Nuova Lezione" button, lesson click → open registro elettronico, full CRUD
+-   **Principals**: School-wide event creation modal, view any user's calendar, global school events visible to all
+
+**Security:**
+-   School events non-editable (frontend `editable: false` + backend 403 on PUT/DELETE)
+-   Multi-tenant isolation (school_id scoping)
+-   Role-based API guards (students blocked from POST, principals require `@require_role`)
+-   Event ownership validation (users can only edit their own events)
+
+**UX Features:**
+-   Responsive modal-based event creation (no blocking prompts)
+-   Color-coded event types (lesson = navy, homework = gold, exam = red, school_event = green)
+-   Mobile-first design with SKAILA design tokens
+-   Drag-and-drop disabled for students, enabled for teachers/principals
+
+**Database Schema:**
+```sql
+schedules: user_id, event_type, title, start_datetime, end_datetime, 
+           all_day, recurrence, event_data (JSONB), created_by, is_active
+
+school_wide_events: scuola_id, event_type, title, description, 
+                     start_datetime, end_datetime, created_by, is_active
+```
+
+**Performance:**
+-   Indexed queries: `idx_schedules_user_date`, `idx_schedules_type`, `idx_school_events_school_date`
+-   Efficient date range filtering
+-   JSONB for flexible metadata without schema migrations
+
+**Files:**
+-   Service: `services/calendar/calendar_system.py` (CRUD logic)
+-   Routes: `routes/calendar_routes.py` (8 endpoints: personal/class/school/chatbot)
+-   Template: `templates/calendar.html` (FullCalendar.js + role-specific UI)
+-   Blueprint: `smart_calendar_bp` registered at `/calendar/smart`
+
 ## Key Features
 -   **SKAILA Connect**: A student career portal with a company database.
 -   **Integrated Online Register**: Digital register for grades and attendance.
 -   **Teaching Materials Management System**: Allows teachers to manage files with class-based access control.
 -   **Parent Communication System**: Generates automated reports with AI insights and real-time notifications.
+-   **Smart Calendar & Agenda**: Personal and school-wide calendar with role-specific behaviors.
 
 # External Dependencies
 
@@ -103,3 +150,55 @@ Features an ultra-professional, enterprise-grade UI with a new design token and 
 -   **Gunicorn**: WSGI HTTP server
 -   **python-dotenv**: Environment variable management
 -   **eventlet**: Asynchronous networking
+
+# Experimental Features
+
+## ⚠️ Experimental Chatbot Schedule Hooks (November 22, 2025)
+
+**STATUS: PROOF-OF-CONCEPT ONLY - NOT PRODUCTION-READY**
+
+A basic API hook (`/api/calendar/chatbot/update`) that accepts structured JSON commands to add or remove calendar events. This is an early proof-of-concept for future integration with the SKAILA AI chatbot system.
+
+**Current Capabilities:**
+-   Role-gated POST endpoint (students blocked with 403 error)
+-   Input validation (event_id must be integer)
+-   Structured JSON actions: `add` (with day/time/subject) and `remove` (with event_id)
+-   Basic error handling with `@handle_errors` decorator
+
+**Known Limitations:**
+-   **Hardcoded dates**: Uses fixed January 2025 dates instead of dynamic/relative parsing
+-   **No natural language processing**: Requires structured JSON, not conversational input
+-   **English weekdays only**: Lacks Italian locale support (no "Lunedì", "Martedì" parsing)
+-   **No timezone handling**: All times assumed to be server timezone
+-   **Missing validation**: No conflict detection, minimal time format validation
+-   **No multi-tenant checks**: Assumes user's school context without explicit verification
+
+**Example Usage:**
+```json
+POST /api/calendar/chatbot/update
+{
+  "action": "add",
+  "day": "Tuesday",
+  "time": "10:00",
+  "subject": "Physics Lab"
+}
+
+POST /api/calendar/chatbot/update
+{
+  "action": "remove",
+  "event_id": 123
+}
+```
+
+**Future Work Required for Production:**
+1. Implement relative date parsing ("next Monday", "tomorrow", "in 2 days")
+2. Add Italian locale support with natural language weekday/month parsing
+3. Integrate timezone detection and conversion
+4. Add conflict detection (overlapping events, schedule constraints)
+5. Implement multi-tenant scoping validation
+6. Build conversational NLP layer for SKAILA AI chatbot
+7. Add comprehensive validation (time formats, date ranges, event types)
+
+**Files:**
+-   Endpoint: `routes/calendar_routes.py` (`smart_chatbot_update_schedule` function)
+-   Service: Uses existing `calendar_system.create_event` and `calendar_system.delete_event`

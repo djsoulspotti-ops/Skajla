@@ -211,14 +211,30 @@ def smart_get_user_calendar(user_id):
 @handle_errors(api=True)
 def smart_chatbot_update_schedule():
     """
-    API per il Chatbot: Aggiorna calendario via linguaggio naturale
+    BASIC API Hook for Chatbot: Schedule updates via structured JSON
     
-    Esempi:
+    ✅ Current Features:
+    - Role gating (students blocked with 403)
+    - Input validation (event_id must be integer)
+    - Structured add/remove actions
+    
+    ⚠️ Limitations (Future Work):
+    - Hardcoded January 2025 dates (no relative parsing)
+    - No timezone handling
+    - English weekdays only (no Italian locale)
+    - No conflict detection
+    - Limited validation of time inputs
+    
+    Examples:
     - { "action": "add", "day": "Tuesday", "time": "10:00", "subject": "Physics" }
     - { "action": "remove", "event_id": 123 }
     """
     user_id = session['user']['user_id']
+    user_role = session['user']['ruolo']
     data = request.get_json()
+    
+    if user_role == 'studente':
+        raise AuthError("Gli studenti non possono aggiornare il calendario tramite chatbot", status_code=403)
     
     action = data.get('action')
     
@@ -251,7 +267,12 @@ def smart_chatbot_update_schedule():
         if not event_id:
             raise ValidationError("event_id obbligatorio")
         
-        calendar_system.delete_event(event_id, user_id)
+        try:
+            event_id_int = int(event_id)
+        except (ValueError, TypeError):
+            raise ValidationError("event_id deve essere un numero intero")
+        
+        calendar_system.delete_event(event_id_int, user_id)
         
         return jsonify({
             'success': True,
