@@ -1,570 +1,21 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="home-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SKAILA - Piattaforma enterprise per la gestione completa di istituti scolastici. Dashboard analitiche, AI coaching, gamification e collaborazione in tempo reale.">
     <title>SKAILA - Enterprise Education Platform</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Stylesheets -->
     <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/professional.css" rel="stylesheet">
-    <style>
-        /* Enterprise Homepage Styles */
-        .enterprise-header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-primary);
-            z-index: 1000;
-            padding: 1.25rem 0;
-            transition: all 0.3s ease;
-        }
-
-        .enterprise-header.scrolled {
-            padding: 1rem 0;
-            box-shadow: var(--shadow-md);
-        }
-
-        .header-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-        }
-
-        .brand-logo {
-            font-size: 2rem;
-            font-weight: var(--font-bold);
-            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -1px;
-        }
-
-        .brand-tagline {
-            font-size: var(--text-sm);
-            color: var(--text-muted);
-            font-weight: var(--font-medium);
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 2.5rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: var(--font-medium);
-            font-size: var(--text-sm);
-            transition: color 0.2s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--color-blue-800);
-        }
-
-        .hero-enterprise {
-            margin-top: 80px;
-            padding: 120px 0 100px;
-            background: linear-gradient(180deg, var(--bg-secondary) 0%, #FFFFFF 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(0, 59, 115, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
-            z-index: 0;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-primary);
-            padding: 0.5rem 1.25rem;
-            border-radius: var(--radius-full);
-            font-size: var(--text-sm);
-            font-weight: var(--font-medium);
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .hero-title {
-            font-size: var(--text-6xl);
-            font-weight: var(--font-extrabold);
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-            letter-spacing: -2px;
-        }
-
-        .hero-title .highlight {
-            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-gold-500) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-description {
-            font-size: var(--text-xl);
-            color: var(--text-secondary);
-            margin-bottom: 3rem;
-            line-height: var(--leading-relaxed);
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-hero-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--color-blue-800);
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: var(--radius-lg);
-            font-weight: var(--font-semibold);
-            font-size: var(--text-base);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-hero-primary:hover {
-            background: var(--color-blue-900);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-            text-decoration: none;
-        }
-
-        .btn-hero-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            color: var(--text-primary);
-            padding: 1rem 2.5rem;
-            border-radius: var(--radius-lg);
-            font-weight: var(--font-semibold);
-            font-size: var(--text-base);
-            text-decoration: none;
-            border: 2px solid var(--border-primary);
-            transition: all 0.3s ease;
-        }
-
-        .btn-hero-secondary:hover {
-            border-color: var(--color-blue-700);
-            color: var(--color-blue-800);
-            transform: translateY(-2px);
-            text-decoration: none;
-        }
-
-        .features-enterprise {
-            padding: 100px 0;
-            background: white;
-        }
-
-        .section-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 5rem;
-        }
-
-        .section-subtitle {
-            font-size: var(--text-sm);
-            color: var(--color-blue-700);
-            font-weight: var(--font-semibold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-        }
-
-        .section-title {
-            font-size: var(--text-4xl);
-            font-weight: var(--font-bold);
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .section-description {
-            font-size: var(--text-lg);
-            color: var(--text-secondary);
-            line-height: var(--leading-relaxed);
-        }
-
-        .features-grid-enterprise {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2.5rem;
-        }
-
-        .feature-card-enterprise {
-            background: var(--bg-card);
-            border: 1px solid var(--border-primary);
-            border-radius: var(--radius-xl);
-            padding: 2.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card-enterprise:hover {
-            border-color: var(--color-blue-600);
-            box-shadow: var(--shadow-card-hover);
-            transform: translateY(-4px);
-        }
-
-        .feature-icon-enterprise {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
-            border-radius: var(--radius-xl);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-icon-enterprise i {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .feature-title-enterprise {
-            font-size: var(--text-xl);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-        }
-
-        .feature-description-enterprise {
-            font-size: var(--text-sm);
-            color: var(--text-secondary);
-            line-height: var(--leading-relaxed);
-        }
-
-        .stats-section {
-            padding: 100px 0;
-            background: var(--color-blue-950);
-            color: white;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 3rem;
-        }
-
-        .services-section {
-            padding: 100px 0;
-            background: linear-gradient(180deg, #FFFFFF 0%, var(--bg-secondary) 100%);
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .service-card {
-            background: var(--bg-card);
-            border: 2px solid var(--border-primary);
-            border-radius: var(--radius-xl);
-            padding: 2.5rem;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--color-blue-800), var(--color-gold-500));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .service-card:hover {
-            border-color: var(--color-blue-600);
-            box-shadow: 0 12px 32px rgba(0, 59, 115, 0.15);
-            transform: translateY(-8px);
-        }
-
-        .service-card:hover::before {
-            opacity: 1;
-        }
-
-        .service-icon {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
-            border-radius: var(--radius-xl);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .service-icon i {
-            font-size: 2rem;
-            color: white;
-        }
-
-        .service-title {
-            font-size: var(--text-xl);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-        }
-
-        .service-description {
-            font-size: var(--text-sm);
-            color: var(--text-secondary);
-            line-height: var(--leading-relaxed);
-            flex: 1;
-            margin-bottom: 1.5rem;
-        }
-
-        .service-cta {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--color-blue-700);
-            font-weight: var(--font-semibold);
-            font-size: var(--text-sm);
-            transition: gap 0.3s ease;
-        }
-
-        .service-card:hover .service-cta {
-            gap: 1rem;
-        }
-
-        .service-cta i {
-            transition: transform 0.3s ease;
-        }
-
-        .service-card:hover .service-cta i {
-            transform: translateX(4px);
-        }
-
-        .cta-enterprise {
-            padding: 120px 0;
-            background: linear-gradient(180deg, #FFFFFF 0%, var(--bg-secondary) 100%);
-            text-align: center;
-        }
-
-        .cta-content-enterprise {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .cta-title-enterprise {
-            font-size: var(--text-4xl);
-            font-weight: var(--font-bold);
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .cta-description-enterprise {
-            font-size: var(--text-lg);
-            color: var(--text-secondary);
-            margin-bottom: 3rem;
-            line-height: var(--leading-relaxed);
-        }
-
-        .footer-enterprise {
-            background: var(--color-steel-900);
-            color: rgba(255, 255, 255, 0.8);
-            padding: 3rem 0 2rem;
-        }
-
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        .footer-brand {
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            color: white;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .footer-link {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: var(--text-sm);
-            transition: color 0.2s ease;
-        }
-
-        .footer-link:hover {
-            color: white;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            font-size: var(--text-sm);
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Documentation Section Styles */
-        .btn-documentation {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
-            color: white;
-            padding: 1.25rem 3rem;
-            border-radius: var(--radius-xl);
-            font-weight: var(--font-bold);
-            font-size: var(--text-lg);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(0, 59, 115, 0.25);
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-documentation:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(0, 59, 115, 0.35);
-            background: linear-gradient(135deg, var(--color-blue-800) 0%, var(--color-blue-600) 100%);
-            text-decoration: none;
-        }
-
-        .btn-documentation i {
-            font-size: 1.5rem;
-        }
-
-        .doc-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            border-color: var(--color-blue-600);
-        }
-
-        /* Enhanced Feature Cards */
-        .feature-card-enterprise {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card-enterprise::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--color-blue-800), var(--color-gold-500));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .feature-card-enterprise:hover::before {
-            opacity: 1;
-        }
-
-        /* Stats Card Enhancements */
-        .stat-card-enterprise {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card-enterprise::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card-enterprise:hover::after {
-            opacity: 1;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .features-grid-enterprise {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .services-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-menu {
-                gap: 1.5rem;
-            }
-            .hero-title {
-                font-size: var(--text-4xl);
-            }
-            .features-grid-enterprise,
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-            .footer-content {
-                flex-direction: column;
-                gap: 2rem;
-            }
-            .btn-documentation {
-                padding: 1rem 2rem;
-                font-size: var(--text-base);
-            }
-        }
-    </style>
+    <link href="/static/css/home.css" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
@@ -575,9 +26,18 @@
                     <div class="brand-logo">SKAILA</div>
                     <div class="brand-tagline">Enterprise Education</div>
                 </a>
-                <ul class="nav-menu">
-                    <li><a href="#features" class="nav-link">Funzionalità</a></li>
-                    <li><a href="#platform" class="nav-link">Piattaforma</a></li>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                
+                <!-- Navigation Menu -->
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#funzionalita" class="nav-link">Funzionalità</a></li>
+                    <li><a href="#piattaforma" class="nav-link">Piattaforma</a></li>
                     <li><a href="/login" class="btn-hero-primary">Accedi</a></li>
                 </ul>
             </nav>
@@ -604,7 +64,7 @@
                         <i class="fas fa-rocket"></i>
                         <span>Inizia Ora</span>
                     </a>
-                    <a href="#features" class="btn-hero-secondary">
+                    <a href="#funzionalita" class="btn-hero-secondary">
                         <i class="fas fa-info-circle"></i>
                         <span>Scopri di Più</span>
                     </a>
@@ -613,13 +73,39 @@
         </div>
     </section>
 
-    <!-- Servizi Section - Unificata -->
-    <section id="platform" class="services-section">
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Utenti Attivi</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Supporto AI</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">GDPR</div>
+                    <div class="stat-label">Compliant</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="funzionalita" class="services-section">
         <div class="container">
             <div class="section-header">
-                <div class="section-subtitle" style="color: var(--color-blue-700);">I NOSTRI SERVIZI</div>
+                <div class="section-subtitle">I NOSTRI SERVIZI</div>
                 <h2 class="section-title">Strumenti Potenti per l'Educazione Moderna</h2>
-                <p class="section-description">Scopri tutti i servizi integrati nella piattaforma SKAILA</p>
+                <p class="section-description">
+                    Scopri tutti i servizi integrati nella piattaforma SKAILA per una gestione scolastica completa
+                </p>
             </div>
             
             <div class="services-grid">
@@ -629,8 +115,7 @@
                     </div>
                     <h3 class="service-title">Messaggistica Unificata</h3>
                     <p class="service-description">
-                        Sistema di chat in tempo reale con canali dedicati per classi, materie e comunicazioni 1-to-1. 
-                        Condivisione file e notifiche smart.
+                        Sistema di chat in tempo reale con canali dedicati per classi, materie e comunicazioni 1-to-1. Condivisione file e notifiche smart.
                     </p>
                     <div class="service-cta">
                         <span>Scopri di più</span>
@@ -638,14 +123,13 @@
                     </div>
                 </a>
 
-                <a href="#platform" class="service-card">
+                <a href="#piattaforma" class="service-card">
                     <div class="service-icon">
                         <i class="fas fa-users-cog"></i>
                     </div>
                     <h3 class="service-title">Gestione Multi-Ruolo</h3>
                     <p class="service-description">
-                        Dashboard personalizzate per studenti, docenti, dirigenti e genitori. 
-                        Permessi granulari e accesso sicuro ai dati.
+                        Dashboard personalizzate per studenti, docenti, dirigenti e genitori. Permessi granulari e accesso sicuro ai dati.
                     </p>
                     <div class="service-cta">
                         <span>Scopri di più</span>
@@ -659,8 +143,7 @@
                     </div>
                     <h3 class="service-title">AI Coach</h3>
                     <p class="service-description">
-                        Assistente virtuale intelligente disponibile 24/7 per supporto allo studio, 
-                        spiegazioni personalizzate e coaching soft skills.
+                        Assistente virtuale intelligente disponibile 24/7 per supporto allo studio, spiegazioni personalizzate e coaching soft skills.
                     </p>
                     <div class="service-cta">
                         <span>Scopri di più</span>
@@ -674,8 +157,7 @@
                     </div>
                     <h3 class="service-title">Gamification</h3>
                     <p class="service-description">
-                        Sistema completo di punti esperienza, livelli, achievement e sfide. 
-                        Rendi l'apprendimento coinvolgente e motivante.
+                        Sistema completo di punti esperienza, livelli, achievement e sfide. Rendi l'apprendimento coinvolgente e motivante.
                     </p>
                     <div class="service-cta">
                         <span>Scopri di più</span>
@@ -687,10 +169,23 @@
                     <div class="service-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <h3 class="service-title">Analytics Avanzate in Tempo Reale</h3>
+                    <h3 class="service-title">Analytics Avanzate</h3>
                     <p class="service-description">
-                        Dashboard Business Intelligence con organigrammi visuali, KPI in tempo reale e 
-                        report automatizzati per dirigenti e docenti.
+                        Dashboard Business Intelligence con KPI in tempo reale, report automatizzati e visualizzazioni interattive.
+                    </p>
+                    <div class="service-cta">
+                        <span>Scopri di più</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <a href="/documentation" class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="service-title">Registro Elettronico</h3>
+                    <p class="service-description">
+                        Sistema completo di gestione presenze, voti, note disciplinari e comunicazioni scuola-famiglia integrate.
                     </p>
                     <div class="service-cta">
                         <span>Scopri di più</span>
@@ -701,48 +196,60 @@
         </div>
     </section>
 
-    <!-- Demo Section -->
-    <section style="padding: 80px 0; background: linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%);">
+    <!-- Platform Features Section -->
+    <section id="piattaforma" class="services-section" style="background: linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%);">
         <div class="container">
-            <div style="text-align: center; max-width: 800px; margin: 0 auto 3rem;">
-                <div class="section-subtitle" style="color: var(--color-blue-700); margin-bottom: 1rem;">
-                    <i class="fas fa-rocket"></i> MODALITÀ DEMO
-                </div>
+            <div class="section-header">
+                <div class="section-subtitle">MODALITÀ DEMO</div>
                 <h2 class="section-title">Esplora SKAILA senza Registrazione</h2>
-                <p style="font-size: var(--text-lg); color: var(--text-secondary); margin-top: 1rem;">
+                <p class="section-description">
                     Accedi direttamente alle diverse sezioni della piattaforma per testare tutte le funzionalità
                 </p>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
-                <a href="/demo/dashboard/studente" class="demo-card" style="display: flex; flex-direction: column; align-items: center; padding: 2rem; background: white; border: 2px solid var(--border-primary); border-radius: var(--radius-xl); text-decoration: none; transition: all 0.3s ease;">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="fas fa-user-graduate" style="font-size: 1.75rem; color: white;"></i>
+            
+            <div class="services-grid">
+                <a href="/demo/dashboard/studente" class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-user-graduate"></i>
                     </div>
-                    <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.5rem;">Dashboard Studente</h3>
-                    <p style="font-size: var(--text-sm); color: var(--text-muted); text-align: center;">KPI cards, attività, progressi</p>
+                    <h3 class="service-title">Dashboard Studente</h3>
+                    <p class="service-description">
+                        Esplora la dashboard studente con KPI cards, progressi di apprendimento e attività recenti.
+                    </p>
+                    <div class="service-cta">
+                        <span>Prova ora</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
                 </a>
-                <a href="/demo/dashboard/professore" class="demo-card" style="display: flex; flex-direction: column; align-items: center; padding: 2rem; background: white; border: 2px solid var(--border-primary); border-radius: var(--radius-xl); text-decoration: none; transition: all 0.3s ease;">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="fas fa-chalkboard-teacher" style="font-size: 1.75rem; color: white;"></i>
+
+                <a href="/demo/dashboard/professore" class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
                     </div>
-                    <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.5rem;">Dashboard Docente</h3>
-                    <p style="font-size: var(--text-sm); color: var(--text-muted); text-align: center;">Gestione classi, studenti</p>
+                    <h3 class="service-title">Dashboard Docente</h3>
+                    <p class="service-description">
+                        Gestione classi, studenti, valutazioni e comunicazioni con un'interfaccia intuitiva.
+                    </p>
+                    <div class="service-cta">
+                        <span>Prova ora</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
                 </a>
-                <a href="/demo/calendario" class="demo-card" style="display: flex; flex-direction: column; align-items: center; padding: 2rem; background: white; border: 2px solid var(--border-primary); border-radius: var(--radius-xl); text-decoration: none; transition: all 0.3s ease;">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="fas fa-calendar-alt" style="font-size: 1.75rem; color: white;"></i>
+
+                <a href="/demo/calendario" class="service-card">
+                    <div class="service-icon" style="background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%);">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.5rem;">Calendario</h3>
-                    <p style="font-size: var(--text-sm); color: var(--text-muted); text-align: center;">Calendario dinamico interattivo</p>
+                    <h3 class="service-title">Calendario Dinamico</h3>
+                    <p class="service-description">
+                        Calendario interattivo con gestione eventi, scadenze e sincronizzazione automatica.
+                    </p>
+                    <div class="service-cta">
+                        <span>Prova ora</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
                 </a>
             </div>
-            <style>
-                .demo-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 10px 30px -5px rgba(0, 59, 115, 0.2);
-                    border-color: var(--color-blue-600);
-                }
-            </style>
         </div>
     </section>
 
@@ -768,79 +275,65 @@
         </div>
     </section>
 
-    <!-- Documentazione Section -->
-    <section style="padding: 80px 0; background: var(--color-steel-100);">
-        <div class="container">
-            <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-                <div class="section-subtitle" style="margin-bottom: 1.5rem;">
-                    <i class="fas fa-file-alt"></i> RISORSE UFFICIALI
-                </div>
-                <h2 class="section-title" style="margin-bottom: 1.5rem;">Documentazione Completa</h2>
-                <p style="font-size: var(--text-lg); color: var(--text-secondary); margin-bottom: 3rem;">
-                    Accedi alla documentazione ufficiale SKAILA, guide compliance e informazioni tecniche complete sulla piattaforma
-                </p>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-                    <div style="background: white; padding: 2rem; border-radius: var(--radius-xl); border: 1px solid var(--border-primary); transition: all 0.3s ease;" class="doc-card">
-                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                            <i class="fas fa-shield-alt" style="font-size: 1.75rem; color: white;"></i>
-                        </div>
-                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.75rem;">Compliance & Privacy</h3>
-                        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 1.5rem;">GDPR, sicurezza dati, normative italiane</p>
-                    </div>
-
-                    <div style="background: white; padding: 2rem; border-radius: var(--radius-xl); border: 1px solid var(--border-primary); transition: all 0.3s ease;" class="doc-card">
-                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                            <i class="fas fa-book" style="font-size: 1.75rem; color: white;"></i>
-                        </div>
-                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.75rem;">Guide Utente</h3>
-                        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 1.5rem;">Tutorial, FAQ, best practices</p>
-                    </div>
-
-                    <div style="background: white; padding: 2rem; border-radius: var(--radius-xl); border: 1px solid var(--border-primary); transition: all 0.3s ease;" class="doc-card">
-                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 100%); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                            <i class="fas fa-code" style="font-size: 1.75rem; color: white;"></i>
-                        </div>
-                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.75rem;">Documentazione Tecnica</h3>
-                        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 1.5rem;">API, integrazioni, architettura</p>
-                    </div>
-                </div>
-
-                <a href="/documentation" class="btn-documentation">
-                    <i class="fas fa-file-download"></i>
-                    <span>ACCEDI ALLA DOCUMENTAZIONE COMPLETA</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer-enterprise">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">SKAILA</div>
                 <ul class="footer-links">
-                    <li><a href="/login" class="footer-link">Accedi</a></li>
-                    <li><a href="/register" class="footer-link">Registrati</a></li>
-                    <li><a href="#features" class="footer-link">Funzionalità</a></li>
-                    <li><a href="#platform" class="footer-link">Piattaforma</a></li>
+                    <li><a href="/documentation" class="footer-link">Documentazione</a></li>
+                    <li><a href="/api/docs" class="footer-link">API</a></li>
+                    <li><a href="#privacy" class="footer-link">Privacy</a></li>
+                    <li><a href="#terms" class="footer-link">Termini</a></li>
                 </ul>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 SKAILA Enterprise Education Platform. Tutti i diritti riservati.</p>
+                © 2025 SKAILA. Enterprise Education Platform. Tutti i diritti riservati.
             </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script>
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            mobileMenuToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.header-nav')) {
+                mobileMenuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
+        });
+
+        // Close mobile menu when clicking a nav link
+        navMenu.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
         // Header scroll effect
         const header = document.getElementById('header');
+        let lastScroll = 0;
+
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
                 header.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
             }
+            
+            lastScroll = currentScroll;
         });
 
         // Smooth scroll for anchor links
@@ -849,9 +342,13 @@
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+                    const headerOffset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
                     });
                 }
             });
