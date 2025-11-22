@@ -29,6 +29,7 @@ from services.school.school_system import school_system
 from services.gamification.gamification import gamification_system
 from services.ai.ai_chatbot import AISkailaBot
 from services.reports.report_scheduler import ReportScheduler
+from services.calendar.calendar_system import calendar_system
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
@@ -50,7 +51,7 @@ from routes.bi_dashboard_routes import bi_bp # BI Dashboard Blueprint
 from routes.timer_routes import timer_bp # Study Timer
 from routes.online_users_routes import online_users_bp # Online Users API
 from routes.cyberpunk_presence_routes import cyberpunk_presence_bp # Cyberpunk Presence Demo
-from routes.calendar_routes import calendar_bp # Smart Calendar System
+from routes.calendar_routes import smart_calendar_bp # Smart Calendar System
 
 # Import services
 from services.auth_service import auth_service
@@ -245,7 +246,7 @@ class SkailaApp:
         self.app.register_blueprint(timer_bp) # Study Timer
         self.app.register_blueprint(online_users_bp) # Online Users API for circulating avatars
         self.app.register_blueprint(cyberpunk_presence_bp) # Cyberpunk Presence Demo
-        self.app.register_blueprint(calendar_bp) # Smart Calendar System
+        self.app.register_blueprint(smart_calendar_bp) # Smart Calendar System
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp
@@ -374,6 +375,9 @@ class SkailaApp:
 
         # Inizializza gamification
         gamification_system.init_gamification_tables()
+        
+        # Inizializza calendario smart
+        calendar_system.init_calendar_tables()
 
         # Crea indici database ottimizzati
         db_manager.create_optimized_indexes()

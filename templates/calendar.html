@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 Calendario - SKAILA</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy-dark: #001F3F;
+            --navy: #003B73;
+            --navy-light: #0056A3;
+            --gold: #D4AF37;
+            --gold-light: #F59E0B;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-50);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: var(--gold);
+        }
+
+        .btn-primary {
+            background: var(--navy);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--navy-light);
+            transform: translateY(-1px);
+        }
+
+        #calendar {
+            margin-top: 24px;
+        }
+
+        .fc {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .fc-button-primary {
+            background-color: var(--navy) !important;
+            border-color: var(--navy) !important;
+        }
+
+        .fc-button-primary:hover {
+            background-color: var(--navy-light) !important;
+            border-color: var(--navy-light) !important;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .fc-event.event-lesson {
+            background-color: var(--navy);
+            border-color: var(--navy);
+        }
+
+        .fc-event.event-homework {
+            background-color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .fc-event.event-exam {
+            background-color: var(--error);
+            border-color: var(--error);
+        }
+
+        .fc-event.event-school_event {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--gray-600);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .role-badge {
+            background: var(--gold);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-calendar-alt"></i> Calendario Personale</h1>
+                <p style="color: var(--gray-600); margin-top: 8px;">
+                    <span class="role-badge">{{ user.ruolo }}</span>
+                    {{ user.nome }} {{ user.cognome }}
+                </p>
+            </div>
+            <button class="btn-primary" onclick="openAddEventModal()">
+                <i class="fas fa-plus"></i>
+                Aggiungi Evento
+            </button>
+        </div>
+
+        <div id="calendar"></div>
+    </div>
+
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nuovo Evento</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+
+            <form id="eventForm">
+                <div class="form-group">
+                    <label>Titolo *</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo Evento *</label>
+                    <select id="eventType" required>
+                        <option value="lesson">Lezione</option>
+                        <option value="homework">Compiti</option>
+                        <option value="exam">Verifica/Esame</option>
+                        <option value="meeting">Riunione</option>
+                        <option value="event">Evento Generico</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Data e Ora Inizio *</label>
+                    <input type="datetime-local" id="eventStart" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Data e Ora Fine</label>
+                    <input type="datetime-local" id="eventEnd">
+                </div>
+
+                <div class="form-group">
+                    <label>Descrizione</label>
+                    <textarea id="eventDescription" placeholder="Note, compiti, argomenti..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Annulla</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Salva
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let calendar;
+        const userRole = "{{ user.ruolo }}";
+        const userId = {{ user.user_id }};
+        let currentEditingEvent = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initCalendar();
+        });
+
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                locale: 'it',
+                buttonText: {
+                    today: 'Oggi',
+                    month: 'Mese',
+                    week: 'Settimana',
+                    day: 'Giorno'
+                },
+                firstDay: 1,
+                editable: true,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true,
+                weekends: true,
+                events: fetchEvents,
+                eventClick: handleEventClick,
+                select: handleDateSelect,
+                eventDrop: handleEventDrop,
+                eventResize: handleEventResize,
+                eventClassNames: function(arg) {
+                    return ['event-' + arg.event.extendedProps.event_type];
+                }
+            });
+            
+            calendar.render();
+        }
+
+        async function fetchEvents(fetchInfo, successCallback, failureCallback) {
+            try {
+                const start = fetchInfo.startStr.split('T')[0];
+                const end = fetchInfo.endStr.split('T')[0];
+                
+                const response = await fetch(`/api/calendar/events?start=${start}&end=${end}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const events = data.events.map(event => ({
+                        id: event.id,
+                        title: event.title,
+                        start: event.start_datetime,
+                        end: event.end_datetime,
+                        allDay: event.all_day || false,
+                        extendedProps: {
+                            event_type: event.event_type,
+                            event_data: event.event_data || {},
+                            editable: event.editable !== false
+                        }
+                    }));
+                    
+                    successCallback(events);
+                } else {
+                    failureCallback();
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                failureCallback();
+            }
+        }
+
+        function handleDateSelect(selectInfo) {
+            document.getElementById('eventStart').value = selectInfo.startStr;
+            document.getElementById('eventEnd').value = selectInfo.endStr;
+            openAddEventModal();
+        }
+
+        function handleEventClick(clickInfo) {
+            const event = clickInfo.event;
+            
+            if (userRole === 'professore' && event.extendedProps.event_type === 'lesson') {
+                if (confirm('Aprire il registro per questa lezione?')) {
+                    const classId = event.extendedProps.event_data.class_id;
+                    if (classId) {
+                        window.location.href = `/registro?class_id=${classId}&date=${event.startStr}`;
+                    } else {
+                        alert('Classe non associata a questa lezione');
+                    }
+                }
+            } else {
+                currentEditingEvent = event;
+                document.getElementById('modalTitle').textContent = 'Modifica Evento';
+                document.getElementById('eventTitle').value = event.title;
+                document.getElementById('eventType').value = event.extendedProps.event_type;
+                document.getElementById('eventStart').value = event.startStr.slice(0, 16);
+                if (event.end) {
+                    document.getElementById('eventEnd').value = event.endStr.slice(0, 16);
+                }
+                document.getElementById('eventDescription').value = event.extendedProps.event_data.description || '';
+                
+                openModal();
+            }
+        }
+
+        async function handleEventDrop(dropInfo) {
+            await updateEvent(dropInfo.event);
+        }
+
+        async function handleEventResize(resizeInfo) {
+            await updateEvent(resizeInfo.event);
+        }
+
+        async function updateEvent(event) {
+            try {
+                const response = await fetch(`/api/calendar/events/${event.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_datetime: event.startStr,
+                        end_datetime: event.endStr
+                    })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    alert('Errore durante l\'aggiornamento');
+                    event.revert();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                event.revert();
+            }
+        }
+
+        function openAddEventModal() {
+            currentEditingEvent = null;
+            document.getElementById('modalTitle').textContent = 'Nuovo Evento';
+            document.getElementById('eventForm').reset();
+            openModal();
+        }
+
+        function openModal() {
+            document.getElementById('eventModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('eventModal').classList.remove('active');
+            document.getElementById('eventForm').reset();
+            currentEditingEvent = null;
+        }
+
+        document.getElementById('eventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const eventData = {
+                title: document.getElementById('eventTitle').value,
+                event_type: document.getElementById('eventType').value,
+                start_datetime: document.getElementById('eventStart').value + ':00',
+                end_datetime: document.getElementById('eventEnd').value ? document.getElementById('eventEnd').value + ':00' : null,
+                event_data: {
+                    description: document.getElementById('eventDescription').value
+                }
+            };
+            
+            try {
+                let response;
+                if (currentEditingEvent) {
+                    response = await fetch(`/api/calendar/events/${currentEditingEvent.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(eventData)
+                    });
+                } else {
+                    response = await fetch('/api/calendar/events', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(eventData)
+                    });
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal();
+                    calendar.refetchEvents();
+                    alert(data.message);
+                } else {
+                    alert('Errore: ' + (data.message || 'Errore sconosciuto'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Errore durante il salvataggio');
+            }
+        });
+    </script>
+</body>
+</html>
