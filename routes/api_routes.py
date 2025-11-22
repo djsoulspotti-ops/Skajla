@@ -191,3 +191,32 @@ def gamification_leaderboard():
         return jsonify(leaderboard_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@api_bp.route('/health/status')
+def health_status():
+    """Health check endpoint for load testing"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': time.time(),
+        'service': 'skaila'
+    })
+
+
+@api_bp.route('/health/db-check')
+def health_db_check():
+    """Database health check for load testing"""
+    try:
+        result = db_manager.query('SELECT 1 as status', one=True)
+        return jsonify({
+            'status': 'healthy',
+            'database': 'connected',
+            'timestamp': time.time()
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'database': 'error',
+            'error': str(e),
+            'timestamp': time.time()
+        }), 500
