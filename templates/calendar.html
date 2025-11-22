@@ -275,10 +275,29 @@
                     {{ user.nome }} {{ user.cognome }}
                 </p>
             </div>
-            <button class="btn-primary" onclick="openAddEventModal()">
-                <i class="fas fa-plus"></i>
-                Aggiungi Evento
-            </button>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                {% if user.ruolo == 'dirigente' %}
+                <button class="btn-primary" onclick="openSchoolEventModal()">
+                    <i class="fas fa-school"></i>
+                    Evento Scolastico
+                </button>
+                {% endif %}
+                {% if user.ruolo == 'professore' %}
+                <button class="btn-primary" onclick="openQuickLessonModal()">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Nuova Lezione
+                </button>
+                <button class="btn-primary" onclick="openAddEventModal()">
+                    <i class="fas fa-plus"></i>
+                    Aggiungi Evento
+                </button>
+                {% elif user.ruolo == 'dirigente' %}
+                <button class="btn-primary" onclick="openAddEventModal()">
+                    <i class="fas fa-plus"></i>
+                    Aggiungi Evento
+                </button>
+                {% endif %}
+            </div>
         </div>
 
         <div id="calendar"></div>
@@ -333,6 +352,39 @@
         </div>
     </div>
 
+    <div class="modal" id="schoolEventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-school"></i> Nuovo Evento Scolastico</h2>
+                <button class="close-btn" onclick="closeSchoolEventModal()">×</button>
+            </div>
+
+            <form id="schoolEventForm">
+                <div class="form-group">
+                    <label>Titolo *</label>
+                    <input type="text" id="schoolEventTitle" placeholder="Es: Gita scolastica, Assemblea, Chiusura scuola" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrizione</label>
+                    <textarea id="schoolEventDescription" placeholder="Dettagli sull'evento scolastico..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Data *</label>
+                    <input type="date" id="schoolEventDate" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeSchoolEventModal()">Annulla</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Crea Evento Scolastico
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let calendar;
         const userRole = "{{ user.ruolo }}";
@@ -345,6 +397,7 @@
 
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
+            const isStudent = (userRole === 'studente');
             
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -361,16 +414,16 @@
                     day: 'Giorno'
                 },
                 firstDay: 1,
-                editable: true,
-                selectable: true,
-                selectMirror: true,
+                editable: !isStudent,
+                selectable: !isStudent,
+                selectMirror: !isStudent,
                 dayMaxEvents: true,
                 weekends: true,
                 events: fetchEvents,
                 eventClick: handleEventClick,
-                select: handleDateSelect,
-                eventDrop: handleEventDrop,
-                eventResize: handleEventResize,
+                select: isStudent ? null : handleDateSelect,
+                eventDrop: isStudent ? null : handleEventDrop,
+                eventResize: isStudent ? null : handleEventResize,
                 eventClassNames: function(arg) {
                     return ['event-' + arg.event.extendedProps.event_type];
                 }
@@ -388,18 +441,23 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    const events = data.events.map(event => ({
-                        id: event.id,
-                        title: event.title,
-                        start: event.start_datetime,
-                        end: event.end_datetime,
-                        allDay: event.all_day || false,
-                        extendedProps: {
-                            event_type: event.event_type,
-                            event_data: event.event_data || {},
-                            editable: event.editable !== false
-                        }
-                    }));
+                    const events = data.events.map(event => {
+                        const isEditable = (event.editable !== false) && (userRole !== 'studente');
+                        return {
+                            id: event.id,
+                            title: event.title,
+                            start: event.start_datetime,
+                            end: event.end_datetime,
+                            allDay: event.all_day || false,
+                            editable: isEditable,
+                            durationEditable: isEditable,
+                            extendedProps: {
+                                event_type: event.event_type,
+                                event_data: event.event_data || {},
+                                editable: isEditable
+                            }
+                        };
+                    });
                     
                     successCallback(events);
                 } else {
@@ -420,6 +478,11 @@
         function handleEventClick(clickInfo) {
             const event = clickInfo.event;
             
+            if (event.extendedProps.event_data?.is_school_event) {
+                alert(`📅 ${event.title}\n\n${event.extendedProps.event_data.description || 'Evento scolastico'}`);
+                return;
+            }
+            
             if (userRole === 'professore' && event.extendedProps.event_type === 'lesson') {
                 if (confirm('Aprire il registro per questa lezione?')) {
                     const classId = event.extendedProps.event_data.class_id;
@@ -429,19 +492,25 @@
                         alert('Classe non associata a questa lezione');
                     }
                 }
-            } else {
-                currentEditingEvent = event;
-                document.getElementById('modalTitle').textContent = 'Modifica Evento';
-                document.getElementById('eventTitle').value = event.title;
-                document.getElementById('eventType').value = event.extendedProps.event_type;
-                document.getElementById('eventStart').value = event.startStr.slice(0, 16);
-                if (event.end) {
-                    document.getElementById('eventEnd').value = event.endStr.slice(0, 16);
-                }
-                document.getElementById('eventDescription').value = event.extendedProps.event_data.description || '';
-                
-                openModal();
+                return;
             }
+            
+            if (!event.extendedProps.editable) {
+                alert('⚠️ Non puoi modificare questo evento');
+                return;
+            }
+            
+            currentEditingEvent = event;
+            document.getElementById('modalTitle').textContent = 'Modifica Evento';
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventType').value = event.extendedProps.event_type;
+            document.getElementById('eventStart').value = event.startStr.slice(0, 16);
+            if (event.end) {
+                document.getElementById('eventEnd').value = event.endStr.slice(0, 16);
+            }
+            document.getElementById('eventDescription').value = event.extendedProps.event_data.description || '';
+            
+            openModal();
         }
 
         async function handleEventDrop(dropInfo) {
@@ -480,6 +549,66 @@
             document.getElementById('eventForm').reset();
             openModal();
         }
+        
+        function openQuickLessonModal() {
+            currentEditingEvent = null;
+            document.getElementById('modalTitle').textContent = 'Nuova Lezione';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventType').value = 'lesson';
+            const now = new Date();
+            const startTime = new Date(now.getTime() + 60 * 60 * 1000);
+            const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+            document.getElementById('eventStart').value = startTime.toISOString().slice(0, 16);
+            document.getElementById('eventEnd').value = endTime.toISOString().slice(0, 16);
+            openModal();
+        }
+        
+        function openSchoolEventModal() {
+            document.getElementById('schoolEventForm').reset();
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('schoolEventDate').value = tomorrow.toISOString().slice(0, 10);
+            document.getElementById('schoolEventModal').classList.add('active');
+        }
+        
+        function closeSchoolEventModal() {
+            document.getElementById('schoolEventModal').classList.remove('active');
+        }
+        
+        document.getElementById('schoolEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('schoolEventTitle').value;
+            const description = document.getElementById('schoolEventDescription').value;
+            const dateStr = document.getElementById('schoolEventDate').value;
+            
+            try {
+                const response = await fetch('/api/calendar/school-event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description || '',
+                        event_type: 'school_event',
+                        start_datetime: dateStr + ' 00:00:00',
+                        all_day: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message);
+                    closeSchoolEventModal();
+                    calendar.refetchEvents();
+                } else {
+                    alert('Errore: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Errore durante la creazione dell\'evento scolastico');
+            }
+        });
 
         function openModal() {
             document.getElementById('eventModal').classList.add('active');

@@ -56,7 +56,11 @@ def smart_get_events():
 def smart_create_event():
     """API: Crea nuovo evento"""
     user_id = session['user']['user_id']
+    user_role = session['user']['ruolo']
     data = request.get_json()
+    
+    if user_role == 'studente':
+        raise AuthError("Gli studenti non possono creare eventi. Contatta il tuo professore.", status_code=403)
     
     required_fields = ['title', 'start_datetime', 'event_type']
     for field in required_fields:
@@ -65,7 +69,7 @@ def smart_create_event():
     
     event_data = data.get('event_data', {})
     
-    if session['user']['ruolo'] == 'professore' and data['event_type'] == 'lesson':
+    if user_role == 'professore' and data['event_type'] == 'lesson':
         classe_id = session['user'].get('classe_id')
         if classe_id:
             event_data['class_id'] = classe_id
@@ -87,7 +91,7 @@ def smart_create_event():
         'message': 'Evento creato con successo'
     })
 
-@smart_calendar_bp.route('/api/calendar/events/<int:event_id>', methods=['PUT'])
+@smart_calendar_bp.route('/api/calendar/events/<event_id>', methods=['PUT'])
 @require_auth
 @handle_errors(api=True)
 def smart_update_event(event_id):
@@ -95,21 +99,37 @@ def smart_update_event(event_id):
     user_id = session['user']['user_id']
     data = request.get_json()
     
-    calendar_system.update_event(event_id, user_id, data)
+    if str(event_id).startswith('school_'):
+        raise AuthError("Gli eventi scolastici non possono essere modificati", status_code=403)
+    
+    try:
+        event_id_int = int(event_id)
+    except ValueError:
+        raise ValidationError("ID evento non valido")
+    
+    calendar_system.update_event(event_id_int, user_id, data)
     
     return jsonify({
         'success': True,
         'message': 'Evento aggiornato con successo'
     })
 
-@smart_calendar_bp.route('/api/calendar/events/<int:event_id>', methods=['DELETE'])
+@smart_calendar_bp.route('/api/calendar/events/<event_id>', methods=['DELETE'])
 @require_auth
 @handle_errors(api=True)
 def smart_delete_event(event_id):
     """API: Elimina evento"""
     user_id = session['user']['user_id']
     
-    calendar_system.delete_event(event_id, user_id)
+    if str(event_id).startswith('school_'):
+        raise AuthError("Gli eventi scolastici non possono essere eliminati", status_code=403)
+    
+    try:
+        event_id_int = int(event_id)
+    except ValueError:
+        raise ValidationError("ID evento non valido")
+    
+    calendar_system.delete_event(event_id_int, user_id)
     
     return jsonify({
         'success': True,
