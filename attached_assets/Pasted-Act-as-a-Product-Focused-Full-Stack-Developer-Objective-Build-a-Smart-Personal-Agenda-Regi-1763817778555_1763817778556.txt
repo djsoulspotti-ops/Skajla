@@ -1,0 +1,36 @@
+Act as a Product-Focused Full-Stack Developer.
+
+**Objective:**
+Build a "Smart Personal Agenda & Register" module that is flexible, easy to use, and integrates with the existing Chatbot.
+Instead of a rigid, bureaucratic system, allow users to customize their schedules dynamically (Google Calendar style).
+
+**Core Philosophy:**
+"Self-Service & AI-Ready." The schedule should be editable manually (UI) OR via the Chatbot (Natural Language).
+
+Please implement this in 3 phases:
+
+**Phase 1: Flexible Database Storage (JSON approach)**
+* Use a flexible storage strategy for the schedule data to ensure easy Chatbot manipulation.
+* Add a `weekly_schedule` column (type JSON or JSONB) to the `Users` table (or a simple `Schedules` table linked to UserID).
+* **Data Structure:** It should store objects like: `{ day: "Monday", time: "09:00", subject: "Math", class_name: "5A", type: "lesson" }`.
+
+**Phase 2: Interactive Calendar UI & Role Logic**
+* Implement a visual Calendar (using `react-big-calendar`, `FullCalendar` or similar).
+* **Drag & Drop / Click-to-Edit:** Users can easily click a slot to add or modify a lesson.
+* **Role-Specific Behaviors (CRITICAL):**
+    * **Teachers:** When they click a slot they created (e.g., "Math - Class 5A"), it opens the **Register Mode** (to input grades/attendance for that specific class).
+    * **Students:** Clicking a slot shows them homework, notes, or lesson details. They cannot modify the teacher's official lesson data, only their personal notes.
+    * **Principal (Dirigente):**
+        1.  **Global View:** Has a search bar to select ANY Teacher or Student and view their live calendar (Read-Only mode).
+        2.  **Global Events:** Can create "School-Wide Events" (e.g., "Assembly" or "Holiday") that automatically appear on everyone's calendar.
+
+**Phase 3: Chatbot "Hook" Integration**
+* Create a backend function `updateUserSchedule(userId, day, time, subject, action)` exposed to the internal API.
+* This ensures the Chatbot can perform actions like:
+    * "Add Physics on Tuesday at 10am" (for Students/Teachers).
+    * "Show me Professor Rossi's schedule" (for the Principal via the Chatbot).
+
+**Constraint:**
+Keep the UI clean and minimal. Prioritize usability over complex restrictions.
+
+Start by confirming which Calendar Library you plan to use for the Frontend.
