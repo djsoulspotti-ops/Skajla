@@ -6,7 +6,9 @@
     <title>💬 Messaggi - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/classmate-spirals.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="/static/js/classmate-spirals.js"></script>
     <style>
         * {
             margin: 0;
@@ -599,7 +601,10 @@
                     </div>
                 </div>
 
-                <div class="messages-container" id="messagesContainer">
+                <div class="messages-container spirals-background-container" id="messagesContainer">
+                    <!-- Interactive Spiral Visualization Background (Online Classmates) -->
+                    <div id="spiralsVisualization"></div>
+                    
                     <!-- Messaggi caricati dinamicamente -->
                 </div>
 
@@ -642,6 +647,21 @@
                 reconnectionDelay: 1000,
                 reconnectionAttempts: 5
             });
+            
+            // Make socket available globally for ClassmateSpirals
+            window.socket = socket;
+            
+            // Initialize Interactive Classmate Spirals Visualization
+            const spiralsViz = new ClassmateSpirals('spiralsVisualization', {
+                canvasWidth: window.innerWidth,
+                canvasHeight: window.innerHeight,
+                opacity: 0.12,  // Subtle background effect
+                spiralSpeed: 0.0006,
+                driftSpeed: 0.0002,
+                mouseInfluence: 100
+            });
+            
+            console.log('🌀 Classmate Spirals initialized');
 
             socket.on('connect', () => {
                 console.log('✅ Socket connesso');

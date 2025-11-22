@@ -60,6 +60,74 @@ def get_online_users():
         return jsonify({'error': 'Internal server error'}), 500
 
 
+@online_users_bp.route('/api/online-classmates', methods=['GET'])
+@require_auth
+def get_online_classmates():
+    """
+    Get list of currently online users in the SAME CLASS (class-level privacy)
+    CRITICAL: Only returns users sharing the exact same classe_id as the logged-in user
+    Returns user IDs, names, and avatar data for spiral visualization
+    """
+    try:
+        school_id = get_current_school_id()
+        current_user_id = session.get('user_id')
+        
+        # Get current user's class ID
+        current_user = db_manager.query('''
+            SELECT classe_id 
+            FROM utenti 
+            WHERE id = %s
+        ''', (current_user_id,), one=True)
+        
+        if not current_user or not current_user.get('classe_id'):
+            return jsonify({'classmates': [], 'message': 'User has no class assigned'})
+        
+        classe_id = current_user['classe_id']
+        
+        # Query online classmates: SAME school + SAME class + online + exclude self
+        online_classmates = db_manager.query('''
+            SELECT 
+                id,
+                nome,
+                cognome,
+                ruolo,
+                classe_id
+            FROM utenti
+            WHERE scuola_id = %s 
+            AND classe_id = %s
+            AND status_online = TRUE
+            AND id != %s
+            ORDER BY nome, cognome
+            LIMIT 20
+        ''', (school_id, classe_id, current_user_id))
+        
+        if not online_classmates:
+            return jsonify({'classmates': [], 'total': 0})
+        
+        # Format response with avatar initials
+        formatted_classmates = []
+        for classmate in online_classmates:
+            formatted_classmates.append({
+                'id': classmate['id'],
+                'name': f"{classmate['nome']} {classmate['cognome']}",
+                'initials': f"{classmate['nome'][0]}{classmate['cognome'][0]}".upper(),
+                'role': classmate['ruolo'],
+                'avatar_color': generate_avatar_color(classmate['id'])
+            })
+        
+        return jsonify({
+            'classmates': formatted_classmates, 
+            'total': len(formatted_classmates),
+            'classe_id': classe_id
+        })
+    
+    except TenantGuardException:
+        return jsonify({'error': 'School ID not found'}), 403
+    except Exception as e:
+        print(f"❌ Error fetching online classmates: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 def generate_avatar_color(user_id):
     """Generate consistent color for user avatar based on ID"""
     colors = [
