@@ -1,480 +1,571 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚙️ Dashboard Admin - SKAILA</title>
+    <title>Dashboard Amministratore - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <link href="/static/css/dashboard-premium.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #7c3aed;
-            --secondary: #a855f7;
-            --accent: #c084fc;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-            min-height: 100vh;
-            color: var(--text);
-        }
-
-        .admin-dashboard {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .admin-header {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
+        /* Principal-Specific Styles */
+        .analytics-hero {
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-xl);
+            border: none;
             margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
-        .admin-title h1 {
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: var(--primary);
+        .analytics-hero h2 {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .hero-metric {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-metric-value {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-extrabold);
+            color: white;
             margin-bottom: 0.5rem;
         }
 
-        .admin-title p {
-            color: var(--text-light);
-            font-size: 1.1rem;
+        .hero-metric-label {
+            font-size: var(--text-sm);
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: var(--font-medium);
         }
 
-        .admin-nav {
+        .hero-metric-change {
+            font-size: var(--text-xs);
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.5rem;
             display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .admin-action-card {
+            background: white;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
             gap: 1rem;
-        }
-
-        .nav-button {
-            padding: 0.75rem 1.5rem;
-            background: var(--gradient-primary);
-            color: white;
             text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
+            transition: all 0.2s ease;
         }
 
-        .nav-button:hover {
+        .admin-action-card:hover {
+            border-color: var(--color-blue-600);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transform: translateY(-2px);
         }
 
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .metric-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
-        }
-
-        .metric-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .metric-number {
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .metric-label {
-            color: var(--text-light);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.875rem;
-            letter-spacing: 0.5px;
-        }
-
-        .admin-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .activity-panel, .controls-panel {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-        }
-
-        .panel-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .activity-list {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border: 1px solid #f1f5f9;
-            border-radius: 12px;
-            margin-bottom: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .activity-item:hover {
-            background: #faf5ff;
-            border-color: var(--primary);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
+        .action-icon-wrapper {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 700;
-            margin-right: 1rem;
+            font-size: 1.5rem;
+            flex-shrink: 0;
         }
 
-        .activity-info {
-            flex: 1;
-        }
-
-        .activity-user {
-            font-weight: 600;
-            color: var(--text);
+        .action-content h3 {
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
             margin-bottom: 0.25rem;
         }
 
-        .activity-details {
-            font-size: 0.875rem;
-            color: var(--text-light);
+        .action-content p {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
         }
 
-        .activity-time {
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-
-        .admin-button {
-            width: 100%;
+        .alert-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
             padding: 1rem;
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            transition: transform 0.3s ease;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            margin-bottom: 0.75rem;
+            border-left: 3px solid var(--color-ruby-500);
+        }
+
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            color: var(--color-ruby-600);
+            flex-shrink: 0;
         }
 
-        .admin-button:hover {
-            transform: translateY(-2px);
+        .alert-content h4 {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
         }
 
-        .admin-button.danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        .alert-content p {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
         }
 
-        .admin-button.warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-
-        .chat-stats {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-        }
-
-        .chat-item {
+        .activity-feed-item {
             display: flex;
-            justify-content: space-between;
+            align-items: start;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .activity-feed-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .activity-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-blue-400) 100%);
+            border-radius: var(--radius-full);
+            display: flex;
             align-items: center;
-            padding: 1rem;
-            border: 1px solid #f1f5f9;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-        }
-
-        .chat-name {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .chat-count {
-            background: var(--primary);
+            justify-content: center;
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
+            font-weight: var(--font-bold);
+            font-size: var(--text-xs);
+            flex-shrink: 0;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-left: 0.5rem;
+        .activity-content p {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
         }
 
-        .online { background: var(--success); }
-        .offline { background: #94a3b8; }
+        .activity-time {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
 
-        @media (max-width: 1024px) {
-            .admin-content {
-                grid-template-columns: 1fr;
+        @media (max-width: 1200px) {
+            .hero-metrics {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 768px) {
-            .admin-dashboard {
-                padding: 1rem;
-            }
-            
-            .admin-header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .admin-nav {
-                flex-wrap: wrap;
+            .hero-metrics {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-<body>
-    <div class="admin-dashboard">
-        <!-- Header -->
-        <div class="admin-header">
-            <div class="admin-title">
-                <h1>⚙️ Pannello Amministratore</h1>
-                <p>Controlla e gestisci l'intera piattaforma SKAILA</p>
+<body class="dashboard-page">
+    <div class="dashboard-container" id="dashboardContainer">
+        <!-- Modern Collapsible Sidebar -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">SKAILA</div>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-            <div class="admin-nav">
-                <a href="/chat" class="nav-button">💬 Chat</a>
-                <a href="/admin/bulk-register" class="nav-button">👥 Registrazioni</a>
-                <a href="/gamification" class="nav-button">🏆 Gamification</a>
-                <a href="/logout" class="nav-button">🚪 Esci</a>
-            </div>
-        </div>
 
-        <!-- Metrics Overview -->
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-icon">👥</div>
-                <div class="metric-number">{{ stats.totale_utenti }}</div>
-                <div class="metric-label">Utenti Totali</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">🎒</div>
-                <div class="metric-number">{{ stats.studenti_attivi }}</div>
-                <div class="metric-label">Studenti Attivi</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">👨‍🏫</div>
-                <div class="metric-number">{{ stats.professori_attivi }}</div>
-                <div class="metric-label">Professori Attivi</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">💬</div>
-                <div class="metric-number">{{ stats.messaggi_oggi }}</div>
-                <div class="metric-label">Messaggi Oggi</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">🌐</div>
-                <div class="metric-number">{{ stats.utenti_online }}</div>
-                <div class="metric-label">Online Ora</div>
-            </div>
-        </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-label">Menu</div>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="/admin/dashboard" class="nav-link active">
+                                <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/scuole" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-school"></i></span>
+                                <span class="nav-text">Scuole</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/users" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-users"></i></span>
+                                <span class="nav-text">Utenti</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/codici" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-key"></i></span>
+                                <span class="nav-text">Codici Accesso</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-        <!-- Main Content -->
-        <div class="admin-content">
-            <!-- Activity Panel -->
-            <div class="activity-panel">
-                <h2 class="panel-title">
-                    <i class="fas fa-activity"></i>
-                    Attività Recente
-                </h2>
-                <div class="activity-list">
-                    {% if recent_activity %}
-                        {% for user in recent_activity %}
-                        <div class="activity-item">
-                            <div class="user-avatar">
-                                {{ user.nome[0] }}{{ user.cognome[0] if user.cognome else '' }}
+                <div class="nav-section">
+                    <div class="nav-section-label">Strumenti</div>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="/admin/reports" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+                                <span class="nav-text">Report</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/settings" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                                <span class="nav-text">Impostazioni</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-card">
+                    <div class="user-avatar" style="background: linear-gradient(135deg, var(--color-purple-700) 0%, var(--color-purple-500) 100%);">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">Amministratore</div>
+                        <div class="user-role">Sistema</div>
+                    </div>
+                </div>
+                <a href="/logout" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Esci</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="dashboard-main">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="header-left">
+                    <h1 class="page-title">Pannello Amministratore ⚙️</h1>
+                    <p class="page-subtitle">Panoramica completa della piattaforma SKAILA</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar">
+                        <i class="fas fa-search" style="color: var(--text-muted);"></i>
+                        <input type="text" placeholder="Cerca scuole, utenti..." />
+                    </div>
+                    <button class="notifications-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">8</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analytics Hero: Full-Width Multi-Metric -->
+            <div class="analytics-hero">
+                <h2><i class="fas fa-chart-line"></i> Statistiche Piattaforma</h2>
+                <div class="hero-metrics">
+                    <div class="hero-metric">
+                        <div class="hero-metric-value">1,247</div>
+                        <div class="hero-metric-label">Utenti Attivi</div>
+                        <div class="hero-metric-change">
+                            <i class="fas fa-arrow-up"></i> +8.2% questa settimana
+                        </div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-metric-value">28</div>
+                        <div class="hero-metric-label">Scuole Registrate</div>
+                        <div class="hero-metric-change">
+                            <i class="fas fa-arrow-up"></i> +3 questo mese
+                        </div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-metric-value">94.2%</div>
+                        <div class="hero-metric-label">Uptime Server</div>
+                        <div class="hero-metric-change">
+                            <i class="fas fa-check-circle"></i> Stabile
+                        </div>
+                    </div>
+                    <div class="hero-metric">
+                        <div class="hero-metric-value">15.8K</div>
+                        <div class="hero-metric-label">Sessioni Oggi</div>
+                        <div class="hero-metric-change">
+                            <i class="fas fa-arrow-up"></i> +12% vs ieri
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Bento Grid: Quick Actions -->
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 1.5rem;">
+                Azioni Rapide
+            </h3>
+            <div class="bento-grid quad-layout">
+                <a href="/admin/codici/genera" class="admin-action-card">
+                    <div class="action-icon-wrapper">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Genera Codici</h3>
+                        <p>Crea nuovi codici di accesso</p>
+                    </div>
+                </a>
+
+                <a href="/admin/scuole/nuova" class="admin-action-card">
+                    <div class="action-icon-wrapper">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Nuova Scuola</h3>
+                        <p>Registra una nuova scuola</p>
+                    </div>
+                </a>
+
+                <a href="/admin/reports" class="admin-action-card">
+                    <div class="action-icon-wrapper">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Report Completi</h3>
+                        <p>Genera analytics e report</p>
+                    </div>
+                </a>
+
+                <a href="/admin/settings" class="admin-action-card">
+                    <div class="action-icon-wrapper">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="action-content">
+                        <h3>Configurazione</h3>
+                        <p>Impostazioni di sistema</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Main Bento Grid: Performance, Alerts, Activity -->
+            <div class="bento-grid balanced-layout" style="margin-top: 2rem;">
+                <!-- School Performance -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-trophy"></i>
+                            Top Scuole per Engagement
+                        </h2>
+                        <a href="/admin/scuole" class="card-action">Vedi tutte →</a>
+                    </div>
+                    <div>
+                        <table class="grades-table">
+                            <thead>
+                                <tr>
+                                    <th>Scuola</th>
+                                    <th>Utenti</th>
+                                    <th>Attività</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: var(--font-medium);">Liceo Scientifico Da Vinci</td>
+                                    <td>348</td>
+                                    <td><span class="grade-badge excellent">95%</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: var(--font-medium);">Istituto Tecnico Fermi</td>
+                                    <td>412</td>
+                                    <td><span class="grade-badge good">88%</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: var(--font-medium);">Liceo Classico Manzoni</td>
+                                    <td>287</td>
+                                    <td><span class="grade-badge good">82%</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: var(--font-medium);">Istituto Professionale Marconi</td>
+                                    <td>156</td>
+                                    <td><span class="grade-badge pass">76%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- System Alerts -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Avvisi Sistema
+                        </h2>
+                        <a href="/admin/alerts" class="card-action">Gestisci →</a>
+                    </div>
+                    <div>
+                        <div class="alert-item" style="border-left-color: var(--color-gold-500);">
+                            <div class="alert-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--color-gold-600);">
+                                <i class="fas fa-database"></i>
                             </div>
-                            <div class="activity-info">
-                                <div class="activity-user">
-                                    {{ user.nome }} {{ user.cognome or '' }}
-                                    <span class="status-indicator {{ 'online' if user.status_online else 'offline' }}"></span>
-                                </div>
-                                <div class="activity-details">
-                                    {{ user.ruolo.title() }} - Ultimo accesso: {{ user.ultimo_accesso or 'Mai' }}
-                                </div>
+                            <div class="alert-content">
+                                <h4>Spazio Database: 78%</h4>
+                                <p>Considera l'upgrade del piano storage</p>
                             </div>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <p>
-                             Nessuna attività recente
-                        </p>
-                    {% endif %}
+                        <div class="alert-item">
+                            <div class="alert-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h4>3 Codici In Scadenza</h4>
+                                <p>Scadranno tra 7 giorni</p>
+                            </div>
+                        </div>
+                        <div class="alert-item" style="border-left-color: var(--color-emerald-500);">
+                            <div class="alert-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-emerald-600);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h4>Backup Completato</h4>
+                                <p>Ultimo backup: 2 ore fa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-history"></i>
+                            Attività Recente
+                        </h2>
+                        <a href="/admin/activity" class="card-action">Vedi tutto →</a>
+                    </div>
+                    <div>
+                        <div class="activity-feed-item">
+                            <div class="activity-avatar">LS</div>
+                            <div class="activity-content">
+                                <p><strong>Liceo Scientifico</strong> ha registrato 24 nuovi studenti</p>
+                                <span class="activity-time">5 minuti fa</span>
+                            </div>
+                        </div>
+                        <div class="activity-feed-item">
+                            <div class="activity-avatar">IT</div>
+                            <div class="activity-content">
+                                <p><strong>Istituto Tecnico</strong> ha generato 15 codici docenti</p>
+                                <span class="activity-time">32 minuti fa</span>
+                            </div>
+                        </div>
+                        <div class="activity-feed-item">
+                            <div class="activity-avatar">LC</div>
+                            <div class="activity-content">
+                                <p><strong>Liceo Classico</strong> ha completato un backup dati</p>
+                                <span class="activity-time">1 ora fa</span>
+                            </div>
+                        </div>
+                        <div class="activity-feed-item">
+                            <div class="activity-avatar">IP</div>
+                            <div class="activity-content">
+                                <p><strong>Istituto Professionale</strong> ha caricato 42 nuovi materiali</p>
+                                <span class="activity-time">2 ore fa</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Controls Panel -->
-            <div class="controls-panel">
-                <h2 class="panel-title">
-                    <i class="fas fa-cogs"></i>
-                    Controlli Admin
-                </h2>
-                <button class="admin-button" onclick="bulkRegister()">
-                    <i class="fas fa-users-plus"></i>
-                    Registrazione di Massa
-                </button>
-                <button class="admin-button" onclick="createSchoolCode()">
-                    <i class="fas fa-key"></i>
-                    Crea Codice Scuola
-                </button>
-                <button class="admin-button" onclick="systemBackup()">
-                    <i class="fas fa-database"></i>
-                    Backup Sistema
-                </button>
-                <button class="admin-button warning" onclick="moderateChats()">
-                    <i class="fas fa-shield-alt"></i>
-                    Modera Chat
-                </button>
-                <button class="admin-button danger" onclick="systemMaintenance()">
-                    <i class="fas fa-tools"></i>
-                    Manutenzione
-                </button>
-            </div>
-        </div>
-
-        <!-- Chat Statistics -->
-        <div class="chat-stats">
-            <h2 class="panel-title">
-                <i class="fas fa-chart-bar"></i>
-                Statistiche Chat
-            </h2>
-            {% if active_chats %}
-                {% for chat in active_chats %}
-                <div class="chat-item">
-                    <span class="chat-name">{{ chat.nome }}</span>
-                    <span class="chat-count">{{ chat.messaggi_count }}</span>
+            <!-- Secondary Stats -->
+            <div class="bento-grid quad-layout" style="margin-top: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-value">2,847</div>
+                    <div class="stat-label">Totale Studenti</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +124 questo mese
+                    </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>
-                    💬 Nessuna attività chat oggi
-                </p>
-            {% endif %}
-        </div>
+                <div class="stat-card">
+                    <div class="stat-value">186</div>
+                    <div class="stat-label">Docenti Attivi</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +12 questo mese
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">8.4K</div>
+                    <div class="stat-label">Materiali Caricati</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +340 questa settimana
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12.3K</div>
+                    <div class="stat-label">Messaggi Inviati</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-fire"></i> +18% engagement
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="/admin/dashboard" class="mobile-nav-item active">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="/admin/scuole" class="mobile-nav-item">
+            <i class="fas fa-school"></i>
+            <span>Scuole</span>
+        </a>
+        <a href="/admin/users" class="mobile-nav-item">
+            <i class="fas fa-users"></i>
+            <span>Utenti</span>
+        </a>
+        <a href="/admin/reports" class="mobile-nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Report</span>
+        </a>
+        <a href="/admin/settings" class="mobile-nav-item">
+            <i class="fas fa-cog"></i>
+            <span>Impostazioni</span>
+        </a>
+    </nav>
+
     <script>
-        function bulkRegister() {
-            window.location.href = '/admin/bulk-register';
-        }
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        const sidebarToggle = document.getElementById('sidebarToggle');
 
-        function createSchoolCode() {
-            const schoolName = prompt(' Nome della scuola:');
-            if (schoolName) {
-                fetch('/api/school/invite-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        school_name: schoolName,
-                        expires_days: 30,
-                        max_uses: 1000
-                    })
-                }).then(response => response.json())
-                  .then(data => {
-                      alert(`🔑 Codice creato: ${data.invite_code}\nScuola: ${data.school_name}\nScadenza: ${data.expires_days} giorni`);
-                  });
-            }
-        }
-
-        function systemBackup() {
-            if (confirm('🔄 Vuoi creare un backup del sistema?')) {
-                // TODO: Implementare backup
-                alert(' Backup avviato! Riceverai una notifica quando sarà completato.');
-            }
-        }
-
-        function moderateChats() {
-            window.location.href = '/chat';
-        }
-
-        function systemMaintenance() {
-            if (confirm(' ATTENZIONE: Questo metterà il sistema in manutenzione. Continuare?')) {
-                alert('🔧 Modalità manutenzione attivata. Tutti gli utenti saranno disconnessi.');
-            }
-        }
-
-        // Real-time updates ogni 30 secondi
-        setInterval(() => {
-            location.reload();
-        }, 30000);
+        sidebarToggle.addEventListener('click', () => {
+            dashboardContainer.classList.toggle('sidebar-collapsed');
+        });
     </script>
 </body>
 </html>

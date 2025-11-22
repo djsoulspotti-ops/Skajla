@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Dashboard Admin - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --secondary: #a855f7;
+            --accent: #c084fc;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .admin-dashboard {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .admin-header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-title h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-title p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .metric-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .metric-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .activity-panel, .controls-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .activity-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: #faf5ff;
+            border-color: var(--primary);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-user {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-details {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .admin-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .admin-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .admin-button.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .admin-button.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .chat-stats {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .chat-count {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .online { background: var(--success); }
+        .offline { background: #94a3b8; }
+
+        @media (max-width: 1024px) {
+            .admin-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-dashboard {
+                padding: 1rem;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .admin-nav {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-dashboard">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="admin-title">
+                <h1>⚙️ Pannello Amministratore</h1>
+                <p>Controlla e gestisci l'intera piattaforma SKAILA</p>
+            </div>
+            <div class="admin-nav">
+                <a href="/chat" class="nav-button">💬 Chat</a>
+                <a href="/admin/bulk-register" class="nav-button">👥 Registrazioni</a>
+                <a href="/gamification" class="nav-button">🏆 Gamification</a>
+                <a href="/logout" class="nav-button">🚪 Esci</a>
+            </div>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-number">{{ stats.totale_utenti }}</div>
+                <div class="metric-label">Utenti Totali</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🎒</div>
+                <div class="metric-number">{{ stats.studenti_attivi }}</div>
+                <div class="metric-label">Studenti Attivi</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">👨‍🏫</div>
+                <div class="metric-number">{{ stats.professori_attivi }}</div>
+                <div class="metric-label">Professori Attivi</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">💬</div>
+                <div class="metric-number">{{ stats.messaggi_oggi }}</div>
+                <div class="metric-label">Messaggi Oggi</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🌐</div>
+                <div class="metric-number">{{ stats.utenti_online }}</div>
+                <div class="metric-label">Online Ora</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+            <!-- Activity Panel -->
+            <div class="activity-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-activity"></i>
+                    Attività Recente
+                </h2>
+                <div class="activity-list">
+                    {% if recent_activity %}
+                        {% for user in recent_activity %}
+                        <div class="activity-item">
+                            <div class="user-avatar">
+                                {{ user.nome[0] }}{{ user.cognome[0] if user.cognome else '' }}
+                            </div>
+                            <div class="activity-info">
+                                <div class="activity-user">
+                                    {{ user.nome }} {{ user.cognome or '' }}
+                                    <span class="status-indicator {{ 'online' if user.status_online else 'offline' }}"></span>
+                                </div>
+                                <div class="activity-details">
+                                    {{ user.ruolo.title() }} - Ultimo accesso: {{ user.ultimo_accesso or 'Mai' }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>
+                             Nessuna attività recente
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-cogs"></i>
+                    Controlli Admin
+                </h2>
+                <button class="admin-button" onclick="bulkRegister()">
+                    <i class="fas fa-users-plus"></i>
+                    Registrazione di Massa
+                </button>
+                <button class="admin-button" onclick="createSchoolCode()">
+                    <i class="fas fa-key"></i>
+                    Crea Codice Scuola
+                </button>
+                <button class="admin-button" onclick="systemBackup()">
+                    <i class="fas fa-database"></i>
+                    Backup Sistema
+                </button>
+                <button class="admin-button warning" onclick="moderateChats()">
+                    <i class="fas fa-shield-alt"></i>
+                    Modera Chat
+                </button>
+                <button class="admin-button danger" onclick="systemMaintenance()">
+                    <i class="fas fa-tools"></i>
+                    Manutenzione
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Statistics -->
+        <div class="chat-stats">
+            <h2 class="panel-title">
+                <i class="fas fa-chart-bar"></i>
+                Statistiche Chat
+            </h2>
+            {% if active_chats %}
+                {% for chat in active_chats %}
+                <div class="chat-item">
+                    <span class="chat-name">{{ chat.nome }}</span>
+                    <span class="chat-count">{{ chat.messaggi_count }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>
+                    💬 Nessuna attività chat oggi
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function bulkRegister() {
+            window.location.href = '/admin/bulk-register';
+        }
+
+        function createSchoolCode() {
+            const schoolName = prompt(' Nome della scuola:');
+            if (schoolName) {
+                fetch('/api/school/invite-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        school_name: schoolName,
+                        expires_days: 30,
+                        max_uses: 1000
+                    })
+                }).then(response => response.json())
+                  .then(data => {
+                      alert(`🔑 Codice creato: ${data.invite_code}\nScuola: ${data.school_name}\nScadenza: ${data.expires_days} giorni`);
+                  });
+            }
+        }
+
+        function systemBackup() {
+            if (confirm('🔄 Vuoi creare un backup del sistema?')) {
+                // TODO: Implementare backup
+                alert(' Backup avviato! Riceverai una notifica quando sarà completato.');
+            }
+        }
+
+        function moderateChats() {
+            window.location.href = '/chat';
+        }
+
+        function systemMaintenance() {
+            if (confirm(' ATTENZIONE: Questo metterà il sistema in manutenzione. Continuare?')) {
+                alert('🔧 Modalità manutenzione attivata. Tutti gli utenti saranno disconnessi.');
+            }
+        }
+
+        // Real-time updates ogni 30 secondi
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
