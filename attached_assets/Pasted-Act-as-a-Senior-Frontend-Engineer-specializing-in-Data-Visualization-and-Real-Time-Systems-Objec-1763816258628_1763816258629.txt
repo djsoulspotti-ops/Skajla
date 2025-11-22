@@ -1,0 +1,26 @@
+Act as a Senior Frontend Engineer specializing in Data Visualization and Real-Time Systems.
+
+**Objective:**
+Enhance the "Unified Messaging Section" [Target File: e.g., MessagingDashboard.jsx or ChatSidebar.vue] by adding an interactive, dynamic visualization background that represents currently connected users.
+
+**Core Requirement: Granular Privacy (Crucial):**
+The visualization must **ONLY** display users who belong to the exact same "class" (or group/cohort) as the currently logged-in user. The frontend should never receive data for users outside their class.
+
+**Execution Plan:**
+
+**Step 1: Data Context & Filtering Logic (The "Who")**
+* Identify how the current frontend determines the logged-in user's `class_id` or group context.
+* Review the real-time connection logic (e.g., WebSockets, Socket.io, or server polling).
+* **Action:** Modify the real-time data subscription so that the browser *only* receives updates about online users sharing the same `class_id`. If this filtering doesn't exist on the backend, mock it securely on the frontend for now by filtering incoming data *before* it reaches the rendering state, ensuring data isolation.
+
+**Step 2: Interactive Frontend Visualization (The "How")**
+* Create a new component (e.g., `OnlineClassmatesViz`) to act as a dynamic background for the messaging section.
+* **Visual Style:** Implement "interactive moving spirals." Each spiral represents one connected classmate. The spirals should drift slowly, feel organic, and subtly react to mouse movement (interactive).
+* **Tech Choice:** Choose a lightweight and performant approach suited for the current stack. Prefer using native Canvas API or SVG with CSS animations to avoid adding heavy 3D libraries (like Three.js) unless already present. If using React, a lightweight library like `framer-motion` or `react-spring` applied to SVG paths is acceptable for performance.
+* **State Integration:** Bind the number of rendered spirals directly to the filtered list of online classmates from Step 1. When a classmate logs on/off, a spiral should appear/disappear smoothly.
+
+**Constraints:**
+* **Performance:** The animation must be low-CPU usage. It should not slow down the chat interface or scrolling.
+* **Aesthetics:** The spirals should be subtle and professional, not distracting. Use a color palette consistent with the app theme.
+
+Start by analyzing the current file structure related to messaging and real-time user state, then proceed with Step 1.

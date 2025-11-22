@@ -12,7 +12,9 @@ from ai_insights_engine import ai_insights_engine
 from shared.middleware.auth import require_login, require_auth, require_teacher
 from services.dashboard.dashboard_service import dashboard_service
 from services.school.school_features_manager import school_features_manager
-from log import logger
+from shared.error_handling.structured_logger import get_logger
+
+logger = get_logger(__name__)
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
