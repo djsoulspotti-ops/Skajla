@@ -16,6 +16,17 @@ from shared.error_handling import (
 
 logger = get_logger(__name__)
 
+# ✅ SECURITY FIX: Whitelist of allowed feature column names (SQL Injection Prevention)
+ALLOWED_FEATURE_COLUMNS = {
+    'gamification': 'modulo_gamification',
+    'chatbot': 'modulo_chatbot',
+    'ai_coach': 'modulo_chatbot',
+    'registro': 'modulo_registro',
+    'materiali': 'modulo_materiali',
+    'connect': 'modulo_connect',
+    'analytics': 'modulo_analytics'
+}
+
 class SchoolSystem:
     """Sistema di gestione scuole, classi e associazioni professori"""
     
@@ -1370,7 +1381,20 @@ class SchoolSystem:
             bool: True se la scuola ha accesso, False altrimenti
         """
         try:
-            column_name = f'modulo_{feature_name}'
+            # ✅ SECURITY FIX: Validate feature_name against whitelist (SQL Injection Prevention)
+            if feature_name not in ALLOWED_FEATURE_COLUMNS:
+                logger.warning(
+                    event_type='invalid_feature_name',
+                    domain='school',
+                    operation='has_feature',
+                    school_id=school_id,
+                    feature_name=feature_name,
+                    message='Attempted access with invalid feature name'
+                )
+                return False
+            
+            # Use whitelisted column name (safe from SQL injection)
+            column_name = ALLOWED_FEATURE_COLUMNS[feature_name]
             
             school = db_manager.query(
                 f'SELECT {column_name} FROM scuole WHERE id = %s',
@@ -1460,7 +1484,23 @@ class SchoolSystem:
             dict: {'success': bool, 'message': str}
         """
         try:
-            column_name = f'modulo_{feature_name}'
+            # ✅ SECURITY FIX: Validate feature_name against whitelist (SQL Injection Prevention)
+            if feature_name not in ALLOWED_FEATURE_COLUMNS:
+                logger.warning(
+                    event_type='invalid_feature_name',
+                    domain='school',
+                    operation='toggle_feature',
+                    school_id=school_id,
+                    feature_name=feature_name,
+                    message='Attempted toggle with invalid feature name'
+                )
+                return {
+                    'success': False,
+                    'message': 'Nome feature non valido'
+                }
+            
+            # Use whitelisted column name (safe from SQL injection)
+            column_name = ALLOWED_FEATURE_COLUMNS[feature_name]
             
             db_manager.execute(
                 f'UPDATE scuole SET {column_name} = %s WHERE id = %s',

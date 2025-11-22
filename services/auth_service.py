@@ -6,12 +6,20 @@ Logica business per autenticazione e sicurezza
 import bcrypt
 import hashlib
 import time
+import json
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import request, session, render_template
 from services.database.database_manager import db_manager
 from shared.validators.input_validators import validator, sql_protector
 from shared.logging.structured_logger import auth_logger, security_logger
+
+# ✅ SECURITY FIX: Import Redis for persistent login tracking
+try:
+    import redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
 
 # Error handling framework
 from shared.error_handling import (
@@ -37,9 +45,38 @@ class SecuritySettings:
 class AuthService:
 
     def __init__(self):
-        self.login_attempts = {}
         self.max_attempts = SecuritySettings.MAX_LOGIN_ATTEMPTS
         self.lockout_duration = SecuritySettings.LOGIN_LOCKOUT_DURATION
+        
+        # ✅ SECURITY FIX: Use Redis for persistent, distributed login tracking
+        self.redis_client = None
+        if REDIS_AVAILABLE:
+            try:
+                self.redis_client = redis.Redis(
+                    host='localhost',
+                    port=6379,
+                    db=0,
+                    decode_responses=True,
+                    socket_connect_timeout=2
+                )
+                # Test connection
+                self.redis_client.ping()
+                logger.info(
+                    event_type='redis_connected',
+                    domain='authentication',
+                    message='Redis login tracking initialized'
+                )
+            except Exception as e:
+                logger.warning(
+                    event_type='redis_connection_failed',
+                    domain='authentication',
+                    error=str(e),
+                    message='Redis unavailable - falling back to in-memory login tracking (DEVELOPMENT ONLY)'
+                )
+                self.redis_client = None
+        
+        # Fallback to in-memory (for development without Redis)
+        self.login_attempts = {}
 
     def hash_password(self, password: str) -> str:
         """Hash password con bcrypt"""
@@ -102,7 +139,29 @@ class AuthService:
             return False
 
     def is_locked_out(self, email: str) -> bool:
-        """Controlla se account è bloccato"""
+        """Controlla se account è bloccato (Redis or in-memory)"""
+        key = f'login_attempts:{email}'
+        
+        # ✅ SECURITY FIX: Use Redis if available (persistent across workers)
+        if self.redis_client:
+            try:
+                attempts_json = self.redis_client.get(key)
+                if not attempts_json:
+                    return False
+                
+                attempts = json.loads(attempts_json)
+                if attempts['count'] >= self.max_attempts:
+                    return True  # Still in lockout (Redis TTL will handle expiry)
+                return False
+            except Exception as e:
+                logger.warning(
+                    event_type='redis_read_failed',
+                    domain='authentication',
+                    error=str(e),
+                    message='Redis read failed - falling back to in-memory'
+                )
+        
+        # Fallback: in-memory (development)
         if email not in self.login_attempts:
             return False
 
@@ -114,28 +173,89 @@ class AuthService:
         return False
 
     def record_failed_attempt(self, email: str):
-        """Registra tentativo fallito"""
+        """Registra tentativo fallito (Redis or in-memory)"""
+        key = f'login_attempts:{email}'
+        
+        # ✅ SECURITY FIX: Use Redis if available (persistent across workers)
+        if self.redis_client:
+            try:
+                attempts_json = self.redis_client.get(key)
+                if not attempts_json:
+                    data = {
+                        'count': 1,
+                        'locked_at': datetime.now().isoformat(),
+                        'ip': request.remote_addr if request else 'unknown'
+                    }
+                else:
+                    data = json.loads(attempts_json)
+                    data['count'] += 1
+                
+                # Store with TTL = lockout_duration
+                self.redis_client.setex(
+                    key,
+                    self.lockout_duration,
+                    json.dumps(data)
+                )
+                
+                logger.warning(
+                    event_type='failed_login_attempt',
+                    domain='authentication',
+                    email=email,
+                    attempt_count=data['count'],
+                    ip=data['ip'],
+                    message=f'Failed login attempt ({data["count"]}/{self.max_attempts})'
+                )
+            except Exception as e:
+                logger.warning(
+                    event_type='redis_write_failed',
+                    domain='authentication',
+                    error=str(e),
+                    message='Redis write failed - falling back to in-memory'
+                )
+                # Fall through to in-memory
+        
+        # Fallback: in-memory (development)
         if email not in self.login_attempts:
             self.login_attempts[email] = {'count': 0, 'last_attempt': 0}
 
         self.login_attempts[email]['count'] += 1
         self.login_attempts[email]['last_attempt'] = time.time()
         
-        # Structured logging for failed attempts
-        security_logger.warning("Failed login attempt",
-                              email=email,
-                              attempt_count=self.login_attempts[email]['count'],
-                              ip=request.remote_addr if request else "unknown")
+        logger.warning(
+            event_type='failed_login_attempt',
+            domain='authentication',
+            email=email,
+            attempt_count=self.login_attempts[email]['count'],
+            ip=request.remote_addr if request else 'unknown',
+            message=f'Failed login attempt ({self.login_attempts[email]["count"]}/{self.max_attempts})'
+        )
 
     def reset_attempts(self, email: str):
-        """Reset tentativi dopo login riuscito"""
+        """Reset tentativi dopo login riuscito (Redis or in-memory)"""
+        key = f'login_attempts:{email}'
+        
+        # ✅ SECURITY FIX: Clear from Redis if available
+        if self.redis_client:
+            try:
+                self.redis_client.delete(key)
+            except Exception as e:
+                logger.warning(
+                    event_type='redis_delete_failed',
+                    domain='authentication',
+                    error=str(e),
+                    message='Redis delete failed - clearing from in-memory'
+                )
+        
+        # Clear from in-memory
         if email in self.login_attempts:
             del self.login_attempts[email]
             
-        # Structured logging for successful login
-        auth_logger.info("Successful login", 
-                        email=email,
-                        ip=request.remote_addr if request else "unknown")
+        logger.info(
+            event_type='successful_login',
+            domain='authentication',
+            email=email,
+            ip=request.remote_addr if request else 'unknown'
+        )
 
     def authenticate_user(self, email: str, password: str):
         """Autentica utente"""

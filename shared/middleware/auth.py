@@ -48,7 +48,7 @@ def api_auth_required(f: Callable) -> Callable:
 
 def require_role(*allowed_roles: str) -> Callable:
     """
-    Decorator per controllo ruoli multipli
+    Decorator per controllo ruoli multipli (API + Web safe)
     
     Uso:
         @require_role('admin', 'professore')
@@ -59,11 +59,27 @@ def require_role(*allowed_roles: str) -> Callable:
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if 'user_id' not in session:
+                # ✅ SECURITY FIX: Detect API vs Web request
+                if request.is_json or request.path.startswith('/api/'):
+                    return jsonify({
+                        'success': False,
+                        'error': 'Non autenticato',
+                        'message': 'Devi effettuare il login'
+                    }), 401
                 flash('Devi effettuare il login', 'warning')
                 return redirect('/login')
             
             user_role = session.get('ruolo')
             if user_role not in allowed_roles:
+                # ✅ SECURITY FIX: Return JSON for API requests
+                if request.is_json or request.path.startswith('/api/'):
+                    return jsonify({
+                        'success': False,
+                        'error': 'Accesso negato',
+                        'message': 'Permessi insufficienti',
+                        'required_roles': list(allowed_roles),
+                        'user_role': user_role
+                    }), 403
                 flash('Accesso negato - Permessi insufficienti', 'danger')
                 return redirect('/dashboard')
             
@@ -74,15 +90,31 @@ def require_role(*allowed_roles: str) -> Callable:
 
 def require_admin(f: Callable) -> Callable:
     """
-    Decorator per richiedere ruolo admin
+    Decorator per richiedere ruolo admin (API + Web safe)
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            # ✅ SECURITY FIX: Detect API vs Web request
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({
+                    'success': False,
+                    'error': 'Non autenticato',
+                    'message': 'Devi effettuare il login'
+                }), 401
             flash('Devi effettuare il login', 'warning')
             return redirect('/login')
         
         if session.get('ruolo') != 'admin':
+            # ✅ SECURITY FIX: Return JSON for API requests
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({
+                    'success': False,
+                    'error': 'Accesso negato',
+                    'message': 'Solo amministratori hanno accesso',
+                    'required_role': 'admin',
+                    'user_role': session.get('ruolo')
+                }), 403
             flash('Accesso negato - Solo amministratori', 'danger')
             return redirect('/dashboard')
         
@@ -115,15 +147,31 @@ def require_teacher(f: Callable) -> Callable:
 
 def require_student(f: Callable) -> Callable:
     """
-    Decorator per richiedere ruolo studente
+    Decorator per richiedere ruolo studente (API + Web safe)
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            # ✅ SECURITY FIX: Detect API vs Web request
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({
+                    'success': False,
+                    'error': 'Non autenticato',
+                    'message': 'Devi effettuare il login'
+                }), 401
             flash('Devi effettuare il login', 'warning')
             return redirect('/login')
         
         if session.get('ruolo') != 'studente':
+            # ✅ SECURITY FIX: Return JSON for API requests
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({
+                    'success': False,
+                    'error': 'Accesso negato',
+                    'message': 'Solo studenti hanno accesso',
+                    'required_role': 'studente',
+                    'user_role': session.get('ruolo')
+                }), 403
             flash('Accesso negato - Solo studenti', 'danger')
             return redirect('/dashboard')
         
