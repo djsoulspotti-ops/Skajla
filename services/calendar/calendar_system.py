@@ -211,6 +211,19 @@ class CalendarSystem:
     @handle_errors
     def update_event(self, event_id: int, user_id: int, updates: dict) -> bool:
         """Aggiorna un evento (solo il creatore può modificare)"""
+        from shared.error_handling import AuthError
+        
+        ownership_check = db_manager.execute(
+            'SELECT created_by FROM schedules WHERE id = %s AND is_active = TRUE',
+            (event_id,)
+        )
+        
+        if not ownership_check:
+            raise ValidationError("Evento non trovato")
+        
+        if ownership_check[0]['created_by'] != user_id:
+            raise AuthError("Non puoi modificare eventi creati da altri utenti")
+        
         allowed_fields = ['title', 'start_datetime', 'end_datetime', 'all_day', 'event_type', 'event_data', 'recurrence']
         
         set_clauses = []
@@ -249,7 +262,20 @@ class CalendarSystem:
     
     @handle_errors
     def delete_event(self, event_id: int, user_id: int) -> bool:
-        """Soft delete di un evento"""
+        """Soft delete di un evento (solo il creatore può eliminare)"""
+        from shared.error_handling import AuthError
+        
+        ownership_check = db_manager.execute(
+            'SELECT created_by FROM schedules WHERE id = %s AND is_active = TRUE',
+            (event_id,)
+        )
+        
+        if not ownership_check:
+            raise ValidationError("Evento non trovato")
+        
+        if ownership_check[0]['created_by'] != user_id:
+            raise AuthError("Non puoi eliminare eventi creati da altri utenti")
+        
         db_manager.execute(
             'UPDATE schedules SET is_active = FALSE WHERE id = %s AND created_by = %s',
             (event_id, user_id)

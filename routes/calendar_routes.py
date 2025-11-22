@@ -141,10 +141,28 @@ def smart_delete_event(event_id):
 @handle_errors(api=True)
 def smart_get_class_schedule(class_id):
     """API: Ottieni orario classe (per studenti/professori)"""
+    from shared.database import db_manager
+    
     user = session['user']
+    user_school_id = user.get('scuola_id')
     
     if user['ruolo'] not in ['studente', 'professore', 'dirigente']:
         raise AuthError("Non autorizzato")
+    
+    if not user_school_id:
+        raise AuthError("Scuola non associata all'utente")
+    
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT scuola_id FROM classi WHERE id = %s", (class_id,))
+        class_row = cursor.fetchone()
+        
+        if not class_row:
+            raise ValidationError("Classe non trovata")
+        
+        class_school_id = class_row[0]
+        if class_school_id != user_school_id:
+            raise AuthError("Non puoi visualizzare orari di classi di altre scuole")
     
     start_date = request.args.get('start')
     end_date = request.args.get('end')
@@ -196,6 +214,24 @@ def smart_create_school_event():
 @handle_errors(api=True)
 def smart_get_user_calendar(user_id):
     """API: Visualizza calendario di qualsiasi utente (solo dirigente)"""
+    from shared.database import db_manager
+    
+    principal_school_id = session['user'].get('scuola_id')
+    if not principal_school_id:
+        raise AuthError("Scuola non associata al dirigente")
+    
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT scuola_id FROM utenti WHERE id = %s", (user_id,))
+        user_row = cursor.fetchone()
+        
+        if not user_row:
+            raise ValidationError("Utente non trovato")
+        
+        user_school_id = user_row[0]
+        if user_school_id != principal_school_id:
+            raise AuthError("Non puoi visualizzare calendari di utenti di altre scuole")
+    
     start_date = request.args.get('start')
     end_date = request.args.get('end')
     
