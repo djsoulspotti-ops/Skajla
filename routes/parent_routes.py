@@ -5,7 +5,7 @@ Provides endpoints for parent-student linking and child monitoring
 
 from flask import Blueprint, request, jsonify, session, render_template
 from services.parent.parent_manager import ParentManager
-from middleware.auth_middleware import require_login, require_role
+from shared.middleware.auth import require_login, require_role
 from shared.error_handling import get_logger
 
 logger = get_logger(__name__)
