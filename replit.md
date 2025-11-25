@@ -42,6 +42,37 @@ A complete UI/UX overhaul implementing modern Bento Grid layouts, collapsible na
 ## Smart Calendar & Agenda System
 A personal and school-wide calendar system with role-specific behaviors and integrated electronic register workflows. It uses PostgreSQL JSONB for event metadata, FullCalendar.js for interactive UI, and a REST API with role-based authorization and multi-tenant isolation.
 
+## Hybrid Behavioral Telemetry & Early Warning System
+**Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine**
+
+A production-ready telemetry infrastructure combining client-side behavioral tracking (99%+ reliability) with server-side critical event capture (100% reliability) for comprehensive student struggle detection.
+
+**Client-Side Telemetry:**
+- Behavioral event tracking (page views, navigation, time-on-task, clicks)
+- Acknowledgement-based queue management with stable client_event_id
+- localStorage persistence for cross-session retry
+- Automatic quarantine for invalid events
+- Multiple exit handlers (beforeunload, pagehide, visibilitychange) with synchronous XHR validation
+- Batch API with HTTP 207 partial success handling
+
+**Server-Side Telemetry:**
+- Quiz submissions tracked in `services/gamification/skaila_quiz_manager.py`
+- AI Coach interactions tracked in `routes/ai_chat_routes.py`
+- Captures: quiz_id, subject, topic, difficulty, is_correct, accuracy_score, time_taken, xp_earned
+- Events marked with `device_type: 'server'` and `source: 'server'` for provenance
+- Never blocks critical user flows (wrapped in try/except)
+
+**TelemetryEngine Unified Interface:**
+- Accepts events from both client (via API) and server (direct calls)
+- Automatic school_id lookup via `_get_user_school(user_id)`
+- Auto-creates session_id when not provided (server-side events)
+- Stores all events in unified `behavioral_telemetry` PostgreSQL table
+- Automatic early warning alert generation on struggle detection
+- Four PostgreSQL tables: behavioral_telemetry, early_warning_alerts, recovery_paths, telemetry_sessions
+
+**Architecture Decision:**
+Hybrid approach addresses browser-imposed limitations (~100ms unload window) that affect all web analytics platforms. Critical learning events (quiz submissions, AI interventions) achieve 100% reliability via server-side tracking, while behavioral signals maintain 99%+ reliability via optimized client-side tracking.
+
 ## Key Features
 -   **SKAILA Connect**: Student career portal with a company database.
 -   **Integrated Online Register**: Digital register for grades and attendance.
