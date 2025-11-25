@@ -5,10 +5,12 @@ Generazione, selezione adattiva, tracking performance
 
 import sqlite3
 import random
+import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from database_manager import db_manager
 from gamification import gamification_system
+from services.telemetry.telemetry_engine import telemetry_engine
 
 class QuizManager:
     """Gestione completa quiz SKAILA"""
@@ -120,6 +122,34 @@ class QuizManager:
         # Info progresso
         progress = self._get_subject_progress_summary(user_id, quiz_data['subject'])
         result['progress'] = progress
+        
+        # CRITICAL: Server-side telemetry for 100% reliability
+        # This ensures quiz submissions are tracked even if client-side fails
+        try:
+            telemetry_engine.track_event(
+                user_id=user_id,
+                event_type='quiz_answer',
+                context={
+                    'quiz_id': quiz_id,
+                    'subject': quiz_data['subject'],
+                    'topic': quiz_data['topic'],
+                    'difficulty': quiz_data['difficulty'],
+                    'is_correct': is_correct,
+                    'user_answer': user_answer,
+                    'correct_answer': quiz_data['correct_answer'],
+                    'time_taken_seconds': time_taken,
+                    'xp_earned': xp_earned,
+                    'speed_bonus': time_taken < 30 and is_correct,
+                    'source': 'server',  # Mark as server-generated
+                    'device_type': 'server'  # Server-side event marker
+                },
+                duration_seconds=time_taken,
+                accuracy_score=1.0 if is_correct else 0.0
+            )
+        except Exception as telemetry_error:
+            # Never let telemetry break quiz flow
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Server-side telemetry failed for quiz {quiz_id}: {telemetry_error}")
         
         return result
     

@@ -8,6 +8,7 @@ from ai_chatbot import ai_bot
 from shared.middleware.feature_guard import check_feature_enabled, Features
 from services.tenant_guard import get_current_school_id
 from shared.error_handling.structured_logger import get_logger
+from services.telemetry.telemetry_engine import telemetry_engine
 
 logger = get_logger(__name__)
 
@@ -75,6 +76,30 @@ def chat_with_ai():
             user_role=session.get('ruolo', 'studente'),
             user_id=session['user_id']
         )
+        
+        # CRITICAL: Server-side telemetry for 100% reliability
+        # Track AI interventions for early warning system
+        try:
+            telemetry_engine.track_event(
+                user_id=session['user_id'],
+                event_type='ai_intervention',
+                context={
+                    'message_length': len(message),
+                    'response_length': len(response),
+                    'user_role': session.get('ruolo', 'studente'),
+                    'source': 'server',  # Mark as server-generated
+                    'device_type': 'server'  # Server-side event marker
+                },
+                duration_seconds=None,
+                accuracy_score=None
+            )
+        except Exception as telemetry_error:
+            # Never let telemetry break AI chat
+            logger.warning(
+                event_type='ai_telemetry_failed',
+                domain='ai_chat',
+                error=str(telemetry_error)
+            )
         
         return jsonify({
             'success': True,
