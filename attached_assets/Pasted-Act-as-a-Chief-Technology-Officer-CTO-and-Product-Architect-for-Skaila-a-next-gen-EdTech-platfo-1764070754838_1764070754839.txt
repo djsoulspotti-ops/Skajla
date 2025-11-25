@@ -1,0 +1,30 @@
+Act as a Chief Technology Officer (CTO) and Product Architect for "Skaila," a next-gen EdTech platform.
+
+**High-Level Goal:**
+Transform Skaila into a unified Super-App that combines the features of an Electronic Register (like ClasseViva) and an LMS (like WeSchool), but beats them on 3 specific competitive advantages where they are weak.
+
+**Implementation Strategy:**
+Please analyze the current project and plan the integration of these three "Killer Features." Do not just add code blindly; propose a modular architecture for the following engines:
+
+**1. The "Smart AI-Tutoring & Early-Warning" Engine (The Brain)**
+* **Problem:** Competitors are passive. They store grades but don't prevent failure.
+* **Requirement:** Implement a "Behavioral Telemetry System."
+    * **Inputs:** Track student interactions: click patterns, time spent on tasks, assignment submission speed, and specific error types in quizzes.
+    * **Logic:** If the system detects a pattern of struggle (e.g., high time-on-task with low accuracy), it must trigger an **"Early-Warning Alert"** to the teacher immediately.
+    * **Output:** Automatically generate a "Recovery Path" for the student (e.g., suggest specific micro-lessons) based on their weak points.
+
+**2. "Gen-Z Mobile-First" UX Engine (The Look)**
+* **Problem:** Competitors are desktop-centric and boring.
+* **Requirement:** Refactor the frontend into a High-Performance PWA (Progressive Web App).
+    * **UI Style:** Adopt a "TikTok-style" vertical feed for educational content. Videos must be short (< 60s) and swipeable.
+    * **Engagement:** Implement heavy Gamification (streaks, badges) and real-time Push Notifications for grades/alerts.
+    * **Tech:** Ensure offline support using Service Workers.
+
+**3. The "Compliance & Paperless" Engine (The Bureaucracy)**
+* **Problem:** Competitors still rely on printing/signing papers (PCTO, authorizations).
+* **Requirement:** Build a secure "Digital Validation Workflow."
+    * **Features:** Remote digital signing capabilities for parents/principals, timestamping for legal validity, and secure storage logs.
+    * **Target:** Make PCTO (Internships) management 100% digital with zero paper.
+
+**Action Plan:**
+Start by outlining the **Database Schema changes** required to support the "Behavioral Telemetry" (tracking clicks/time) and the **Frontend Architecture** needed for the vertical video feed.
