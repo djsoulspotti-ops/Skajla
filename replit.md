@@ -126,8 +126,53 @@ A complete PWA infrastructure with TikTok-style vertical feed for mobile-first G
 - Scroll Snap: Chrome 69+, Safari 11+, Firefox 68+
 - PWA Install: Chrome/Edge (desktop/mobile), Safari (iOS 11.3+)
 
+## SKAILA Connect: Opportunity Marketplace (Compliance & Paperless Engine)
+**Part of Feature #3: Compliance & Paperless Engine**
+
+A complete transformation of SKAILA Connect into a dynamic "Opportunity Marketplace" where students can find PCTO placements as easily as ordering food. Implements a three-phase architecture: Dynamic Student Portfolio, Smart Matching, and PCTO Workflow Engine.
+
+**Phase 1: Dynamic Student Portfolio (Data Layer)**
+- **Student Portfolios Table**: Stores bio, soft skills, languages, and certifications
+- **Student Projects Table**: Tracks academic, personal, and competition projects with technologies and achievements
+- **Student Skills Table**: Manages technical/soft skills with proficiency levels and verification status
+- **StudentPortfolioManager Service**: Generates "Candidate Cards" automatically from student data
+- **Aggregates Data From**: Verified grades (registro_voti), badges (user_badges), gamification stats, subject progress
+- **Profile Completeness**: Dynamic calculation (0-100%) based on portfolio richness
+- **API Endpoints**: GET/POST /api/student/portfolio, /api/student/skills, /api/student/projects
+
+**Phase 2: Opportunity Feed & Smart Matching (UX Layer)**
+- **Enhanced Company Schema**: Added remote_allowed, pcto_certified, hours_required, location_type, sector_tags
+- **Company Opportunities Table**: Multi-position support per company with skills requirements, spots tracking, compensation
+- **Student Applications Table**: Tracks application status, stores candidate card snapshots, review workflow
+- **Modern Marketplace UI**: Card-based feed (LinkedIn/Indeed style), mobile-first responsive design
+- **Smart Filtering**: Location type (Remote/On-Site/Hybrid), Sector, PCTO hours, Quick filters (PCTO Certified, Paid positions)
+- **One-Click Apply**: Automatically sends Candidate Card to company without forms, instant application submission
+- **API Endpoints**: POST /api/opportunities/apply, GET /api/opportunities, GET /api/student/applications
+
+**Phase 3: PCTO Workflow Engine (Compliance & Digital Logbook)**
+- **PCTO Placements Table**: Tracks student-company connections, hours required/completed, status workflow (active/completed/suspended)
+- **PCTO Timesheets Table**: Digital check-in/check-out logs with GPS location, automatic hours calculation, tutor validation
+- **Progress Tracker UI**: Real-time progress bar (Hours Completed vs Hours Required), visual status indicators
+- **Digital Logbook**: Check-In/Check-Out buttons replace paper logbooks, automatic timesheet generation, time-on-task tracking
+- **Tutor Validation Workflow**: Teachers validate logged hours, add notes, approve/reject timesheets
+- **Completion Detection**: Auto-marks placement as completed when hours target reached
+- **API Endpoints**: POST /api/pcto/check-in, POST /api/pcto/check-out, GET /api/pcto/progress
+
+**Technical Architecture:**
+- Routes: `/skaila-connect` (marketplace), `/pcto/tracker` (student logbook)
+- Templates: `skaila_connect_marketplace.html`, `pcto_tracker.html`
+- Services: `services/portfolio/student_portfolio_manager.py`
+- Database: 9 new tables (3 portfolio + 2 opportunities + 2 PCTO + 2 legacy enhanced)
+- Design: Blue/White trust colors, PCTO Certified badges, mobile-first Bento Grid layout
+
+**Business Value:**
+- **Zero Friction**: Finding PCTO placement is as easy as ordering food (no paper forms)
+- **Paperless Compliance**: Digital timesheets replace paper logbooks, automatic validation
+- **Smart Matching**: Skills-based filtering connects students with relevant opportunities
+- **Transparency**: Real-time progress tracking for students, teachers, and companies
+
 ## Key Features
--   **SKAILA Connect**: Student career portal with a company database.
+-   **SKAILA Connect - Opportunity Marketplace**: Dynamic PCTO marketplace with One-Click Apply and digital logbook (see above).
 -   **Integrated Online Register**: Digital register for grades and attendance.
 -   **Teaching Materials Management System**: Manages files with class-based access control.
 -   **Parent Communication System**: Generates automated reports with AI insights and real-time notifications.

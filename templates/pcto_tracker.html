@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCTO Tracker - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+            padding: 2rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .tracker-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .progress-section {
+            background: linear-gradient(135deg, #003B73 0%, #0056a3 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .hours-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        .hours-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #D4AF37, #f3d687);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        .check-in-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            padding: 1.25rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .btn-check-in {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .btn-check-in:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        .btn-check-out {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        .btn-check-out:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+        .timesheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .timesheet-table th {
+            text-align: left;
+            padding: 1rem;
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .timesheet-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            color: #6b7280;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-validated {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            color: #374151;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-bottom: 2rem;
+        }
+        .btn-back:hover {
+            border-color: #003B73;
+            color: #003B73;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #9ca3af;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+
+        <div class="tracker-card">
+            <h1>📊 PCTO Tracker</h1>
+            <p class="subtitle">Track your PCTO hours and manage your digital logbook</p>
+
+            {% if placement %}
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-info">
+                    <div>
+                        <div class="hours-display">{{ placement.hours_completed|default(0, true)|round(2) }}h / {{ placement.hours_required }}h</div>
+                        <div class="hours-label">{{ placement.company_name }}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 2rem; font-weight: 800;">
+                            {{ ((placement.hours_completed|default(0, true) / placement.hours_required) * 100)|round(1) }}%
+                        </div>
+                        <div class="hours-label">Complete</div>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ ((placement.hours_completed|default(0, true) / placement.hours_required) * 100)|round(1) }}%"></div>
+                </div>
+                <div class="hours-label">
+                    <i class="fas fa-info-circle"></i>
+                    {{ (placement.hours_required - placement.hours_completed|default(0, true))|round(2) }} hours remaining to complete your PCTO
+                </div>
+            </div>
+
+            <!-- Check-In/Check-Out Section -->
+            <div class="check-in-section">
+                <button class="btn btn-check-in" id="checkInBtn" onclick="checkIn()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Check-In
+                </button>
+                <button class="btn btn-check-out" id="checkOutBtn" onclick="checkOut()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Check-Out
+                </button>
+            </div>
+
+            <!-- Timesheet History -->
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #111827;">
+                <i class="fas fa-clock"></i> Timesheet History
+            </h2>
+            
+            {% if timesheets %}
+            <table class="timesheet-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Hours</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ts in timesheets %}
+                    <tr>
+                        <td>{{ ts.check_in_time.strftime('%d/%m/%Y') if ts.check_in_time else 'N/A' }}</td>
+                        <td>{{ ts.check_in_time.strftime('%H:%M') if ts.check_in_time else 'N/A' }}</td>
+                        <td>{{ ts.check_out_time.strftime('%H:%M') if ts.check_out_time else '—' }}</td>
+                        <td><strong>{{ ts.hours_logged|default(0, true)|round(2) }}h</strong></td>
+                        <td>
+                            {% if ts.is_validated %}
+                            <span class="status-badge status-validated">✓ Validated</span>
+                            {% else %}
+                            <span class="status-badge status-pending">⏳ Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <p>No timesheet entries yet. Check-in to start tracking your hours!</p>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- No Active Placement -->
+            <div class="empty-state">
+                <i class="fas fa-briefcase"></i>
+                <h3 style="margin-bottom: 0.5rem; color: #374151;">No Active PCTO Placement</h3>
+                <p>Apply to opportunities in SKAILA Connect to start your PCTO journey!</p>
+                <a href="/skaila-connect" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #003B73 0%, #0056a3 100%); color: white; text-decoration: none; border-radius: 12px; font-weight: 600;">
+                    Browse Opportunities
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        async function checkIn() {
+            const btn = document.getElementById('checkInBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking In...';
+
+            try {
+                const response = await fetch('/api/pcto/check-in', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Check-in failed');
+                }
+            } catch (error) {
+                alert('❌ ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Check-In';
+            }
+        }
+
+        async function checkOut() {
+            const btn = document.getElementById('checkOutBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking Out...';
+
+            try {
+                const response = await fetch('/api/pcto/check-out', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const message = `✅ ${data.message}\n\n📊 Total Hours: ${data.total_hours.toFixed(2)}/${data.hours_required}\n${data.is_completed ? '🎉 Congratulations! PCTO completed!' : ''}`;
+                    alert(message);
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Check-out failed');
+                }
+            } catch (error) {
+                alert('❌ ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Check-Out';
+            }
+        }
+    </script>
+</body>
+</html>

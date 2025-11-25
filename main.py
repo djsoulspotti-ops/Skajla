@@ -55,6 +55,9 @@ from routes.cyberpunk_presence_routes import cyberpunk_presence_bp # Cyberpunk P
 from routes.calendar_routes import smart_calendar_bp # Smart Calendar System
 from routes.telemetry_routes import telemetry_bp # Behavioral Telemetry System
 from routes.early_warning_routes import early_warning_bp # Early Warning Dashboard
+from routes.portfolio_routes import portfolio_bp # Student Portfolio & Candidate Cards
+from routes.opportunities_api import opportunities_api_bp # Opportunities One-Click Apply API
+from routes.pcto_routes import pcto_bp # PCTO Tracker & Digital Logbook
 
 # Import services
 from services.auth_service import auth_service
@@ -252,6 +255,9 @@ class SkailaApp:
         self.app.register_blueprint(smart_calendar_bp) # Smart Calendar System
         self.app.register_blueprint(telemetry_bp) # Behavioral Telemetry System
         self.app.register_blueprint(early_warning_bp) # Early Warning Dashboard
+        self.app.register_blueprint(portfolio_bp) # Student Portfolio API
+        self.app.register_blueprint(opportunities_api_bp) # Opportunities Marketplace API
+        self.app.register_blueprint(pcto_bp) # PCTO Tracker & Digital Logbook
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp

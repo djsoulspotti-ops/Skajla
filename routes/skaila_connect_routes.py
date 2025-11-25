@@ -135,47 +135,70 @@ MOCK_COMPANIES = [
 @require_login
 def connect_hub():
     """
-    Hub SKAILA Connect - Connessione scuole-aziende per alternanza scuola-lavoro
+    Hub SKAILA Connect - Opportunity Marketplace
     """
     user_id = session.get('user_id')
-    school_id = session.get('school_id')
+    ruolo = session.get('ruolo')
     
-    # Query aziende disponibili (mock per ora, poi sarà integrato con sistema reale)
+    # Get active opportunities from new schema with robust error handling
+    opportunities = []
     try:
-        companies = db_manager.query('''
-            SELECT * FROM companies
-            WHERE attiva = TRUE
-            ORDER BY created_at DESC
-            LIMIT 20
+        opportunities = db_manager.query('''
+            SELECT 
+                co.id,
+                co.position_title,
+                co.position_description as description,
+                co.opportunity_type,
+                co.hours_required,
+                co.compensation,
+                co.spots_available,
+                co.spots_filled,
+                c.nome as company_name,
+                c.citta as city,
+                c.settore as sector,
+                c.location_type,
+                c.pcto_certified,
+                c.remote_allowed
+            FROM company_opportunities co
+            JOIN skaila_connect_companies c ON co.company_id = c.id
+            WHERE co.is_active = TRUE
+            ORDER BY co.created_at DESC
+            LIMIT 50
         ''') or []
     except Exception as e:
         logger.warning(
-            event_type='companies_query_fallback',
+            event_type='opportunities_query_fallback',
             domain='skaila_connect',
             user_id=user_id,
-            school_id=school_id,
             error=str(e),
             error_type=type(e).__name__,
-            message='Companies table not found, using mock data',
-            fallback='MOCK_COMPANIES'
+            message='Opportunity tables not found or query failed, showing empty state',
+            fallback='empty_list'
         )
-        companies = []
+        opportunities = []
     
-    # Se nessuna azienda trovata, usa dati mock (lista condivisa)
-    if not companies:
-        companies = MOCK_COMPANIES
+    # Get profile completeness for student
+    profile_completeness = 50  # Default
+    if ruolo == 'studente':
+        try:
+            from services.portfolio.student_portfolio_manager import StudentPortfolioManager
+            portfolio_manager = StudentPortfolioManager()
+            candidate_card = portfolio_manager.generate_candidate_card(user_id, include_private=False)
+            profile_completeness = candidate_card.get('profile_completeness', 50)
+        except Exception as e:
+            logger.warning(
+                event_type='profile_completeness_fallback',
+                domain='skaila_connect',
+                user_id=user_id,
+                error=str(e),
+                message='Profile completeness calculation failed, using default 50%'
+            )
+            profile_completeness = 50
     
-    # Statistiche utente (candidature inviate, ecc.)
-    user_stats = {
-        'candidature_inviate': 0,
-        'candidature_accettate': 0,
-        'profilo_completo': True
-    }
-    
-    return render_template('skaila_connect.html',
+    return render_template('skaila_connect_marketplace.html',
                          user=session,
-                         companies=companies,
-                         stats=user_stats)
+                         opportunities=opportunities,
+                         profile_completeness=profile_completeness)
 
 
 @skaila_connect_bp.route('/skaila-connect/company/<int:company_id>')

@@ -1,0 +1,33 @@
+Act as a Senior Product Designer and Full-Stack Engineer.
+
+**Objective:**
+Completely revamp the "Skaila Connect" section within the Student Dashboard.
+Transform it from a static page into a dynamic "Opportunity Marketplace" where students can easily connect with companies for Internships, Work Exchanges, and PCTO (School-Work Alternation).
+
+**Core Philosophy:**
+"Zero Friction." Finding a PCTO placement should be as easy as ordering food. Eliminate paperwork and confusion.
+
+Please execute the implementation in 3 distinct phases:
+
+**Phase 1: The "Dynamic Student Portfolio" (Data Layer)**
+* **Problem:** Companies don't want to read boring PDFs.
+* **Solution:** Create a standardized digital CV automatically generated from the student's Skaila data.
+    * Include: Verified Grades, Badges/Certifications earned in the app, Soft Skills, and Past Projects.
+    * **Action:** Create a database view or JSON structure that bundles this data into a shareable "Candidate Card."
+
+**Phase 2: The Opportunity Feed & Smart Matching (UX Layer)**
+* **Layout:** Implement a card-based feed (similar to LinkedIn Jobs or Indeed) optimized for mobile.
+* **Filtering:** Allow students to filter by: "Remote/On-Site," "Sector" (Tech, Art, Mechanics), and "PCTO Hours Validation."
+* **"One-Click Apply":** Add a button that sends the student's "Candidate Card" (from Phase 1) directly to the company. No long forms to fill out.
+
+**Phase 3: The PCTO Workflow Engine (Compliance)**
+* **The Tracker:** Add a progress bar showing "Hours Completed vs. Hours Required."
+* **Digital Logbook:** When a student is "Connected" to a company:
+    * Allow them to "Check-In" (Start Work) and "Check-Out" (End Work) via the app.
+    * This automatically generates the timesheet for the tutor to validate, replacing paper logbooks.
+
+**Visual Style:**
+* Use a clean, professional, yet approachable UI (Blue/White tones usually imply trust).
+* Use distinct tags for "PCTO Certified" companies.
+
+**Start by analyzing the current database to see how we can link "Companies" to "Students" effectively.**
