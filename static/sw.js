@@ -129,7 +129,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'Nuova notifica da SKAILA',
     icon: '/static/icons/icon-192x192.png',
-    badge: '/static/icons/icon-72x72.png',
+    badge: '/static/icons/icon-192x192.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),

@@ -73,6 +73,59 @@ A production-ready telemetry infrastructure combining client-side behavioral tra
 **Architecture Decision:**
 Hybrid approach addresses browser-imposed limitations (~100ms unload window) that affect all web analytics platforms. Critical learning events (quiz submissions, AI interventions) achieve 100% reliability via server-side tracking, while behavioral signals maintain 99%+ reliability via optimized client-side tracking.
 
+## Teacher Early Warning Dashboard
+**Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine**
+
+A production-ready cyberpunk-themed dashboard for teachers to monitor and intervene with struggling students in real-time.
+
+**Features:**
+- Severity-based alert categorization (Critical, High, Medium) with color-coded cards
+- Student profile cards with avatar, struggle indicators, and telemetry evidence
+- Real-time alert feed powered by behavioral telemetry data
+- Quick action buttons: acknowledge alert, view student profile
+- Empty state with positive messaging when no alerts active
+- Responsive Bento Grid layout for desktop and mobile
+
+**Technical Implementation:**
+- Route: `/early-warning/dashboard` (requires docente role)
+- Template: `templates/early_warning_dashboard.html`
+- API endpoints: `/api/alerts` (GET), `/api/alert/<id>/acknowledge` (POST), `/api/alert/<id>/resolve` (POST)
+- Data formatting: Automatic JSON parsing for evidence/recommended_actions, student name composition
+- Design: IBM Plex Sans typography, Deep Corporate Blue (#003B73), Classic Gold (#D4AF37) accents
+
+## Gen-Z Mobile-First UX & Progressive Web App (PWA)
+**Part of Feature #2: Gen-Z Mobile-First UX**
+
+A complete PWA infrastructure with TikTok-style vertical feed for mobile-first Gen-Z user experience.
+
+**PWA Features:**
+- Installable as native app on mobile devices (Android/iOS)
+- Offline support with service worker caching strategies
+- Push notifications for real-time updates
+- App shortcuts for quick access to Dashboard, AI Coach, Quiz
+- Share target integration for content sharing
+- Automatic cache management with 7-day max age
+
+**Mobile-First Components:**
+- **Vertical Feed**: Scroll-snap cards (85vh height), infinite scroll, pull-to-refresh
+- **Swipeable Cards**: Touch gestures with left/right swipe detection, spring animations
+- **Mobile Navigation**: Bottom nav bar with safe area support for notched devices
+- **Touch Optimizations**: iOS smooth scrolling, overscroll containment, tap highlight removal
+- **Responsive Design**: Mobile-first breakpoints (640px, 768px, 1024px)
+
+**Technical Files:**
+- PWA Manifest: `static/manifest.json` (app config, icons, shortcuts)
+- Service Worker: `static/sw.js` (caching, offline, push, background sync)
+- Mobile CSS: `static/css/mobile-first.css` (vertical feed, swipeable UI, mobile nav)
+- Vertical Feed Component: `static/js/vertical-feed.js` (touch gestures, IntersectionObserver)
+- Offline Page: `templates/offline.html` (network retry)
+- Icons: `static/icons/` (192x192px, 512x512px SKAILA branded icons)
+
+**Browser Compatibility:**
+- Service Worker: All modern browsers + Safari 11.1+
+- Scroll Snap: Chrome 69+, Safari 11+, Firefox 68+
+- PWA Install: Chrome/Edge (desktop/mobile), Safari (iOS 11.3+)
+
 ## Key Features
 -   **SKAILA Connect**: Student career portal with a company database.
 -   **Integrated Online Register**: Digital register for grades and attendance.

@@ -677,20 +677,34 @@ class TelemetryEngine:
             
             formatted_alerts = []
             for alert in alerts:
-                formatted_alert = dict(alert)
-                formatted_alert['student_name'] = f"{alert['nome']} {alert['cognome']}"
+                try:
+                    formatted_alert = dict(alert)
+                except (TypeError, ValueError) as e:
+                    logger.warning(
+                        event_type='alert_conversion_failed',
+                        domain='telemetry',
+                        error=str(e),
+                        alert_type=type(alert).__name__
+                    )
+                    continue
                 
-                if alert.get('evidence'):
+                nome = formatted_alert.get('nome', '')
+                cognome = formatted_alert.get('cognome', '')
+                formatted_alert['student_name'] = f"{nome} {cognome}".strip()
+                
+                evidence = formatted_alert.get('evidence')
+                if evidence:
                     try:
-                        formatted_alert['evidence'] = json.loads(alert['evidence']) if isinstance(alert['evidence'], str) else alert['evidence']
+                        formatted_alert['evidence'] = json.loads(evidence) if isinstance(evidence, str) else evidence
                     except:
                         formatted_alert['evidence'] = {}
                 else:
                     formatted_alert['evidence'] = {}
                     
-                if alert.get('recommended_actions'):
+                actions = formatted_alert.get('recommended_actions')
+                if actions:
                     try:
-                        formatted_alert['recommended_actions'] = json.loads(alert['recommended_actions']) if isinstance(alert['recommended_actions'], str) else alert['recommended_actions']
+                        formatted_alert['recommended_actions'] = json.loads(actions) if isinstance(actions, str) else actions
                     except:
                         formatted_alert['recommended_actions'] = []
                 else:
