@@ -675,7 +675,30 @@ class TelemetryEngine:
                     ewa.detected_at DESC
             ''', (teacher_data['classe'],))
             
-            return alerts
+            formatted_alerts = []
+            for alert in alerts:
+                formatted_alert = dict(alert)
+                formatted_alert['student_name'] = f"{alert['nome']} {alert['cognome']}"
+                
+                if alert.get('evidence'):
+                    try:
+                        formatted_alert['evidence'] = json.loads(alert['evidence']) if isinstance(alert['evidence'], str) else alert['evidence']
+                    except:
+                        formatted_alert['evidence'] = {}
+                else:
+                    formatted_alert['evidence'] = {}
+                    
+                if alert.get('recommended_actions'):
+                    try:
+                        formatted_alert['recommended_actions'] = json.loads(alert['recommended_actions']) if isinstance(alert['recommended_actions'], str) else alert['recommended_actions']
+                    except:
+                        formatted_alert['recommended_actions'] = []
+                else:
+                    formatted_alert['recommended_actions'] = []
+                
+                formatted_alerts.append(formatted_alert)
+            
+            return formatted_alerts
             
         except Exception as e:
             logger.error(
