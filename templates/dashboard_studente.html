@@ -2,12 +2,18 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#003B73">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SKAILA">
     <title>Dashboard Studente - SKAILA</title>
+    <link rel="manifest" href="/static/manifest.json">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="/static/css/tokens.css" rel="stylesheet">
     <link href="/static/css/dashboard-premium.css" rel="stylesheet">
+    <link href="/static/css/mobile-first.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/circulating-avatars.css">
     <style>
         /* Additional Student-Specific Styles */
@@ -564,5 +570,70 @@
     
     <!-- Telemetry Tracker for Early Warning System -->
     <script src="/static/js/telemetry-tracker.js"></script>
+    
+    <!-- Vertical Feed Component for Gen-Z UX -->
+    <script src="/static/js/vertical-feed.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+                        
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] New version available! Refresh to update.');
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.log('[PWA] Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            const installPrompt = document.createElement('div');
+            installPrompt.className = 'pwa-install-prompt';
+            installPrompt.innerHTML = `
+                <div class="pwa-install-icon">
+                    <i class="fas fa-mobile-screen"></i>
+                </div>
+                <div class="pwa-install-content">
+                    <div class="pwa-install-title">Installa SKAILA</div>
+                    <div class="pwa-install-description">Accesso rapido come app nativa</div>
+                </div>
+                <button class="pwa-install-button" onclick="installPWA()">
+                    Installa
+                </button>
+            `;
+            
+            document.body.appendChild(installPrompt);
+        });
+
+        function installPWA() {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('[PWA] App installed');
+                }
+                deferredPrompt = null;
+                
+                const prompt = document.querySelector('.pwa-install-prompt');
+                if (prompt) prompt.remove();
+            });
+        }
+    </script>
 </body>
 </html>

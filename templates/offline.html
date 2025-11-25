@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - SKAILA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #003B73 0%, #0074D9 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .offline-container {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .offline-icon {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .retry-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: white;
+            color: #003B73;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .retry-button:active {
+            transform: translateY(0);
+        }
+
+        .offline-tips {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .offline-tips h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .offline-tips ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .offline-tips li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+        }
+
+        .offline-tips i {
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .offline-icon {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            <i class="fas fa-wifi-slash"></i>
+        </div>
+
+        <h1>Sei Offline</h1>
+        <p>Non riusciamo a connetterci ai server SKAILA. Controlla la tua connessione internet e riprova.</p>
+
+        <button class="retry-button" onclick="window.location.reload()">
+            <i class="fas fa-rotate-right"></i>
+            Riprova
+        </button>
+
+        <div class="offline-tips">
+            <h3>Suggerimenti:</h3>
+            <ul>
+                <li>
+                    <i class="fas fa-circle-check"></i>
+                    <span>Verifica che il Wi-Fi o i dati mobili siano attivi</span>
+                </li>
+                <li>
+                    <i class="fas fa-circle-check"></i>
+                    <span>Controlla se altre app funzionano correttamente</span>
+                </li>
+                <li>
+                    <i class="fas fa-circle-check"></i>
+                    <span>Prova a disattivare e riattivare la modalità aereo</span>
+                </li>
+                <li>
+                    <i class="fas fa-circle-check"></i>
+                    <span>Alcune funzionalità potrebbero essere disponibili offline</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.sync.register('retry-connection');
+            });
+        }
+    </script>
+</body>
+</html>
