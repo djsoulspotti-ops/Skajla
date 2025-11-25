@@ -58,6 +58,7 @@ from routes.early_warning_routes import early_warning_bp # Early Warning Dashboa
 from routes.portfolio_routes import portfolio_bp # Student Portfolio & Candidate Cards
 from routes.opportunities_api import opportunities_api_bp # Opportunities One-Click Apply API
 from routes.pcto_routes import pcto_bp # PCTO Tracker & Digital Logbook
+from routes.parent_routes import parent_bp # Parent Dashboard - Zero-Friction Child Monitoring
 
 # Import services
 from services.auth_service import auth_service
@@ -258,6 +259,7 @@ class SkailaApp:
         self.app.register_blueprint(portfolio_bp) # Student Portfolio API
         self.app.register_blueprint(opportunities_api_bp) # Opportunities Marketplace API
         self.app.register_blueprint(pcto_bp) # PCTO Tracker & Digital Logbook
+        self.app.register_blueprint(parent_bp) # Parent Dashboard - Child Monitoring
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp

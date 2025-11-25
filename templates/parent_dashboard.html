@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Genitore - SKAILA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_modern.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .parent-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+            color: white;
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .parent-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .parent-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .child-switcher {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            overflow-x: auto;
+            padding: var(--spacing-md) 0;
+        }
+        
+        .child-card {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .child-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .child-card.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        
+        .child-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--surface-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-md);
+            font-size: 32px;
+        }
+        
+        .child-card.active .child-avatar {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .child-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .child-class {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        .add-child-btn {
+            background: var(--surface-secondary);
+            border: 2px dashed var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .add-child-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: var(--surface-tertiary);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-icon.blue {
+            background: var(--primary-blue-light);
+            color: var(--primary-blue);
+        }
+        
+        .stat-icon.green {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        
+        .stat-icon.yellow {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+        
+        .stat-icon.red {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .grades-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .grade-item {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .grade-item:last-child {
+            border-bottom: none;
+        }
+        
+        .grade-subject {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .grade-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .grade-value {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            background: var(--surface-secondary);
+        }
+        
+        .grade-value.excellent {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        
+        .grade-value.good {
+            background: var(--primary-blue-light);
+            color: var(--primary-blue);
+        }
+        
+        .grade-value.warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+        
+        .grade-value.poor {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+        
+        .notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .note-item {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: var(--surface-secondary);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .note-subject {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .note-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .note-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: var(--text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+        
+        .btn-link-child {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            margin-top: var(--spacing-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-link-child:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: var(--spacing-2xl);
+        }
+        
+        .loading-spinner i {
+            font-size: 48px;
+            color: var(--primary-blue);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    {% include 'partials/navbar_modern.html' %}
+    
+    <div class="dashboard-container">
+        {% if is_onboarding %}
+            <!-- Onboarding state - redirect to onboarding -->
+            <div class="parent-header">
+                <h1><i class="fas fa-hand-sparkles"></i> Benvenuto, {{ user.nome }}!</h1>
+                <p>Inizia collegando il tuo primo figlio per monitorare i suoi progressi scolastici.</p>
+            </div>
+            
+            <div class="empty-state">
+                <i class="fas fa-user-plus"></i>
+                <h2>Nessuno Studente Collegato</h2>
+                <p>Collega il tuo primo figlio usando il suo Codice Identificativo Studente</p>
+                <a href="/parent/onboarding" class="btn-link-child">
+                    <i class="fas fa-link"></i> Collega Studente
+                </a>
+            </div>
+        {% else %}
+            <!-- Dashboard with children -->
+            <div class="parent-header">
+                <h1><i class="fas fa-house-user"></i> Dashboard Genitore</h1>
+                <p>Monitora i progressi dei tuoi figli in tempo reale</p>
+            </div>
+            
+            <!-- Child Switcher -->
+            <div class="child-switcher">
+                {% for child in children %}
+                <div class="child-card {% if loop.first %}active{% endif %}" data-student-id="{{ child.id }}">
+                    <div class="child-avatar">
+                        {% if child.avatar %}
+                            <img src="{{ child.avatar }}" alt="{{ child.nome }}" style="width: 100%; height: 100%; border-radius: 50%;">
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="child-name">{{ child.nome }} {{ child.cognome }}</div>
+                    <div class="child-class"><i class="fas fa-graduation-cap"></i> {{ child.classe or 'N/A' }}</div>
+                </div>
+                {% endfor %}
+                
+                <div class="child-card add-child-btn" onclick="window.location.href='/parent/onboarding'">
+                    <div class="child-avatar">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="child-name">Aggiungi Figlio</div>
+                </div>
+            </div>
+            
+            <!-- Stats Container -->
+            <div id="stats-container">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Caricamento dati...</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        let currentStudentId = {{ children[0].id if children else 'null' }};
+        
+        // Child switcher functionality
+        document.querySelectorAll('.child-card[data-student-id]').forEach(card => {
+            card.addEventListener('click', () => {
+                // Update active state
+                document.querySelectorAll('.child-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                // Load data for selected child
+                const studentId = card.dataset.studentId;
+                currentStudentId = studentId;
+                loadChildOverview(studentId);
+            });
+        });
+        
+        // Load initial child data
+        if (currentStudentId) {
+            loadChildOverview(currentStudentId);
+        }
+        
+        async function loadChildOverview(studentId) {
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Caricamento dati...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`/api/parent/child/${studentId}/overview`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderChildStats(result.data);
+                } else {
+                    statsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h2>Errore nel caricamento</h2>
+                            <p>${result.message || 'Impossibile caricare i dati dello studente'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                statsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-wifi-slash"></i>
+                        <h2>Errore di Connessione</h2>
+                        <p>Impossibile caricare i dati. Riprova.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderChildStats(data) {
+            const { student, grades, attendance, notes, average_grade } = data;
+            
+            const statsHtml = `
+                <div class="stats-grid">
+                    <!-- Average Grade Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <div class="stat-title">Media Voti</div>
+                                <div class="stat-value">${average_grade || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Absences Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon ${attendance.assenze > 5 ? 'red' : 'green'}">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <div class="stat-title">Assenze (ultimi 30gg)</div>
+                                <div class="stat-value">${attendance.assenze || 0}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Late Arrivals Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon ${attendance.ritardi > 3 ? 'yellow' : 'green'}">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <div class="stat-title">Ritardi (ultimi 30gg)</div>
+                                <div class="stat-value">${attendance.ritardi || 0}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Grades -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <h2 style="margin: 0;">Voti Recenti</h2>
+                    </div>
+                    <div class="grades-list">
+                        ${grades.length > 0 ? grades.map(grade => `
+                            <div class="grade-item">
+                                <div>
+                                    <div class="grade-subject">${grade.materia || 'Materia Sconosciuta'}</div>
+                                    <div class="grade-date">${formatDate(grade.data_voto)}</div>
+                                </div>
+                                <div class="grade-value ${getGradeClass(grade.voto)}">${grade.voto || 'N/A'}</div>
+                            </div>
+                        `).join('') : '<div class="empty-state"><p>Nessun voto disponibile</p></div>'}
+                    </div>
+                </div>
+                
+                <!-- Teacher Notes -->
+                ${notes.length > 0 ? `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-sticky-note"></i>
+                        </div>
+                        <h2 style="margin: 0;">Note Docenti</h2>
+                    </div>
+                    <div class="notes-list">
+                        ${notes.map(note => `
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <span class="note-subject">${note.materia || 'Generale'}</span>
+                                    <span class="note-date">${formatDate(note.data_nota)}</span>
+                                </div>
+                                <div class="note-text">${note.note}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('stats-container').innerHTML = statsHtml;
+        }
+        
+        function getGradeClass(voto) {
+            if (!voto) return '';
+            const grade = parseFloat(voto);
+            if (grade >= 8) return 'excellent';
+            if (grade >= 6.5) return 'good';
+            if (grade >= 6) return 'warning';
+            return 'poor';
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+    </script>
+</body>
+</html>

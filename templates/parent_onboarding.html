@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collega il tuo Figlio - SKAILA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_modern.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .onboarding-container {
+            max-width: 600px;
+            margin: 80px auto;
+            padding: var(--spacing-xl);
+        }
+        
+        .onboarding-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+        }
+        
+        .onboarding-icon {
+            font-size: 64px;
+            color: var(--primary-blue);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .onboarding-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .onboarding-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-2xl);
+            line-height: 1.6;
+        }
+        
+        .input-group {
+            margin-bottom: var(--spacing-lg);
+            text-align: left;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .input-code {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .input-code:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(0, 120, 255, 0.1);
+        }
+        
+        .btn-link {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-link:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-link:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .help-text {
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--surface-tertiary);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .help-text strong {
+            color: var(--primary-blue);
+        }
+        
+        .error-message {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--danger-light);
+            color: var(--danger);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success-message {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--success-light);
+            color: var(--success);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            display: none;
+        }
+        
+        .skip-link {
+            display: block;
+            margin-top: var(--spacing-lg);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .skip-link:hover {
+            color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="onboarding-card">
+            <div class="onboarding-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            
+            <h1 class="onboarding-title">Benvenuto, {{ user.nome }}!</h1>
+            <p class="onboarding-subtitle">
+                Per iniziare a monitorare i progressi di tuo figlio, inserisci il suo <strong>Codice Identificativo Studente</strong> che ha ricevuto dalla scuola.
+            </p>
+            
+            <div class="input-group">
+                <label class="input-label" for="student-code">
+                    <i class="fas fa-barcode"></i> Codice Identificativo Studente
+                </label>
+                <input 
+                    type="text" 
+                    id="student-code" 
+                    class="input-code" 
+                    placeholder="STU-2024-12345"
+                    maxlength="20"
+                    autocomplete="off"
+                >
+            </div>
+            
+            <button id="btn-link" class="btn-link">
+                <i class="fas fa-link"></i> Collega Studente
+            </button>
+            
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+            
+            <div class="help-text">
+                <strong><i class="fas fa-info-circle"></i> Dove trovo il codice?</strong><br>
+                Il codice identificativo è stato fornito allo studente dalla scuola. Lo studente può trovarlo nel suo profilo SKAILA, oppure può chiederlo al docente o al dirigente scolastico.
+            </div>
+            
+            <a href="/parent/dashboard" class="skip-link">
+                <i class="fas fa-arrow-right"></i> Salta per ora, collegherò dopo
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        const studentCodeInput = document.getElementById('student-code');
+        const btnLink = document.getElementById('btn-link');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        
+        // Auto-format code input
+        studentCodeInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+        
+        // Link student on button click
+        btnLink.addEventListener('click', async () => {
+            const code = studentCodeInput.value.trim();
+            
+            if (!code) {
+                showError('Inserisci il codice identificativo dello studente');
+                return;
+            }
+            
+            // Disable button and show loading
+            btnLink.disabled = true;
+            btnLink.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Collegamento in corso...';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/parent/link-child', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ student_code: code })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message
+                    showSuccess(result.message + ' - Reindirizzamento...');
+                    
+                    // Redirect to dashboard after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = '/parent/dashboard';
+                    }, 1500);
+                } else {
+                    showError(result.message || 'Errore durante il collegamento');
+                    btnLink.disabled = false;
+                    btnLink.innerHTML = '<i class="fas fa-link"></i> Collega Studente';
+                }
+            } catch (error) {
+                console.error('Link error:', error);
+                showError('Errore di connessione. Riprova.');
+                btnLink.disabled = false;
+                btnLink.innerHTML = '<i class="fas fa-link"></i> Collega Studente';
+            }
+        });
+        
+        // Handle Enter key
+        studentCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                btnLink.click();
+            }
+        });
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+        
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
