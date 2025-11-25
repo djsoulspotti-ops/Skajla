@@ -1,0 +1,31 @@
+Act as a Senior Full-Stack Architect and Product Designer.
+
+**Objective:**
+Implement the complete "Parent Dashboard" module (Frontend & Backend).
+The goal is to provide parents with real-time monitoring of their child (Grades, Attendance, Behavior).
+
+**Core "Pairing" Logic (Crucial):**
+The onboarding must be extremely simple ("Zero Friction").
+The Parent connects to the Student account using the **exact same Student Identification Code** (or unique "Matricola") that the student already possesses.
+* **Logic:** If Parent inputs Code "X", system finds Student with Code "X" -> Link is established immediately.
+
+Please execute this implementation plan:
+
+**Phase 1: Zero-Friction Pairing Backend**
+* **Database Check:** Verify if the `Users` (Student) table already has a unique `identification_code` column. If not, create one.
+* **The Linking API:** Create an endpoint `/api/link-parent` that takes the `parent_id` and the `target_student_code`.
+* **Validation:** The system must verify the code exists. If valid, create a link in the database (e.g., `ParentStudentMap` table).
+* **Security Note:** Ensure that once linked, the parent has read-only access to that specific student's data.
+
+**Phase 2: The Dashboard UI (Frontend)**
+* **Onboarding Screen:** When a user creates a Parent account, the first screen should ask: *"Enter your Child's Student ID Code to connect."*
+* **Multi-Child Support:** Allow the parent to click "Add another child" and enter a second code to aggregate multiple children in one dashboard.
+* **Main View (Mission Control):**
+    * **Child Switcher:** Simple tabs/avatars to switch between children.
+    * **Stats:** Show Grades, Absences, and Teacher Notes for the selected child.
+
+**Phase 3: Role Guard & Navigation**
+* Create the specific route `/parent/dashboard`.
+* Ensure the navigation bar changes based on the role (Parent sees "My Children", Student sees "My Grades").
+
+**Start by confirming you understand the "Shared Code" linking logic before generating the code.**
