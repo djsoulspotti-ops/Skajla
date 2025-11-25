@@ -30,6 +30,7 @@ from services.gamification.gamification import gamification_system
 from services.ai.ai_chatbot import AISkailaBot
 from services.reports.report_scheduler import ReportScheduler
 from services.calendar.calendar_system import calendar_system
+from services.telemetry.telemetry_engine import telemetry_engine
 
 # Import routes modulari
 from routes.auth_routes import auth_bp
@@ -52,6 +53,8 @@ from routes.timer_routes import timer_bp # Study Timer
 from routes.online_users_routes import online_users_bp # Online Users API
 from routes.cyberpunk_presence_routes import cyberpunk_presence_bp # Cyberpunk Presence Demo
 from routes.calendar_routes import smart_calendar_bp # Smart Calendar System
+from routes.telemetry_routes import telemetry_bp # Behavioral Telemetry System
+from routes.early_warning_routes import early_warning_bp # Early Warning Dashboard
 
 # Import services
 from services.auth_service import auth_service
@@ -247,6 +250,8 @@ class SkailaApp:
         self.app.register_blueprint(online_users_bp) # Online Users API for circulating avatars
         self.app.register_blueprint(cyberpunk_presence_bp) # Cyberpunk Presence Demo
         self.app.register_blueprint(smart_calendar_bp) # Smart Calendar System
+        self.app.register_blueprint(telemetry_bp) # Behavioral Telemetry System
+        self.app.register_blueprint(early_warning_bp) # Early Warning Dashboard
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp
