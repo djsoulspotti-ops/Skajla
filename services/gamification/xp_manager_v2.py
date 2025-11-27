@@ -5,7 +5,7 @@ Adapted for SKAILA's DatabaseManager pattern
 
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from services.database.database_manager import db_manager
 from services.gamification.advanced_gamification import (
     XP_CONFIG, RANK_CONFIG, RANK_ORDER, calcola_rango, xp_per_prossimo_rango

@@ -7,7 +7,22 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 SKAILA is built on Flask with a modular MVC and ORM architecture using SQLAlchemy. It features a centralized configuration and a feature flag system for enabling/disabling modules. Authentication and authorization are handled by a centralized middleware supporting multi-role access. The database layer supports SQLite (development) and PostgreSQL (production) with a `DatabaseManager` for multi-tenant school management.
 
-Real-time communication is powered by Socket.IO, enabling messaging and presence systems. AI integration focuses on personalized learning through the SKAILA AI Brain Engine, Adaptive Quiz System, and AI Insights Engine. A gamification engine provides XP and leveling with atomic and concurrency-safe operations. A study timer system tracks student sessions with XP multipliers.
+Real-time communication is powered by Socket.IO, enabling messaging and presence systems. AI integration focuses on personalized learning through the SKAILA AI Brain Engine, Adaptive Quiz System, and AI Insights Engine.
+
+## Advanced Gamification V2 System
+The platform features an extensive gamification system with:
+- **Rank System**: 9 progression levels from Germoglio → Immortale with XP thresholds (200 to 13000+ XP)
+- **Battle Pass**: Seasonal content with free and premium reward tracks
+- **Challenge System**: Daily, weekly, and class challenges with auto-assignment
+- **Kudos**: Peer recognition system awarding XP for appreciation
+- **Power-ups**: Purchasable boosters (XP multipliers, streak shields, second chances)
+- **Leaderboards**: Multi-period rankings (daily/weekly/monthly/seasonal/lifetime)
+- **Badges**: Achievement unlocks with rarity tiers (comune/raro/epico/leggendario)
+- **Notifications**: Real-time gamification alerts for rank ups, badges, and challenges
+
+API: `/api/gamification/v2/*` - Complete REST endpoints for profile, stats, challenges, badges, leaderboards, kudos, and power-ups.
+
+A study timer system tracks student sessions with XP multipliers.
 
 The platform includes a centralized error handling framework with typed exceptions, decorators, and structured logging. The UI/UX features an enterprise design system with modern Bento Grid layouts, collapsible navigation, and role-specific dashboards for students, teachers, and principals, optimized for performance and responsive design.
 
