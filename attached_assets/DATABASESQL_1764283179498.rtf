@@ -1,0 +1,197 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 -- Esempio schema database attuale (anche solo nomi tabelle principali)\
+SHOW TABLES;\
+-- oppure\
+DESCRIBE users;\
+DESCRIBE classes;\
+DESCRIBE messages;\
+```\
+\
+### 3\uc0\u65039 \u8419  **FUNZIONALIT\'c0 ATTUALI**\
+\
+- \uc0\u9989  Sistema di messaggistica unificata \u8594  Come traccia chi invia/riceve messaggi?\
+- \uc0\u9989  Chatbot integrato \u8594  Come traccia le interazioni?\
+- \uc0\u9989  Sistema di autenticazione \u8594  Gli studenti hanno gi\'e0 un account?\
+- \uc0\u9989  Gestione classi \u8594  Come sono associate classi/studenti?\
+\
+### 4\uc0\u65039 \u8419  **REQUISITI SPECIFICI**\
+\
+- Hai bisogno di notifiche push? (Browser / Email / SMS?)\
+- Vuoi dashboard admin per monitorare gamification?\
+- Serve sistema di moderazione/report?\
+- Budget/limitazioni tecniche particolari?\
+\
+---\
+\
+## \uc0\u55356 \u57263  COSA TI PREPARO\
+\
+Una volta che mi dai queste info, ti consegno:\
+\
+### \uc0\u55357 \u56550  **PACCHETTO COMPLETO:**\
+\
+#### **1. DATABASE SCHEMA** \
+```\
+\uc0\u9989  Tabelle complete gamification\
+\uc0\u9989  Relazioni e indici ottimizzati\
+\uc0\u9989  Script di migrazione\
+\uc0\u9989  Seed data per testing\
+```\
+\
+#### **2. BACKEND API**\
+```\
+\uc0\u9989  Endpoints per tracking azioni\
+\uc0\u9989  Sistema calcolo XP/livelli automatico\
+\uc0\u9989  Gestione sfide giornaliere/settimanali\
+\uc0\u9989  Sistema badge e achievement\
+\uc0\u9989  Leaderboard con caching\
+\uc0\u9989  Sistema stagionale con reset\
+\uc0\u9989  Battle Pass progressione\
+\uc0\u9989  Eventi speciali\
+\uc0\u9989  Notifiche trigger\
+```\
+\
+#### **3. FRONTEND COMPONENTS**\
+```\
+\uc0\u9989  Dashboard studente completa\
+\uc0\u9989  Widget XP/Livello con animazioni\
+\uc0\u9989  Sistema badge collection\
+\uc0\u9989  Leaderboard interactive\
+\uc0\u9989  Sfide panel con countdown\
+\uc0\u9989  Notifiche in-app\
+\uc0\u9989  Profile page gamification\
+\uc0\u9989  Seasonal theme system\
+```\
+\
+#### **4. LOGICA DI BUSINESS**\
+```\
+\uc0\u9989  Event tracking system (ogni azione \u8594  XP)\
+\uc0\u9989  Challenge validator\
+\uc0\u9989  Reward distributor\
+\uc0\u9989  Seasonal rotation automation\
+\uc0\u9989  Anti-cheat basic system\
+```\
+\
+#### **5. DOCUMENTAZIONE**\
+```\
+\uc0\u9989  Guida setup completa\
+\uc0\u9989  API documentation\
+\uc0\u9989  Component usage guide\
+\uc0\u9989  Database schema diagram\
+\uc0\u9989  Flow charts sistema\
+```\
+\
+#### **6. EXTRA TOOLS**\
+```\
+\uc0\u9989  Admin dashboard per gestire:\
+   - Creare/modificare sfide\
+   - Monitorare engagement\
+   - Gestire stagioni\
+   - Ban/reset utenti\
+\uc0\u9989  Analytics dashboard\
+\uc0\u9989  Testing suite\
+```\
+\
+---\
+\
+## \uc0\u55356 \u57256  ANTEPRIMA STRUTTURA (esempio React + Node.js)\
+\
+Ti do un'anteprima di come sar\'e0 strutturato (ma adatter\'f2 al tuo stack):\
+```\
+\uc0\u55357 \u56513  project/\
+\uc0\u9500 \u9472 \u9472  \u55357 \u56513  backend/\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  models/\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  User.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  XP.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  Badge.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  Challenge.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  Season.js\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  Leaderboard.js\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  controllers/\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  gamificationController.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  challengeController.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  leaderboardController.js\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  seasonController.js\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  routes/\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  gamification.routes.js\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  services/\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  xpCalculator.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  badgeAwarded.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  challengeValidator.js\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  seasonManager.js\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  middleware/\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  trackAction.js\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  antiCheat.js\
+\uc0\u9474    \u9492 \u9472 \u9472  \u55357 \u56513  migrations/\
+\uc0\u9474        \u9492 \u9472 \u9472  001_gamification_tables.sql\
+\uc0\u9474 \
+\uc0\u9500 \u9472 \u9472  \u55357 \u56513  frontend/\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  components/\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  \u55357 \u56513  Gamification/\
+\uc0\u9474    \u9474    \u9474    \u9500 \u9472 \u9472  XPBar.jsx\
+\uc0\u9474    \u9474    \u9474    \u9500 \u9472 \u9472  BadgeCollection.jsx\
+\uc0\u9474    \u9474    \u9474    \u9500 \u9472 \u9472  Leaderboard.jsx\
+\uc0\u9474    \u9474    \u9474    \u9500 \u9472 \u9472  DailyChallenge.jsx\
+\uc0\u9474    \u9474    \u9474    \u9500 \u9472 \u9472  SeasonProgress.jsx\
+\uc0\u9474    \u9474    \u9474    \u9492 \u9472 \u9472  NotificationToast.jsx\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  \u55357 \u56513  Dashboard/\
+\uc0\u9474    \u9474        \u9492 \u9472 \u9472  StudentDashboard.jsx\
+\uc0\u9474    \u9500 \u9472 \u9472  \u55357 \u56513  hooks/\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  useGamification.js\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  useChallenges.js\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  useLeaderboard.js\
+\uc0\u9474    \u9492 \u9472 \u9472  \u55357 \u56513  utils/\
+\uc0\u9474        \u9500 \u9472 \u9472  xpFormatter.js\
+\uc0\u9474        \u9492 \u9472 \u9472  badgeIcons.js\
+\uc0\u9474 \
+\uc0\u9492 \u9472 \u9472  \u55357 \u56513  admin-panel/\
+    \uc0\u9500 \u9472 \u9472  ChallengeManager.jsx\
+    \uc0\u9500 \u9472 \u9472  SeasonControl.jsx\
+    \uc0\u9492 \u9472 \u9472  AnalyticsDashboard.jsx\
+```\
+\
+---\
+\
+## \uc0\u9889  RISPOSTA VELOCE\
+\
+Se vuoi partire SUBITO e hai:\
+- **React + Node.js + PostgreSQL** \uc0\u8594  Dimmi e parto immediatamente\
+- **Altro stack** \uc0\u8594  Specificalo nei dettagli\
+\
+**Oppure** dammi accesso alla tua repository (se possibile) e vedo direttamente la struttura.\
+\
+---\
+\
+## \uc0\u55357 \u56541  TEMPLATE RISPOSTA\
+\
+Per velocizzare, copia e compila questo:\
+```\
+STACK TECNOLOGICO:\
+- Frontend: [es. React 18 + Tailwind]\
+- Backend: [es. Node.js + Express]\
+- Database: [es. PostgreSQL]\
+- Hosting: [es. Vercel + Railway]\
+\
+STRUTTURA DATABASE ATTUALE:\
+- Tabella utenti: [nome tabella + campi principali]\
+- Tabella classi: [nome tabella + campi principali]\
+- Tabella messaggi: [nome tabella + campi principali]\
+\
+AUTENTICAZIONE:\
+- Sistema: [es. JWT / Firebase Auth]\
+- Come identifichi utente: [es. userId, email]\
+\
+TRACKING ATTUALE:\
+- Messaggi: [come li salvi? tabella?]\
+- Chatbot: [interazioni gi\'e0 tracciate?]\
+\
+NOTIFICHE:\
+- Servizio: [es. Firebase Cloud Messaging / Email / nessuno]\
+\
+NOTE AGGIUNTIVE:\
+[Qualsiasi altra info utile]}
