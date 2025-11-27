@@ -59,6 +59,7 @@ from routes.portfolio_routes import portfolio_bp # Student Portfolio & Candidate
 from routes.opportunities_api import opportunities_api_bp # Opportunities One-Click Apply API
 from routes.pcto_routes import pcto_bp # PCTO Tracker & Digital Logbook
 from routes.parent_routes import parent_bp # Parent Dashboard - Zero-Friction Child Monitoring
+from routes.gamification_api_v2 import gamification_api_bp # Advanced Gamification API V2
 
 # Import services
 from services.auth_service import auth_service
@@ -260,6 +261,7 @@ class SkailaApp:
         self.app.register_blueprint(opportunities_api_bp) # Opportunities Marketplace API
         self.app.register_blueprint(pcto_bp) # PCTO Tracker & Digital Logbook
         self.app.register_blueprint(parent_bp) # Parent Dashboard - Child Monitoring
+        self.app.register_blueprint(gamification_api_bp) # Advanced Gamification V2
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp
@@ -386,8 +388,16 @@ class SkailaApp:
             from database_keep_alive import keep_alive
             keep_alive.start()  # Avvia keep-alive service
 
-        # Inizializza gamification
+        # Inizializza gamification (base + advanced v2)
         gamification_system.init_gamification_tables()
+        
+        # Inizializza Advanced Gamification V2 (ranks, battle pass, challenges, kudos)
+        from services.gamification.advanced_gamification import advanced_gamification
+        if advanced_gamification.init_advanced_tables():
+            advanced_gamification.seed_default_badges()
+            advanced_gamification.seed_default_challenges()
+            advanced_gamification.seed_default_powerups()
+            print("🎮 Advanced Gamification V2 initialized")
         
         # Inizializza calendario smart
         calendar_system.init_calendar_tables()
