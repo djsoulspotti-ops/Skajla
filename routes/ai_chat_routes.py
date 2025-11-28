@@ -1,10 +1,10 @@
 """
 SKAILA - AI Chat Routes
-API endpoints per AI Coach
+API endpoints per AI Coach with Gemini + Gamification
 """
 
 from flask import Blueprint, jsonify, session, request
-from ai_chatbot import ai_bot
+from services.ai.gemini_chatbot import gemini_chatbot
 from shared.middleware.feature_guard import check_feature_enabled, Features
 from services.tenant_guard import get_current_school_id
 from shared.error_handling.structured_logger import get_logger
@@ -45,11 +45,10 @@ def check_ai_coach_feature():
 
 @ai_chat_bp.route('/chat', methods=['POST'])
 def chat_with_ai():
-    """Endpoint per chattare con AI Coach"""
+    """Endpoint per chattare con AI Coach - Gemini + Gamification"""
     if 'user_id' not in session:
         return jsonify({'error': 'Non autenticato'}), 401
     
-    # Defensive handling per JSON malformato
     try:
         data = request.get_json()
         if not data:
@@ -68,33 +67,30 @@ def chat_with_ai():
     if not message:
         return jsonify({'error': 'Messaggio vuoto'}), 400
     
-    # Genera risposta AI personalizzata
     try:
-        response = ai_bot.generate_response(
+        result = gemini_chatbot.generate_response(
             message=message,
+            user_id=session['user_id'],
             user_name=session.get('nome', 'Studente'),
-            user_role=session.get('ruolo', 'studente'),
-            user_id=session['user_id']
+            user_role=session.get('ruolo', 'studente')
         )
         
-        # CRITICAL: Server-side telemetry for 100% reliability
-        # Track AI interventions for early warning system
         try:
             telemetry_engine.track_event(
                 user_id=session['user_id'],
                 event_type='ai_intervention',
                 context={
                     'message_length': len(message),
-                    'response_length': len(response),
+                    'response_length': len(result.get('response', '')),
+                    'xp_awarded': result.get('xp_awarded', 0),
+                    'ai_mode': result.get('ai_mode', 'unknown'),
                     'user_role': session.get('ruolo', 'studente'),
-                    'source': 'server',  # Mark as server-generated
-                    'device_type': 'server'  # Server-side event marker
+                    'source': 'server'
                 },
                 duration_seconds=None,
                 accuracy_score=None
             )
         except Exception as telemetry_error:
-            # Never let telemetry break AI chat
             logger.warning(
                 event_type='ai_telemetry_failed',
                 domain='ai_chat',
@@ -103,7 +99,12 @@ def chat_with_ai():
         
         return jsonify({
             'success': True,
-            'response': response,
+            'response': result.get('response', ''),
+            'xp_awarded': result.get('xp_awarded', 0),
+            'rank_up': result.get('rank_up', False),
+            'new_rank': result.get('new_rank'),
+            'gamification': result.get('gamification', {}),
+            'ai_mode': result.get('ai_mode', 'mock'),
             'timestamp': 'now'
         })
     
@@ -124,16 +125,11 @@ def chat_with_ai():
 
 @ai_chat_bp.route('/suggestions', methods=['GET'])
 def get_suggestions():
-    """Ottieni suggerimenti intelligenti per l'utente"""
+    """Ottieni suggerimenti personalizzati basati su gamification"""
     if 'user_id' not in session:
         return jsonify({'error': 'Non autenticato'}), 401
     
-    suggestions = [
-        "Come posso migliorare il mio metodo di studio?",
-        "Dammi consigli per gestire lo stress pre-esame",
-        "Come posso organizzare meglio il mio tempo?",
-        "Aiutami a definire obiettivi di studio chiari"
-    ]
+    suggestions = gemini_chatbot.get_study_suggestions(session['user_id'])
     
     return jsonify({
         'success': True,
