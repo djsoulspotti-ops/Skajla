@@ -20,7 +20,19 @@ The platform features an extensive gamification system with:
 - **Badges**: Achievement unlocks with rarity tiers (comune/raro/epico/leggendario)
 - **Notifications**: Real-time gamification alerts for rank ups, badges, and challenges
 
-API: `/api/gamification/v2/*` - Complete REST endpoints for profile, stats, challenges, badges, leaderboards, kudos, and power-ups.
+### Student Gamification Dashboard (November 2025)
+Full-featured student-facing UI at `/gamification`:
+- **Bento Grid Layout**: Modern responsive design with profile card, streak tracker, challenges, badges, leaderboard
+- **Profile Card**: Rank icon with gradient color, XP progress bar, next rank preview
+- **Challenges Section**: Daily/weekly challenge cards with countdown timers and progress bars
+- **Badges Showcase**: Grid of earned badges with rarity indicators and modal for full collection
+- **Leaderboard Widget**: Multi-period tabs (weekly/monthly/lifetime) with live rankings
+- **Power-ups Section**: Available boosters with activation buttons
+- **Kudos Feed**: Recent peer recognition with XP awards
+- **Activity Timeline**: Recent gamification events (XP gains, badges, challenge completions)
+- **Ranks Progression**: Visual ladder showing all 9 ranks with current position highlighted
+
+API: `/api/gamification/v2/*` - Complete REST endpoints for profile, stats, challenges, badges, leaderboards, kudos, power-ups, and activity timeline.
 
 A study timer system tracks student sessions with XP multipliers.
 
