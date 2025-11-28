@@ -361,42 +361,63 @@ def registro_online():
 @dashboard_bp.route('/gamification')
 @require_login
 def gamification_page():
-    """Pagina Gamification completa"""
+    """Pagina Gamification V2 completa"""
+    from services.gamification.xp_manager_v2 import xp_manager_v2
+    from services.gamification.advanced_gamification import RANK_CONFIG, RANK_ORDER
+    
     user_id = session['user_id']
+    user_data = {
+        'id': user_id,
+        'nome': session.get('nome', ''),
+        'cognome': session.get('cognome', ''),
+        'ruolo': session.get('ruolo', 'studente')
+    }
 
     try:
-        user_stats = gamification_system.get_user_stats(user_id)
-        leaderboard = db_manager.query('''
-            SELECT u.nome, u.cognome, ug.total_xp, ug.current_level
-            FROM user_gamification ug
-            JOIN utenti u ON ug.user_id = u.id
-            ORDER BY ug.total_xp DESC
-            LIMIT 10
-        ''')
-
-        achievements = db_manager.query('''
-            SELECT achievement_id, unlocked_at, xp_earned
-            FROM user_achievements
-            WHERE user_id = %s
-            ORDER BY unlocked_at DESC
-        ''', (user_id,))
-
-        badges = db_manager.query('''
-            SELECT badge_id, earned_at, xp_earned, rarity
-            FROM user_badges
-            WHERE user_id = %s
-            ORDER BY earned_at DESC
-        ''', (user_id,))
+        profile = xp_manager_v2.get_user_profile(user_id)
+        if not profile:
+            profile = {
+                'xp_totale': 0,
+                'rango': 'Germoglio',
+                'rank_icon': '🌱',
+                'livello': 1,
+                'streak_corrente': 0,
+                'progress_percentage': 0,
+                'xp_prossimo_rango': 200,
+                'xp_mancanti': 200,
+                'prossimo_rango': 'Esploratore',
+                'giorni_attivi': 0,
+                'sfide_completate': 0
+            }
+        
+        ranks = []
+        for rank_name in RANK_ORDER:
+            config = RANK_CONFIG[rank_name]
+            ranks.append({
+                'nome': rank_name,
+                'min_xp': config['min_xp'],
+                'icon': config['icon'],
+                'color': config['color']
+            })
 
     except Exception as e:
-        print(f"⚠️ Errore gamification: {e}")
-        user_stats = {'total_xp': 0, 'current_level': 1, 'current_streak': 0}
-        leaderboard = []
-        achievements = []
-        badges = []
+        print(f"⚠️ Errore gamification V2: {e}")
+        profile = {
+            'xp_totale': 0,
+            'rango': 'Germoglio',
+            'rank_icon': '🌱',
+            'livello': 1,
+            'streak_corrente': 0,
+            'progress_percentage': 0,
+            'xp_prossimo_rango': 200,
+            'xp_mancanti': 200,
+            'prossimo_rango': 'Esploratore',
+            'giorni_attivi': 0,
+            'sfide_completate': 0
+        }
+        ranks = []
 
     return render_template('gamification_dashboard.html',
-                         stats=user_stats,
-                         leaderboard=leaderboard,
-                         achievements=achievements,
-                         badges=badges)
+                         user=user_data,
+                         profile=profile,
+                         ranks=ranks)

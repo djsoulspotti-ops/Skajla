@@ -851,3 +851,42 @@ def get_battlepass():
     except Exception as e:
         logger.error(f"Error getting battle pass: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+# =============================================================================
+# ACTIVITY TIMELINE
+# =============================================================================
+
+@gamification_api_bp.route('/activity', methods=['GET'])
+@require_auth
+def get_activity():
+    """Get user's recent gamification activity"""
+    try:
+        limit = request.args.get('limit', 10, type=int)
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT tipo, descrizione, xp_earned, dati, created_at
+                FROM gamification_events
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+                LIMIT %s
+            ''', (request.user_id, limit))
+            
+            activities = []
+            for row in cursor.fetchall():
+                activities.append({
+                    'tipo': row[0],
+                    'descrizione': row[1],
+                    'xp_earned': row[2],
+                    'dati': row[3],
+                    'created_at': row[4].strftime('%d/%m/%Y %H:%M') if row[4] else None
+                })
+            
+            return jsonify(activities), 200
+            
+    except Exception as e:
+        logger.error(f"Error getting activity: {e}")
+        return jsonify([]), 200
