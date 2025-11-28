@@ -768,7 +768,6 @@ class SkailaApp:
             host=host,
             port=port,
             debug=debug,
-            allow_unsafe_werkzeug=True,
             use_reloader=False,
             log_output=not debug
         )
