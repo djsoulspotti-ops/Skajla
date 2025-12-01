@@ -112,7 +112,12 @@ def register():
             # NUOVO SISTEMA: Codici Scuola Premium (PRIORITÀ ASSOLUTA)
             codice_scuola_premium = request.form.get('codice_scuola_premium', '').strip().upper()
             scuola_id = None
-            ruolo = 'studente'  # Default
+            
+            # Leggi ruolo dal form (default: studente)
+            ruolo_from_form = request.form.get('ruolo', 'studente').strip()
+            # Valida ruolo
+            valid_roles = ['studente', 'professore', 'genitore', 'dirigente']
+            ruolo = ruolo_from_form if ruolo_from_form in valid_roles else 'studente'
             
             # PRIORITÀ 1: Codice Scuola Premium (SKAIL, PROF, DIR)
             if codice_scuola_premium:
