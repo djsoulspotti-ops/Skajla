@@ -15,8 +15,8 @@
     <link href="/static/css/dashboard-premium.css" rel="stylesheet">
     <link href="/static/css/mobile-first.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/circulating-avatars.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Additional Student-Specific Styles */
         .gamification-widget {
             background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
             color: white;
@@ -24,7 +24,6 @@
             border-radius: var(--radius-xl);
             border: none;
         }
-
         .xp-progress-bar {
             background: rgba(255, 255, 255, 0.2);
             border-radius: var(--radius-full);
@@ -32,14 +31,12 @@
             margin: 1rem 0;
             overflow: hidden;
         }
-
         .xp-progress-fill {
             background: var(--color-gold-400);
             height: 100%;
             border-radius: var(--radius-full);
             transition: width 0.3s ease;
         }
-
         .level-badge {
             display: inline-flex;
             align-items: center;
@@ -50,35 +47,16 @@
             font-weight: var(--font-semibold);
             font-size: var(--text-sm);
         }
-
         .streak-indicator {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             margin-top: 1rem;
         }
-
-        .streak-flame {
-            font-size: 1.5rem;
-        }
-
-        .next-lesson-card {
-            background: linear-gradient(135deg, rgba(0, 59, 115, 0.05) 0%, rgba(0, 116, 217, 0.03) 100%);
-            border: 2px solid var(--color-blue-200);
-        }
-
-        .lesson-time {
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            color: var(--color-blue-800);
-            font-family: 'IBM Plex Sans', sans-serif;
-        }
-
         .grades-table {
             width: 100%;
             font-size: var(--text-sm);
         }
-
         .grades-table th {
             text-align: left;
             padding: 0.75rem 0.5rem;
@@ -89,16 +67,13 @@
             letter-spacing: 0.05em;
             border-bottom: 1px solid var(--border-primary);
         }
-
         .grades-table td {
             padding: 0.875rem 0.5rem;
             border-bottom: 1px solid var(--border-secondary);
         }
-
         .grades-table tr:last-child td {
             border-bottom: none;
         }
-
         .grade-badge {
             display: inline-flex;
             align-items: center;
@@ -109,22 +84,22 @@
             font-weight: var(--font-bold);
             font-size: var(--text-base);
         }
-
         .grade-badge.excellent {
             background: rgba(16, 185, 129, 0.1);
             color: var(--color-emerald-600);
         }
-
         .grade-badge.good {
             background: rgba(59, 130, 246, 0.1);
             color: var(--color-blue-600);
         }
-
         .grade-badge.pass {
             background: rgba(245, 158, 11, 0.1);
             color: var(--color-gold-600);
         }
-
+        .grade-badge.fail {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-ruby-600);
+        }
         .ai-coach-preview {
             padding: 1.5rem;
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.03) 100%);
@@ -132,13 +107,11 @@
             border-radius: var(--radius-lg);
             text-align: center;
         }
-
         .event-list {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
         }
-
         .event-item {
             display: flex;
             gap: 1rem;
@@ -147,12 +120,10 @@
             border-radius: var(--radius-lg);
             transition: all 0.2s ease;
         }
-
         .event-item:hover {
             background: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
-
         .event-date {
             text-align: center;
             padding: 0.5rem;
@@ -160,23 +131,147 @@
             border-radius: var(--radius-md);
             min-width: 50px;
         }
-
         .event-day {
             font-size: var(--text-2xl);
             font-weight: var(--font-bold);
             color: var(--color-blue-800);
         }
-
         .event-month {
             font-size: var(--text-xs);
             color: var(--text-muted);
             text-transform: uppercase;
         }
+        .subject-avg-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            transition: all 0.2s ease;
+        }
+        .subject-avg-card:hover {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .subject-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .subject-icon.math { background: rgba(59, 130, 246, 0.1); color: var(--color-blue-600); }
+        .subject-icon.italian { background: rgba(239, 68, 68, 0.1); color: var(--color-ruby-600); }
+        .subject-icon.english { background: rgba(16, 185, 129, 0.1); color: var(--color-emerald-600); }
+        .subject-icon.history { background: rgba(245, 158, 11, 0.1); color: var(--color-gold-600); }
+        .subject-icon.science { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
+        .subject-icon.default { background: rgba(107, 114, 128, 0.1); color: var(--color-steel-600); }
+        .attendance-stat {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+        }
+        .attendance-stat-value {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-extrabold);
+        }
+        .attendance-stat-value.present { color: var(--color-emerald-600); }
+        .attendance-stat-value.absent { color: var(--color-ruby-600); }
+        .attendance-stat-value.late { color: var(--color-gold-600); }
+        .attendance-stat-value.justified { color: var(--color-blue-600); }
+        .attendance-stat-label {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .quick-link-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        .quick-link-card:hover {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        .quick-link-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .quick-link-icon.blue { background: rgba(59, 130, 246, 0.1); color: var(--color-blue-600); }
+        .quick-link-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--color-emerald-600); }
+        .quick-link-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
+        .quick-link-icon.gold { background: rgba(245, 158, 11, 0.1); color: var(--color-gold-600); }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        @media (max-width: 1024px) {
+            .bento-grid.hero-layout,
+            .bento-grid.balanced-layout {
+                grid-template-columns: 1fr;
+            }
+            .bento-grid.quad-layout {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .bento-grid.quad-layout {
+                grid-template-columns: 1fr;
+            }
+            .quick-links-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+            }
+            .search-bar {
+                min-width: 100%;
+            }
+        }
     </style>
 </head>
 <body class="dashboard-page">
     <div class="dashboard-container" id="dashboardContainer">
-        <!-- Modern Collapsible Sidebar -->
         <aside class="dashboard-sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand">SKAILA</div>
@@ -184,7 +279,6 @@
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-label">Menu</div>
@@ -219,7 +313,6 @@
                         </li>
                     </ul>
                 </div>
-
                 <div class="nav-section">
                     <div class="nav-section-label">Strumenti</div>
                     <ul class="nav-list">
@@ -250,7 +343,6 @@
                     </ul>
                 </div>
             </nav>
-
             <div class="sidebar-footer">
                 <div class="user-profile-card">
                     <div class="user-avatar">
@@ -268,13 +360,11 @@
             </div>
         </aside>
 
-        <!-- Main Content Area -->
         <main class="dashboard-main">
-            <!-- Header -->
             <div class="dashboard-header">
                 <div class="header-left">
                     <h1 class="page-title">Ciao, {{ user.nome }}! 👋</h1>
-                    <p class="page-subtitle">Ecco cosa sta succedendo oggi</p>
+                    <p class="page-subtitle">Ecco il tuo andamento scolastico</p>
                 </div>
                 <div class="header-right">
                     <div class="search-bar">
@@ -283,43 +373,12 @@
                     </div>
                     <button class="notifications-btn">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
+                        <span class="notification-badge">{{ stats.messages_today if stats.messages_today else '0' }}</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Hero Bento Grid: Next Lesson + Gamification -->
             <div class="bento-grid hero-layout">
-                <!-- Next Lesson Card -->
-                <div class="bento-card next-lesson-card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-clock"></i>
-                            Prossima Lezione
-                        </h2>
-                        <a href="/calendario" class="card-action">Vedi tutto →</a>
-                    </div>
-                    <div class="card-body">
-                        <div class="lesson-time">14:30 - 16:00</div>
-                        <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--color-blue-900); margin: 0.75rem 0;">Matematica Avanzata</h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                            <i class="fas fa-map-marker-alt" style="margin-right: 0.5rem;"></i>
-                            Aula 201 - Prof. Rossi
-                        </p>
-                        <div style="display: flex; gap: 0.75rem;">
-                            <a href="/calendario" class="btn-quick-action" style="text-decoration: none;">
-                                <i class="fas fa-calendar-check"></i>
-                                Vai al Calendario
-                            </a>
-                            <a href="/registro" class="btn-quick-action secondary" style="text-decoration: none;">
-                                <i class="fas fa-book-open"></i>
-                                Registro
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gamification Widget -->
                 <div class="gamification-widget">
                     <div class="card-header" style="border-color: rgba(255,255,255,0.2);">
                         <h2 class="card-title" style="color: white;">
@@ -330,31 +389,72 @@
                     </div>
                     <div class="level-badge">
                         <i class="fas fa-trophy"></i>
-                        Livello {{ gamification.livello if gamification else '1' }}
+                        Livello {{ gamification.profile.current_level if gamification and gamification.profile else stats.current_level if stats else 1 }}
                     </div>
                     <div class="xp-progress-bar">
-                        <div class="xp-progress-fill" style="width: {{ gamification.progress_percentage if gamification else '35' }}%;"></div>
+                        {% set progress = gamification.profile.progress_percentage if gamification and gamification.profile else 35 %}
+                        <div class="xp-progress-fill" style="width: {{ progress }}%;"></div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
                         <span style="font-size: var(--text-sm); opacity: 0.9;">
-                            {{ gamification.xp_attuale if gamification else '350' }} / {{ gamification.xp_necessari if gamification else '1000' }} XP
+                            {{ gamification.profile.total_xp if gamification and gamification.profile else stats.total_xp if stats else 0 }} XP
                         </span>
                         <span style="font-size: var(--text-sm); font-weight: var(--font-semibold);">
-                            {{ gamification.progress_percentage if gamification else '35' }}%
+                            {{ progress }}%
                         </span>
                     </div>
                     <div class="streak-indicator">
-                        <span class="streak-flame">🔥</span>
+                        <span style="font-size: 1.5rem;">🔥</span>
                         <span style="font-size: var(--text-sm); opacity: 0.9;">
-                            {{ gamification.streak_giorni if gamification else '7' }} giorni di streak!
+                            {{ gamification.profile.current_streak if gamification and gamification.profile else stats.current_streak if stats else 0 }} giorni di streak!
                         </span>
+                    </div>
+                </div>
+
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Statistiche Presenze
+                        </h2>
+                        <a href="/registro" class="card-action">Dettagli →</a>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                        <div class="attendance-stat">
+                            <div class="attendance-stat-value present">{{ stats.presenze_percentuale if stats else 0 }}%</div>
+                            <div class="attendance-stat-label">Presenze</div>
+                        </div>
+                        <div class="attendance-stat">
+                            <div class="attendance-stat-value absent">{{ stats.assenze if stats else 0 }}</div>
+                            <div class="attendance-stat-label">Assenze</div>
+                        </div>
+                        <div class="attendance-stat">
+                            <div class="attendance-stat-value justified">{{ stats.assenze_giustificate if stats else 0 }}</div>
+                            <div class="attendance-stat-label">Giustificate</div>
+                        </div>
+                        <div class="attendance-stat">
+                            <div class="attendance-stat-value late">{{ stats.ritardi if stats else 0 }}</div>
+                            <div class="attendance-stat-label">Ritardi</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); margin-bottom: 1rem; color: var(--text-primary);">
+                            Tasso di Frequenza
+                        </h3>
+                        <div style="background: var(--bg-surface); height: 12px; border-radius: var(--radius-full); overflow: hidden;">
+                            {% set freq_pct = stats.presenze_percentuale if stats else 0 %}
+                            <div style="background: {% if freq_pct >= 90 %}var(--color-emerald-500){% elif freq_pct >= 75 %}var(--color-gold-500){% else %}var(--color-ruby-500){% endif %}; width: {{ freq_pct }}%; height: 100%; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">0%</span>
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">{{ stats.giorni_totali if stats else 0 }} giorni registrati</span>
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">100%</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Bento Grid: Grades, AI Coach, Calendar -->
             <div class="bento-grid balanced-layout">
-                <!-- Latest Grades -->
                 <div class="bento-card">
                     <div class="card-header">
                         <h2 class="card-title">
@@ -363,45 +463,139 @@
                         </h2>
                         <a href="/registro" class="card-action">Vedi tutti →</a>
                     </div>
+                    {% if voti and voti|length > 0 %}
                     <table class="grades-table">
                         <thead>
                             <tr>
                                 <th>Materia</th>
                                 <th>Voto</th>
+                                <th>Tipo</th>
                                 <th>Data</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for voto in voti[:5] %}
                             <tr>
-                                <td style="font-weight: var(--font-medium);">Matematica</td>
-                                <td><span class="grade-badge excellent">9.0</span></td>
-                                <td style="color: var(--text-muted); font-size: var(--text-xs);">20 Nov</td>
+                                <td style="font-weight: var(--font-medium);">{{ voto.materia }}</td>
+                                <td>
+                                    {% set v = voto.voto|float %}
+                                    <span class="grade-badge {% if v >= 8 %}excellent{% elif v >= 7 %}good{% elif v >= 6 %}pass{% else %}fail{% endif %}">
+                                        {{ voto.voto }}
+                                    </span>
+                                </td>
+                                <td style="font-size: var(--text-xs); color: var(--text-muted);">
+                                    {{ voto.tipo_valutazione|capitalize if voto.tipo_valutazione else '-' }}
+                                </td>
+                                <td style="color: var(--text-muted); font-size: var(--text-xs);">
+                                    {{ voto.data.strftime('%d %b') if voto.data else '-' }}
+                                </td>
                             </tr>
-                            <tr>
-                                <td style="font-weight: var(--font-medium);">Italiano</td>
-                                <td><span class="grade-badge good">8.5</span></td>
-                                <td style="color: var(--text-muted); font-size: var(--text-xs);">18 Nov</td>
-                            </tr>
-                            <tr>
-                                <td style="font-weight: var(--font-medium);">Storia</td>
-                                <td><span class="grade-badge good">7.5</span></td>
-                                <td style="color: var(--text-muted); font-size: var(--text-xs);">15 Nov</td>
-                            </tr>
-                            <tr>
-                                <td style="font-weight: var(--font-medium);">Inglese</td>
-                                <td><span class="grade-badge excellent">9.5</span></td>
-                                <td style="color: var(--text-muted); font-size: var(--text-xs);">13 Nov</td>
-                            </tr>
-                            <tr>
-                                <td style="font-weight: var(--font-medium);">Fisica</td>
-                                <td><span class="grade-badge pass">6.5</span></td>
-                                <td style="color: var(--text-muted); font-size: var(--text-xs);">10 Nov</td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>Nessun voto registrato</p>
+                    </div>
+                    {% endif %}
                 </div>
 
-                <!-- AI Coach Quick Access -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Medie per Materia
+                        </h2>
+                    </div>
+                    {% if medie_materie and medie_materie|length > 0 %}
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 300px; overflow-y: auto;">
+                        {% for m in medie_materie %}
+                        {% set subject_lower = m.materia|lower %}
+                        {% set icon_class = 'math' if 'matem' in subject_lower else 'italian' if 'italian' in subject_lower else 'english' if 'inglese' in subject_lower else 'history' if 'storia' in subject_lower else 'science' if 'scienz' in subject_lower or 'fisica' in subject_lower or 'chim' in subject_lower else 'default' %}
+                        {% set icon = 'fas fa-calculator' if 'matem' in subject_lower else 'fas fa-book' if 'italian' in subject_lower else 'fas fa-globe' if 'inglese' in subject_lower else 'fas fa-landmark' if 'storia' in subject_lower else 'fas fa-flask' if 'scienz' in subject_lower or 'fisica' in subject_lower or 'chim' in subject_lower else 'fas fa-bookmark' %}
+                        <div class="subject-avg-card">
+                            <div class="subject-icon {{ icon_class }}">
+                                <i class="{{ icon }}"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ m.materia }}</div>
+                                <div style="font-size: var(--text-xs); color: var(--text-muted);">{{ m.num_voti }} vot{{ 'o' if m.num_voti == 1 else 'i' }}</div>
+                            </div>
+                            {% set avg = m.media|float %}
+                            <div class="grade-badge {% if avg >= 8 %}excellent{% elif avg >= 7 %}good{% elif avg >= 6 %}pass{% else %}fail{% endif %}">
+                                {{ "%.1f"|format(avg) }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Nessuna media disponibile</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Prossimi Eventi
+                        </h2>
+                        <a href="/calendario" class="card-action">Vedi tutto →</a>
+                    </div>
+                    {% if upcoming_events and upcoming_events|length > 0 %}
+                    <div class="event-list">
+                        {% for event in upcoming_events %}
+                        <div class="event-item">
+                            <div class="event-date">
+                                <div class="event-day">{{ event.start_datetime.strftime('%d') if event.start_datetime else '--' }}</div>
+                                <div class="event-month">{{ event.start_datetime.strftime('%b') if event.start_datetime else '--' }}</div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
+                                    {{ event.title }}
+                                </div>
+                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
+                                    {% if event.event_type == 'test' %}
+                                    <i class="fas fa-file-alt" style="color: var(--color-ruby-500);"></i> Verifica
+                                    {% elif event.event_type == 'homework' %}
+                                    <i class="fas fa-tasks" style="color: var(--color-gold-500);"></i> Compito
+                                    {% else %}
+                                    <i class="fas fa-calendar-check"></i> {{ event.event_type|capitalize if event.event_type else 'Evento' }}
+                                    {% endif %}
+                                    {% if event.start_datetime %}
+                                     - {{ event.start_datetime.strftime('%H:%M') }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>Nessun evento in programma</p>
+                        <a href="/calendario" style="color: var(--color-blue-600); font-size: var(--text-sm); text-decoration: none;">Vai al calendario →</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bento-grid hero-layout">
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            Andamento Voti
+                        </h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="gradesChart"></canvas>
+                    </div>
+                </div>
+
                 <div class="bento-card">
                     <div class="card-header">
                         <h2 class="card-title">
@@ -411,12 +605,18 @@
                         <a href="/ai-chat" class="card-action">Apri Chat →</a>
                     </div>
                     <div class="ai-coach-preview">
-                        <i class="fas fa-robot" style="font-size: 3rem; color: var(--color-purple-600); margin-bottom: 1rem;"></i>
+                        <i class="fas fa-robot" style="font-size: 3rem; color: #8B5CF6; margin-bottom: 1rem;"></i>
                         <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.5rem;">
                             Ciao {{ user.nome }}!
                         </h3>
                         <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: 1.5rem;">
+                            {% if stats and stats.media_voti and stats.media_voti < 6 %}
+                            Vedo che hai bisogno di supporto in alcune materie. Vuoi che ti aiuti a studiare?
+                            {% elif stats and stats.media_voti and stats.media_voti >= 8 %}
+                            Ottimo lavoro! Continua cosi. Posso aiutarti a prepararti per le prossime verifiche.
+                            {% else %}
                             Hai bisogno di aiuto con i compiti o vuoi ripassare qualche argomento?
+                            {% endif %}
                         </p>
                         <a href="/ai-chat" class="btn-quick-action" style="text-decoration: none;">
                             <i class="fas fa-comments"></i>
@@ -424,98 +624,118 @@
                         </a>
                     </div>
                 </div>
+            </div>
 
-                <!-- Upcoming Events -->
-                <div class="bento-card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-calendar-alt"></i>
-                            Prossimi Eventi
-                        </h2>
-                        <a href="/calendario" class="card-action">Vedi tutto →</a>
+            <div class="bento-grid quad-layout">
+                <div class="stat-card">
+                    <div class="stat-value" style="color: {% if stats and stats.media_voti >= 7 %}var(--color-emerald-600){% elif stats and stats.media_voti >= 6 %}var(--color-gold-600){% else %}var(--color-ruby-600){% endif %};">
+                        {{ "%.1f"|format(stats.media_voti) if stats and stats.media_voti else '-.--' }}
                     </div>
-                    <div class="event-list">
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">25</div>
-                                <div class="event-month">Nov</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                    Verifica di Storia
-                                </div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                    <i class="fas fa-clock"></i> 09:00 - 11:00
-                                </div>
-                            </div>
-                        </div>
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">27</div>
-                                <div class="event-month">Nov</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                    Consegna Progetto Informatica
-                                </div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                    <i class="fas fa-exclamation-circle"></i> Scadenza ore 23:59
-                                </div>
-                            </div>
-                        </div>
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">30</div>
-                                <div class="event-month">Nov</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                    Colloquio Genitori
-                                </div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                    <i class="fas fa-users"></i> 15:00 - 18:00
-                                </div>
-                            </div>
-                        </div>
+                    <div class="stat-label">Media Generale</div>
+                    <div class="stat-change {% if stats and stats.media_voti >= 6 %}positive{% else %}negative{% endif %}">
+                        <i class="fas fa-{% if stats and stats.media_voti >= 6 %}check{% else %}arrow-down{% endif %}"></i>
+                        {{ stats.totale_voti if stats else 0 }} voti
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: {% if stats and stats.presenze_percentuale >= 90 %}var(--color-emerald-600){% elif stats and stats.presenze_percentuale >= 75 %}var(--color-gold-600){% else %}var(--color-ruby-600){% endif %};">
+                        {{ stats.presenze_percentuale if stats else 0 }}%
+                    </div>
+                    <div class="stat-label">Frequenza</div>
+                    <div class="stat-change {% if stats and stats.presenze_percentuale >= 75 %}positive{% else %}negative{% endif %}">
+                        <i class="fas fa-{% if stats and stats.presenze_percentuale >= 75 %}check{% else %}exclamation{% endif %}"></i>
+                        {% if stats and stats.presenze_percentuale >= 90 %}Ottimo{% elif stats and stats.presenze_percentuale >= 75 %}Buono{% else %}Da migliorare{% endif %}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.total_xp if stats else 0 }}</div>
+                    <div class="stat-label">XP Totali</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-star"></i>
+                        Livello {{ stats.current_level if stats else 1 }}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.current_streak if stats else 0 }}</div>
+                    <div class="stat-label">Giorni Streak</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-fire"></i>
+                        Continua cosi!
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Stats -->
-            <div class="bento-grid quad-layout">
-                <div class="stat-card">
-                    <div class="stat-value">{{ stats.media_voti if stats and stats.media_voti else '8.2' }}</div>
-                    <div class="stat-label">Media Voti</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +0.3
+            <div class="bento-grid hero-layout">
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-bolt"></i>
+                            Azioni Rapide
+                        </h2>
+                    </div>
+                    <div class="quick-links-grid">
+                        <a href="/registro" class="quick-link-card">
+                            <div class="quick-link-icon blue">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <span style="font-weight: var(--font-semibold);">Registro</span>
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">Voti e presenze</span>
+                        </a>
+                        <a href="/calendario" class="quick-link-card">
+                            <div class="quick-link-icon green">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <span style="font-weight: var(--font-semibold);">Calendario</span>
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">Lezioni ed eventi</span>
+                        </a>
+                        <a href="/ai-chat" class="quick-link-card">
+                            <div class="quick-link-icon purple">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <span style="font-weight: var(--font-semibold);">AI Coach</span>
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">Aiuto studio</span>
+                        </a>
+                        <a href="/gamification" class="quick-link-card">
+                            <div class="quick-link-icon gold">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <span style="font-weight: var(--font-semibold);">Gamification</span>
+                            <span style="font-size: var(--text-xs); color: var(--text-muted);">Sfide e premi</span>
+                        </a>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ stats.presenze_percentuale if stats and stats.presenze_percentuale else '95' }}%</div>
-                    <div class="stat-label">Presenze</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-check"></i> Ottimo
+
+                {% if companies and companies|length > 0 %}
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-briefcase"></i>
+                            SKAILA Connect
+                        </h2>
+                        <a href="/skaila-connect" class="card-action">Esplora →</a>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        {% for company in companies %}
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
+                            <div style="width: 48px; height: 48px; background: var(--color-blue-100); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-building" style="color: var(--color-blue-600);"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ company.nome }}</div>
+                                <div style="font-size: var(--text-xs); color: var(--text-muted);">{{ company.settore }} - {{ company.citta }}</div>
+                            </div>
+                            <a href="/company/{{ company.id }}" style="color: var(--color-blue-600); font-size: var(--text-sm);">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ stats.materiali_studiati if stats and stats.materiali_studiati else '24' }}</div>
-                    <div class="stat-label">Materiali Studiati</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +5 questa settimana
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ stats.quiz_completati if stats and stats.quiz_completati else '12' }}</div>
-                    <div class="stat-label">Quiz Completati</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-fire"></i> 92% successo
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </main>
     </div>
 
-    <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav">
         <a href="/dashboard" class="mobile-nav-item active">
             <i class="fas fa-home"></i>
@@ -540,7 +760,6 @@
     </nav>
 
     <script>
-        // Sidebar Toggle
         const sidebar = document.getElementById('sidebar');
         const dashboardContainer = document.getElementById('dashboardContainer');
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -549,8 +768,6 @@
             dashboardContainer.classList.toggle('sidebar-collapsed');
         });
 
-        // Mobile Sidebar Toggle
-        const mobileMenuBtn = document.querySelector('.notifications-btn');
         if (window.innerWidth <= 768) {
             sidebar.addEventListener('click', (e) => {
                 if (e.target.classList.contains('nav-link')) {
@@ -559,22 +776,100 @@
             });
         }
 
-        // Initialize circulating avatars
         {% if enabled_features.get('real_time_presence', True) %}
         if (typeof initializeCirculatingAvatars === 'function') {
             initializeCirculatingAvatars('messaging-avatars-container');
         }
         {% endif %}
+
+        const ctx = document.getElementById('gradesChart');
+        if (ctx) {
+            const chartData = {{ chart_data | tojson | safe }};
+            const colors = [
+                'rgba(59, 130, 246, 1)',
+                'rgba(16, 185, 129, 1)',
+                'rgba(245, 158, 11, 1)',
+                'rgba(239, 68, 68, 1)',
+                'rgba(139, 92, 246, 1)',
+                'rgba(236, 72, 153, 1)'
+            ];
+            
+            const datasets = [];
+            let colorIndex = 0;
+            
+            if (chartData && chartData.datasets) {
+                for (const [materia, data] of Object.entries(chartData.datasets)) {
+                    datasets.push({
+                        label: materia,
+                        data: data,
+                        borderColor: colors[colorIndex % colors.length],
+                        backgroundColor: colors[colorIndex % colors.length].replace('1)', '0.1)'),
+                        tension: 0.3,
+                        fill: false,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    });
+                    colorIndex++;
+                }
+            }
+            
+            if (datasets.length > 0) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'category',
+                                labels: [...new Set(datasets.flatMap(d => d.data.map(p => p.x)))].sort(),
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                min: 1,
+                                max: 10,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+            } else {
+                ctx.parentElement.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><p>Nessun dato disponibile per il grafico</p></div>';
+            }
+        }
     </script>
     <script src="/static/js/classmate-spirals.js"></script>
-    
-    <!-- Telemetry Tracker for Early Warning System -->
     <script src="/static/js/telemetry-tracker.js"></script>
-    
-    <!-- Vertical Feed Component for Gen-Z UX -->
     <script src="/static/js/vertical-feed.js"></script>
     
-    <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

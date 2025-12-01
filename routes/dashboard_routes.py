@@ -36,14 +36,96 @@ def dashboard():
 @dashboard_bp.route('/dashboard/studente')
 @require_login
 def dashboard_studente():
-    """Dashboard studente con gamification"""
+    """Dashboard studente con gamification e dati reali"""
+    from datetime import datetime, timedelta
+    
     user_id = session['user_id']
     school_id = get_current_school_id()
 
     # Ottieni feature abilitate per questa scuola
     enabled_features = school_features_manager.get_school_features(school_id)
 
-    # Dati gamification (con fallback se profilo non esiste)
+    # ========== VOTI REALI DAL DATABASE ==========
+    # Ultimi voti dello studente
+    voti = db_manager.query('''
+        SELECT materia, voto, tipo_valutazione, data, note
+        FROM voti 
+        WHERE studente_id = %s 
+        ORDER BY data DESC 
+        LIMIT 10
+    ''', (user_id,)) or []
+
+    # Media voti per materia
+    medie_materie = db_manager.query('''
+        SELECT materia, 
+               ROUND(AVG(voto)::numeric, 2) as media, 
+               COUNT(*) as num_voti,
+               MAX(data) as ultimo_voto
+        FROM voti
+        WHERE studente_id = %s
+        GROUP BY materia
+        ORDER BY materia
+    ''', (user_id,)) or []
+
+    # Media generale
+    media_generale = db_manager.query('''
+        SELECT ROUND(AVG(voto)::numeric, 2) as media_generale,
+               COUNT(*) as totale_voti
+        FROM voti
+        WHERE studente_id = %s
+    ''', (user_id,), one=True) or {'media_generale': 0, 'totale_voti': 0}
+
+    # Trend voti ultimi 30 giorni per grafico
+    voti_trend = db_manager.query('''
+        SELECT data, voto, materia
+        FROM voti
+        WHERE studente_id = %s 
+        AND data >= CURRENT_DATE - INTERVAL '90 days'
+        ORDER BY data ASC
+    ''', (user_id,)) or []
+
+    # ========== PRESENZE/ASSENZE DAL DATABASE ==========
+    presenze_stats = db_manager.query('''
+        SELECT 
+            COUNT(*) as giorni_totali,
+            SUM(CASE WHEN presente = true THEN 1 ELSE 0 END) as presenze,
+            SUM(CASE WHEN presente = false THEN 1 ELSE 0 END) as assenze,
+            SUM(CASE WHEN giustificato = true THEN 1 ELSE 0 END) as giustificate,
+            SUM(CASE WHEN ritardo = true THEN 1 ELSE 0 END) as ritardi
+        FROM presenze
+        WHERE studente_id = %s
+    ''', (user_id,), one=True) or {
+        'giorni_totali': 0, 'presenze': 0, 'assenze': 0, 
+        'giustificate': 0, 'ritardi': 0
+    }
+
+    # Calcola percentuale presenze
+    percentuale_presenze = 0
+    if presenze_stats['giorni_totali'] and presenze_stats['giorni_totali'] > 0:
+        percentuale_presenze = round(
+            (presenze_stats['presenze'] or 0) / presenze_stats['giorni_totali'] * 100, 1
+        )
+
+    # Ultime presenze/assenze
+    ultime_presenze = db_manager.query('''
+        SELECT data, presente, giustificato, ritardo, note
+        FROM presenze
+        WHERE studente_id = %s
+        ORDER BY data DESC
+        LIMIT 10
+    ''', (user_id,)) or []
+
+    # ========== PROSSIMI EVENTI (verifiche, compiti, scadenze) ==========
+    upcoming_events = db_manager.query('''
+        SELECT id, title, description, event_type, start_datetime, end_datetime
+        FROM calendar_events
+        WHERE (user_id = %s OR is_school_wide = true)
+        AND start_datetime >= CURRENT_TIMESTAMP
+        ORDER BY start_datetime ASC
+        LIMIT 5
+    ''', (user_id,)) or []
+
+    # ========== DATI GAMIFICATION ==========
     gamification_data = None
     profile = {}
 
@@ -53,20 +135,27 @@ def dashboard_studente():
             profile = gamification_data.get('profile', {})
         except Exception as e:
             print(f"⚠️ Gamification error for user {user_id}: {e}")
-            # Crea profilo minimo di fallback
             gamification_system.get_or_create_profile(user_id)
             gamification_data = gamification_system.get_user_dashboard(user_id)
             profile = gamification_data.get('profile', {})
 
     # Statistiche recenti - usando DashboardService
-    daily_stats = dashboard_service.get_user_daily_stats(user_id)
+    daily_stats_service = dashboard_service.get_user_daily_stats(user_id)
 
+    # ========== STATISTICHE DASHBOARD COMPLETE ==========
     dashboard_stats = {
-        'messages_today': daily_stats['messages_today'],
-        'ai_questions_today': daily_stats['ai_interactions_today'],
+        'messages_today': daily_stats_service['messages_today'],
+        'ai_questions_today': daily_stats_service['ai_interactions_today'],
         'current_streak': profile.get('current_streak', 0),
         'total_xp': profile.get('total_xp', 0),
-        'current_level': profile.get('current_level', 1)
+        'current_level': profile.get('current_level', 1),
+        'media_voti': media_generale['media_generale'] or 0,
+        'totale_voti': media_generale['totale_voti'] or 0,
+        'presenze_percentuale': percentuale_presenze,
+        'assenze': presenze_stats['assenze'] or 0,
+        'assenze_giustificate': presenze_stats['giustificate'] or 0,
+        'ritardi': presenze_stats['ritardi'] or 0,
+        'giorni_totali': presenze_stats['giorni_totali'] or 0
     }
 
     # SKAILA Connect - Aziende disponibili
@@ -79,13 +168,11 @@ def dashboard_studente():
         LIMIT 3
     ''') or []
 
-    # AI Insights intelligenti (ML + statistica) - Temporaneamente disabilitato
-    ai_insights = []  # ai_insights_engine.generate_insights(user_id)
+    # AI Insights
+    ai_insights = []
 
-    # Attività recenti (dai daily_analytics e achievements)
+    # Attività recenti
     recent_activities_list = []
-
-    # Achievement recenti - usando DashboardService
     achievements = dashboard_service.get_recent_achievements(user_id, limit=3)
 
     for ach in achievements:
@@ -97,8 +184,8 @@ def dashboard_studente():
             'timestamp': ach['unlocked_at']
         })
 
-    # Attività da daily analytics (ultimi 7 giorni)
-    daily_stats = db_manager.query('''
+    # Attività da daily analytics
+    daily_analytics = db_manager.query('''
         SELECT date, quizzes_completed, messages_sent, ai_interactions, xp_earned
         FROM daily_analytics
         WHERE user_id = %s AND date >= CURRENT_DATE - INTERVAL '7 days'
@@ -106,7 +193,7 @@ def dashboard_studente():
         LIMIT 5
     ''', (user_id,)) or []
 
-    for stat in daily_stats:
+    for stat in daily_analytics:
         if stat['quizzes_completed'] and stat['quizzes_completed'] > 0:
             recent_activities_list.append({
                 'action_type': 'quiz',
@@ -115,22 +202,34 @@ def dashboard_studente():
                 'xp_earned': 0,
                 'timestamp': stat['date']
             })
-        if stat['messages_sent'] and stat['messages_sent'] > 0:
-            recent_activities_list.append({
-                'action_type': 'message',
-                'title': 'Messaggi Inviati',
-                'description': f"{stat['messages_sent']} messaggi",
-                'xp_earned': 0,
-                'timestamp': stat['date']
-            })
 
-    # Ordina per timestamp e prendi i primi 5
     recent_activities = sorted(recent_activities_list, key=lambda x: x['timestamp'], reverse=True)[:5]
+
+    # Prepara dati per Chart.js (trend voti)
+    chart_data = {
+        'labels': [],
+        'datasets': {}
+    }
+    for voto in voti_trend:
+        data_str = voto['data'].strftime('%d/%m') if hasattr(voto['data'], 'strftime') else str(voto['data'])
+        materia = voto['materia']
+        if materia not in chart_data['datasets']:
+            chart_data['datasets'][materia] = []
+        chart_data['datasets'][materia].append({
+            'x': data_str,
+            'y': float(voto['voto'])
+        })
 
     return render_template('dashboard_studente.html', 
                          user=session, 
                          gamification=gamification_data,
                          stats=dashboard_stats,
+                         voti=voti,
+                         medie_materie=medie_materie,
+                         ultime_presenze=ultime_presenze,
+                         presenze_stats=presenze_stats,
+                         upcoming_events=upcoming_events,
+                         chart_data=chart_data,
                          companies=companies if enabled_features.get('skaila_connect', True) else [],
                          ai_insights=ai_insights if enabled_features.get('ai_coach', True) else [],
                          recent_activities=recent_activities,
