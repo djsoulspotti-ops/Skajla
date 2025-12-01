@@ -43,6 +43,14 @@ A Smart Calendar & Agenda System offers personal and school-wide scheduling with
 SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) features, including a TikTok-style vertical feed, offline support, and push notifications. The SKAILA Connect module is an "Opportunity Marketplace" for PCTO placements, featuring dynamic student portfolios, smart matching, and a digital PCTO workflow engine for compliance and paperless operations. A Parent Dashboard provides zero-friction child monitoring with auto-generated student codes and real-time academic and attendance stats.
 
 # Recent Updates (December 2025)
+- **Enhanced Student Dashboard**: Complete redesign with Bento Grid layout featuring:
+  - Real-time grades table with color-coded badges (excellent/good/pass/fail)
+  - Subject averages with icons and automatic media calculation
+  - Attendance statistics with progress bars and detailed breakdown
+  - Chart.js grade trends visualization (last 90 days)
+  - Upcoming events/tests from calendar
+  - Quick stats cards (media generale, frequenza %, XP totali, streak)
+  - All data is read-only from voti and presenze tables with tenant isolation (scuola_id filtering)
 - **Gemini 3.0 AI Integration**: Upgraded chatbot from Gemini 2.5-flash to Gemini 3.0-flash for enhanced conversational capabilities
 - **XP Reward System**: Chat interactions award 5-50 XP with automatic rank progression and gamification context refresh
 - **Test Accounts Created**: Student (test123), Teacher (prof123), Admin (admin123) accounts with proper bcrypt password hashes
