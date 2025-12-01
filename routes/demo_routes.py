@@ -3,9 +3,53 @@ SKAILA - Demo Routes
 Route demo sicure con SOLO dati mock (nessun accesso database reale)
 """
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, jsonify
+from services.ai.gemini_chatbot import gemini_chatbot
 
 demo_bp = Blueprint('demo', __name__, url_prefix='/demo')
+
+
+@demo_bp.route('/ai/chat', methods=['POST'])
+def demo_ai_chat_api():
+    """
+    Demo AI Chat API endpoint - No authentication required
+    Uses GeminiChatbot with mock user for demo purposes
+    """
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
+
+        if not message.strip():
+            return jsonify({'success': False, 'error': 'Messaggio vuoto'}), 400
+
+        demo_user_id = 1
+        demo_user_name = 'Demo'
+        
+        result = gemini_chatbot.generate_response(
+            message=message,
+            user_id=demo_user_id,
+            user_name=demo_user_name,
+            user_role='studente'
+        )
+
+        return jsonify({
+            'success': result.get('success', True),
+            'response': result.get('response', ''),
+            'xp_earned': result.get('xp_awarded', 0),
+            'xp_awarded': result.get('xp_awarded', 0),
+            'rank_up': result.get('rank_up', False),
+            'new_rank': result.get('new_rank'),
+            'gamification': result.get('gamification', {}),
+            'ai_mode': result.get('ai_mode', 'gemini')
+        })
+
+    except Exception as e:
+        print(f"Errore API /demo/ai/chat: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Errore durante la generazione della risposta',
+            'response': 'Mi dispiace, ho avuto un problema tecnico. Riprova tra poco!'
+        }), 500
 
 def get_demo_session_studente():
     """Sessione demo per studente"""
