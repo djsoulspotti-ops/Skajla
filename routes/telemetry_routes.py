@@ -6,7 +6,7 @@ Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine
 
 from flask import Blueprint, request, jsonify, session, render_template
 from services.telemetry.telemetry_engine import telemetry_engine
-from shared.middleware.auth import require_login, require_role
+from shared.middleware.auth import require_login, require_role, require_auth
 from shared.error_handling import get_logger
 
 logger = get_logger(__name__)
@@ -15,7 +15,7 @@ telemetry_bp = Blueprint('telemetry', __name__, url_prefix='/api/telemetry')
 
 
 @telemetry_bp.route('/events/track', methods=['POST'])
-@require_login
+@require_auth
 def track_single_event():
     """
     Track a single telemetry event
@@ -255,7 +255,7 @@ def track_single_event():
 
 
 @telemetry_bp.route('/session/start', methods=['POST'])
-@require_login
+@require_auth
 def start_session():
     """Start a new telemetry session"""
     try:
