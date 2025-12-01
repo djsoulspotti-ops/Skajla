@@ -1,19 +1,24 @@
 """
 SKAILA Quiz Manager - Sistema Gestione Quiz Intelligente
 Generazione, selezione adattiva, tracking performance
+Supporto curriculum ministeriale italiano (scuole medie e superiori)
 """
 
-import sqlite3
 import random
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-from database_manager import db_manager
-from gamification import gamification_system
+from services.database.database_manager import db_manager
+try:
+    from gamification import gamification_system
+except ImportError:
+    gamification_system = None
 from services.telemetry.telemetry_engine import telemetry_engine
 
+logger = logging.getLogger(__name__)
+
 class QuizManager:
-    """Gestione completa quiz SKAILA"""
+    """Gestione completa quiz SKAILA con supporto curriculum ministeriale"""
     
     def __init__(self):
         self.difficulty_xp = {
@@ -21,28 +26,32 @@ class QuizManager:
             'medio': 50,
             'difficile': 100
         }
+        self.grade_levels = ['medie', 'superiori']
+        self.learning_tracks = {
+            'medie': ['generale'],
+            'superiori': ['scientifico', 'classico', 'linguistico', 'artistico', 'tecnico', 'professionale']
+        }
     
-    def get_adaptive_quiz(self, user_id: int, subject: str, force_difficulty: Optional[str] = None) -> Optional[Dict]:
-        """Seleziona quiz adattivo basato su performance utente"""
+    def get_adaptive_quiz(self, user_id: int, subject: str, 
+                          force_difficulty: Optional[str] = None,
+                          grade_level: Optional[str] = None,
+                          learning_track: Optional[str] = None) -> Optional[Dict]:
+        """Seleziona quiz adattivo basato su performance utente e curriculum ministeriale"""
         
-        # Calcola difficoltà adattiva
         if force_difficulty:
             difficulty = force_difficulty
         else:
             difficulty = self._calculate_adaptive_difficulty(user_id, subject)
         
-        # Trova argomenti deboli
         weak_topics = self._get_weak_topics(user_id, subject)
         
-        # Query quiz appropriato
         if weak_topics:
-            # Priorità a argomenti deboli (80% chance)
             if random.random() < 0.8:
-                quiz = self._get_quiz_by_topic(subject, difficulty, weak_topics[0])
+                quiz = self._get_quiz_by_topic(subject, difficulty, weak_topics[0], grade_level, learning_track)
             else:
-                quiz = self._get_random_quiz(subject, difficulty)
+                quiz = self._get_random_quiz(subject, difficulty, grade_level, learning_track)
         else:
-            quiz = self._get_random_quiz(subject, difficulty)
+            quiz = self._get_random_quiz(subject, difficulty, grade_level, learning_track)
         
         if not quiz:
             return None
@@ -61,7 +70,10 @@ class QuizManager:
             },
             'correct_answer': quiz['correct_answer'],
             'explanation': quiz['explanation'],
-            'xp_reward': quiz['xp_reward']
+            'xp_reward': quiz['xp_reward'],
+            'grade_level': quiz.get('grade_level', 'generale'),
+            'learning_track': quiz.get('learning_track', 'generale'),
+            'curriculum_standard': quiz.get('curriculum_standard')
         }
     
     def submit_quiz_answer(self, user_id: int, quiz_id: int, quiz_data: Dict, user_answer: str, time_taken: int) -> Dict:
@@ -89,26 +101,24 @@ class QuizManager:
         # Aggiorna progress materia
         self._update_subject_progress(user_id, quiz_data['subject'], quiz_data['topic'], is_correct, xp_earned)
         
-        # Assegna XP gamification
-        if is_correct:
-            gamification_system.award_xp(user_id, 'ai_correct_answer', 1.0, 
-                f"Quiz {quiz_data['subject']} corretto!")
-        else:
-            gamification_system.award_xp(user_id, 'ai_question', 0.5, 
-                "Partecipazione quiz")
+        if gamification_system:
+            if is_correct:
+                gamification_system.award_xp(user_id, 'ai_correct_answer', 1.0, 
+                    f"Quiz {quiz_data['subject']} corretto!")
+            else:
+                gamification_system.award_xp(user_id, 'ai_question', 0.5, 
+                    "Partecipazione quiz")
         
-        # Check badge unlock
         self._check_quiz_badges(user_id, quiz_data['subject'], is_correct)
         
-        # Aggiorna stats quiz
         db_manager.execute('''
             UPDATE quiz_bank 
-            SET times_used = times_used + 1,
+            SET times_used = COALESCE(times_used, 0) + 1,
                 success_rate = (
-                    SELECT CAST(SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)
-                    FROM student_quiz_history WHERE quiz_id = ?
+                    SELECT CAST(SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(COUNT(*), 0)
+                    FROM student_quiz_history WHERE quiz_id = %s
                 )
-            WHERE id = ?
+            WHERE id = %s
         ''', (quiz_id, quiz_id))
         
         result = {
@@ -156,21 +166,18 @@ class QuizManager:
     def _calculate_adaptive_difficulty(self, user_id: int, subject: str) -> str:
         """Calcola difficoltà adattiva basata su performance"""
         
-        # Ultimi 10 quiz della materia
         recent_quizzes = db_manager.query('''
             SELECT is_correct, difficulty FROM student_quiz_history 
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
             ORDER BY timestamp DESC LIMIT 10
         ''', (user_id, subject))
         
         if not recent_quizzes or len(recent_quizzes) < 3:
-            return 'facile'  # Inizia sempre facile
+            return 'facile'
         
-        # Calcola accuracy recente
         correct_count = sum(1 for q in recent_quizzes if q['is_correct'])
         accuracy = (correct_count / len(recent_quizzes)) * 100
         
-        # Logica adattiva
         if accuracy >= 85:
             return 'difficile'
         elif accuracy >= 70:
@@ -186,78 +193,98 @@ class QuizManager:
                    COUNT(*) as total,
                    SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct
             FROM student_quiz_history 
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
             GROUP BY topic
-            HAVING total >= 3
+            HAVING COUNT(*) >= 3
         ''', (user_id, subject))
         
         weak_topics = []
-        for stat in topic_stats:
-            accuracy = (stat['correct'] / stat['total']) * 100
-            if accuracy < 70:
-                weak_topics.append(stat['topic'])
+        for stat in topic_stats or []:
+            if stat['total'] > 0:
+                accuracy = (stat['correct'] / stat['total']) * 100
+                if accuracy < 70:
+                    weak_topics.append(stat['topic'])
         
         return weak_topics
     
-    def _get_quiz_by_topic(self, subject: str, difficulty: str, topic: str) -> Optional[Dict]:
-        """Trova quiz per argomento specifico"""
+    def _get_quiz_by_topic(self, subject: str, difficulty: str, topic: str,
+                           grade_level: Optional[str] = None,
+                           learning_track: Optional[str] = None) -> Optional[Dict]:
+        """Trova quiz per argomento specifico con filtri curriculum"""
         
-        quiz = db_manager.query('''
+        query = '''
             SELECT * FROM quiz_bank 
-            WHERE subject = ? AND difficulty = ? AND topic = ?
+            WHERE subject = %s AND difficulty = %s AND topic = %s
             AND approved = true
-            ORDER BY RANDOM() LIMIT 1
-        ''', (subject, difficulty, topic), one=True)
+        '''
+        params = [subject, difficulty, topic]
         
-        return quiz
+        if grade_level:
+            query += ' AND grade_level = %s'
+            params.append(grade_level)
+        
+        if learning_track:
+            query += ' AND learning_track = %s'
+            params.append(learning_track)
+        
+        query += ' ORDER BY RANDOM() LIMIT 1'
+        
+        return db_manager.query(query, tuple(params), one=True)
     
-    def _get_random_quiz(self, subject: str, difficulty: str) -> Optional[Dict]:
-        """Trova quiz casuale"""
+    def _get_random_quiz(self, subject: str, difficulty: str,
+                         grade_level: Optional[str] = None,
+                         learning_track: Optional[str] = None) -> Optional[Dict]:
+        """Trova quiz casuale con filtri curriculum"""
         
-        quiz = db_manager.query('''
+        query = '''
             SELECT * FROM quiz_bank 
-            WHERE subject = ? AND difficulty = ? AND approved = true
-            ORDER BY RANDOM() LIMIT 1
-        ''', (subject, difficulty), one=True)
+            WHERE subject = %s AND difficulty = %s AND approved = true
+        '''
+        params = [subject, difficulty]
         
-        return quiz
+        if grade_level:
+            query += ' AND grade_level = %s'
+            params.append(grade_level)
+        
+        if learning_track:
+            query += ' AND learning_track = %s'
+            params.append(learning_track)
+        
+        query += ' ORDER BY RANDOM() LIMIT 1'
+        
+        return db_manager.query(query, tuple(params), one=True)
     
     def _update_subject_progress(self, user_id: int, subject: str, topic: str, is_correct: bool, xp_earned: int):
         """Aggiorna progressi materia"""
         
-        # Check se esiste
         existing = db_manager.query('''
             SELECT * FROM student_subject_progress 
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
         ''', (user_id, subject), one=True)
         
         if existing:
-            # Update
             new_total = existing['total_quizzes'] + 1
             new_correct = existing['correct_quizzes'] + (1 if is_correct else 0)
             new_accuracy = (new_correct / new_total) * 100
             new_xp = existing['total_xp'] + xp_earned
             
-            # Gestisci topic deboli
             weak_topics = existing['topics_weak'].split(',') if existing['topics_weak'] else []
             if not is_correct and topic not in weak_topics:
                 weak_topics.append(topic)
             elif is_correct and topic in weak_topics:
-                # Rimuovi se migliora
                 recent_topic_accuracy = self._get_topic_accuracy(user_id, subject, topic)
                 if recent_topic_accuracy >= 70:
                     weak_topics.remove(topic)
             
             db_manager.execute('''
                 UPDATE student_subject_progress 
-                SET total_quizzes = ?, correct_quizzes = ?, 
-                    accuracy_percentage = ?, total_xp = ?,
-                    topics_weak = ?, last_activity_date = ?
-                WHERE user_id = ? AND subject = ?
+                SET total_quizzes = %s, correct_quizzes = %s, 
+                    accuracy_percentage = %s, total_xp = %s,
+                    topics_weak = %s, last_activity_date = %s
+                WHERE user_id = %s AND subject = %s
             ''', (new_total, new_correct, new_accuracy, new_xp,
                   ','.join(weak_topics), datetime.now(), user_id, subject))
         else:
-            # Insert
             db_manager.execute('''
                 INSERT INTO student_subject_progress 
                 (user_id, subject, total_quizzes, correct_quizzes, 
@@ -274,8 +301,8 @@ class QuizManager:
             SELECT COUNT(*) as total,
                    SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct
             FROM student_quiz_history 
-            WHERE user_id = ? AND subject = ? AND topic = ?
-            AND timestamp >= datetime('now', '-7 days')
+            WHERE user_id = %s AND subject = %s AND topic = %s
+            AND timestamp >= CURRENT_DATE - INTERVAL '7 days'
         ''', (user_id, subject, topic), one=True)
         
         if not stats or stats['total'] == 0:
@@ -286,8 +313,7 @@ class QuizManager:
     def _check_quiz_badges(self, user_id: int, subject: str, is_correct: bool):
         """Verifica unlock badge quiz"""
         
-        if is_correct:
-            # Consecutive correct quizzes
+        if is_correct and gamification_system:
             consecutive = self._get_consecutive_correct(user_id)
             
             if consecutive >= 5:
@@ -300,12 +326,12 @@ class QuizManager:
         
         recent = db_manager.query('''
             SELECT is_correct FROM student_quiz_history 
-            WHERE user_id = ? 
+            WHERE user_id = %s 
             ORDER BY timestamp DESC LIMIT 10
         ''', (user_id,))
         
         consecutive = 0
-        for quiz in recent:
+        for quiz in recent or []:
             if quiz['is_correct']:
                 consecutive += 1
             else:
@@ -318,7 +344,7 @@ class QuizManager:
         
         progress = db_manager.query('''
             SELECT * FROM student_subject_progress 
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
         ''', (user_id, subject), one=True)
         
         if not progress:
@@ -338,15 +364,15 @@ class QuizManager:
             SELECT u.id, u.nome, u.cognome, ssp.total_xp, ssp.accuracy_percentage, ssp.total_quizzes
             FROM student_subject_progress ssp
             JOIN utenti u ON ssp.user_id = u.id
-            WHERE ssp.subject = ?
+            WHERE ssp.subject = %s
         '''
         params = [subject]
         
         if classe:
-            query += ' AND u.classe = ?'
+            query += ' AND u.classe = %s'
             params.append(classe)
         
-        query += ' ORDER BY ssp.total_xp DESC LIMIT ?'
+        query += ' ORDER BY ssp.total_xp DESC LIMIT %s'
         params.append(limit)
         
         results = db_manager.query(query, tuple(params))
