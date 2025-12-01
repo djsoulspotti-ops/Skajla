@@ -5,408 +5,225 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Genitore - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
-            min-height: 100vh;
-            color: #1e293b;
-        }
-
-        .navbar {
-            background: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #1e3a5f;
-            text-decoration: none;
-        }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        .btn-logout {
-            padding: 0.5rem 1rem;
-            background: #fee2e2;
-            color: #dc2626;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: #64748b;
-        }
-
-        .student-card {
-            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
-            border-radius: 16px;
-            padding: 1.5rem;
-            color: white;
-            margin-bottom: 2rem;
-        }
-
-        .student-card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .student-card p {
-            opacity: 0.8;
-            font-size: 0.9rem;
-        }
-
-        .no-student {
-            background: #fef3c7;
-            border: 1px solid #fbbf24;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .no-student i {
-            font-size: 2.5rem;
-            color: #f59e0b;
-            margin-bottom: 1rem;
-        }
-
-        .no-student h3 {
-            color: #92400e;
-            margin-bottom: 0.5rem;
-        }
-
-        .no-student p {
-            color: #a16207;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.25rem;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-value.green { color: #10b981; }
-        .stat-value.red { color: #ef4444; }
-        .stat-value.yellow { color: #f59e0b; }
-        .stat-value.blue { color: #3b82f6; }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        .section {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title i {
-            color: #3b82f6;
-        }
-
-        .grades-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 0.75rem;
-        }
-
-        .grade-card {
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .grade-subject {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .grade-value {
-            font-size: 1.75rem;
-            font-weight: 800;
-        }
-
-        .grade-value.excellent { color: #10b981; }
-        .grade-value.good { color: #3b82f6; }
-        .grade-value.pass { color: #f59e0b; }
-        .grade-value.fail { color: #ef4444; }
-
-        .grade-count {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-top: 0.25rem;
-        }
-
-        .recent-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .recent-table th,
-        .recent-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .recent-table th {
-            font-size: 0.75rem;
-            color: #64748b;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .recent-table td {
-            font-size: 0.9rem;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-green { background: #dcfce7; color: #15803d; }
-        .badge-red { background: #fee2e2; color: #dc2626; }
-        .badge-yellow { background: #fef3c7; color: #b45309; }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #94a3b8;
-        }
-
-        .empty-state i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .grades-grid { grid-template-columns: repeat(2, 1fr); }
-            .recent-table { font-size: 0.8rem; }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/dashboard-unified.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <a href="/" class="logo">SKAILA</a>
-        <div class="nav-user">
-            <span class="user-name">{{ user.nome }} {{ user.cognome }}</span>
-            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Esci</a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="header">
-            <h1>Dashboard Genitore</h1>
-            <p>Monitora voti, assenze e ritardi</p>
-        </div>
-
-        {% if studente %}
-        <div class="student-card">
-            <h2><i class="fas fa-user-graduate"></i> {{ studente.nome }} {{ studente.cognome }}</h2>
-            <p>{{ studente.email }}</p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value green">{{ presenze_stats.presenze or 0 }}</div>
-                <div class="stat-label">Presenze</div>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-logo">SKAILA</a>
             </div>
-            <div class="stat-card">
-                <div class="stat-value red">{{ presenze_stats.assenze or 0 }}</div>
-                <div class="stat-label">Assenze</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value yellow">{{ presenze_stats.ritardi or 0 }}</div>
-                <div class="stat-label">Ritardi</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value blue">{{ presenze_stats.giustificate or 0 }}</div>
-                <div class="stat-label">Giustificate</div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h3 class="section-title"><i class="fas fa-graduation-cap"></i> Medie per Materia</h3>
-            {% if medie_materie %}
-            <div class="grades-grid">
-                {% for m in medie_materie %}
-                <div class="grade-card">
-                    <div class="grade-subject">{{ m.materia }}</div>
-                    <div class="grade-value {% if m.media >= 8 %}excellent{% elif m.media >= 7 %}good{% elif m.media >= 6 %}pass{% else %}fail{% endif %}">
-                        {{ m.media }}
-                    </div>
-                    <div class="grade-count">{{ m.num_voti }} voti</div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-label">Menu</div>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="/dashboard" class="active">
+                                <i class="fas fa-home"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                {% endfor %}
+                
+                <div class="nav-section">
+                    <div class="nav-section-label">Monitoraggio</div>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#">
+                                <i class="fas fa-graduation-cap"></i>
+                                Voti
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#">
+                                <i class="fas fa-calendar-check"></i>
+                                Presenze
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar">{{ user.nome[0]|upper }}{{ user.cognome[0]|upper if user.cognome else '' }}</div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.nome }} {{ user.cognome }}</div>
+                        <div class="user-role">Genitore</div>
+                    </div>
+                </div>
+                <a href="/logout" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Esci
+                </a>
             </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-header-top">
+                    <div>
+                        <h1 class="page-title">Dashboard Genitore</h1>
+                        <p class="page-subtitle">Monitoraggio rendimento scolastico</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% if studente %}
+            <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--accent);">
+                <div class="card-body" style="display: flex; align-items: center; gap: 16px;">
+                    <div class="list-avatar" style="width: 56px; height: 56px; font-size: 1.125rem; background: var(--accent); color: white; border: none;">
+                        {{ studente.nome[0]|upper }}{{ studente.cognome[0]|upper if studente.cognome else '' }}
+                    </div>
+                    <div>
+                        <div style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary);">{{ studente.nome }} {{ studente.cognome }}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-muted);">{{ studente.email }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Presenze</div>
+                    <div class="stat-value success">{{ presenze_stats.presenze or 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Assenze</div>
+                    <div class="stat-value danger">{{ presenze_stats.assenze or 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ritardi</div>
+                    <div class="stat-value warning">{{ presenze_stats.ritardi or 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Giustificate</div>
+                    <div class="stat-value accent">{{ presenze_stats.giustificate or 0 }}</div>
+                </div>
+            </div>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Medie per Materia</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if medie_materie %}
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            {% for m in medie_materie %}
+                            <div style="background: var(--bg-light); border-radius: 8px; padding: 16px; text-align: center;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">{{ m.materia }}</div>
+                                <div style="font-size: 1.75rem; font-weight: 700; {% if m.media >= 8 %}color: var(--success);{% elif m.media >= 7 %}color: var(--accent);{% elif m.media >= 6 %}color: var(--warning);{% else %}color: var(--danger);{% endif %}">
+                                    {{ m.media }}
+                                </div>
+                                <div style="font-size: 0.6875rem; color: var(--text-light); margin-top: 4px;">{{ m.num_voti }} voti</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <p>Nessun voto registrato</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ultimi Voti</h3>
+                    </div>
+                    <div class="card-body no-padding">
+                        {% if voti %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Materia</th>
+                                    <th>Voto</th>
+                                    <th>Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in voti %}
+                                <tr>
+                                    <td>{{ v.data.strftime('%d/%m/%Y') if v.data else '-' }}</td>
+                                    <td>{{ v.materia }}</td>
+                                    <td><strong>{{ v.voto }}</strong></td>
+                                    <td>{{ v.tipo_valutazione or '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>Nessun voto recente</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Registro Presenze</h3>
+                </div>
+                <div class="card-body no-padding">
+                    {% if ultime_presenze %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Stato</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in ultime_presenze %}
+                            <tr>
+                                <td>{{ p.data.strftime('%d/%m/%Y') if p.data else '-' }}</td>
+                                <td>
+                                    {% if p.presente %}
+                                        {% if p.ritardo %}
+                                        <span class="badge badge-warning">Ritardo</span>
+                                        {% else %}
+                                        <span class="badge badge-success">Presente</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if p.giustificato %}
+                                        <span class="badge badge-warning">Giustificata</span>
+                                        {% else %}
+                                        <span class="badge badge-danger">Assente</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td style="color: var(--text-muted);">{{ p.note or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar"></i>
+                        <p>Nessuna presenza registrata</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
             {% else %}
-            <div class="empty-state">
-                <i class="fas fa-book-open"></i>
-                <p>Nessun voto registrato</p>
+            <div class="card" style="border-left: 4px solid var(--warning);">
+                <div class="card-body" style="text-align: center; padding: 48px;">
+                    <i class="fas fa-user-slash" style="font-size: 3rem; color: var(--warning); opacity: 0.5; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Nessuno studente collegato</h3>
+                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Il tuo account non e ancora collegato a uno studente. Contatta la segreteria per collegare il profilo.</p>
+                </div>
             </div>
             {% endif %}
-        </div>
-
-        <div class="section">
-            <h3 class="section-title"><i class="fas fa-list"></i> Ultimi Voti</h3>
-            {% if voti %}
-            <table class="recent-table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Materia</th>
-                        <th>Voto</th>
-                        <th>Tipo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for v in voti %}
-                    <tr>
-                        <td>{{ v.data.strftime('%d/%m/%Y') if v.data else '-' }}</td>
-                        <td>{{ v.materia }}</td>
-                        <td><strong>{{ v.voto }}</strong></td>
-                        <td>{{ v.tipo_valutazione or '-' }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state">
-                <i class="fas fa-clipboard-list"></i>
-                <p>Nessun voto recente</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="section">
-            <h3 class="section-title"><i class="fas fa-calendar-check"></i> Registro Presenze</h3>
-            {% if ultime_presenze %}
-            <table class="recent-table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Stato</th>
-                        <th>Note</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in ultime_presenze %}
-                    <tr>
-                        <td>{{ p.data.strftime('%d/%m/%Y') if p.data else '-' }}</td>
-                        <td>
-                            {% if p.presente %}
-                                {% if p.ritardo %}
-                                <span class="badge badge-yellow">Ritardo</span>
-                                {% else %}
-                                <span class="badge badge-green">Presente</span>
-                                {% endif %}
-                            {% else %}
-                                {% if p.giustificato %}
-                                <span class="badge badge-yellow">Assente (Giust.)</span>
-                                {% else %}
-                                <span class="badge badge-red">Assente</span>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                        <td>{{ p.note or '-' }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state">
-                <i class="fas fa-calendar"></i>
-                <p>Nessuna presenza registrata</p>
-            </div>
-            {% endif %}
-        </div>
-
-        {% else %}
-        <div class="no-student">
-            <i class="fas fa-user-slash"></i>
-            <h3>Nessuno studente collegato</h3>
-            <p>Il tuo account non è ancora collegato a uno studente. Contatta la segreteria per collegare il profilo del tuo figlio/figlia.</p>
-        </div>
-        {% endif %}
+        </main>
     </div>
 </body>
 </html>

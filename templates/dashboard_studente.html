@@ -2,494 +2,142 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#003B73">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SKAILA">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Studente - SKAILA</title>
-    <link rel="manifest" href="/static/manifest.json">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/dashboard-premium.css" rel="stylesheet">
-    <link href="/static/css/mobile-first.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/circulating-avatars.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/dashboard-unified.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .gamification-widget {
-            background: linear-gradient(135deg, var(--color-blue-900) 0%, var(--color-blue-700) 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: var(--radius-xl);
-            border: none;
-        }
-        .xp-progress-bar {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: var(--radius-full);
-            height: 12px;
-            margin: 1rem 0;
-            overflow: hidden;
-        }
-        .xp-progress-fill {
-            background: var(--color-gold-400);
-            height: 100%;
-            border-radius: var(--radius-full);
-            transition: width 0.3s ease;
-        }
-        .level-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-full);
-            font-weight: var(--font-semibold);
-            font-size: var(--text-sm);
-        }
-        .streak-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        .grades-table {
-            width: 100%;
-            font-size: var(--text-sm);
-        }
-        .grades-table th {
-            text-align: left;
-            padding: 0.75rem 0.5rem;
-            font-weight: var(--font-semibold);
-            color: var(--text-muted);
-            font-size: var(--text-xs);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid var(--border-primary);
-        }
-        .grades-table td {
-            padding: 0.875rem 0.5rem;
-            border-bottom: 1px solid var(--border-secondary);
-        }
-        .grades-table tr:last-child td {
-            border-bottom: none;
-        }
+        .panel { display: none; }
+        .panel.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .nav-item a.panel-trigger { cursor: pointer; }
+        
         .grade-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 40px;
             height: 40px;
-            border-radius: var(--radius-full);
-            font-weight: var(--font-bold);
-            font-size: var(--text-base);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9375rem;
         }
-        .grade-badge.excellent {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--color-emerald-600);
+        .grade-badge.excellent { background: var(--success-light); color: var(--success); }
+        .grade-badge.good { background: rgba(37, 99, 235, 0.1); color: var(--accent); }
+        .grade-badge.pass { background: var(--warning-light); color: var(--warning); }
+        .grade-badge.fail { background: var(--danger-light); color: var(--danger); }
+        
+        .xp-card {
+            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
-        .grade-badge.good {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--color-blue-600);
-        }
-        .grade-badge.pass {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--color-gold-600);
-        }
-        .grade-badge.fail {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--color-ruby-600);
-        }
-        .ai-coach-preview {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.03) 100%);
-            border: 2px dashed rgba(139, 92, 246, 0.3);
-            border-radius: var(--radius-lg);
-            text-align: center;
-        }
-        .event-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        .event-item {
-            display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            transition: all 0.2s ease;
-        }
-        .event-item:hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-        .event-date {
-            text-align: center;
-            padding: 0.5rem;
-            background: var(--color-blue-50);
-            border-radius: var(--radius-md);
-            min-width: 50px;
-        }
-        .event-day {
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            color: var(--color-blue-800);
-        }
-        .event-month {
-            font-size: var(--text-xs);
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-        .subject-avg-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            transition: all 0.2s ease;
-        }
-        .subject-avg-card:hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-        .subject-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        .subject-icon.math { background: rgba(59, 130, 246, 0.1); color: var(--color-blue-600); }
-        .subject-icon.italian { background: rgba(239, 68, 68, 0.1); color: var(--color-ruby-600); }
-        .subject-icon.english { background: rgba(16, 185, 129, 0.1); color: var(--color-emerald-600); }
-        .subject-icon.history { background: rgba(245, 158, 11, 0.1); color: var(--color-gold-600); }
-        .subject-icon.science { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
-        .subject-icon.default { background: rgba(107, 114, 128, 0.1); color: var(--color-steel-600); }
-        .attendance-stat {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-        }
-        .attendance-stat-value {
-            font-size: var(--text-3xl);
-            font-weight: var(--font-extrabold);
-        }
-        .attendance-stat-value.present { color: var(--color-emerald-600); }
-        .attendance-stat-value.absent { color: var(--color-ruby-600); }
-        .attendance-stat-value.late { color: var(--color-gold-600); }
-        .attendance-stat-value.justified { color: var(--color-blue-600); }
-        .attendance-stat-label {
-            font-size: var(--text-xs);
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .chart-container {
-            position: relative;
-            height: 250px;
-            width: 100%;
-        }
-        .quick-links-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        .quick-link-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: none;
-        }
-        .quick-link-card:hover {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
-        }
-        .quick-link-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-full);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-        .quick-link-icon.blue { background: rgba(59, 130, 246, 0.1); color: var(--color-blue-600); }
-        .quick-link-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--color-emerald-600); }
-        .quick-link-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
-        .quick-link-icon.gold { background: rgba(245, 158, 11, 0.1); color: var(--color-gold-600); }
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-        }
-        .empty-state i {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .panel {
-            display: none;
-            opacity: 0;
-            transform: translateX(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .panel.panel-active {
-            display: block;
-            opacity: 1;
-            transform: translateX(0);
-            animation: panelSlideIn 0.3s ease forwards;
-        }
-        @keyframes panelSlideIn {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        .nav-link.panel-nav {
-            cursor: pointer;
-        }
-        .nav-link.panel-nav:not(.active):hover {
-            background: var(--bg-surface);
-            color: var(--color-blue-800);
-        }
-
-        .ai-chat-panel {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 150px);
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-radius: var(--radius-xl);
+        .xp-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 100px;
             overflow: hidden;
+            margin: 12px 0;
+        }
+        .xp-fill {
+            height: 100%;
+            background: #fbbf24;
+            border-radius: 100px;
+        }
+        
+        .ai-chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+            background: var(--bg-light);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-light);
         }
         .ai-chat-header {
-            background: linear-gradient(135deg, #003B73 0%, #0056a3 100%);
+            background: var(--accent);
             color: white;
-            padding: 1rem 1.5rem;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 59, 115, 0.3);
         }
-        .ai-header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .ai-bot-info h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .ai-bot-info .status {
-            font-size: 0.75rem;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(0.9); }
-        }
-        .xp-badge {
-            background: linear-gradient(135deg, #D4AF37, #f4d03f);
-            color: #1a1a1a;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-        .ai-chat-container {
+        .ai-messages {
             flex: 1;
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 1.5rem;
             overflow-y: auto;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-        }
-        .ai-welcome-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 1rem;
-        }
-        .ai-welcome-card .avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #003B73, #0056a3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2.5rem;
-            box-shadow: 0 8px 24px rgba(0, 59, 115, 0.3);
-        }
-        .ai-welcome-card h2 {
-            font-size: 1.5rem;
-            color: #111827;
-            margin-bottom: 0.5rem;
-        }
-        .ai-welcome-card p {
-            color: #6b7280;
-            margin-bottom: 0.5rem;
-        }
-        .xp-hint {
-            color: #D4AF37;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-        .gamification-stats {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e5e7eb;
-        }
-        .stat {
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #003B73;
-        }
-        .stat-label {
-            font-size: 0.7rem;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 0.25rem;
-        }
-        .ai-suggestions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .suggestion-btn {
-            background: white;
-            border: 2px solid #e2e8f0;
-            padding: 0.625rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #374151;
-        }
-        .suggestion-btn:hover {
-            background: #003B73;
-            color: white;
-            border-color: #003B73;
-            transform: translateY(-2px);
-        }
-        .ai-messages-area {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            gap: 16px;
         }
         .ai-message {
             max-width: 80%;
-            padding: 1rem 1.25rem;
-            border-radius: 18px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 0.9375rem;
             line-height: 1.6;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         .ai-message.user {
-            background: linear-gradient(135deg, #003B73, #0056a3);
+            background: var(--accent);
             color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 6px;
+            border-bottom-right-radius: 4px;
         }
-        .ai-message.ai {
+        .ai-message.bot {
             background: white;
-            color: #1f2937;
+            color: var(--text-primary);
             align-self: flex-start;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-light);
+            border-bottom-left-radius: 4px;
         }
-        .ai-message .xp-reward {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            background: linear-gradient(135deg, #D4AF37, #f4d03f);
-            color: #1a1a1a;
-            padding: 0.375rem 0.875rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-top: 0.75rem;
+        .ai-input-area {
+            padding: 16px 24px;
+            background: white;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 12px;
         }
-        .ai-message .rank-up {
-            display: block;
-            background: linear-gradient(135deg, #10b981, #059669);
+        .ai-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid var(--border-light);
+            border-radius: 100px;
+            font-size: 0.9375rem;
+            outline: none;
+            font-family: inherit;
+        }
+        .ai-input:focus { border-color: var(--accent); }
+        .ai-send {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
             color: white;
-            padding: 0.875rem 1rem;
-            border-radius: 12px;
-            margin-top: 1rem;
-            font-weight: 600;
-            text-align: center;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: background 0.2s;
         }
+        .ai-send:hover { background: var(--accent-hover); }
+        
         .typing-indicator {
             display: none;
             align-self: flex-start;
             background: white;
-            padding: 1rem 1.25rem;
-            border-radius: 18px;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 14px 18px;
+            border-radius: 16px;
+            border: 1px solid var(--border-light);
         }
-        .typing-indicator.active {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
+        .typing-indicator.active { display: flex; gap: 4px; }
         .typing-indicator span {
             width: 8px;
             height: 8px;
-            background: #94a3b8;
+            background: var(--text-muted);
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out;
         }
@@ -499,1019 +147,403 @@
             0%, 80%, 100% { transform: scale(0.6); }
             40% { transform: scale(1); }
         }
-        .ai-input-container {
-            background: white;
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #e2e8f0;
-        }
-        .ai-input-wrapper {
-            max-width: 900px;
-            margin: 0 auto;
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-        }
-        .ai-chat-input {
-            flex: 1;
-            padding: 1rem 1.25rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 25px;
-            font-size: 1rem;
-            transition: all 0.2s;
-            outline: none;
-            font-family: inherit;
-        }
-        .ai-chat-input:focus {
-            border-color: #003B73;
-            box-shadow: 0 0 0 4px rgba(0, 59, 115, 0.1);
-        }
-        .ai-send-btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #003B73, #0056a3);
-            border: none;
-            color: white;
-            font-size: 1.25rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 59, 115, 0.3);
-        }
-        .ai-send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 59, 115, 0.4);
-        }
-        .ai-send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .xp-toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: linear-gradient(135deg, #D4AF37, #f4d03f);
-            color: #1a1a1a;
-            padding: 0.875rem 1.75rem;
-            border-radius: 25px;
-            font-weight: 700;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
-        }
-        .xp-toast.active {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            animation: toastIn 0.4s ease forwards;
-        }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.9); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-        }
-
-        .calendario-panel {
-            padding: 0;
-        }
-        .calendario-header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 1.5rem 2rem;
-            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        }
-        .calendario-content {
-            padding: 1.5rem;
-        }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 2rem;
-        }
-        .calendar-day-header {
-            text-align: center;
-            font-weight: var(--font-semibold);
-            color: var(--text-muted);
-            font-size: var(--text-xs);
-            padding: 0.5rem;
-            text-transform: uppercase;
-        }
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-md);
-            font-size: var(--text-sm);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .calendar-day:hover {
-            background: var(--bg-surface);
-        }
-        .calendar-day.today {
-            background: linear-gradient(135deg, #003B73, #0056a3);
-            color: white;
-            font-weight: var(--font-bold);
-        }
-        .calendar-day.has-event::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            width: 6px;
-            height: 6px;
-            background: var(--color-ruby-500);
-            border-radius: 50%;
-        }
-        .calendar-day.other-month {
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
-
-        .gamification-panel {
-            padding: 0;
-        }
-        .gamification-header {
-            background: linear-gradient(135deg, #D4AF37 0%, #f4d03f 100%);
-            color: #1a1a1a;
-            padding: 1.5rem 2rem;
-            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        }
-        .gamification-content {
-            padding: 1.5rem;
-        }
-        .achievement-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            margin-bottom: 0.75rem;
-            transition: all 0.2s ease;
-        }
-        .achievement-card:hover {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        .achievement-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-full);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        .achievement-icon.gold { background: linear-gradient(135deg, #D4AF37, #f4d03f); color: #1a1a1a; }
-        .achievement-icon.silver { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #1a1a1a; }
-        .achievement-icon.bronze { background: linear-gradient(135deg, #cd7f32, #dba56b); color: #1a1a1a; }
-        .achievement-locked {
-            opacity: 0.5;
-            filter: grayscale(1);
-        }
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            margin-bottom: 0.5rem;
-        }
-        .leaderboard-rank {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-full);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: var(--font-bold);
-            font-size: var(--text-sm);
-        }
-        .leaderboard-rank.first { background: linear-gradient(135deg, #D4AF37, #f4d03f); color: #1a1a1a; }
-        .leaderboard-rank.second { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #1a1a1a; }
-        .leaderboard-rank.third { background: linear-gradient(135deg, #cd7f32, #dba56b); color: white; }
-        .leaderboard-rank.other { background: var(--bg-surface); border: 1px solid var(--border-primary); }
-
-        @media (max-width: 1024px) {
-            .bento-grid.hero-layout,
-            .bento-grid.balanced-layout {
-                grid-template-columns: 1fr;
-            }
-            .bento-grid.quad-layout {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (max-width: 768px) {
-            .bento-grid.quad-layout {
-                grid-template-columns: 1fr;
-            }
-            .quick-links-grid {
-                grid-template-columns: 1fr;
-            }
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .header-right {
-                width: 100%;
-            }
-            .search-bar {
-                min-width: 100%;
-            }
-            .ai-chat-panel {
-                height: calc(100vh - 200px);
-            }
-            .ai-message { max-width: 90%; }
-            .gamification-stats { gap: 1rem; flex-wrap: wrap; }
-        }
     </style>
 </head>
-<body class="dashboard-page">
-    <div class="dashboard-container" id="dashboardContainer">
-        <aside class="dashboard-sidebar" id="sidebar">
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-brand">SKAILA</div>
-                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <a href="/" class="sidebar-logo">SKAILA</a>
             </div>
+            
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-label">Menu</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a class="nav-link panel-nav active" data-panel="dashboard">
-                                <span class="nav-icon"><i class="fas fa-home"></i></span>
-                                <span class="nav-text">Dashboard</span>
+                            <a href="#" class="panel-trigger active" data-panel="dashboard">
+                                <i class="fas fa-home"></i>
+                                Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link panel-nav" data-panel="calendario">
-                                <span class="nav-icon"><i class="fas fa-calendar"></i></span>
-                                <span class="nav-text">Calendario</span>
+                            <a href="#" class="panel-trigger" data-panel="ai-coach">
+                                <i class="fas fa-robot"></i>
+                                AI Coach
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/registro" class="nav-link {% if not enabled_features.get('registro_elettronico', True) %}disabled{% endif %}">
-                                <span class="nav-icon"><i class="fas fa-book"></i></span>
-                                <span class="nav-text">Registro</span>
+                            <a href="#" class="panel-trigger" data-panel="calendario">
+                                <i class="fas fa-calendar"></i>
+                                Calendario
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/chat" class="nav-link">
-                                <span class="nav-icon">
-                                    <div id="messaging-avatars-container" class="circulating-avatars-container" style="display: inline-block;">
-                                        <i class="fas fa-comments"></i>
-                                    </div>
-                                </span>
-                                <span class="nav-text">Messaggi</span>
+                            <a href="#" class="panel-trigger" data-panel="gamification">
+                                <i class="fas fa-trophy"></i>
+                                Gamification
                             </a>
                         </li>
                     </ul>
                 </div>
+                
                 <div class="nav-section">
-                    <div class="nav-section-label">Strumenti</div>
+                    <div class="nav-section-label">Altro</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a class="nav-link panel-nav" data-panel="ai-coach">
-                                <span class="nav-icon"><i class="fas fa-robot"></i></span>
-                                <span class="nav-text">AI Coach</span>
+                            <a href="/registro">
+                                <i class="fas fa-book"></i>
+                                Registro
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/materiali" class="nav-link {% if not enabled_features.get('materiali_didattici', True) %}disabled{% endif %}">
-                                <span class="nav-icon"><i class="fas fa-folder"></i></span>
-                                <span class="nav-text">Materiali</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link panel-nav" data-panel="gamification">
-                                <span class="nav-icon"><i class="fas fa-trophy"></i></span>
-                                <span class="nav-text">Gamification</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/skaila-connect" class="nav-link {% if not enabled_features.get('skaila_connect', True) %}disabled{% endif %}">
-                                <span class="nav-icon"><i class="fas fa-briefcase"></i></span>
-                                <span class="nav-text">SKAILA Connect</span>
+                            <a href="/chat">
+                                <i class="fas fa-comments"></i>
+                                Messaggi
                             </a>
                         </li>
                     </ul>
                 </div>
             </nav>
+            
             <div class="sidebar-footer">
-                <div class="user-profile-card">
-                    <div class="user-avatar">
-                        {{ user.nome[0] if user and user.nome else 'S' }}{{ user.cognome[0] if user and user.cognome else 'K' }}
-                    </div>
-                    <div class="user-details">
+                <div class="user-card">
+                    <div class="user-avatar">{{ user.nome[0]|upper }}{{ user.cognome[0]|upper if user.cognome else '' }}</div>
+                    <div class="user-info">
                         <div class="user-name">{{ user.nome }} {{ user.cognome }}</div>
-                        <div class="user-role">Studente{% if user.classe %} - {{ user.classe }}{% endif %}</div>
+                        <div class="user-role">Studente</div>
                     </div>
                 </div>
                 <a href="/logout" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Esci</span>
+                    Esci
                 </a>
             </div>
         </aside>
-
-        <main class="dashboard-main">
-            <div class="panel panel-active" id="panel-dashboard">
-                <div class="dashboard-header">
-                    <div class="header-left">
-                        <h1 class="page-title">Ciao, {{ user.nome }}! 👋</h1>
-                        <p class="page-subtitle">Ecco il tuo andamento scolastico</p>
-                    </div>
-                    <div class="header-right">
-                        <div class="search-bar">
-                            <i class="fas fa-search" style="color: var(--text-muted);"></i>
-                            <input type="text" placeholder="Cerca..." />
-                        </div>
-                        <button class="notifications-btn">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">{{ stats.messages_today if stats.messages_today else '0' }}</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bento-grid hero-layout">
-                    <div class="gamification-widget">
-                        <div class="card-header" style="border-color: rgba(255,255,255,0.2);">
-                            <h2 class="card-title" style="color: white;">
-                                <i class="fas fa-star"></i>
-                                Il Tuo Progresso
-                            </h2>
-                            <a class="card-action panel-nav-link" data-panel="gamification" style="color: rgba(255,255,255,0.9); cursor: pointer;">Dettagli →</a>
-                        </div>
-                        <div class="level-badge">
-                            <i class="fas fa-trophy"></i>
-                            Livello {{ gamification.profile.current_level if gamification and gamification.profile else stats.current_level if stats else 1 }}
-                        </div>
-                        <div class="xp-progress-bar">
-                            {% set progress = gamification.profile.progress_percentage if gamification and gamification.profile else 35 %}
-                            <div class="xp-progress-fill" style="width: {{ progress }}%;"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                            <span style="font-size: var(--text-sm); opacity: 0.9;">
-                                {{ gamification.profile.total_xp if gamification and gamification.profile else stats.total_xp if stats else 0 }} XP
-                            </span>
-                            <span style="font-size: var(--text-sm); font-weight: var(--font-semibold);">
-                                {{ progress }}%
-                            </span>
-                        </div>
-                        <div class="streak-indicator">
-                            <span style="font-size: 1.5rem;">🔥</span>
-                            <span style="font-size: var(--text-sm); opacity: 0.9;">
-                                {{ gamification.profile.current_streak if gamification and gamification.profile else stats.current_streak if stats else 0 }} giorni di streak!
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-chart-pie"></i>
-                                Statistiche Presenze
-                            </h2>
-                            <a href="/registro" class="card-action">Dettagli →</a>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
-                            <div class="attendance-stat">
-                                <div class="attendance-stat-value present">{{ stats.presenze_percentuale if stats else 0 }}%</div>
-                                <div class="attendance-stat-label">Presenze</div>
-                            </div>
-                            <div class="attendance-stat">
-                                <div class="attendance-stat-value absent">{{ stats.assenze if stats else 0 }}</div>
-                                <div class="attendance-stat-label">Assenze</div>
-                            </div>
-                            <div class="attendance-stat">
-                                <div class="attendance-stat-value justified">{{ stats.assenze_giustificate if stats else 0 }}</div>
-                                <div class="attendance-stat-label">Giustificate</div>
-                            </div>
-                            <div class="attendance-stat">
-                                <div class="attendance-stat-value late">{{ stats.ritardi if stats else 0 }}</div>
-                                <div class="attendance-stat-label">Ritardi</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 1.5rem;">
-                            <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); margin-bottom: 1rem; color: var(--text-primary);">
-                                Tasso di Frequenza
-                            </h3>
-                            <div style="background: var(--bg-surface); height: 12px; border-radius: var(--radius-full); overflow: hidden;">
-                                {% set freq_pct = stats.presenze_percentuale if stats else 0 %}
-                                <div style="background: {% if freq_pct >= 90 %}var(--color-emerald-500){% elif freq_pct >= 75 %}var(--color-gold-500){% else %}var(--color-ruby-500){% endif %}; width: {{ freq_pct }}%; height: 100%; transition: width 0.5s ease;"></div>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">0%</span>
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">{{ stats.giorni_totali if stats else 0 }} giorni registrati</span>
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">100%</span>
-                            </div>
+        
+        <main class="main-content">
+            <!-- DASHBOARD PANEL -->
+            <div id="panel-dashboard" class="panel active">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title">Ciao, {{ user.nome }}</h1>
+                            <p class="page-subtitle">Ecco il tuo riepilogo</p>
                         </div>
                     </div>
                 </div>
-
-                <div class="bento-grid balanced-layout">
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-graduation-cap"></i>
-                                Ultimi Voti
-                            </h2>
-                            <a href="/registro" class="card-action">Vedi tutti →</a>
-                        </div>
-                        {% if voti and voti|length > 0 %}
-                        <table class="grades-table">
-                            <thead>
-                                <tr>
-                                    <th>Materia</th>
-                                    <th>Voto</th>
-                                    <th>Tipo</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for voto in voti[:5] %}
-                                <tr>
-                                    <td style="font-weight: var(--font-medium);">{{ voto.materia }}</td>
-                                    <td>
-                                        {% set v = voto.voto|float %}
-                                        <span class="grade-badge {% if v >= 8 %}excellent{% elif v >= 7 %}good{% elif v >= 6 %}pass{% else %}fail{% endif %}">
-                                            {{ voto.voto }}
-                                        </span>
-                                    </td>
-                                    <td style="font-size: var(--text-xs); color: var(--text-muted);">
-                                        {{ voto.tipo_valutazione|capitalize if voto.tipo_valutazione else '-' }}
-                                    </td>
-                                    <td style="color: var(--text-muted); font-size: var(--text-xs);">
-                                        {{ voto.data.strftime('%d %b') if voto.data else '-' }}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        {% else %}
-                        <div class="empty-state">
-                            <i class="fas fa-book-open"></i>
-                            <p>Nessun voto registrato</p>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-chart-bar"></i>
-                                Medie per Materia
-                            </h2>
-                        </div>
-                        {% if medie_materie and medie_materie|length > 0 %}
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 300px; overflow-y: auto;">
-                            {% for m in medie_materie %}
-                            {% set subject_lower = m.materia|lower %}
-                            {% set icon_class = 'math' if 'matem' in subject_lower else 'italian' if 'italian' in subject_lower else 'english' if 'inglese' in subject_lower else 'history' if 'storia' in subject_lower else 'science' if 'scienz' in subject_lower or 'fisica' in subject_lower or 'chim' in subject_lower else 'default' %}
-                            {% set icon = 'fas fa-calculator' if 'matem' in subject_lower else 'fas fa-book' if 'italian' in subject_lower else 'fas fa-globe' if 'inglese' in subject_lower else 'fas fa-landmark' if 'storia' in subject_lower else 'fas fa-flask' if 'scienz' in subject_lower or 'fisica' in subject_lower or 'chim' in subject_lower else 'fas fa-bookmark' %}
-                            <div class="subject-avg-card">
-                                <div class="subject-icon {{ icon_class }}">
-                                    <i class="{{ icon }}"></i>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ m.materia }}</div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">{{ m.num_voti }} vot{{ 'o' if m.num_voti == 1 else 'i' }}</div>
-                                </div>
-                                {% set avg = m.media|float %}
-                                <div class="grade-badge {% if avg >= 8 %}excellent{% elif avg >= 7 %}good{% elif avg >= 6 %}pass{% else %}fail{% endif %}">
-                                    {{ "%.1f"|format(avg) }}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="empty-state">
-                            <i class="fas fa-chart-line"></i>
-                            <p>Nessuna media disponibile</p>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-calendar-alt"></i>
-                                Prossimi Eventi
-                            </h2>
-                            <a class="card-action panel-nav-link" data-panel="calendario" style="cursor: pointer;">Vedi tutto →</a>
-                        </div>
-                        {% if upcoming_events and upcoming_events|length > 0 %}
-                        <div class="event-list">
-                            {% for event in upcoming_events %}
-                            <div class="event-item">
-                                <div class="event-date">
-                                    <div class="event-day">{{ event.start_datetime.strftime('%d') if event.start_datetime else '--' }}</div>
-                                    <div class="event-month">{{ event.start_datetime.strftime('%b') if event.start_datetime else '--' }}</div>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                        {{ event.title }}
-                                    </div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                        {% if event.event_type == 'test' %}
-                                        <i class="fas fa-file-alt" style="color: var(--color-ruby-500);"></i> Verifica
-                                        {% elif event.event_type == 'homework' %}
-                                        <i class="fas fa-tasks" style="color: var(--color-gold-500);"></i> Compito
-                                        {% else %}
-                                        <i class="fas fa-calendar-check"></i> {{ event.event_type|capitalize if event.event_type else 'Evento' }}
-                                        {% endif %}
-                                        {% if event.start_datetime %}
-                                         - {{ event.start_datetime.strftime('%H:%M') }}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="empty-state">
-                            <i class="fas fa-calendar-check"></i>
-                            <p>Nessun evento in programma</p>
-                            <a class="panel-nav-link" data-panel="calendario" style="color: var(--color-blue-600); font-size: var(--text-sm); text-decoration: none; cursor: pointer;">Vai al calendario →</a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="bento-grid hero-layout">
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-chart-line"></i>
-                                Andamento Voti
-                            </h2>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="gradesChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-robot"></i>
-                                AI Coach
-                            </h2>
-                            <a class="card-action panel-nav-link" data-panel="ai-coach" style="cursor: pointer;">Apri Chat →</a>
-                        </div>
-                        <div class="ai-coach-preview">
-                            <i class="fas fa-robot" style="font-size: 3rem; color: #8B5CF6; margin-bottom: 1rem;"></i>
-                            <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.5rem;">
-                                Ciao {{ user.nome }}!
-                            </h3>
-                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: 1.5rem;">
-                                {% if stats and stats.media_voti and stats.media_voti < 6 %}
-                                Vedo che hai bisogno di supporto in alcune materie. Vuoi che ti aiuti a studiare?
-                                {% elif stats and stats.media_voti and stats.media_voti >= 8 %}
-                                Ottimo lavoro! Continua cosi. Posso aiutarti a prepararti per le prossime verifiche.
-                                {% else %}
-                                Hai bisogno di aiuto con i compiti o vuoi ripassare qualche argomento?
-                                {% endif %}
-                            </p>
-                            <button class="btn-quick-action panel-nav-link" data-panel="ai-coach" style="cursor: pointer; background: linear-gradient(135deg, #8B5CF6, #a855f7); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: var(--radius-lg); font-weight: var(--font-semibold);">
-                                <i class="fas fa-comments"></i>
-                                Inizia Chat
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bento-grid quad-layout">
+                
+                <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-value" style="color: {% if stats and stats.media_voti >= 7 %}var(--color-emerald-600){% elif stats and stats.media_voti >= 6 %}var(--color-gold-600){% else %}var(--color-ruby-600){% endif %};">
-                            {{ "%.1f"|format(stats.media_voti) if stats and stats.media_voti else '-.--' }}
-                        </div>
                         <div class="stat-label">Media Generale</div>
-                        <div class="stat-change {% if stats and stats.media_voti >= 6 %}positive{% else %}negative{% endif %}">
-                            <i class="fas fa-{% if stats and stats.media_voti >= 6 %}check{% else %}arrow-down{% endif %}"></i>
-                            {{ stats.totale_voti if stats else 0 }} voti
-                        </div>
+                        <div class="stat-value {% if media_generale >= 7 %}success{% elif media_generale >= 6 %}warning{% else %}danger{% endif %}">{{ media_generale|round(1) if media_generale else 'N/A' }}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" style="color: {% if stats and stats.presenze_percentuale >= 90 %}var(--color-emerald-600){% elif stats and stats.presenze_percentuale >= 75 %}var(--color-gold-600){% else %}var(--color-ruby-600){% endif %};">
-                            {{ stats.presenze_percentuale if stats else 0 }}%
-                        </div>
                         <div class="stat-label">Frequenza</div>
-                        <div class="stat-change {% if stats and stats.presenze_percentuale >= 75 %}positive{% else %}negative{% endif %}">
-                            <i class="fas fa-{% if stats and stats.presenze_percentuale >= 75 %}check{% else %}exclamation{% endif %}"></i>
-                            {% if stats and stats.presenze_percentuale >= 90 %}Ottimo{% elif stats and stats.presenze_percentuale >= 75 %}Buono{% else %}Da migliorare{% endif %}
-                        </div>
+                        <div class="stat-value accent">{{ frequenza_percentuale|round(0)|int if frequenza_percentuale else 0 }}%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">{{ stats.total_xp if stats else 0 }}</div>
                         <div class="stat-label">XP Totali</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-star"></i>
-                            Livello {{ stats.current_level if stats else 1 }}
-                        </div>
+                        <div class="stat-value" style="color: #f59e0b;">{{ gamification.total_xp if gamification else 0 }}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">{{ stats.current_streak if stats else 0 }}</div>
-                        <div class="stat-label">Giorni Streak</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-fire"></i>
-                            Continua cosi!
+                        <div class="stat-label">Streak</div>
+                        <div class="stat-value">{{ gamification.streak if gamification else 0 }} gg</div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Ultimi Voti</h3>
+                            <a href="/registro" class="card-action">Vedi tutti</a>
+                        </div>
+                        <div class="card-body no-padding">
+                            {% if voti %}
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Materia</th>
+                                        <th>Voto</th>
+                                        <th>Tipo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for v in voti[:5] %}
+                                    <tr>
+                                        <td>{{ v.data.strftime('%d/%m') if v.data else '-' }}</td>
+                                        <td>{{ v.materia }}</td>
+                                        <td>
+                                            <span class="grade-badge {% if v.voto >= 8 %}excellent{% elif v.voto >= 7 %}good{% elif v.voto >= 6 %}pass{% else %}fail{% endif %}">
+                                                {{ v.voto }}
+                                            </span>
+                                        </td>
+                                        <td style="color: var(--text-muted);">{{ v.tipo_valutazione or '-' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Nessun voto registrato</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Medie per Materia</h3>
+                        </div>
+                        <div class="card-body">
+                            {% if medie_materie %}
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                {% for m in medie_materie[:5] %}
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <div style="width: 100px; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary);">{{ m.materia }}</div>
+                                    <div style="flex: 1;">
+                                        <div class="progress-bar" style="height: 8px;">
+                                            <div class="progress-fill {% if m.media >= 7 %}success{% elif m.media >= 6 %}warning{% else %}danger{% endif %}" style="width: {{ (m.media / 10 * 100)|round }}%;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="font-weight: 700; color: {% if m.media >= 7 %}var(--success){% elif m.media >= 6 %}var(--warning){% else %}var(--danger){% endif %};">{{ m.media }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-book-open"></i>
+                                <p>Nessuna media disponibile</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-
-                <div class="bento-grid hero-layout">
-                    <div class="bento-card">
+                
+                <div class="content-grid">
+                    <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-bolt"></i>
-                                Azioni Rapide
-                            </h2>
+                            <h3 class="card-title">Andamento Voti</h3>
                         </div>
-                        <div class="quick-links-grid">
-                            <a href="/registro" class="quick-link-card">
-                                <div class="quick-link-icon blue">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                                <span style="font-weight: var(--font-semibold);">Registro</span>
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">Voti e presenze</span>
-                            </a>
-                            <button class="quick-link-card panel-nav-link" data-panel="calendario">
-                                <div class="quick-link-icon green">
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <span style="font-weight: var(--font-semibold);">Calendario</span>
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">Lezioni ed eventi</span>
-                            </button>
-                            <button class="quick-link-card panel-nav-link" data-panel="ai-coach">
-                                <div class="quick-link-icon purple">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <span style="font-weight: var(--font-semibold);">AI Coach</span>
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">Aiuto studio</span>
-                            </button>
-                            <button class="quick-link-card panel-nav-link" data-panel="gamification">
-                                <div class="quick-link-icon gold">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <span style="font-weight: var(--font-semibold);">Gamification</span>
-                                <span style="font-size: var(--text-xs); color: var(--text-muted);">Sfide e premi</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {% if companies and companies|length > 0 %}
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-briefcase"></i>
-                                SKAILA Connect
-                            </h2>
-                            <a href="/skaila-connect" class="card-action">Esplora →</a>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            {% for company in companies %}
-                            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-lg);">
-                                <div style="width: 48px; height: 48px; background: var(--color-blue-100); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-building" style="color: var(--color-blue-600);"></i>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ company.nome }}</div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">{{ company.settore }} - {{ company.citta }}</div>
-                                </div>
-                                <a href="/company/{{ company.id }}" style="color: var(--color-blue-600); font-size: var(--text-sm);">
-                                    <i class="fas fa-arrow-right"></i>
-                                </a>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="gradesChart"></canvas>
                             </div>
-                            {% endfor %}
                         </div>
                     </div>
-                    {% endif %}
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Presenze</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                                <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--success);">{{ presenze_stats.presenze or 0 }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Presenze</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--danger);">{{ presenze_stats.assenze or 0 }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Assenze</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">{{ presenze_stats.ritardi or 0 }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Ritardi</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">{{ presenze_stats.giustificate or 0 }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Giustificate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="panel" id="panel-ai-coach">
-                <div class="dashboard-header">
-                    <div class="header-left">
-                        <h1 class="page-title"><i class="fas fa-robot"></i> AI Coach</h1>
-                        <p class="page-subtitle">Il tuo tutor AI personale</p>
-                    </div>
-                    <div class="header-right">
-                        <button class="panel-nav-link notifications-btn" data-panel="dashboard" style="cursor: pointer;">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
+            
+            <!-- AI COACH PANEL -->
+            <div id="panel-ai-coach" class="panel">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title">AI Coach</h1>
+                            <p class="page-subtitle">Il tuo tutor personale</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a1a1a; padding: 8px 16px; border-radius: 100px; font-weight: 700; font-size: 0.875rem;">
+                            <i class="fas fa-star"></i> <span id="chatXP">{{ gamification.total_xp if gamification else 0 }}</span> XP
+                        </div>
                     </div>
                 </div>
-
-                <div class="ai-chat-panel">
+                
+                <div class="ai-chat-container">
                     <div class="ai-chat-header">
-                        <div class="ai-header-left">
-                            <div class="ai-bot-info">
-                                <h3><i class="fas fa-robot"></i> SKAILA Coach</h3>
-                                <div class="status">
-                                    <span class="status-dot"></span>
-                                    <span id="ai-status">Online</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">SKAILA AI Coach</div>
+                                <div style="font-size: 0.75rem; opacity: 0.8;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 4px;"></span>
+                                    Online
                                 </div>
                             </div>
-                        </div>
-                        <div class="xp-badge" id="session-xp">
-                            <i class="fas fa-star"></i>
-                            <span>+0 XP</span>
                         </div>
                     </div>
-
-                    <div class="ai-chat-container">
-                        <div class="ai-welcome-card" id="ai-welcome-card">
-                            <div class="avatar">
-                                <i class="fas fa-robot" style="color: white;"></i>
+                    <div class="ai-messages" id="chatMessages">
+                        <div style="text-align: center; padding: 32px;">
+                            <div style="width: 80px; height: 80px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 2rem; color: white;">
+                                <i class="fas fa-robot"></i>
                             </div>
-                            <h2>Ciao {{ user.nome }}!</h2>
-                            <p>Sono SKAILA Coach, il tuo tutor AI personale.</p>
-                            <p class="xp-hint"><i class="fas fa-coins"></i> Ogni interazione ti fa guadagnare XP!</p>
-                            <div class="gamification-stats">
-                                <div class="stat">
-                                    <div class="stat-value" id="stat-rank">Livello {{ stats.current_level if stats else 1 }}</div>
-                                    <div class="stat-label">Rango</div>
-                                </div>
-                                <div class="stat">
-                                    <div class="stat-value" id="stat-xp">{{ stats.total_xp if stats else 0 }}</div>
-                                    <div class="stat-label">XP Totali</div>
-                                </div>
-                                <div class="stat">
-                                    <div class="stat-value" id="stat-streak">{{ stats.current_streak if stats else 0 }}</div>
-                                    <div class="stat-label">Streak</div>
-                                </div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Ciao {{ user.nome }}!</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 16px;">Sono il tuo AI Coach personale. Chiedimi qualsiasi cosa!</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                                <button class="suggestion-btn" onclick="sendSuggestion('Spiegami le equazioni di secondo grado')">Equazioni 2° grado</button>
+                                <button class="suggestion-btn" onclick="sendSuggestion('Come si analizza un testo poetico?')">Analisi testo</button>
+                                <button class="suggestion-btn" onclick="sendSuggestion('Aiutami a studiare storia')">Aiuto studio</button>
                             </div>
                         </div>
-
-                        <div class="ai-suggestions" id="ai-suggestions">
-                            <button class="suggestion-btn" onclick="useSuggestion(this)">Aiutami con i compiti di matematica</button>
-                            <button class="suggestion-btn" onclick="useSuggestion(this)">Spiegami la Seconda Guerra Mondiale</button>
-                            <button class="suggestion-btn" onclick="useSuggestion(this)">Come posso migliorare in inglese?</button>
-                            <button class="suggestion-btn" onclick="useSuggestion(this)">Quiz veloce di storia</button>
-                        </div>
-
-                        <div class="ai-messages-area" id="ai-messages"></div>
-
-                        <div class="typing-indicator" id="typing">
+                        <div class="typing-indicator" id="typingIndicator">
                             <span></span><span></span><span></span>
                         </div>
                     </div>
-
-                    <div class="ai-input-container">
-                        <div class="ai-input-wrapper">
-                            <input type="text" class="ai-chat-input" id="ai-chat-input" 
-                                   placeholder="Scrivi un messaggio..." autocomplete="off">
-                            <button class="ai-send-btn" id="ai-send-btn">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="panel" id="panel-calendario">
-                <div class="dashboard-header">
-                    <div class="header-left">
-                        <h1 class="page-title"><i class="fas fa-calendar"></i> Calendario</h1>
-                        <p class="page-subtitle">I tuoi impegni e scadenze</p>
-                    </div>
-                    <div class="header-right">
-                        <button class="panel-nav-link notifications-btn" data-panel="dashboard" style="cursor: pointer;">
-                            <i class="fas fa-arrow-left"></i>
+                    <div class="ai-input-area">
+                        <input type="text" class="ai-input" id="chatInput" placeholder="Scrivi un messaggio..." onkeypress="if(event.key==='Enter')sendMessage()">
+                        <button class="ai-send" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </div>
-
-                <div class="bento-grid hero-layout">
-                    <div class="bento-card calendario-panel">
-                        <div class="calendario-header">
-                            <h2 style="margin: 0; font-size: 1.5rem;"><i class="fas fa-calendar-alt"></i> Dicembre 2025</h2>
-                            <p style="margin: 0.5rem 0 0; opacity: 0.9;">I tuoi prossimi impegni</p>
-                        </div>
-                        <div class="calendario-content">
-                            <div class="calendar-grid">
-                                <div class="calendar-day-header">Lun</div>
-                                <div class="calendar-day-header">Mar</div>
-                                <div class="calendar-day-header">Mer</div>
-                                <div class="calendar-day-header">Gio</div>
-                                <div class="calendar-day-header">Ven</div>
-                                <div class="calendar-day-header">Sab</div>
-                                <div class="calendar-day-header">Dom</div>
-                                <div class="calendar-day today">1</div>
-                                <div class="calendar-day">2</div>
-                                <div class="calendar-day has-event">3</div>
-                                <div class="calendar-day">4</div>
-                                <div class="calendar-day has-event">5</div>
-                                <div class="calendar-day">6</div>
-                                <div class="calendar-day">7</div>
-                                <div class="calendar-day has-event">8</div>
-                                <div class="calendar-day">9</div>
-                                <div class="calendar-day">10</div>
-                                <div class="calendar-day">11</div>
-                                <div class="calendar-day has-event">12</div>
-                                <div class="calendar-day">13</div>
-                                <div class="calendar-day">14</div>
-                                <div class="calendar-day">15</div>
-                                <div class="calendar-day">16</div>
-                                <div class="calendar-day">17</div>
-                                <div class="calendar-day">18</div>
-                                <div class="calendar-day">19</div>
-                                <div class="calendar-day">20</div>
-                                <div class="calendar-day">21</div>
-                            </div>
+            </div>
+            
+            <!-- CALENDARIO PANEL -->
+            <div id="panel-calendario" class="panel">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title">Calendario</h1>
+                            <p class="page-subtitle">I tuoi impegni scolastici</p>
                         </div>
                     </div>
-
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-list"></i>
-                                Prossimi Eventi
-                            </h2>
-                        </div>
-                        {% if upcoming_events and upcoming_events|length > 0 %}
-                        <div class="event-list">
-                            {% for event in upcoming_events %}
-                            <div class="event-item">
-                                <div class="event-date">
-                                    <div class="event-day">{{ event.start_datetime.strftime('%d') if event.start_datetime else '--' }}</div>
-                                    <div class="event-month">{{ event.start_datetime.strftime('%b') if event.start_datetime else '--' }}</div>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                        {{ event.title }}
-                                    </div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                        {{ event.description if event.description else '' }}
-                                    </div>
-                                </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Prossimi Eventi</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if eventi %}
+                        {% for e in eventi %}
+                        <div class="list-item">
+                            <div style="text-align: center; min-width: 56px; padding: 12px; background: var(--bg-light); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">{{ e.data.day if e.data else '-' }}</div>
+                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">{{ e.data.strftime('%b') if e.data else '' }}</div>
                             </div>
-                            {% endfor %}
+                            <div class="list-content">
+                                <div class="list-title">{{ e.titolo }}</div>
+                                <div class="list-subtitle">{{ e.descrizione or '' }}</div>
+                            </div>
                         </div>
+                        {% endfor %}
                         {% else %}
                         <div class="empty-state">
-                            <i class="fas fa-calendar-check"></i>
+                            <i class="fas fa-calendar"></i>
                             <p>Nessun evento in programma</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
-
-            <div class="panel" id="panel-gamification">
-                <div class="dashboard-header">
-                    <div class="header-left">
-                        <h1 class="page-title"><i class="fas fa-trophy"></i> Gamification</h1>
-                        <p class="page-subtitle">I tuoi progressi e obiettivi</p>
-                    </div>
-                    <div class="header-right">
-                        <button class="panel-nav-link notifications-btn" data-panel="dashboard" style="cursor: pointer;">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bento-grid hero-layout">
-                    <div class="bento-card gamification-panel">
-                        <div class="gamification-header">
-                            <h2 style="margin: 0; font-size: 1.5rem;"><i class="fas fa-star"></i> Il Tuo Progresso</h2>
-                            <p style="margin: 0.5rem 0 0;">Livello {{ gamification.profile.current_level if gamification and gamification.profile else stats.current_level if stats else 1 }}</p>
-                        </div>
-                        <div class="gamification-content">
-                            <div style="text-align: center; padding: 2rem 0;">
-                                <div style="font-size: 4rem; font-weight: 800; color: #D4AF37;">
-                                    {{ gamification.profile.total_xp if gamification and gamification.profile else stats.total_xp if stats else 0 }}
-                                </div>
-                                <div style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">XP Totali</div>
-                            </div>
-                            <div class="xp-progress-bar" style="background: rgba(212, 175, 55, 0.2); height: 16px;">
-                                {% set progress = gamification.profile.progress_percentage if gamification and gamification.profile else 35 %}
-                                <div class="xp-progress-fill" style="width: {{ progress }}%; background: linear-gradient(135deg, #D4AF37, #f4d03f);"></div>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">
-                                <span>Livello {{ gamification.profile.current_level if gamification and gamification.profile else stats.current_level if stats else 1 }}</span>
-                                <span>{{ progress }}%</span>
-                                <span>Livello {{ (gamification.profile.current_level if gamification and gamification.profile else stats.current_level if stats else 1) + 1 }}</span>
-                            </div>
-                            <div style="display: flex; justify-content: center; gap: 3rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-primary);">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2rem;">🔥</div>
-                                    <div style="font-size: 1.5rem; font-weight: 800;">{{ gamification.profile.current_streak if gamification and gamification.profile else stats.current_streak if stats else 0 }}</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Giorni Streak</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2rem;">🏆</div>
-                                    <div style="font-size: 1.5rem; font-weight: 800;">5</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Achievement</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2rem;">📚</div>
-                                    <div style="font-size: 1.5rem; font-weight: 800;">{{ stats.totale_voti if stats else 0 }}</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Voti Ottenuti</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-medal"></i>
-                                Achievement
-                            </h2>
-                        </div>
-                        <div class="achievement-card">
-                            <div class="achievement-icon gold">
-                                <i class="fas fa-fire"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold);">Streak Master</div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">7 giorni consecutivi di studio</div>
-                            </div>
-                            <i class="fas fa-check-circle" style="color: var(--color-emerald-500);"></i>
-                        </div>
-                        <div class="achievement-card">
-                            <div class="achievement-icon silver">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold);">Studente Modello</div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">Media superiore a 8</div>
-                            </div>
-                            <i class="fas fa-check-circle" style="color: var(--color-emerald-500);"></i>
-                        </div>
-                        <div class="achievement-card">
-                            <div class="achievement-icon bronze">
-                                <i class="fas fa-robot"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold);">AI Explorer</div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">10 domande all'AI Coach</div>
-                            </div>
-                            <i class="fas fa-check-circle" style="color: var(--color-emerald-500);"></i>
-                        </div>
-                        <div class="achievement-card achievement-locked">
-                            <div class="achievement-icon gold">
-                                <i class="fas fa-crown"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold);">Campione della Classe</div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">Primo in classifica</div>
-                            </div>
-                            <i class="fas fa-lock" style="color: var(--text-muted);"></i>
+            
+            <!-- GAMIFICATION PANEL -->
+            <div id="panel-gamification" class="panel">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title">Gamification</h1>
+                            <p class="page-subtitle">I tuoi progressi e premi</p>
                         </div>
                     </div>
                 </div>
-
-                <div class="bento-grid full-width">
-                    <div class="bento-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-ranking-star"></i>
-                                Classifica Classe
-                            </h2>
+                
+                <div class="xp-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em;">Livello Attuale</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">{{ gamification.rank if gamification else 'Germoglio' }}</div>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                            <div class="leaderboard-item">
-                                <div class="leaderboard-rank first">1</div>
-                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-blue-800), var(--color-blue-600)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">SR</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold);">Sara Rossi</div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">3250 XP</div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 2rem; font-weight: 700;">{{ gamification.total_xp if gamification else 0 }} XP</div>
+                        </div>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: {{ ((gamification.total_xp or 0) % 1000) / 10 }}%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; opacity: 0.8;">
+                        <span>Prossimo livello</span>
+                        <span>{{ 1000 - ((gamification.total_xp or 0) % 1000) }} XP rimanenti</span>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Sfide Attive</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-item">
+                                <div style="width: 48px; height: 48px; background: var(--warning-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--warning); font-size: 1.25rem;">
+                                    <i class="fas fa-fire"></i>
                                 </div>
-                            </div>
-                            <div class="leaderboard-item" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05)); border: 2px solid var(--color-blue-300);">
-                                <div class="leaderboard-rank second">2</div>
-                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-blue-800), var(--color-blue-600)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">{{ user.nome[0] if user and user.nome else 'M' }}{{ user.cognome[0] if user and user.cognome else 'D' }}</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold);">{{ user.nome }} {{ user.cognome }} (Tu)</div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">{{ stats.total_xp if stats else 0 }} XP</div>
+                                <div class="list-content">
+                                    <div class="list-title">Streak 7 giorni</div>
+                                    <div class="list-subtitle">{{ gamification.streak if gamification else 0 }}/7 giorni completati</div>
                                 </div>
+                                <span class="badge badge-warning">+100 XP</span>
                             </div>
-                            <div class="leaderboard-item">
-                                <div class="leaderboard-rank third">3</div>
-                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-blue-800), var(--color-blue-600)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">LB</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold);">Luca Bianchi</div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">2100 XP</div>
+                            <div class="list-item">
+                                <div style="width: 48px; height: 48px; background: rgba(37, 99, 235, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 1.25rem;">
+                                    <i class="fas fa-robot"></i>
                                 </div>
+                                <div class="list-content">
+                                    <div class="list-title">Chatta con AI Coach</div>
+                                    <div class="list-subtitle">Fai 5 domande oggi</div>
+                                </div>
+                                <span class="badge badge-neutral">+50 XP</span>
                             </div>
-                            <div class="leaderboard-item">
-                                <div class="leaderboard-rank other">4</div>
-                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-blue-800), var(--color-blue-600)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">GV</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: var(--font-semibold);">Giulia Verdi</div>
-                                    <div style="font-size: var(--text-xs); color: var(--text-muted);">1850 XP</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Badge Sbloccati</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center;">
+                                <div>
+                                    <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #f59e0b, #fbbf24); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; color: white; font-size: 1.25rem;">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Prima Stella</div>
+                                </div>
+                                <div>
+                                    <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981, #34d399); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; color: white; font-size: 1.25rem;">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Primo Voto</div>
+                                </div>
+                                <div>
+                                    <div style="width: 56px; height: 56px; background: var(--bg-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; color: var(--text-light); font-size: 1.25rem;">
+                                        <i class="fas fa-lock"></i>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Bloccato</div>
+                                </div>
+                                <div>
+                                    <div style="width: 56px; height: 56px; background: var(--bg-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; color: var(--text-light); font-size: 1.25rem;">
+                                        <i class="fas fa-lock"></i>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Bloccato</div>
                                 </div>
                             </div>
                         </div>
@@ -1520,383 +552,126 @@
             </div>
         </main>
     </div>
-
-    <nav class="mobile-bottom-nav">
-        <a class="mobile-nav-item active panel-nav" data-panel="dashboard">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a class="mobile-nav-item panel-nav" data-panel="calendario">
-            <i class="fas fa-calendar"></i>
-            <span>Calendario</span>
-        </a>
-        <a href="/chat" class="mobile-nav-item">
-            <i class="fas fa-comments"></i>
-            <span>Chat</span>
-        </a>
-        <a class="mobile-nav-item panel-nav" data-panel="ai-coach">
-            <i class="fas fa-robot"></i>
-            <span>AI Coach</span>
-        </a>
-        <a class="mobile-nav-item panel-nav" data-panel="gamification">
-            <i class="fas fa-trophy"></i>
-            <span>Livelli</span>
-        </a>
-    </nav>
-
-    <div class="xp-toast" id="xp-toast"></div>
-
+    
+    <style>
+        .suggestion-btn {
+            background: white;
+            border: 1px solid var(--border-light);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+        .suggestion-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+    </style>
+    
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const dashboardContainer = document.getElementById('dashboardContainer');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        sidebarToggle.addEventListener('click', () => {
-            dashboardContainer.classList.toggle('sidebar-collapsed');
-        });
-
-        function switchPanel(panelId) {
-            document.querySelectorAll('.panel').forEach(panel => {
-                panel.classList.remove('panel-active');
-            });
-            
-            document.querySelectorAll('.nav-link.panel-nav, .mobile-nav-item.panel-nav').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            const targetPanel = document.getElementById('panel-' + panelId);
-            if (targetPanel) {
-                targetPanel.classList.add('panel-active');
-            }
-            
-            document.querySelectorAll(`[data-panel="${panelId}"]`).forEach(link => {
-                link.classList.add('active');
-            });
-
-            if (panelId === 'ai-coach') {
-                const aiInput = document.getElementById('ai-chat-input');
-                if (aiInput) {
-                    setTimeout(() => aiInput.focus(), 100);
-                }
-            }
-
-            if (panelId === 'dashboard') {
-                initializeChart();
-            }
-        }
-
-        document.querySelectorAll('.nav-link.panel-nav, .mobile-nav-item.panel-nav, .panel-nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const panelId = link.getAttribute('data-panel');
-                if (panelId) {
-                    switchPanel(panelId);
-                }
-            });
-        });
-
-        if (window.innerWidth <= 768) {
-            sidebar.addEventListener('click', (e) => {
-                if (e.target.classList.contains('nav-link')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-        }
-
-        {% if enabled_features.get('real_time_presence', True) %}
-        if (typeof initializeCirculatingAvatars === 'function') {
-            initializeCirculatingAvatars('messaging-avatars-container');
-        }
-        {% endif %}
-
-        let chartInitialized = false;
-        function initializeChart() {
-            if (chartInitialized) return;
-            
-            const ctx = document.getElementById('gradesChart');
-            if (ctx) {
-                const chartData = {{ chart_data | tojson | safe }};
-                const colors = [
-                    'rgba(59, 130, 246, 1)',
-                    'rgba(16, 185, 129, 1)',
-                    'rgba(245, 158, 11, 1)',
-                    'rgba(239, 68, 68, 1)',
-                    'rgba(139, 92, 246, 1)',
-                    'rgba(236, 72, 153, 1)'
-                ];
-                
-                const datasets = [];
-                let colorIndex = 0;
-                
-                if (chartData && chartData.datasets) {
-                    for (const [materia, data] of Object.entries(chartData.datasets)) {
-                        datasets.push({
-                            label: materia,
-                            data: data,
-                            borderColor: colors[colorIndex % colors.length],
-                            backgroundColor: colors[colorIndex % colors.length].replace('1)', '0.1)'),
-                            tension: 0.3,
-                            fill: false,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
-                        });
-                        colorIndex++;
+        Chart.defaults.font.family = 'Inter, sans-serif';
+        Chart.defaults.color = '#6b7280';
+        
+        const gradesCtx = document.getElementById('gradesChart');
+        if (gradesCtx) {
+            new Chart(gradesCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Set', 'Ott', 'Nov', 'Dic', 'Gen', 'Feb'],
+                    datasets: [{
+                        label: 'Media Voti',
+                        data: [7.2, 7.5, 7.8, 7.6, 8.0, 7.9],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 5, max: 10, grid: { color: '#e5e7eb' } },
+                        x: { grid: { display: false } }
                     }
                 }
+            });
+        }
+        
+        document.querySelectorAll('.panel-trigger').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const panelId = this.dataset.panel;
                 
-                if (datasets.length > 0) {
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: chartData.labels || [],
-                            datasets: datasets
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        usePointStyle: true,
-                                        padding: 20
-                                    }
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    min: 1,
-                                    max: 10,
-                                    grid: {
-                                        color: 'rgba(0, 0, 0, 0.05)'
-                                    },
-                                    ticks: {
-                                        stepSize: 1
-                                    }
-                                }
-                            },
-                            interaction: {
-                                mode: 'nearest',
-                                axis: 'x',
-                                intersect: false
-                            }
-                        }
-                    });
-                    chartInitialized = true;
-                } else {
-                    ctx.parentElement.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><p>Nessun dato disponibile per il grafico</p></div>';
+                document.querySelectorAll('.panel-trigger').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('panel-' + panelId).classList.add('active');
+                
+                if (panelId === 'ai-coach') {
+                    document.getElementById('chatInput').focus();
                 }
-            }
+            });
+        });
+        
+        function sendSuggestion(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
         }
-
-        initializeChart();
-
-        let sessionXP = 0;
-        const messagesContainer = document.getElementById('ai-messages');
-        const chatInput = document.getElementById('ai-chat-input');
-        const sendBtn = document.getElementById('ai-send-btn');
-        const typingIndicator = document.getElementById('typing');
-        const sessionXpBadge = document.getElementById('session-xp');
-        const welcomeCard = document.getElementById('ai-welcome-card');
-
-        function useSuggestion(btn) {
-            chatInput.value = btn.textContent;
-            chatInput.focus();
-        }
-
-        function formatMarkdown(text) {
-            if (!text) return '';
-            let formatted = text
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                .replace(/^\* /gm, '• ')
-                .replace(/^- /gm, '• ')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>');
-            return formatted;
-        }
-
-        function addMessage(content, isUser = false, xpAwarded = 0, rankUp = false, newRank = null) {
-            if (welcomeCard) welcomeCard.style.display = 'none';
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `ai-message ${isUser ? 'user' : 'ai'}`;
-            
-            const formattedContent = isUser ? content : formatMarkdown(content);
-            let html = `<p>${formattedContent}</p>`;
-            
-            if (!isUser && xpAwarded > 0) {
-                html += `<div class="xp-reward"><i class="fas fa-star"></i> +${xpAwarded} XP</div>`;
-            }
-            
-            if (!isUser && rankUp && newRank) {
-                html += `<div class="rank-up"><i class="fas fa-trophy"></i> Nuovo Rango: ${newRank}!</div>`;
-            }
-            
-            messageDiv.innerHTML = html;
-            messagesContainer.appendChild(messageDiv);
-            
-            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
-
-        function showTyping(show) {
-            typingIndicator.classList.toggle('active', show);
-            if (show) {
-                typingIndicator.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }
-        }
-
-        function showXPToast(amount) {
-            if (amount <= 0) return;
-            
-            sessionXP += amount;
-            sessionXpBadge.innerHTML = `<i class="fas fa-star"></i> <span>+${sessionXP} XP</span>`;
-            
-            const toast = document.getElementById('xp-toast');
-            toast.innerHTML = `<i class="fas fa-star"></i> +${amount} XP guadagnati!`;
-            toast.classList.add('active');
-            
-            setTimeout(() => toast.classList.remove('active'), 2500);
-        }
-
-        function updateStats(gamification) {
-            if (gamification) {
-                const rankEl = document.getElementById('stat-rank');
-                const xpEl = document.getElementById('stat-xp');
-                const streakEl = document.getElementById('stat-streak');
-                
-                if (rankEl) rankEl.textContent = gamification.rank || 'Livello 1';
-                if (xpEl) xpEl.textContent = gamification.xp_total || 0;
-                if (streakEl) streakEl.textContent = gamification.streak_days || 0;
-            }
-        }
-
+        
         async function sendMessage() {
-            const message = chatInput.value.trim();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
             if (!message) return;
-
-            addMessage(message, true);
-            chatInput.value = '';
-            sendBtn.disabled = true;
-            showTyping(true);
-
+            
+            const messagesArea = document.getElementById('chatMessages');
+            const welcomeCard = messagesArea.querySelector('div[style*="text-align: center"]');
+            if (welcomeCard) welcomeCard.remove();
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'ai-message user';
+            userMsg.textContent = message;
+            messagesArea.insertBefore(userMsg, document.getElementById('typingIndicator'));
+            
+            input.value = '';
+            
+            const typing = document.getElementById('typingIndicator');
+            typing.classList.add('active');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            
             try {
                 const response = await fetch('/demo/ai/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({ message: message })
                 });
-
-                const data = await response.json();
-                showTyping(false);
-
-                if (data.success) {
-                    addMessage(data.response, false, data.xp_awarded, data.rank_up, data.new_rank);
-                    
-                    if (data.xp_awarded > 0) {
-                        showXPToast(data.xp_awarded);
-                    }
-                    
-                    if (data.gamification) {
-                        updateStats(data.gamification);
-                    }
-
-                    const mode = data.ai_mode === 'gemini' ? 'Gemini AI' : 'Coach AI';
-                    const statusEl = document.getElementById('ai-status');
-                    if (statusEl) statusEl.textContent = `Online - ${mode}`;
-                } else {
-                    addMessage('Mi dispiace, ho avuto un problema. Riprova!', false);
-                }
-            } catch (error) {
-                showTyping(false);
-                addMessage('Errore di connessione. Verifica la rete e riprova.', false);
-                console.error('Chat error:', error);
-            } finally {
-                sendBtn.disabled = false;
-                chatInput.focus();
-            }
-        }
-
-        if (sendBtn) {
-            sendBtn.addEventListener('click', sendMessage);
-        }
-        
-        if (chatInput) {
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !sendBtn.disabled) {
-                    sendMessage();
-                }
-            });
-        }
-
-        console.log('SKAILA Dashboard initialized with Teams-style navigation');
-    </script>
-    <script src="/static/js/classmate-spirals.js"></script>
-    <script src="/static/js/telemetry-tracker.js"></script>
-    <script src="/static/js/vertical-feed.js"></script>
-    
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/sw.js')
-                    .then(registration => {
-                        console.log('[PWA] Service Worker registered:', registration.scope);
-                        
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('[PWA] New version available! Refresh to update.');
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        console.log('[PWA] Service Worker registration failed:', error);
-                    });
-            });
-        }
-
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            const installPrompt = document.createElement('div');
-            installPrompt.className = 'pwa-install-prompt';
-            installPrompt.innerHTML = `
-                <div class="pwa-install-icon">
-                    <i class="fas fa-mobile-screen"></i>
-                </div>
-                <div class="pwa-install-content">
-                    <div class="pwa-install-title">Installa SKAILA</div>
-                    <div class="pwa-install-description">Accesso rapido come app nativa</div>
-                </div>
-                <button class="pwa-install-button" onclick="installPWA()">
-                    Installa
-                </button>
-            `;
-            
-            document.body.appendChild(installPrompt);
-        });
-
-        function installPWA() {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('[PWA] App installed');
-                }
-                deferredPrompt = null;
                 
-                const prompt = document.querySelector('.pwa-install-prompt');
-                if (prompt) prompt.remove();
-            });
+                const data = await response.json();
+                typing.classList.remove('active');
+                
+                const botMsg = document.createElement('div');
+                botMsg.className = 'ai-message bot';
+                botMsg.innerHTML = data.response.replace(/\n/g, '<br>');
+                
+                if (data.xp_earned) {
+                    botMsg.innerHTML += '<div style="margin-top: 12px; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a1a1a; padding: 6px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-star"></i> +' + data.xp_earned + ' XP</div>';
+                    document.getElementById('chatXP').textContent = data.new_total_xp || (parseInt(document.getElementById('chatXP').textContent) + data.xp_earned);
+                }
+                
+                messagesArea.insertBefore(botMsg, typing);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } catch (error) {
+                typing.classList.remove('active');
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'ai-message bot';
+                errorMsg.textContent = 'Mi dispiace, si è verificato un errore. Riprova.';
+                messagesArea.insertBefore(errorMsg, typing);
+            }
         }
     </script>
 </body>

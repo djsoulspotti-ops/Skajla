@@ -5,598 +5,311 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Docente - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/dashboard-premium.css" rel="stylesheet">
-    <style>
-        /* Teacher-Specific Styles */
-        .class-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .mini-stat {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-        }
-
-        .mini-stat-value {
-            font-size: var(--text-3xl);
-            font-weight: var(--font-extrabold);
-            color: var(--color-blue-800);
-        }
-
-        .mini-stat-label {
-            font-size: var(--text-xs);
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .schedule-timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            border-left: 3px solid var(--color-blue-600);
-            transition: all 0.2s ease;
-        }
-
-        .timeline-item:hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .timeline-item.current {
-            background: linear-gradient(135deg, rgba(0, 59, 115, 0.05) 0%, rgba(0, 116, 217, 0.03) 100%);
-            border-left-color: var(--color-gold-500);
-        }
-
-        .timeline-time {
-            font-weight: var(--font-bold);
-            color: var(--color-blue-800);
-            font-size: var(--text-sm);
-            min-width: 80px;
-        }
-
-        .timeline-content h4 {
-            font-size: var(--text-base);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .timeline-content p {
-            font-size: var(--text-xs);
-            color: var(--text-muted);
-        }
-
-        .message-item {
-            display: flex;
-            align-items: start;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            margin-bottom: 0.75rem;
-            transition: all 0.2s ease;
-        }
-
-        .message-item:hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-full);
-            background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-blue-400) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: var(--font-bold);
-            font-size: var(--text-sm);
-            flex-shrink: 0;
-        }
-
-        .message-content {
-            flex: 1;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .message-sender {
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            font-size: var(--text-sm);
-        }
-
-        .message-time {
-            font-size: var(--text-xs);
-            color: var(--text-muted);
-        }
-
-        .message-text {
-            font-size: var(--text-sm);
-            color: var(--text-secondary);
-        }
-
-        .pending-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            margin-bottom: 0.75rem;
-            transition: all 0.2s ease;
-        }
-
-        .pending-item:hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .pending-info h4 {
-            font-size: var(--text-sm);
-            font-weight: var(--font-semibold);
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .pending-info p {
-            font-size: var(--text-xs);
-            color: var(--text-muted);
-        }
-
-        .pending-badge {
-            padding: 0.375rem 0.75rem;
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--color-gold-700);
-            border-radius: var(--radius-full);
-            font-size: var(--text-xs);
-            font-weight: var(--font-semibold);
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/dashboard-unified.css" rel="stylesheet">
 </head>
-<body class="dashboard-page">
-    <div class="dashboard-container" id="dashboardContainer">
-        <!-- Modern Collapsible Sidebar -->
-        <aside class="dashboard-sidebar" id="sidebar">
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-brand">SKAILA</div>
-                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <a href="/" class="sidebar-logo">SKAILA</a>
             </div>
-
+            
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-label">Menu</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a href="/dashboard" class="nav-link active">
-                                <span class="nav-icon"><i class="fas fa-home"></i></span>
-                                <span class="nav-text">Dashboard</span>
+                            <a href="/dashboard" class="active">
+                                <i class="fas fa-home"></i>
+                                Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/registro-professore" class="nav-link">
-                                <span class="nav-icon"><i class="fas fa-book"></i></span>
-                                <span class="nav-text">Registro</span>
+                            <a href="/registro-professore">
+                                <i class="fas fa-book"></i>
+                                Registro
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/calendario" class="nav-link">
-                                <span class="nav-icon"><i class="fas fa-calendar"></i></span>
-                                <span class="nav-text">Calendario</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/chat" class="nav-link">
-                                <span class="nav-icon"><i class="fas fa-comments"></i></span>
-                                <span class="nav-text">Messaggi</span>
+                            <a href="/calendario">
+                                <i class="fas fa-calendar"></i>
+                                Calendario
                             </a>
                         </li>
                     </ul>
                 </div>
-
+                
                 <div class="nav-section">
                     <div class="nav-section-label">Strumenti</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a href="/materiali" class="nav-link">
-                                <span class="nav-icon"><i class="fas fa-folder"></i></span>
-                                <span class="nav-text">Materiali</span>
+                            <a href="/chat">
+                                <i class="fas fa-comments"></i>
+                                Messaggi
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/bi/dashboard" class="nav-link">
-                                <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
-                                <span class="nav-text">Analytics</span>
+                            <a href="/materiali">
+                                <i class="fas fa-folder"></i>
+                                Materiali
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/bi/dashboard">
+                                <i class="fas fa-chart-line"></i>
+                                Analytics
                             </a>
                         </li>
                     </ul>
                 </div>
             </nav>
-
+            
             <div class="sidebar-footer">
-                <div class="user-profile-card">
-                    <div class="user-avatar">
-                        {{ user.nome[0]|upper if user and user.nome else 'P' }}{{ user.cognome[0]|upper if user and user.cognome else 'R' }}
-                    </div>
-                    <div class="user-details">
+                <div class="user-card">
+                    <div class="user-avatar">{{ user.nome[0]|upper if user and user.nome else 'P' }}{{ user.cognome[0]|upper if user and user.cognome else 'R' }}</div>
+                    <div class="user-info">
                         <div class="user-name">{{ user.nome }} {{ user.cognome }}</div>
                         <div class="user-role">Docente</div>
                     </div>
                 </div>
                 <a href="/logout" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Esci</span>
+                    Esci
                 </a>
             </div>
         </aside>
-
-        <!-- Main Content Area -->
-        <main class="dashboard-main">
-            <!-- Header -->
-            <div class="dashboard-header">
-                <div class="header-left">
-                    <h1 class="page-title">Benvenuto, Prof. {{ user.cognome }}! 👨‍🏫</h1>
-                    <p class="page-subtitle">Gestisci le tue classi in modo efficiente</p>
-                </div>
-                <div class="header-right">
-                    <div class="search-bar">
-                        <i class="fas fa-search" style="color: var(--text-muted);"></i>
-                        <input type="text" placeholder="Cerca studente..." />
-                    </div>
-                    <button class="notifications-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">5</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Quick Action Bar -->
-            <div class="quick-action-bar">
-                <div class="select-wrapper">
-                    <label for="classSelect" style="font-size: var(--text-xs); color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Classe Attiva:</label>
-                    <select id="classSelect">
-                        <option>3A - Matematica</option>
-                        <option>4B - Fisica</option>
-                        <option>5C - Matematica</option>
-                    </select>
-                </div>
-                <div class="quick-action-buttons">
-                    <a href="/registro-professore" class="btn-quick-action">
-                        <i class="fas fa-user-check"></i>
-                        Appello
-                    </a>
-                    <a href="/registro-professore" class="btn-quick-action secondary">
-                        <i class="fas fa-star"></i>
-                        Inserisci Voto
-                    </a>
-                    <a href="/calendario" class="btn-quick-action secondary">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        Nuova Lezione
-                    </a>
-                </div>
-            </div>
-
-            <!-- Hero Bento Grid: Today's Schedule + Class Stats -->
-            <div class="bento-grid hero-layout">
-                <!-- Today's Schedule -->
-                <div class="bento-card hero">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-clock"></i>
-                            Orario di Oggi
-                        </h2>
-                        <a href="/calendario" class="card-action">Vedi settimana →</a>
-                    </div>
-                    <div class="schedule-timeline">
-                        <div class="timeline-item current">
-                            <div class="timeline-time">
-                                <i class="fas fa-circle" style="color: var(--color-gold-500); font-size: 8px; margin-right: 0.5rem;"></i>
-                                09:00 - 11:00
-                            </div>
-                            <div class="timeline-content">
-                                <h4>Matematica - 3A</h4>
-                                <p><i class="fas fa-map-marker-alt"></i> Aula 201 • Algebra lineare</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-time">11:15 - 13:00</div>
-                            <div class="timeline-content">
-                                <h4>Fisica - 4B</h4>
-                                <p><i class="fas fa-map-marker-alt"></i> Laboratorio • Termodinamica</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-time">14:30 - 16:00</div>
-                            <div class="timeline-content">
-                                <h4>Matematica - 5C</h4>
-                                <p><i class="fas fa-map-marker-alt"></i> Aula 105 • Derivate e integrali</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Class Quick Stats -->
-                <div class="bento-card hero">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-chart-bar"></i>
-                            Statistiche Classe 3A
-                        </h2>
-                        <a href="/bi/dashboard" class="card-action">Analytics →</a>
-                    </div>
-                    <div class="class-stats-grid">
-                        <div class="mini-stat">
-                            <div class="mini-stat-value">{{ total_studenti if total_studenti else '24' }}</div>
-                            <div class="mini-stat-label">Studenti</div>
-                        </div>
-                        <div class="mini-stat">
-                            <div class="mini-stat-value" style="color: var(--color-emerald-600);">{{ media_classe if media_classe else '7.8' }}</div>
-                            <div class="mini-stat-label">Media Voti</div>
-                        </div>
-                        <div class="mini-stat">
-                            <div class="mini-stat-value" style="color: var(--color-blue-600);">{{ tasso_presenze if tasso_presenze else '92' }}%</div>
-                            <div class="mini-stat-label">Presenze</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 2rem;">
-                        <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); margin-bottom: 1rem; color: var(--text-primary);">
-                            Distribuzione Voti
-                        </h3>
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="font-size: var(--text-sm); color: var(--text-secondary);">Eccellenti (9-10)</span>
-                                    <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-emerald-600);">6 studenti</span>
-                                </div>
-                                <div style="background: var(--bg-surface); height: 8px; border-radius: var(--radius-full); overflow: hidden;">
-                                    <div style="background: var(--color-emerald-500); width: 25%; height: 100%;"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="font-size: var(--text-sm); color: var(--text-secondary);">Buoni (7-8)</span>
-                                    <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-blue-600);">12 studenti</span>
-                                </div>
-                                <div style="background: var(--bg-surface); height: 8px; border-radius: var(--radius-full); overflow: hidden;">
-                                    <div style="background: var(--color-blue-500); width: 50%; height: 100%;"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="font-size: var(--text-sm); color: var(--text-secondary);">Sufficienti (6)</span>
-                                    <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-gold-600);">6 studenti</span>
-                                </div>
-                                <div style="background: var(--bg-surface); height: 8px; border-radius: var(--radius-full); overflow: hidden;">
-                                    <div style="background: var(--color-gold-500); width: 25%; height: 100%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Bento Grid: Messages, Pending Grading, Calendar -->
-            <div class="bento-grid balanced-layout">
-                <!-- Recent Messages -->
-                <div class="bento-card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-envelope"></i>
-                            Messaggi Recenti
-                        </h2>
-                        <a href="/chat" class="card-action">Vedi tutti →</a>
-                    </div>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-header-top">
                     <div>
-                        <div class="message-item">
-                            <div class="message-avatar">MR</div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-sender">Mario Rossi</span>
-                                    <span class="message-time">10 min fa</span>
+                        <h1 class="page-title">Benvenuto, Prof. {{ user.cognome }}</h1>
+                        <p class="page-subtitle">Gestisci le tue classi</p>
+                    </div>
+                    <div class="header-actions">
+                        <a href="/registro-professore" class="btn btn-primary">
+                            <i class="fas fa-user-check"></i>
+                            Appello
+                        </a>
+                        <a href="/registro-professore" class="btn btn-secondary">
+                            <i class="fas fa-star"></i>
+                            Inserisci Voto
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Studenti</div>
+                    <div class="stat-value">{{ total_studenti if total_studenti else '24' }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Media Voti</div>
+                    <div class="stat-value success">{{ media_classe if media_classe else '7.8' }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Presenze</div>
+                    <div class="stat-value accent">{{ tasso_presenze if tasso_presenze else '92' }}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Classi</div>
+                    <div class="stat-value">{{ num_classi if num_classi else '3' }}</div>
+                </div>
+            </div>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Orario di Oggi</h3>
+                        <a href="/calendario" class="card-action">Vedi settimana</a>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(37, 99, 235, 0.05); border-radius: 8px; border-left: 3px solid var(--accent);">
+                                <div style="min-width: 80px;">
+                                    <div style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">09:00</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">11:00</div>
                                 </div>
-                                <p class="message-text">Prof, ho una domanda sull'esercizio 5...</p>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Matematica - 3A</div>
+                                    <div style="font-size: 0.8125rem; color: var(--text-muted);">Aula 201</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="message-item">
-                            <div class="message-avatar">LB</div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-sender">Laura Bianchi</span>
-                                    <span class="message-time">1 ora fa</span>
+                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-light); border-radius: 8px; border-left: 3px solid var(--border-light);">
+                                <div style="min-width: 80px;">
+                                    <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">11:15</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">13:00</div>
                                 </div>
-                                <p class="message-text">Grazie per la spiegazione di oggi!</p>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Fisica - 4B</div>
+                                    <div style="font-size: 0.8125rem; color: var(--text-muted);">Laboratorio</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="message-item">
-                            <div class="message-avatar">GV</div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-sender">Giuseppe Verdi</span>
-                                    <span class="message-time">2 ore fa</span>
+                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-light); border-radius: 8px; border-left: 3px solid var(--border-light);">
+                                <div style="min-width: 80px;">
+                                    <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">14:30</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">16:00</div>
                                 </div>
-                                <p class="message-text">Posso recuperare la verifica di martedì?</p>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Matematica - 5C</div>
+                                    <div style="font-size: 0.8125rem; color: var(--text-muted);">Aula 105</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Pending Grading -->
-                <div class="bento-card">
+                
+                <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-clipboard-check"></i>
-                            Da Valutare
-                        </h2>
-                        <a href="/registro-professore" class="card-action">Vai al registro →</a>
+                        <h3 class="card-title">Distribuzione Voti - 3A</h3>
+                        <a href="/bi/dashboard" class="card-action">Analytics</a>
                     </div>
-                    <div>
-                        <div class="pending-item">
-                            <div class="pending-info">
-                                <h4>Compito in Classe - Algebra</h4>
-                                <p>Classe 3A • 24 studenti</p>
-                            </div>
-                            <span class="pending-badge">Urgente</span>
-                        </div>
-                        <div class="pending-item">
-                            <div class="pending-info">
-                                <h4>Progetto Fisica</h4>
-                                <p>Classe 4B • 8 progetti</p>
-                            </div>
-                            <span class="pending-badge" style="background: rgba(59, 130, 246, 0.1); color: var(--color-blue-700);">In corso</span>
-                        </div>
-                        <div class="pending-item">
-                            <div class="pending-info">
-                                <h4>Quiz Online - Derivate</h4>
-                                <p>Classe 5C • 15 completati</p>
-                            </div>
-                            <span class="pending-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--color-emerald-700);">Quasi pronto</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Upcoming Events -->
-                <div class="bento-card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-calendar-check"></i>
-                            Prossimi Eventi
-                        </h2>
-                        <a href="/calendario" class="card-action">Vedi calendario →</a>
-                    </div>
-                    <div class="event-list">
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">25</div>
-                                <div class="event-month">Nov</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                    Verifica Scritta - 3A
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Eccellenti (9-10)</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--success);">6 studenti</span>
                                 </div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                    <i class="fas fa-clock"></i> 09:00 - 11:00 • Aula 201
+                                <div class="progress-bar">
+                                    <div class="progress-fill success" style="width: 25%;"></div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">27</div>
-                                <div class="event-month">Nov</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                    Consiglio di Classe
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Buoni (7-8)</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">12 studenti</span>
                                 </div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                    <i class="fas fa-users"></i> 14:30 - 17:00 • Sala Riunioni
+                                <div class="progress-bar">
+                                    <div class="progress-fill accent" style="width: 50%;"></div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">30</div>
-                                <div class="event-month">Nov</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: 0.25rem;">
-                                    Colloqui Genitori
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Sufficienti (6)</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--warning);">6 studenti</span>
                                 </div>
-                                <div style="font-size: var(--text-xs); color: var(--text-muted);">
-                                    <i class="fas fa-handshake"></i> 15:00 - 18:00
+                                <div class="progress-bar">
+                                    <div class="progress-fill warning" style="width: 25%;"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Quick Stats -->
-            <div class="bento-grid quad-layout">
-                <div class="stat-card">
-                    <div class="stat-value">{{ classi_attive if classi_attive else '3' }}</div>
-                    <div class="stat-label">Classi Attive</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ total_studenti if total_studenti else '64' }}</div>
-                    <div class="stat-label">Studenti Totali</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">18</div>
-                    <div class="stat-label">Lezioni Questa Settimana</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-check"></i> +2 rispetto a prev.
+            
+            <div class="content-grid cols-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Messaggi Recenti</h3>
+                        <a href="/chat" class="card-action">Vedi tutti</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-item">
+                            <div class="list-avatar">MR</div>
+                            <div class="list-content">
+                                <div class="list-title">Mario Rossi</div>
+                                <div class="list-subtitle">Ho una domanda sull'esercizio 5...</div>
+                            </div>
+                            <div class="list-meta">
+                                <span style="font-size: 0.75rem; color: var(--text-light);">10 min fa</span>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-avatar">LB</div>
+                            <div class="list-content">
+                                <div class="list-title">Laura Bianchi</div>
+                                <div class="list-subtitle">Grazie per la spiegazione!</div>
+                            </div>
+                            <div class="list-meta">
+                                <span style="font-size: 0.75rem; color: var(--text-light);">1 ora fa</span>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-avatar">GV</div>
+                            <div class="list-content">
+                                <div class="list-title">Giuseppe Verdi</div>
+                                <div class="list-subtitle">Posso recuperare la verifica?</div>
+                            </div>
+                            <div class="list-meta">
+                                <span style="font-size: 0.75rem; color: var(--text-light);">2 ore fa</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">42</div>
-                    <div class="stat-label">Materiali Caricati</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +5 questo mese
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Da Valutare</h3>
+                        <a href="/registro-professore" class="card-action">Vai al registro</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-item">
+                            <div class="list-content">
+                                <div class="list-title">Compito in Classe - Algebra</div>
+                                <div class="list-subtitle">Classe 3A - 24 studenti</div>
+                            </div>
+                            <span class="badge badge-warning">Urgente</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-content">
+                                <div class="list-title">Progetto Fisica</div>
+                                <div class="list-subtitle">Classe 4B - 8 progetti</div>
+                            </div>
+                            <span class="badge badge-neutral">In corso</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-content">
+                                <div class="list-title">Quiz Online - Derivate</div>
+                                <div class="list-subtitle">Classe 5C - 15 completati</div>
+                            </div>
+                            <span class="badge badge-success">Pronto</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Prossimi Eventi</h3>
+                        <a href="/calendario" class="card-action">Calendario</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-item">
+                            <div style="text-align: center; min-width: 48px; padding: 8px; background: var(--bg-light); border-radius: 8px;">
+                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">25</div>
+                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
+                            </div>
+                            <div class="list-content">
+                                <div class="list-title">Verifica Scritta - 3A</div>
+                                <div class="list-subtitle">09:00 - 11:00 - Aula 201</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div style="text-align: center; min-width: 48px; padding: 8px; background: var(--bg-light); border-radius: 8px;">
+                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">27</div>
+                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
+                            </div>
+                            <div class="list-content">
+                                <div class="list-title">Consiglio di Classe</div>
+                                <div class="list-subtitle">15:00 - 17:00 - Sala Riunioni</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div style="text-align: center; min-width: 48px; padding: 8px; background: var(--bg-light); border-radius: 8px;">
+                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">29</div>
+                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
+                            </div>
+                            <div class="list-content">
+                                <div class="list-title">Colloqui Genitori</div>
+                                <div class="list-subtitle">14:00 - 18:00</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="/dashboard" class="mobile-nav-item active">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="/registro-professore" class="mobile-nav-item">
-            <i class="fas fa-book"></i>
-            <span>Registro</span>
-        </a>
-        <a href="/calendario" class="mobile-nav-item">
-            <i class="fas fa-calendar"></i>
-            <span>Calendario</span>
-        </a>
-        <a href="/chat" class="mobile-nav-item">
-            <i class="fas fa-comments"></i>
-            <span>Chat</span>
-        </a>
-        <a href="/materiali" class="mobile-nav-item">
-            <i class="fas fa-folder"></i>
-            <span>Materiali</span>
-        </a>
-    </nav>
-
-    <script>
-        // Sidebar Toggle
-        const sidebar = document.getElementById('sidebar');
-        const dashboardContainer = document.getElementById('dashboardContainer');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        sidebarToggle.addEventListener('click', () => {
-            dashboardContainer.classList.toggle('sidebar-collapsed');
-        });
-    </script>
 </body>
 </html>
