@@ -5,9 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Dirigente - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="/static/css/dashboard-unified.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .section-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.125rem;
+        }
+        .section-icon.green { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .section-icon.amber { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+        .section-icon.purple { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
+        }
+        .section-subtitle {
+            font-size: 0.8125rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent);
+            margin: 40px 0;
+        }
+        .executive-stat {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .executive-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+        .executive-stat.green::before { background: linear-gradient(90deg, #059669, #10b981); }
+        .executive-stat.amber::before { background: linear-gradient(90deg, #d97706, #f59e0b); }
+        .executive-stat.purple::before { background: linear-gradient(90deg, #7c3aed, #8b5cf6); }
+        .executive-value {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .executive-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .executive-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 100px;
+            margin-top: 12px;
+        }
+        .executive-change.positive { background: #d1fae5; color: #059669; }
+        .executive-change.neutral { background: #f3f4f6; color: #6b7280; }
+        .card-enhanced {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card-enhanced-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .card-enhanced-title {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .card-enhanced-badge {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: #dbeafe;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .revenue-highlight {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-radius: 12px;
+            padding: 32px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .revenue-highlight::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        .revenue-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+        .revenue-label {
+            font-size: 0.9375rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+        .revenue-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+        .metric-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .metric-row:last-child { border-bottom: none; }
+        .metric-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .metric-icon {
+            width: 36px;
+            height: 36px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .metric-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .metric-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .progress-enhanced {
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 100px;
+            overflow: hidden;
+            flex: 1;
+            max-width: 120px;
+        }
+        .progress-enhanced-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.5s ease;
+        }
+        .teacher-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+        .teacher-row:hover { background: #fafbfc; }
+        .teacher-row:last-child { border-bottom: none; }
+        .teacher-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #4f46e5;
+            font-size: 0.9375rem;
+        }
+        .teacher-info { flex: 1; }
+        .teacher-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .teacher-subject {
+            font-size: 0.8125rem;
+            color: #6b7280;
+        }
+        .teacher-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stars {
+            display: flex;
+            gap: 2px;
+            color: #fbbf24;
+        }
+        .stars i { font-size: 0.875rem; }
+        .stars i.empty { color: #e5e7eb; }
+        .rating-count {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-layout">
@@ -82,16 +333,17 @@
         </aside>
         
         <main class="main-content">
-            <div class="page-header">
+            <div class="page-header" style="margin-bottom: 40px;">
                 <div class="page-header-top">
                     <div>
-                        <h1 class="page-title">Buongiorno, {{ user.nome }}</h1>
-                        <p class="page-subtitle">Panoramica di {{ school_name }}</p>
+                        <p style="font-size: 0.8125rem; color: #6b7280; margin-bottom: 4px;">Dashboard Esecutiva</p>
+                        <h1 class="page-title" style="font-size: 2rem;">Buongiorno, {{ user.nome }}</h1>
+                        <p class="page-subtitle" style="margin-top: 8px;">{{ school_name }} - Panoramica in tempo reale</p>
                     </div>
                     <div class="header-actions">
                         <a href="/bi/dashboard" class="btn btn-primary">
                             <i class="fas fa-chart-bar"></i>
-                            Analytics
+                            Analytics Avanzate
                         </a>
                         <a href="/schools/dashboard/dirigente" class="btn btn-secondary">
                             <i class="fas fa-cog"></i>
@@ -101,50 +353,89 @@
                 </div>
             </div>
             
-            <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
-                <div class="stat-card">
-                    <div class="stat-label">Studenti</div>
-                    <div class="stat-value">{{ overview.total_students if overview else 0 }}</div>
+            <!-- OVERVIEW SECTION -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-school"></i>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Docenti</div>
-                    <div class="stat-value">{{ overview.total_teachers if overview else 0 }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Classi</div>
-                    <div class="stat-value">{{ overview.total_classes if overview else 0 }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Eta Media</div>
-                    <div class="stat-value">{{ overview.avg_student_age if overview else '-' }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Utenti Oggi</div>
-                    <div class="stat-value accent">{{ overview.active_users_today if overview else 0 }}</div>
+                <div>
+                    <div class="section-title">Panoramica Istituto</div>
+                    <div class="section-subtitle">Statistiche generali della scuola</div>
                 </div>
             </div>
             
-            <div class="content-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Classi</h3>
-                        <span style="font-size: 0.8125rem; color: var(--success);">{{ classes|length if classes else 0 }} classi attive</span>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 24px;">
+                <div class="executive-stat">
+                    <div class="executive-value">{{ overview.total_students if overview else 0 }}</div>
+                    <div class="executive-label">Studenti Iscritti</div>
+                    <div class="executive-change positive">
+                        <i class="fas fa-arrow-up"></i> Attivi
                     </div>
-                    <div class="card-body no-padding">
+                </div>
+                <div class="executive-stat green">
+                    <div class="executive-value">{{ overview.total_teachers if overview else 0 }}</div>
+                    <div class="executive-label">Corpo Docente</div>
+                    <div class="executive-change neutral">
+                        <i class="fas fa-check"></i> Completo
+                    </div>
+                </div>
+                <div class="executive-stat amber">
+                    <div class="executive-value">{{ overview.total_classes if overview else 0 }}</div>
+                    <div class="executive-label">Classi Attive</div>
+                    <div class="executive-change neutral">
+                        <i class="fas fa-layer-group"></i> Sezioni
+                    </div>
+                </div>
+                <div class="executive-stat purple">
+                    <div class="executive-value">{{ overview.avg_student_age if overview else '-' }}</div>
+                    <div class="executive-label">Eta Media</div>
+                    <div class="executive-change neutral">
+                        <i class="fas fa-users"></i> Anni
+                    </div>
+                </div>
+                <div class="executive-stat">
+                    <div class="executive-value" style="color: #2563eb;">{{ overview.active_users_today if overview else 0 }}</div>
+                    <div class="executive-label">Utenti Oggi</div>
+                    <div class="executive-change positive">
+                        <i class="fas fa-signal"></i> Online
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-divider"></div>
+            
+            <!-- ACADEMIC SECTION -->
+            <div class="section-header">
+                <div class="section-icon purple">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <div class="section-title">Performance Accademica</div>
+                    <div class="section-subtitle">Rendimento classi e valutazioni docenti</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Rendimento per Classe</span>
+                        <span class="card-enhanced-badge">{{ classes|length if classes else 0 }} Classi</span>
+                    </div>
+                    <div style="max-height: 360px; overflow-y: auto;">
                         {% if classes %}
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Classe</th>
                                     <th>Studenti</th>
-                                    <th>Media Voti</th>
+                                    <th>Media</th>
                                     <th>Frequenza</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for cls in classes[:8] %}
+                                {% for cls in classes[:10] %}
                                 <tr>
-                                    <td><strong>{{ cls.class_name }}</strong></td>
+                                    <td><strong style="color: #1a1a1a;">{{ cls.class_name }}</strong></td>
                                     <td>{{ cls.student_count }}</td>
                                     <td>
                                         <span class="badge {% if cls.avg_grade >= 8 %}badge-success{% elif cls.avg_grade >= 7 %}badge-neutral{% elif cls.avg_grade >= 6 %}badge-warning{% else %}badge-danger{% endif %}">
@@ -161,7 +452,7 @@
                             </tbody>
                         </table>
                         {% else %}
-                        <div class="empty-state">
+                        <div class="empty-state" style="padding: 48px;">
                             <i class="fas fa-door-open"></i>
                             <p>Nessuna classe configurata</p>
                         </div>
@@ -169,31 +460,33 @@
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Docenti con Valutazioni</h3>
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Valutazione Docenti</span>
+                        <span class="card-enhanced-badge">Feedback Studenti</span>
                     </div>
-                    <div class="card-body">
+                    <div>
                         {% if teachers %}
-                        {% for teacher in teachers[:5] %}
-                        <div class="list-item">
-                            <div class="list-avatar">{{ teacher.nome[0] if teacher.nome else 'D' }}{{ teacher.cognome[0] if teacher.cognome else '' }}</div>
-                            <div class="list-content">
-                                <div class="list-title">{{ teacher.nome }} {{ teacher.cognome }}</div>
-                                <div class="list-subtitle">{{ teacher.subject or 'Docente' }}</div>
+                        {% for teacher in teachers[:6] %}
+                        <div class="teacher-row">
+                            <div class="teacher-avatar">{{ teacher.nome[0] if teacher.nome else 'D' }}{{ teacher.cognome[0] if teacher.cognome else '' }}</div>
+                            <div class="teacher-info">
+                                <div class="teacher-name">{{ teacher.nome }} {{ teacher.cognome }}</div>
+                                <div class="teacher-subject">{{ teacher.subject or 'Docente' }}</div>
                             </div>
-                            <div class="list-meta">
-                                <div style="color: #f59e0b; font-size: 0.875rem;">
+                            <div class="teacher-rating">
+                                <div class="stars">
+                                    {% set rating = teacher.avg_rating|default(0)|round|int %}
                                     {% for i in range(5) %}
-                                    <i class="fas fa-star" style="{% if i >= (teacher.avg_rating|default(0)|round) %}opacity: 0.3;{% endif %}"></i>
+                                    <i class="fas fa-star {% if i >= rating %}empty{% endif %}"></i>
                                     {% endfor %}
                                 </div>
-                                <div style="font-size: 0.6875rem; color: var(--text-light);">{{ teacher.rating_count|default(0) }} valutazioni</div>
+                                <span class="rating-count">({{ teacher.rating_count|default(0) }})</span>
                             </div>
                         </div>
                         {% endfor %}
                         {% else %}
-                        <div class="empty-state">
+                        <div class="empty-state" style="padding: 48px;">
                             <i class="fas fa-users"></i>
                             <p>Nessun docente registrato</p>
                         </div>
@@ -202,97 +495,187 @@
                 </div>
             </div>
             
-            <div class="content-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">KPI Economici</h3>
-                    </div>
-                    <div class="card-body">
-                        <div style="background: var(--success-light); border-radius: 8px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--success);">
-                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">{{ economic.monthly_revenue if economic else 599 }}</div>
-                            <div style="font-size: 0.875rem; color: var(--text-secondary);">Ricavo Mensile</div>
-                            <div style="font-size: 0.75rem; color: var(--success); margin-top: 4px;">
-                                <i class="fas fa-arrow-up"></i> Piano Professional attivo
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-                            <div style="background: var(--bg-light); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">{{ economic.cost_per_student if economic else 0 }}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);">Costo/Studente</div>
-                            </div>
-                            <div style="background: var(--bg-light); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ economic.yoy_growth if economic else 18 }}%</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);">Crescita YoY</div>
-                            </div>
-                        </div>
+            <div class="section-divider"></div>
+            
+            <!-- FINANCIAL SECTION -->
+            <div class="section-header">
+                <div class="section-icon green">
+                    <i class="fas fa-euro-sign"></i>
+                </div>
+                <div>
+                    <div class="section-title">Performance Economica</div>
+                    <div class="section-subtitle">KPI finanziari e metriche di costo</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="revenue-highlight">
+                    <div class="revenue-value">{{ economic.monthly_revenue if economic else 599 }}</div>
+                    <div class="revenue-label">Canone Mensile Piano Professional</div>
+                    <div class="revenue-badge">
+                        <i class="fas fa-check-circle"></i>
+                        Abbonamento Attivo
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Engagement Piattaforma</h3>
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Metriche Economiche</span>
                     </div>
-                    <div class="card-body">
-                        <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Engagement 7gg</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--success);">{{ kpis.engagement_rate if kpis else 0 }}%</span>
+                    <div style="padding: 24px;">
+                        <div class="metric-row">
+                            <div class="metric-info">
+                                <div class="metric-icon">
+                                    <i class="fas fa-user-graduate"></i>
                                 </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill success" style="width: {{ kpis.engagement_rate if kpis else 0 }}%;"></div>
-                                </div>
+                                <span class="metric-name">Costo per Studente</span>
                             </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Interazioni AI Coach</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">{{ kpis.ai_total_interactions if kpis else 0 }}</span>
+                            <span class="metric-value" style="color: #2563eb;">{{ economic.cost_per_student if economic else 0 }}</span>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-info">
+                                <div class="metric-icon">
+                                    <i class="fas fa-chart-line"></i>
                                 </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill accent" style="width: {{ [kpis.ai_total_interactions if kpis else 0, 100]|min }}%;"></div>
-                                </div>
+                                <span class="metric-name">Crescita Anno su Anno</span>
                             </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Gamification</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--warning);">{{ kpis.gamification_rate if kpis else 0 }}%</span>
+                            <span class="metric-value" style="color: #059669;">+{{ economic.yoy_growth if economic else 18 }}%</span>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-info">
+                                <div class="metric-icon">
+                                    <i class="fas fa-receipt"></i>
                                 </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill warning" style="width: {{ kpis.gamification_rate if kpis else 0 }}%;"></div>
-                                </div>
+                                <span class="metric-name">Piano Attivo</span>
                             </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Genitori Attivi</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">{{ kpis.parent_engagement if kpis else 0 }}%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: {{ kpis.parent_engagement if kpis else 0 }}%; background: var(--text-muted);"></div>
-                                </div>
-                            </div>
+                            <span class="metric-value">Professional</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="content-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Trend Ricavi</h3>
+            <div class="section-divider"></div>
+            
+            <!-- ENGAGEMENT SECTION -->
+            <div class="section-header">
+                <div class="section-icon amber">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div>
+                    <div class="section-title">Engagement Piattaforma</div>
+                    <div class="section-subtitle">Utilizzo e coinvolgimento degli utenti</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Metriche di Utilizzo</span>
+                        <span class="card-enhanced-badge">Ultimi 7 giorni</span>
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
+                    <div style="padding: 24px;">
+                        <div class="metric-row">
+                            <div class="metric-info">
+                                <div class="metric-icon" style="background: #dbeafe; color: #2563eb;">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span class="metric-name">Tasso di Engagement</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div class="progress-enhanced">
+                                    <div class="progress-enhanced-fill" style="width: {{ kpis.engagement_rate if kpis else 0 }}%; background: linear-gradient(90deg, #2563eb, #3b82f6);"></div>
+                                </div>
+                                <span class="metric-value" style="color: #2563eb;">{{ kpis.engagement_rate if kpis else 0 }}%</span>
+                            </div>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-info">
+                                <div class="metric-icon" style="background: #fef3c7; color: #d97706;">
+                                    <i class="fas fa-gamepad"></i>
+                                </div>
+                                <span class="metric-name">Partecipazione Gamification</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div class="progress-enhanced">
+                                    <div class="progress-enhanced-fill" style="width: {{ kpis.gamification_rate if kpis else 0 }}%; background: linear-gradient(90deg, #d97706, #f59e0b);"></div>
+                                </div>
+                                <span class="metric-value" style="color: #d97706;">{{ kpis.gamification_rate if kpis else 0 }}%</span>
+                            </div>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-info">
+                                <div class="metric-icon" style="background: #d1fae5; color: #059669;">
+                                    <i class="fas fa-user-friends"></i>
+                                </div>
+                                <span class="metric-name">Genitori Attivi</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div class="progress-enhanced">
+                                    <div class="progress-enhanced-fill" style="width: {{ kpis.parent_engagement if kpis else 0 }}%; background: linear-gradient(90deg, #059669, #10b981);"></div>
+                                </div>
+                                <span class="metric-value" style="color: #059669;">{{ kpis.parent_engagement if kpis else 0 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">AI Coach Analytics</span>
+                        <span class="card-enhanced-badge">Ultimi 30 giorni</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="text-align: center; padding: 24px; background: linear-gradient(135deg, #ede9fe, #ddd6fe); border-radius: 12px;">
+                                <div style="font-size: 2.5rem; font-weight: 800; color: #7c3aed;">{{ kpis.ai_total_interactions if kpis else 0 }}</div>
+                                <div style="font-size: 0.8125rem; color: #6b7280; margin-top: 4px;">Interazioni Totali</div>
+                            </div>
+                            <div style="text-align: center; padding: 24px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-radius: 12px;">
+                                <div style="font-size: 2.5rem; font-weight: 800; color: #2563eb;">{{ kpis.ai_unique_users if kpis else 0 }}</div>
+                                <div style="font-size: 0.8125rem; color: #6b7280; margin-top: 4px;">Utenti Unici</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 8px; text-align: center;">
+                            <i class="fas fa-robot" style="font-size: 1.25rem; color: #7c3aed; margin-bottom: 8px;"></i>
+                            <div style="font-size: 0.8125rem; color: #6b7280;">L'AI Coach supporta gli studenti con tutoring personalizzato</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-divider"></div>
+            
+            <!-- CHARTS SECTION -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-chart-area"></i>
+                </div>
+                <div>
+                    <div class="section-title">Visualizzazioni Dati</div>
+                    <div class="section-subtitle">Trend e distribuzioni</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Trend Abbonamento</span>
+                        <span class="card-enhanced-badge">6 Mesi</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="height: 240px;">
                             <canvas id="revenueChart"></canvas>
                         </div>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Distribuzione Voti</h3>
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Distribuzione Voti</span>
+                        <span class="card-enhanced-badge">Tutti gli studenti</span>
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
+                    <div style="padding: 24px;">
+                        <div style="height: 240px;">
                             <canvas id="gradesChart"></canvas>
                         </div>
                     </div>
@@ -309,14 +692,18 @@
         new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: ['Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                labels: ['Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'],
                 datasets: [{
-                    label: 'Ricavi',
+                    label: 'Canone',
                     data: [509, 520, 540, 560, 580, 599],
                     borderColor: '#059669',
                     backgroundColor: 'rgba(5, 150, 105, 0.1)',
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointBackgroundColor: '#059669',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             },
             options: {
@@ -329,7 +716,9 @@
                     y: {
                         beginAtZero: false,
                         min: 400,
-                        grid: { color: '#e5e7eb' }
+                        max: 700,
+                        grid: { color: '#f3f4f6' },
+                        ticks: { callback: function(value) { return '' + value; } }
                     },
                     x: {
                         grid: { display: false }
@@ -337,24 +726,6 @@
                 }
             }
         });
-        
-        {% set excellent = 0 %}
-        {% set good = 0 %}
-        {% set sufficient = 0 %}
-        {% set insufficient = 0 %}
-        {% if grade_distribution %}
-            {% for g in grade_distribution %}
-                {% if 'Eccellente' in g.category %}
-                    {% set excellent = g.count %}
-                {% elif 'Buono' in g.category %}
-                    {% set good = g.count %}
-                {% elif 'Sufficiente' in g.category %}
-                    {% set sufficient = g.count %}
-                {% else %}
-                    {% set insufficient = g.count %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
         
         const gradesCtx = document.getElementById('gradesChart').getContext('2d');
         new Chart(gradesCtx, {
@@ -364,16 +735,22 @@
                 datasets: [{
                     data: [25, 45, 20, 10],
                     backgroundColor: ['#059669', '#2563eb', '#d97706', '#dc2626'],
-                    borderWidth: 0
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '65%',
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { padding: 16 }
+                        labels: { 
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
                     }
                 }
             }
