@@ -76,7 +76,11 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - **Gestalt Principles**: Improved proximity grouping, consistent spacing rhythm, similarity in interactive states
   - **Accessibility**: Focus-visible outlines, reduced-motion support, WCAG-compliant contrast
   - **PWA**: Created offline.html fallback page, updated service worker cache versioning
-- **Telemetry Resilience**: Added user existence check before session creation to prevent ForeignKeyViolation errors
+- **Telemetry Resilience Architecture**: Centralized user validation at API route level (telemetry_routes.py):
+  - All telemetry endpoints validate user existence BEFORE database operations
+  - Invalid sessions return 401 with `require_reauth: true` flag
+  - Duplicate database queries eliminated from telemetry_engine.py
+  - Prevents ForeignKeyViolation errors at database layer
 - **Principal Dashboard (December 2025)**: Comprehensive executive dashboard at `/dashboard/dirigente`:
   - **School Overview**: Total students, teachers, classes, average student age, active users today
   - **Classes Analytics**: Student count, average grade, attendance rate per class with color-coded badges
