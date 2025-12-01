@@ -70,6 +70,16 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
 - **XP Reward System**: Chat interactions award 5-50 XP with automatic rank progression and gamification context refresh
 - **Test Accounts Created**: Student (test123), Teacher (prof123), Admin (admin123) accounts with proper bcrypt password hashes
 - **Status**: Gemini API key active, chatbot powered by Gemini 2.0-flash model, telemetry batch endpoint disabled to fix schema issues
+- **Principal Dashboard (December 2025)**: Comprehensive executive dashboard at `/dashboard/dirigente`:
+  - **School Overview**: Total students, teachers, classes, average student age, active users today
+  - **Classes Analytics**: Student count, average grade, attendance rate per class with color-coded badges
+  - **Teachers with Anonymous Ratings**: 5-star rating system from students, rating count, subject display
+  - **Economic KPIs**: Monthly revenue (€599/month Professional tier), cost per student, revenue trend chart
+  - **Platform Engagement**: 7-day engagement rate, AI Coach usage stats, gamification participation, parent engagement
+  - **Visualizations**: Chart.js for revenue trends and grade distribution, bento grid layout
+  - **Security**: Full tenant isolation - ALL queries filter by scuola_id, no cross-school data exposure
+  - **Test Account**: dirigente@skaila.app / password123 (School ID: 1)
+  - **Database**: teacher_ratings table for anonymous student feedback
 
 # External Dependencies
 -   **Flask**: Web framework
