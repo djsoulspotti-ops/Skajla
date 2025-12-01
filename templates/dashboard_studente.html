@@ -236,19 +236,19 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">Media Generale</div>
-                        <div class="stat-value {% if media_generale >= 7 %}success{% elif media_generale >= 6 %}warning{% else %}danger{% endif %}">{{ media_generale|round(1) if media_generale else 'N/A' }}</div>
+                        <div class="stat-value {% if stats.media_voti >= 7 %}success{% elif stats.media_voti >= 6 %}warning{% else %}danger{% endif %}">{{ stats.media_voti|round(1) if stats.media_voti else 'N/A' }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Frequenza</div>
-                        <div class="stat-value accent">{{ frequenza_percentuale|round(0)|int if frequenza_percentuale else 0 }}%</div>
+                        <div class="stat-value accent">{{ stats.presenze_percentuale|round(0)|int if stats.presenze_percentuale else 0 }}%</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">XP Totali</div>
-                        <div class="stat-value" style="color: #f59e0b;">{{ gamification.total_xp if gamification else 0 }}</div>
+                        <div class="stat-value" style="color: #f59e0b;">{{ stats.total_xp if stats.total_xp else 0 }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Streak</div>
-                        <div class="stat-value">{{ gamification.streak if gamification else 0 }} gg</div>
+                        <div class="stat-value">{{ stats.current_streak if stats.current_streak else 0 }} gg</div>
                     </div>
                 </div>
                 
@@ -371,7 +371,7 @@
                             <p class="page-subtitle">Il tuo tutor personale</p>
                         </div>
                         <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a1a1a; padding: 8px 16px; border-radius: 100px; font-weight: 700; font-size: 0.875rem;">
-                            <i class="fas fa-star"></i> <span id="chatXP">{{ gamification.total_xp if gamification else 0 }}</span> XP
+                            <i class="fas fa-star"></i> <span id="chatXP">{{ stats.total_xp if stats.total_xp else 0 }}</span> XP
                         </div>
                     </div>
                 </div>
@@ -471,18 +471,18 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div>
                             <div style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em;">Livello Attuale</div>
-                            <div style="font-size: 1.5rem; font-weight: 700;">{{ gamification.rank if gamification else 'Germoglio' }}</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">Livello {{ stats.current_level if stats.current_level else 1 }}</div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 2rem; font-weight: 700;">{{ gamification.total_xp if gamification else 0 }} XP</div>
+                            <div style="font-size: 2rem; font-weight: 700;">{{ stats.total_xp if stats.total_xp else 0 }} XP</div>
                         </div>
                     </div>
                     <div class="xp-bar">
-                        <div class="xp-fill" style="width: {{ ((gamification.total_xp or 0) % 1000) / 10 }}%;"></div>
+                        <div class="xp-fill" style="width: {{ ((stats.total_xp or 0) % 1000) / 10 }}%;"></div>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.75rem; opacity: 0.8;">
                         <span>Prossimo livello</span>
-                        <span>{{ 1000 - ((gamification.total_xp or 0) % 1000) }} XP rimanenti</span>
+                        <span>{{ 1000 - ((stats.total_xp or 0) % 1000) }} XP rimanenti</span>
                     </div>
                 </div>
                 
@@ -498,7 +498,7 @@
                                 </div>
                                 <div class="list-content">
                                     <div class="list-title">Streak 7 giorni</div>
-                                    <div class="list-subtitle">{{ gamification.streak if gamification else 0 }}/7 giorni completati</div>
+                                    <div class="list-subtitle">{{ stats.current_streak if stats.current_streak else 0 }}/7 giorni completati</div>
                                 </div>
                                 <span class="badge badge-warning">+100 XP</span>
                             </div>
