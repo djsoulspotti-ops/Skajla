@@ -43,6 +43,12 @@ A Smart Calendar & Agenda System offers personal and school-wide scheduling with
 SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) features, including a TikTok-style vertical feed, offline support, and push notifications. The SKAILA Connect module is an "Opportunity Marketplace" for PCTO placements, featuring dynamic student portfolios, smart matching, and a digital PCTO workflow engine for compliance and paperless operations. A Parent Dashboard provides zero-friction child monitoring with auto-generated student codes and real-time academic and attendance stats.
 
 # Recent Updates (December 2025)
+- **Teams-Style Single-Page Navigation**: Student dashboard now uses panel-based navigation like Microsoft Teams:
+  - Clicking sidebar items switches content panels WITHOUT page reload
+  - Smooth CSS slide-in transitions between panels
+  - Four main panels: Dashboard, AI Coach, Calendario, Gamification
+  - Active state styling on sidebar items
+  - Mobile bottom navigation also uses panel switching
 - **Enhanced Student Dashboard**: Complete redesign with Bento Grid layout featuring:
   - Real-time grades table with color-coded badges (excellent/good/pass/fail)
   - Subject averages with icons and automatic media calculation
@@ -51,6 +57,12 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - Upcoming events/tests from calendar
   - Quick stats cards (media generale, frequenza %, XP totali, streak)
   - All data is read-only from voti and presenze tables with tenant isolation (scuola_id filtering)
+- **Embedded AI Coach Panel**: AI Chat interface integrated directly into student dashboard as a panel:
+  - Full chat interface with message input and send button
+  - Welcome card with suggestions and gamification stats
+  - XP badge showing current XP earned from chat interactions
+  - Message history area with typing indicator
+  - Auto-focus on input when switching to panel
 - **Gemini 3.0 AI Integration**: Upgraded chatbot from Gemini 2.5-flash to Gemini 3.0-flash for enhanced conversational capabilities
 - **XP Reward System**: Chat interactions award 5-50 XP with automatic rank progression and gamification context refresh
 - **Test Accounts Created**: Student (test123), Teacher (prof123), Admin (admin123) accounts with proper bcrypt password hashes
