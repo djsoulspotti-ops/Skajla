@@ -487,6 +487,7 @@ class TelemetryEngine:
                 INSERT INTO telemetry_sessions (
                     session_id, user_id, device_type, started_at
                 ) VALUES (%s, %s, %s, %s)
+                RETURNING session_id
             ''', (session_id, user_id, device_type, datetime.now()))
             
             if not result or result.rowcount == 0:
