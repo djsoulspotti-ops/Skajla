@@ -194,7 +194,41 @@ class SkailaApp:
         def index():
             if 'user_id' in session:
                 return redirect('/dashboard')
-            return render_template('index.html')
+            
+            # Statistiche pubbliche per la homepage
+            try:
+                total_users = db_manager.query('''
+                    SELECT COUNT(*) as count FROM utenti WHERE attivo = true
+                ''', one=True)
+                
+                total_schools = db_manager.query('''
+                    SELECT COUNT(*) as count FROM scuole WHERE attiva = true
+                ''', one=True)
+                
+                total_students = db_manager.query('''
+                    SELECT COUNT(*) as count FROM utenti WHERE ruolo = 'studente' AND attivo = true
+                ''', one=True)
+                
+                ai_interactions = db_manager.query('''
+                    SELECT COUNT(*) as count FROM ai_conversations
+                ''', one=True)
+                
+                stats = {
+                    'total_users': total_users['count'] if total_users else 0,
+                    'total_schools': total_schools['count'] if total_schools else 0,
+                    'total_students': total_students['count'] if total_students else 0,
+                    'ai_interactions': ai_interactions['count'] if ai_interactions else 0
+                }
+            except Exception as e:
+                print(f"Error loading homepage stats: {e}")
+                stats = {
+                    'total_users': 0,
+                    'total_schools': 0,
+                    'total_students': 0,
+                    'ai_interactions': 0
+                }
+            
+            return render_template('index.html', stats=stats)
 
         @self.app.route('/chat')
         def chat():

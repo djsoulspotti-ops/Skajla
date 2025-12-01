@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SKAILA - La piattaforma educativa che rende lo studio coinvolgente con AI e gamification.">
-    <title>SKAILA - Studia Smart</title>
+    <meta name="description" content="SKAILA - La piattaforma educativa enterprise per scuole italiane. AI tutoring, gamification e analytics avanzati.">
+    <title>SKAILA - Enterprise Education Platform</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -17,7 +17,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #FAFBFC;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
             color: #1a1a2e;
             min-height: 100vh;
         }
@@ -27,26 +27,41 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 1rem 2rem;
+            padding: 1rem 3rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             z-index: 100;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 800;
-            color: #1e3a5f;
+            color: #0f172a;
             text-decoration: none;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
         }
 
         .btn {
-            padding: 0.7rem 1.5rem;
+            padding: 0.75rem 1.75rem;
             border-radius: 10px;
             font-weight: 600;
             font-size: 0.95rem;
@@ -54,13 +69,14 @@
             transition: all 0.2s ease;
             cursor: pointer;
             border: none;
-            background: #1e3a5f;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
             color: white;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
         }
 
         .btn:hover {
-            background: #0f2744;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
         }
 
         .hero {
@@ -70,7 +86,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 6rem 2rem 4rem;
+            padding: 7rem 2rem 4rem;
             position: relative;
             overflow: hidden;
         }
@@ -78,86 +94,187 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(30, 58, 95, 0.03) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.03) 0%, transparent 70%);
             z-index: 0;
         }
 
         .hero-content {
             position: relative;
             z-index: 1;
-            max-width: 700px;
+            max-width: 800px;
             animation: fadeInUp 0.8s ease-out;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            gap: 0.6rem;
+            padding: 0.6rem 1.25rem;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
             border-radius: 50px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            color: #92400e;
-            margin-bottom: 1.5rem;
+            color: #1e40af;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .hero-badge i {
+            font-size: 0.9rem;
         }
 
         .hero-title {
-            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-size: clamp(2.8rem, 7vw, 4.5rem);
             font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.25rem;
-            letter-spacing: -1.5px;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
             color: #0f172a;
         }
 
-        .hero-title span {
-            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+        .hero-title .gradient {
+            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 50%, #6366f1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .hero-subtitle {
-            font-size: 1.2rem;
-            color: #64748b;
-            line-height: 1.6;
-            margin-bottom: 2.5rem;
-            max-width: 500px;
+            font-size: 1.25rem;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 3rem;
+            max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        .btn-large {
-            padding: 1rem 2.5rem;
-            font-size: 1.05rem;
-            border-radius: 14px;
-            display: inline-flex;
+        .stats-section {
+            padding: 4rem 2rem;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .stats-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .stats-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .stats-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+        }
+
+        .stats-header p {
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.4rem;
+        }
+
+        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #2563eb; }
+        .stat-icon.green { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #059669; }
+        .stat-icon.purple { background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%); color: #7c3aed; }
+        .stat-icon.gold { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #d97706; }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 500;
         }
 
         .features {
             padding: 5rem 2rem;
-            background: white;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+
+        .features-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+
+        .features-header h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+        }
+
+        .features-header p {
+            font-size: 1.1rem;
+            color: #64748b;
         }
 
         .features-grid {
-            max-width: 900px;
-            margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
         }
 
         .feature {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
             text-align: center;
-            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
             animation: fadeInUp 0.6s ease-out;
             animation-fill-mode: both;
         }
@@ -166,51 +283,139 @@
         .feature:nth-child(2) { animation-delay: 0.2s; }
         .feature:nth-child(3) { animation-delay: 0.3s; }
 
+        .feature:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+        }
+
         .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-radius: 16px;
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 1.5rem;
-            color: #1e3a5f;
+            margin: 0 auto 1.5rem;
+            font-size: 1.75rem;
+            color: white;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
         }
 
         .feature h3 {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             color: #0f172a;
         }
 
         .feature p {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #64748b;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        .footer {
-            padding: 2rem;
+        .trust-section {
+            padding: 4rem 2rem;
+            background: white;
             text-align: center;
-            background: #f8fafc;
             border-top: 1px solid #e2e8f0;
         }
 
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .trust-badge i {
+            font-size: 1.25rem;
+            color: #22c55e;
+        }
+
+        .footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            background: #0f172a;
+            color: white;
+        }
+
+        .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
         .footer p {
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
             .navbar {
-                padding: 1rem;
+                padding: 1rem 1.5rem;
+            }
+
+            .hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
 
             .features-grid {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .trust-badges {
+                flex-direction: column;
                 gap: 1.5rem;
             }
         }
@@ -218,69 +423,154 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo">SKAILA</a>
-        <a href="/login" class="btn">Accedi</a>
+        <a href="/" class="logo">
+            <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+            SKAILA
+        </a>
+        <a href="/login" class="btn">
+            <i class="fas fa-sign-in-alt"></i> Accedi
+        </a>
     </nav>
 
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge">
-                <i class="fas fa-sparkles"></i>
-                Potenziato da AI
+                <i class="fas fa-bolt"></i>
+                Enterprise Education Platform
             </div>
             <h1 class="hero-title">
-                Studia <span>meglio</span>,<br>non di più
+                La scuola del futuro,<br><span class="gradient">oggi</span>
             </h1>
             <p class="hero-subtitle">
-                La piattaforma che trasforma lo studio in un gioco. 
-                AI coach personale, sfide, XP e classifiche.
+                Piattaforma enterprise per scuole italiane. AI tutoring personalizzato, 
+                gamification avanzata e analytics in tempo reale per studenti, docenti e dirigenti.
             </p>
-            <a href="/login" class="btn btn-large">
-                <i class="fas fa-arrow-right"></i>
-                Accedi
-            </a>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stats-header">
+                <h2>SKAILA in numeri</h2>
+                <p>Una community in crescita che trasforma l'educazione</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value">{{ stats.total_users | default(0) }}+</div>
+                    <div class="stat-label">Utenti Attivi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div class="stat-value">{{ stats.total_schools | default(0) }}+</div>
+                    <div class="stat-label">Scuole Partner</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-value">{{ stats.total_students | default(0) }}+</div>
+                    <div class="stat-label">Studenti</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon gold">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="stat-value">{{ stats.ai_interactions | default(0) }}+</div>
+                    <div class="stat-label">Interazioni AI</div>
+                </div>
+            </div>
         </div>
     </section>
 
     <section class="features">
-        <div class="features-grid">
-            <div class="feature">
-                <div class="feature-icon">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h3>AI Coach 24/7</h3>
-                <p>Un tutor personale sempre disponibile che ti aiuta a capire qualsiasi argomento</p>
+        <div class="features-container">
+            <div class="features-header">
+                <h2>Perche scegliere SKAILA</h2>
+                <p>Tutto quello che serve per una scuola moderna e connessa</p>
             </div>
-            <div class="feature">
-                <div class="feature-icon">
-                    <i class="fas fa-gamepad"></i>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI Coach Personale</h3>
+                    <p>Tutor AI disponibile 24/7 che si adatta allo stile di apprendimento di ogni studente con Gemini 2.0</p>
                 </div>
-                <h3>Gamification</h3>
-                <p>Guadagna XP, sali di livello e sblocca badge mentre studi</p>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Gamification Avanzata</h3>
+                    <p>Sistema a 9 livelli con XP, badge, sfide giornaliere e classifiche per motivare lo studio</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Analytics per Dirigenti</h3>
+                    <p>Dashboard executive con KPI economici, performance docenti e metriche di engagement</p>
+                </div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3>Progressi Real-time</h3>
-                <p>Monitora voti, presenze e performance in un'unica dashboard</p>
+        </div>
+    </section>
+
+    <section class="trust-section">
+        <div class="trust-badges">
+            <div class="trust-badge">
+                <i class="fas fa-shield-alt"></i>
+                GDPR Compliant
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-lock"></i>
+                Crittografia End-to-End
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-server"></i>
+                Server in EU
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-headset"></i>
+                Supporto Dedicato
             </div>
         </div>
     </section>
 
     <footer class="footer">
-        <p>SKAILA - La scuola del futuro, oggi</p>
+        <div class="footer-content">
+            <div class="footer-logo">SKAILA</div>
+            <p>Enterprise Education Platform</p>
+            <p>&copy; 2025 SKAILA. Tutti i diritti riservati.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Termini di Servizio</a>
+                <a href="#">Contatti</a>
+            </div>
+        </div>
     </footer>
 </body>
 </html>
