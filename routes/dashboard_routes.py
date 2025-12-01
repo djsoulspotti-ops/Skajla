@@ -45,46 +45,46 @@ def dashboard_studente():
     # Ottieni feature abilitate per questa scuola
     enabled_features = school_features_manager.get_school_features(school_id)
 
-    # ========== VOTI REALI DAL DATABASE ==========
-    # Ultimi voti dello studente
+    # ========== VOTI REALI DAL DATABASE (TENANT-ISOLATED) ==========
+    # Ultimi voti dello studente - filtro per scuola_id per isolamento tenant
     voti = db_manager.query('''
         SELECT materia, voto, tipo_valutazione, data, note
         FROM voti 
-        WHERE studente_id = %s 
+        WHERE studente_id = %s AND scuola_id = %s
         ORDER BY data DESC 
         LIMIT 10
-    ''', (user_id,)) or []
+    ''', (user_id, school_id)) or []
 
-    # Media voti per materia
+    # Media voti per materia - filtro per scuola_id
     medie_materie = db_manager.query('''
         SELECT materia, 
                ROUND(AVG(voto)::numeric, 2) as media, 
                COUNT(*) as num_voti,
                MAX(data) as ultimo_voto
         FROM voti
-        WHERE studente_id = %s
+        WHERE studente_id = %s AND scuola_id = %s
         GROUP BY materia
         ORDER BY materia
-    ''', (user_id,)) or []
+    ''', (user_id, school_id)) or []
 
-    # Media generale
+    # Media generale - filtro per scuola_id
     media_generale = db_manager.query('''
         SELECT ROUND(AVG(voto)::numeric, 2) as media_generale,
                COUNT(*) as totale_voti
         FROM voti
-        WHERE studente_id = %s
-    ''', (user_id,), one=True) or {'media_generale': 0, 'totale_voti': 0}
+        WHERE studente_id = %s AND scuola_id = %s
+    ''', (user_id, school_id), one=True) or {'media_generale': 0, 'totale_voti': 0}
 
-    # Trend voti ultimi 30 giorni per grafico
+    # Trend voti ultimi 90 giorni per grafico - filtro per scuola_id
     voti_trend = db_manager.query('''
         SELECT data, voto, materia
         FROM voti
-        WHERE studente_id = %s 
+        WHERE studente_id = %s AND scuola_id = %s
         AND data >= CURRENT_DATE - INTERVAL '90 days'
         ORDER BY data ASC
-    ''', (user_id,)) or []
+    ''', (user_id, school_id)) or []
 
-    # ========== PRESENZE/ASSENZE DAL DATABASE ==========
+    # ========== PRESENZE/ASSENZE DAL DATABASE (TENANT-ISOLATED) ==========
     presenze_stats = db_manager.query('''
         SELECT 
             COUNT(*) as giorni_totali,
@@ -93,8 +93,8 @@ def dashboard_studente():
             SUM(CASE WHEN giustificato = true THEN 1 ELSE 0 END) as giustificate,
             SUM(CASE WHEN ritardo = true THEN 1 ELSE 0 END) as ritardi
         FROM presenze
-        WHERE studente_id = %s
-    ''', (user_id,), one=True) or {
+        WHERE studente_id = %s AND scuola_id = %s
+    ''', (user_id, school_id), one=True) or {
         'giorni_totali': 0, 'presenze': 0, 'assenze': 0, 
         'giustificate': 0, 'ritardi': 0
     }
@@ -106,14 +106,14 @@ def dashboard_studente():
             (presenze_stats['presenze'] or 0) / presenze_stats['giorni_totali'] * 100, 1
         )
 
-    # Ultime presenze/assenze
+    # Ultime presenze/assenze - filtro per scuola_id
     ultime_presenze = db_manager.query('''
         SELECT data, presente, giustificato, ritardo, note
         FROM presenze
-        WHERE studente_id = %s
+        WHERE studente_id = %s AND scuola_id = %s
         ORDER BY data DESC
         LIMIT 10
-    ''', (user_id,)) or []
+    ''', (user_id, school_id)) or []
 
     # ========== PROSSIMI EVENTI (verifiche, compiti, scadenze) ==========
     upcoming_events = db_manager.query('''
