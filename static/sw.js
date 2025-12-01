@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
   '/static/css/dashboard-premium.css',
   '/static/css/mobile-first.css',
   '/static/js/telemetry-tracker.js',
-  '/offline.html'
+  '/static/offline.html'
 ];
 
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg', '.gif', '.webp'];
@@ -111,7 +111,7 @@ self.addEventListener('fetch', (event) => {
           }
           
           if (request.headers.get('accept').includes('text/html')) {
-            return caches.match('/offline.html');
+            return caches.match('/static/offline.html');
           }
         });
       });

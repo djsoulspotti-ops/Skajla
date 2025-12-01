@@ -285,10 +285,14 @@ class SKAILABrain:
         streak = profile['current_streak']
         last_activity = profile.get('last_activity_date')
 
-        # Calcola se è emergenza (non attivo oggi)
         is_today = False
         if last_activity:
-            last_date = datetime.strptime(last_activity, '%Y-%m-%d').date()
+            if isinstance(last_activity, str):
+                last_date = datetime.strptime(last_activity, '%Y-%m-%d').date()
+            elif hasattr(last_activity, 'date'):
+                last_date = last_activity.date() if callable(getattr(last_activity, 'date', None)) else last_activity
+            else:
+                last_date = last_activity
             is_today = last_date == datetime.now().date()
 
         return {

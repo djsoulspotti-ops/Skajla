@@ -97,10 +97,9 @@ def track_single_event():
         }), 500
 
 
-# DISABLED: Batch endpoint causing database schema mismatch errors
-# @telemetry_bp.route('/events/batch', methods=['POST'])
-# @require_login
-# def track_batch_events_disabled():
+@telemetry_bp.route('/events/batch', methods=['POST'])
+@require_auth
+def track_batch_events():
     """
     Track multiple telemetry events in batch (for efficiency)
     
