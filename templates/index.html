@@ -1,358 +1,482 @@
 <!DOCTYPE html>
-<html lang="it" class="home-page">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SKAILA - Piattaforma enterprise per la gestione completa di istituti scolastici. Dashboard analitiche, AI coaching, gamification e collaborazione in tempo reale.">
-    <title>SKAILA - Enterprise Education Platform</title>
+    <meta name="description" content="SKAILA - La piattaforma educativa che rende lo studio coinvolgente con AI e gamification.">
+    <title>SKAILA - Studia Smart</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Stylesheets -->
-    <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/home.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #FAFBFC;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #64748b;
+        }
+
+        .btn-ghost:hover {
+            color: #1e3a5f;
+            background: #f1f5f9;
+        }
+
+        .btn-primary {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0f2744;
+            transform: translateY(-1px);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(30, 58, 95, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.25rem;
+            letter-spacing: -1.5px;
+            color: #0f172a;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1e3a5f;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #1e3a5f;
+            background: #f8fafc;
+        }
+
+        /* Features */
+        .features {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .features-grid {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: #1e3a5f;
+        }
+
+        .feature h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .feature p {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Roles Section */
+        .roles {
+            padding: 5rem 2rem;
+            background: #f8fafc;
+        }
+
+        .roles-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .roles-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .roles-header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .roles-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .role-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: transparent;
+        }
+
+        .role-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .role-icon.student { background: #dbeafe; color: #1d4ed8; }
+        .role-icon.teacher { background: #dcfce7; color: #15803d; }
+        .role-icon.parent { background: #fef3c7; color: #b45309; }
+        .role-icon.admin { background: #f3e8ff; color: #7c3aed; }
+
+        .role-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #0f172a;
+        }
+
+        .role-content p {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer p {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-large {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-content {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .feature, .role-card {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .feature:nth-child(1) { animation-delay: 0.1s; }
+        .feature:nth-child(2) { animation-delay: 0.2s; }
+        .feature:nth-child(3) { animation-delay: 0.3s; }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="enterprise-header" id="header">
-        <div class="container">
-            <nav class="header-nav">
-                <a href="/" class="brand">
-                    <div class="brand-logo">SKAILA</div>
-                    <div class="brand-tagline">Enterprise Education</div>
-                </a>
-                
-                <!-- Mobile Menu Toggle -->
-                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                
-                <!-- Navigation Menu -->
-                <ul class="nav-menu" id="navMenu">
-                    <li><a href="#funzionalita" class="nav-link">Funzionalità</a></li>
-                    <li><a href="#piattaforma" class="nav-link">Piattaforma</a></li>
-                    <li><a href="/login" class="btn-hero-primary">Accedi</a></li>
-                </ul>
-            </nav>
+    <nav class="navbar">
+        <a href="/" class="logo">SKAILA</a>
+        <div class="nav-buttons">
+            <a href="/login" class="btn btn-ghost">Accedi</a>
+            <a href="/register" class="btn btn-primary">Inizia Gratis</a>
         </div>
-    </header>
+    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-enterprise">
-        <div class="hero-pattern"></div>
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Piattaforma Enterprise Certificata</span>
-                </div>
-                <h1 class="hero-title">
-                    Gestione Educativa <span class="highlight">Professionale</span>
-                </h1>
-                <p class="hero-description">
-                    Sistema integrato per la gestione completa di istituti scolastici e organizzazioni educative. Dashboard analitiche, reporting automatizzato e strumenti di collaborazione enterprise-grade.
-                </p>
-                <div class="hero-buttons">
-                    <a href="/register" class="btn-hero-primary">
-                        <i class="fas fa-rocket"></i>
-                        <span>Inizia Ora</span>
-                    </a>
-                    <a href="#funzionalita" class="btn-hero-secondary">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Scopri di Più</span>
-                    </a>
-                </div>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-sparkles"></i>
+                Potenziato da AI
             </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">100+</div>
-                    <div class="stat-label">Utenti Attivi</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">Supporto AI</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">99.9%</div>
-                    <div class="stat-label">Uptime</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">GDPR</div>
-                    <div class="stat-label">Compliant</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="funzionalita" class="services-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-subtitle">I NOSTRI SERVIZI</div>
-                <h2 class="section-title">Strumenti Potenti per l'Educazione Moderna</h2>
-                <p class="section-description">
-                    Scopri tutti i servizi integrati nella piattaforma SKAILA per una gestione scolastica completa
-                </p>
-            </div>
-            
-            <div class="services-grid">
-                <a href="/chat" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h3 class="service-title">Messaggistica Unificata</h3>
-                    <p class="service-description">
-                        Sistema di chat in tempo reale con canali dedicati per classi, materie e comunicazioni 1-to-1. Condivisione file e notifiche smart.
-                    </p>
-                    <div class="service-cta">
-                        <span>Scopri di più</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
+            <h1 class="hero-title">
+                Studia <span>meglio</span>,<br>non di più
+            </h1>
+            <p class="hero-subtitle">
+                La piattaforma che trasforma lo studio in un gioco. 
+                AI coach personale, sfide, XP e classifiche.
+            </p>
+            <div class="hero-cta">
+                <a href="/register" class="btn btn-primary btn-large">
+                    <i class="fas fa-rocket"></i>
+                    Inizia Ora
                 </a>
-
-                <a href="#piattaforma" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-users-cog"></i>
-                    </div>
-                    <h3 class="service-title">Gestione Multi-Ruolo</h3>
-                    <p class="service-description">
-                        Dashboard personalizzate per studenti, docenti, dirigenti e genitori. Permessi granulari e accesso sicuro ai dati.
-                    </p>
-                    <div class="service-cta">
-                        <span>Scopri di più</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-
-                <a href="/ai-chat" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3 class="service-title">AI Coach</h3>
-                    <p class="service-description">
-                        Assistente virtuale intelligente disponibile 24/7 per supporto allo studio, spiegazioni personalizzate e coaching soft skills.
-                    </p>
-                    <div class="service-cta">
-                        <span>Scopri di più</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-
-                <a href="/gamification" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                    <h3 class="service-title">Gamification</h3>
-                    <p class="service-description">
-                        Sistema completo di punti esperienza, livelli, achievement e sfide. Rendi l'apprendimento coinvolgente e motivante.
-                    </p>
-                    <div class="service-cta">
-                        <span>Scopri di più</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-
-                <a href="/bi/dashboard" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3 class="service-title">Analytics Avanzate</h3>
-                    <p class="service-description">
-                        Dashboard Business Intelligence con KPI in tempo reale, report automatizzati e visualizzazioni interattive.
-                    </p>
-                    <div class="service-cta">
-                        <span>Scopri di più</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-
-                <a href="/documentation" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <h3 class="service-title">Registro Elettronico</h3>
-                    <p class="service-description">
-                        Sistema completo di gestione presenze, voti, note disciplinari e comunicazioni scuola-famiglia integrate.
-                    </p>
-                    <div class="service-cta">
-                        <span>Scopri di più</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
+                <a href="/demo/dashboard/studente" class="btn btn-secondary btn-large">
+                    <i class="fas fa-play"></i>
+                    Prova Demo
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Platform Features Section -->
-    <section id="piattaforma" class="services-section" style="background: linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%);">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-subtitle">MODALITÀ DEMO</div>
-                <h2 class="section-title">Esplora SKAILA senza Registrazione</h2>
-                <p class="section-description">
-                    Accedi direttamente alle diverse sezioni della piattaforma per testare tutte le funzionalità
-                </p>
-            </div>
-            
-            <div class="services-grid">
-                <a href="/demo/dashboard/studente" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                    <h3 class="service-title">Dashboard Studente</h3>
-                    <p class="service-description">
-                        Esplora la dashboard studente con KPI cards, progressi di apprendimento e attività recenti.
-                    </p>
-                    <div class="service-cta">
-                        <span>Prova ora</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-
-                <a href="/demo/dashboard/professore" class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <h3 class="service-title">Dashboard Docente</h3>
-                    <p class="service-description">
-                        Gestione classi, studenti, valutazioni e comunicazioni con un'interfaccia intuitiva.
-                    </p>
-                    <div class="service-cta">
-                        <span>Prova ora</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-
-                <a href="/demo/dashboard/dirigente" class="service-card">
-                    <div class="service-icon" style="background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-500) 100%);">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <h3 class="service-title">Dashboard Dirigente</h3>
-                    <p class="service-description">
-                        Dashboard completa per dirigenti scolastici con panoramica istituto, KPI e gestione organizzativa.
-                    </p>
-                    <div class="service-cta">
-                        <span>Prova ora</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-enterprise">
-        <div class="container">
-            <div class="cta-content-enterprise">
-                <h2 class="cta-title-enterprise">Pronto a Rivoluzionare la Tua Scuola?</h2>
-                <p class="cta-description-enterprise">
-                    Unisciti alle centinaia di istituzioni che hanno già scelto SKAILA per modernizzare la loro gestione educativa
-                </p>
-                <div class="hero-buttons">
-                    <a href="/register" class="btn-hero-primary">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Registrati Gratuitamente</span>
-                    </a>
-                    <a href="/login" class="btn-hero-secondary">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Accedi al tuo Account</span>
-                    </a>
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
                 </div>
+                <h3>AI Coach 24/7</h3>
+                <p>Un tutor personale sempre disponibile che ti aiuta a capire qualsiasi argomento</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3>Gamification</h3>
+                <p>Guadagna XP, sali di livello e sblocca badge mentre studi</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Progressi Real-time</h3>
+                <p>Monitora voti, presenze e performance in un'unica dashboard</p>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer-enterprise">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">SKAILA</div>
-                <ul class="footer-links">
-                    <li><a href="/documentation" class="footer-link">Documentazione</a></li>
-                    <li><a href="/api/docs" class="footer-link">API</a></li>
-                    <li><a href="#privacy" class="footer-link">Privacy</a></li>
-                    <li><a href="#terms" class="footer-link">Termini</a></li>
-                </ul>
-            </div>
-            <div class="footer-bottom">
-                © 2025 SKAILA. Enterprise Education Platform. Tutti i diritti riservati.
-            </div>
+    <section class="roles">
+        <div class="roles-header">
+            <h2>Chi sei?</h2>
+            <p>Scegli il tuo ruolo per iniziare</p>
         </div>
+        <div class="roles-grid">
+            <a href="/register" class="role-card">
+                <div class="role-icon student">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="role-content">
+                    <h3>Studente</h3>
+                    <p>Trasforma lo studio in un'avventura con AI coach e sfide giornaliere</p>
+                </div>
+            </a>
+            <a href="/register" class="role-card">
+                <div class="role-icon teacher">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="role-content">
+                    <h3>Professore</h3>
+                    <p>Gestisci classi, voti e monitora i progressi degli studenti</p>
+                </div>
+            </a>
+            <a href="/register" class="role-card">
+                <div class="role-icon parent">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="role-content">
+                    <h3>Genitore</h3>
+                    <p>Resta aggiornato su voti, presenze e attività dei tuoi figli</p>
+                </div>
+            </a>
+            <a href="/register" class="role-card">
+                <div class="role-icon admin">
+                    <i class="fas fa-school"></i>
+                </div>
+                <div class="role-content">
+                    <h3>Dirigente</h3>
+                    <p>Gestione completa della scuola con analytics e report avanzati</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>SKAILA - La scuola del futuro, oggi</p>
     </footer>
-
-    <!-- Scripts -->
-    <script>
-        // Mobile Menu Toggle
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const navMenu = document.getElementById('navMenu');
-
-        mobileMenuToggle.addEventListener('click', () => {
-            mobileMenuToggle.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.header-nav')) {
-                mobileMenuToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            }
-        });
-
-        // Close mobile menu when clicking a nav link
-        navMenu.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenuToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-
-        // Header scroll effect
-        const header = document.getElementById('header');
-        let lastScroll = 0;
-
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-            
-            lastScroll = currentScroll;
-        });
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const headerOffset = 80;
-                    const elementPosition = target.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>
