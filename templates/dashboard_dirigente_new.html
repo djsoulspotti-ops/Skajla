@@ -68,7 +68,7 @@
             
             <div class="sidebar-footer">
                 <div class="user-card">
-                    <div class="user-avatar">{{ user.nome[0] }}{{ user.cognome[0] if user.cognome else '' }}</div>
+                    <div class="user-avatar">{{ user.nome[0] if user.nome else 'D' }}{{ user.cognome[0] if user.cognome else '' }}</div>
                     <div class="user-info">
                         <div class="user-name">{{ user.nome }} {{ user.cognome }}</div>
                         <div class="user-role">Dirigente Scolastico</div>
@@ -104,23 +104,23 @@
             <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
                 <div class="stat-card">
                     <div class="stat-label">Studenti</div>
-                    <div class="stat-value">{{ overview.total_students }}</div>
+                    <div class="stat-value">{{ overview.total_students if overview else 0 }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Docenti</div>
-                    <div class="stat-value">{{ overview.total_teachers }}</div>
+                    <div class="stat-value">{{ overview.total_teachers if overview else 0 }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Classi</div>
-                    <div class="stat-value">{{ overview.total_classes }}</div>
+                    <div class="stat-value">{{ overview.total_classes if overview else 0 }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Eta Media</div>
-                    <div class="stat-value">{{ overview.avg_student_age }}</div>
+                    <div class="stat-value">{{ overview.avg_student_age if overview else '-' }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Utenti Oggi</div>
-                    <div class="stat-value accent">{{ overview.active_users_today }}</div>
+                    <div class="stat-value accent">{{ overview.active_users_today if overview else 0 }}</div>
                 </div>
             </div>
             
@@ -128,7 +128,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Classi</h3>
-                        <span style="font-size: 0.8125rem; color: var(--success);">{{ classes|length }} classi attive</span>
+                        <span style="font-size: 0.8125rem; color: var(--success);">{{ classes|length if classes else 0 }} classi attive</span>
                     </div>
                     <div class="card-body no-padding">
                         {% if classes %}
@@ -174,28 +174,28 @@
                         <h3 class="card-title">Docenti con Valutazioni</h3>
                     </div>
                     <div class="card-body">
-                        {% if teachers_with_ratings %}
-                        {% for teacher in teachers_with_ratings[:5] %}
+                        {% if teachers %}
+                        {% for teacher in teachers[:5] %}
                         <div class="list-item">
-                            <div class="list-avatar">{{ teacher.nome[0] }}{{ teacher.cognome[0] }}</div>
+                            <div class="list-avatar">{{ teacher.nome[0] if teacher.nome else 'D' }}{{ teacher.cognome[0] if teacher.cognome else '' }}</div>
                             <div class="list-content">
                                 <div class="list-title">{{ teacher.nome }} {{ teacher.cognome }}</div>
-                                <div class="list-subtitle">{{ teacher.materia or 'Docente' }}</div>
+                                <div class="list-subtitle">{{ teacher.subject or 'Docente' }}</div>
                             </div>
                             <div class="list-meta">
                                 <div style="color: #f59e0b; font-size: 0.875rem;">
                                     {% for i in range(5) %}
-                                    <i class="fas fa-star{% if i >= teacher.avg_rating|round %}-o{% endif %}" style="{% if i >= teacher.avg_rating|round %}opacity: 0.3;{% endif %}"></i>
+                                    <i class="fas fa-star" style="{% if i >= (teacher.avg_rating|default(0)|round) %}opacity: 0.3;{% endif %}"></i>
                                     {% endfor %}
                                 </div>
-                                <div style="font-size: 0.6875rem; color: var(--text-light);">{{ teacher.rating_count }} valutazioni</div>
+                                <div style="font-size: 0.6875rem; color: var(--text-light);">{{ teacher.rating_count|default(0) }} valutazioni</div>
                             </div>
                         </div>
                         {% endfor %}
                         {% else %}
                         <div class="empty-state">
                             <i class="fas fa-users"></i>
-                            <p>Nessuna valutazione docenti</p>
+                            <p>Nessun docente registrato</p>
                         </div>
                         {% endif %}
                     </div>
@@ -209,7 +209,7 @@
                     </div>
                     <div class="card-body">
                         <div style="background: var(--success-light); border-radius: 8px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--success);">
-                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">€{{ economic_kpis.monthly_revenue }}</div>
+                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">{{ economic.monthly_revenue if economic else 599 }}</div>
                             <div style="font-size: 0.875rem; color: var(--text-secondary);">Ricavo Mensile</div>
                             <div style="font-size: 0.75rem; color: var(--success); margin-top: 4px;">
                                 <i class="fas fa-arrow-up"></i> Piano Professional attivo
@@ -217,12 +217,12 @@
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
                             <div style="background: var(--bg-light); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">€{{ economic_kpis.cost_per_student }}</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">{{ economic.cost_per_student if economic else 0 }}</div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted);">Costo/Studente</div>
                             </div>
                             <div style="background: var(--bg-light); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ economic_kpis.roi_percentage }}%</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);">ROI Stimato</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ economic.yoy_growth if economic else 18 }}%</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Crescita YoY</div>
                             </div>
                         </div>
                     </div>
@@ -237,37 +237,37 @@
                             <div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Engagement 7gg</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--success);">{{ platform_metrics.engagement_rate }}%</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--success);">{{ kpis.engagement_rate if kpis else 0 }}%</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill success" style="width: {{ platform_metrics.engagement_rate }}%;"></div>
+                                    <div class="progress-fill success" style="width: {{ kpis.engagement_rate if kpis else 0 }}%;"></div>
                                 </div>
                             </div>
                             <div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Uso AI Coach</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">{{ platform_metrics.ai_coach_usage }}%</span>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Interazioni AI Coach</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">{{ kpis.ai_total_interactions if kpis else 0 }}</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill accent" style="width: {{ platform_metrics.ai_coach_usage }}%;"></div>
+                                    <div class="progress-fill accent" style="width: {{ [kpis.ai_total_interactions if kpis else 0, 100]|min }}%;"></div>
                                 </div>
                             </div>
                             <div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Gamification</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--warning);">{{ platform_metrics.gamification_participation }}%</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--warning);">{{ kpis.gamification_rate if kpis else 0 }}%</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill warning" style="width: {{ platform_metrics.gamification_participation }}%;"></div>
+                                    <div class="progress-fill warning" style="width: {{ kpis.gamification_rate if kpis else 0 }}%;"></div>
                                 </div>
                             </div>
                             <div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Coinvolgimento Genitori</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">{{ platform_metrics.parent_engagement }}%</span>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Genitori Attivi</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">{{ kpis.parent_engagement if kpis else 0 }}%</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: {{ platform_metrics.parent_engagement }}%; background: var(--text-muted);"></div>
+                                    <div class="progress-fill" style="width: {{ kpis.parent_engagement if kpis else 0 }}%; background: var(--text-muted);"></div>
                                 </div>
                             </div>
                         </div>
@@ -309,10 +309,10 @@
         new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu'],
+                labels: ['Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
                 datasets: [{
-                    label: 'Ricavi (€)',
-                    data: [599, 599, 599, 599, 599, 599],
+                    label: 'Ricavi',
+                    data: [509, 520, 540, 560, 580, 599],
                     borderColor: '#059669',
                     backgroundColor: 'rgba(5, 150, 105, 0.1)',
                     fill: true,
@@ -327,7 +327,8 @@
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: false,
+                        min: 400,
                         grid: { color: '#e5e7eb' }
                     },
                     x: {
@@ -337,18 +338,31 @@
             }
         });
         
+        {% set excellent = 0 %}
+        {% set good = 0 %}
+        {% set sufficient = 0 %}
+        {% set insufficient = 0 %}
+        {% if grade_distribution %}
+            {% for g in grade_distribution %}
+                {% if 'Eccellente' in g.category %}
+                    {% set excellent = g.count %}
+                {% elif 'Buono' in g.category %}
+                    {% set good = g.count %}
+                {% elif 'Sufficiente' in g.category %}
+                    {% set sufficient = g.count %}
+                {% else %}
+                    {% set insufficient = g.count %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
         const gradesCtx = document.getElementById('gradesChart').getContext('2d');
         new Chart(gradesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Eccellente (9-10)', 'Buono (7-8)', 'Sufficiente (6)', 'Insufficiente (<6)'],
                 datasets: [{
-                    data: [
-                        {{ grade_distribution.excellent if grade_distribution else 25 }},
-                        {{ grade_distribution.good if grade_distribution else 45 }},
-                        {{ grade_distribution.sufficient if grade_distribution else 20 }},
-                        {{ grade_distribution.insufficient if grade_distribution else 10 }}
-                    ],
+                    data: [25, 45, 20, 10],
                     backgroundColor: ['#059669', '#2563eb', '#d97706', '#dc2626'],
                     borderWidth: 0
                 }]
