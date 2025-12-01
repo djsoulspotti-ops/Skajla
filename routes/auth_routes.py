@@ -4,7 +4,10 @@ SKAILA - Routes Autenticazione
 Gestisce login, logout, registrazione e sessioni
 """
 
-from flask import Blueprint, render_template, request, redirect, session, flash
+import secrets
+import bcrypt
+from datetime import datetime, timedelta
+from flask import Blueprint, render_template, request, redirect, session, flash, url_for
 from csrf_protection import csrf_protect
 
 from services.auth_service import auth_service
@@ -375,3 +378,99 @@ def register():
 def logout():
     session.clear()
     return redirect('/')
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+@csrf_protect
+def forgot_password():
+    reset_link = None
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        
+        if not email:
+            flash('Per favore inserisci un indirizzo email.', 'error')
+            return render_template('forgot_password.html')
+        
+        user = db_manager.query(
+            'SELECT id, email, nome FROM utenti WHERE LOWER(email) = %s',
+            (email,), one=True
+        )
+        
+        if user:
+            token = secrets.token_urlsafe(32)
+            expires_at = datetime.utcnow() + timedelta(hours=1)
+            
+            db_manager.execute(
+                'UPDATE password_reset_tokens SET used = TRUE WHERE user_id = %s AND used = FALSE',
+                (user['id'],)
+            )
+            
+            db_manager.execute('''
+                INSERT INTO password_reset_tokens (user_id, token, expires_at, used, created_at)
+                VALUES (%s, %s, %s, FALSE, CURRENT_TIMESTAMP)
+            ''', (user['id'], token, expires_at))
+            
+            reset_link = request.host_url.rstrip('/') + f'/reset-password/{token}'
+            
+            print(f"🔑 Password reset token generated for {email}: {token}")
+            flash(f'Link di reset generato per {user["nome"]}! Usa il link qui sotto per reimpostare la password.', 'success')
+        else:
+            flash('Se l\'email esiste nel sistema, riceverai un link di reset.', 'info')
+            print(f"⚠️ Password reset requested for non-existent email: {email}")
+    
+    return render_template('forgot_password.html', reset_link=reset_link)
+
+@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+@csrf_protect
+def reset_password(token):
+    token_record = db_manager.query('''
+        SELECT prt.id, prt.user_id, prt.expires_at, prt.used, u.email, u.nome
+        FROM password_reset_tokens prt
+        JOIN utenti u ON prt.user_id = u.id
+        WHERE prt.token = %s
+    ''', (token,), one=True)
+    
+    if not token_record:
+        print(f"❌ Invalid reset token: {token}")
+        return render_template('reset_password.html', token_valid=False)
+    
+    if token_record['used']:
+        print(f"❌ Token already used: {token}")
+        flash('Questo link di reset è già stato utilizzato.', 'warning')
+        return render_template('reset_password.html', token_valid=False)
+    
+    if token_record['expires_at'] < datetime.utcnow():
+        print(f"❌ Token expired: {token}")
+        flash('Questo link di reset è scaduto.', 'warning')
+        return render_template('reset_password.html', token_valid=False)
+    
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        if password != confirm_password:
+            flash('Le password non corrispondono.', 'error')
+            return render_template('reset_password.html', token_valid=True)
+        
+        is_valid, message = validate_password(password)
+        if not is_valid:
+            flash(f'Password non valida: {message}', 'error')
+            return render_template('reset_password.html', token_valid=True)
+        
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        db_manager.execute(
+            'UPDATE utenti SET password = %s WHERE id = %s',
+            (hashed_password, token_record['user_id'])
+        )
+        
+        db_manager.execute(
+            'UPDATE password_reset_tokens SET used = TRUE WHERE id = %s',
+            (token_record['id'],)
+        )
+        
+        print(f"✅ Password reset successful for user: {token_record['email']}")
+        flash('Password reimpostata con successo! Ora puoi accedere con la nuova password.', 'success')
+        return redirect('/login')
+    
+    return render_template('reset_password.html', token_valid=True)
