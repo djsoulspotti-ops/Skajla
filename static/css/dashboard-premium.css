@@ -666,3 +666,177 @@ body.dashboard-page {
 .mobile-nav-item i {
     font-size: 20px;
 }
+
+/* ========== UX ENHANCEMENTS (Fitts/Hick/Gestalt) ========== */
+
+/* Fitts' Law: Larger click targets (minimum 44px for touch) */
+.nav-link {
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+}
+
+.btn-logout {
+    min-height: 48px;
+}
+
+.notifications-btn {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0.75rem;
+}
+
+.quick-link-card {
+    min-height: 110px;
+}
+
+.card-action {
+    min-height: 36px;
+    padding: 0.5rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Fitts' Law: Corner & edge proximity for primary actions */
+.mobile-bottom-nav .mobile-nav-item {
+    min-width: 60px;
+    min-height: 56px;
+    padding: 0.75rem 1rem;
+}
+
+/* Hick's Law: Visual hierarchy for faster decisions */
+.bento-card .card-header .card-title {
+    font-weight: 700;
+    color: var(--color-blue-900);
+}
+
+.nav-link.active {
+    background: linear-gradient(135deg, rgba(0, 59, 115, 0.15) 0%, rgba(0, 116, 217, 0.1) 100%);
+    border-left: 4px solid var(--color-blue-800);
+    margin-left: -4px;
+}
+
+/* Primary action emphasis */
+.gamification-widget .card-action,
+.bento-card .card-action {
+    font-weight: 600;
+    color: var(--color-blue-600);
+    transition: all 0.2s ease;
+}
+
+.bento-card .card-action:hover {
+    color: var(--color-blue-800);
+    text-decoration: underline;
+}
+
+/* Gestalt: Proximity - Group related content */
+.bento-card {
+    padding: 1.75rem;
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+/* Gestalt: Continuity - Consistent spacing rhythm */
+.bento-grid {
+    gap: 1.75rem;
+}
+
+.nav-section:not(:last-child) {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+/* Gestalt: Similarity - Consistent interactive states */
+.bento-card,
+.subject-avg-card,
+.event-item,
+.achievement-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.bento-card:hover {
+    transform: translateY(-2px);
+}
+
+.subject-avg-card:hover,
+.event-item:hover,
+.achievement-card:hover {
+    transform: translateX(4px);
+    border-left: 3px solid var(--color-blue-500);
+    margin-left: -3px;
+}
+
+/* Gestalt: Figure-Ground - Clear content separation */
+.gamification-widget {
+    position: relative;
+    overflow: hidden;
+}
+
+.gamification-widget::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* Enhanced focus states for accessibility */
+.nav-link:focus-visible,
+.btn-logout:focus-visible,
+.card-action:focus-visible,
+.notifications-btn:focus-visible {
+    outline: 3px solid var(--color-blue-400);
+    outline-offset: 2px;
+}
+
+/* Skeleton loading states for perceived performance */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-surface) 25%, #e5e7eb 50%, var(--bg-surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Touch feedback for mobile */
+@media (hover: none) and (pointer: coarse) {
+    .nav-link:active,
+    .btn-logout:active,
+    .card-action:active,
+    .quick-link-card:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+    
+    .bento-card:active {
+        transform: scale(0.995);
+    }
+}

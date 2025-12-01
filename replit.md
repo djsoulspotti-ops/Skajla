@@ -69,7 +69,14 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - Italian language support with motivational coaching style
 - **XP Reward System**: Chat interactions award 5-50 XP with automatic rank progression and gamification context refresh
 - **Test Accounts Created**: Student (test123), Teacher (prof123), Admin (admin123) accounts with proper bcrypt password hashes
-- **Status**: Gemini API key active, chatbot powered by Gemini 2.0-flash model, telemetry batch endpoint disabled to fix schema issues
+- **Status**: Gemini API key active, chatbot powered by Gemini 2.0-flash model
+- **UX Enhancements (December 2025)**: Applied usability engineering principles to dashboards:
+  - **Fitts' Law**: Minimum 44-48px click targets for all interactive elements, larger touch areas on mobile
+  - **Hick's Law**: Enhanced visual hierarchy with primary action emphasis and clearer decision paths
+  - **Gestalt Principles**: Improved proximity grouping, consistent spacing rhythm, similarity in interactive states
+  - **Accessibility**: Focus-visible outlines, reduced-motion support, WCAG-compliant contrast
+  - **PWA**: Created offline.html fallback page, updated service worker cache versioning
+- **Telemetry Resilience**: Added user existence check before session creation to prevent ForeignKeyViolation errors
 - **Principal Dashboard (December 2025)**: Comprehensive executive dashboard at `/dashboard/dirigente`:
   - **School Overview**: Total students, teachers, classes, average student age, active users today
   - **Classes Analytics**: Student count, average grade, attendance rate per class with color-coded badges

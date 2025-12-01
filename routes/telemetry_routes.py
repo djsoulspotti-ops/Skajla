@@ -6,12 +6,28 @@ Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine
 
 from flask import Blueprint, request, jsonify, session, render_template
 from services.telemetry.telemetry_engine import telemetry_engine
+from services.database.database_manager import db_manager
 from shared.middleware.auth import require_login, require_role, require_auth
 from shared.error_handling import get_logger
 
 logger = get_logger(__name__)
 
 telemetry_bp = Blueprint('telemetry', __name__, url_prefix='/api/telemetry')
+
+
+def _validate_user_exists(user_id: int) -> bool:
+    """Check if user exists in database to prevent ForeignKey violations"""
+    if not user_id:
+        return False
+    try:
+        result = db_manager.query(
+            'SELECT 1 FROM utenti WHERE id = %s',
+            (user_id,),
+            one=True
+        )
+        return result is not None
+    except Exception:
+        return False
 
 
 @telemetry_bp.route('/events/track', methods=['POST'])
@@ -36,6 +52,19 @@ def track_single_event():
     try:
         user_id = session.get('user_id')
         data = request.json
+        
+        if not _validate_user_exists(user_id):
+            logger.warning(
+                event_type='telemetry_user_not_found',
+                domain='telemetry_api',
+                user_id=user_id,
+                message='User not found in database, telemetry skipped'
+            )
+            return jsonify({
+                "success": False, 
+                "error": "Session invalid - please refresh",
+                "require_reauth": True
+            }), 401
         
         if not data:
             return jsonify({"success": False, "error": "No data provided"}), 400
@@ -120,6 +149,19 @@ def track_batch_events():
     try:
         user_id = session.get('user_id')
         data = request.json
+        
+        if not _validate_user_exists(user_id):
+            logger.warning(
+                event_type='telemetry_batch_user_not_found',
+                domain='telemetry_api',
+                user_id=user_id,
+                message='User not found in database, batch telemetry skipped'
+            )
+            return jsonify({
+                "success": False, 
+                "error": "Session invalid - please refresh",
+                "require_reauth": True
+            }), 401
         
         if not data:
             return jsonify({"success": False, "error": "No data provided"}), 400
@@ -260,6 +302,19 @@ def start_session():
     try:
         user_id = session.get('user_id')
         data = request.json or {}
+        
+        if not _validate_user_exists(user_id):
+            logger.warning(
+                event_type='telemetry_session_user_not_found',
+                domain='telemetry_api',
+                user_id=user_id,
+                message='User not found in database, session creation skipped'
+            )
+            return jsonify({
+                "success": False, 
+                "error": "Session invalid - please refresh",
+                "require_reauth": True
+            }), 401
         
         device_type = data.get('device_type') or _get_device_type(request.user_agent.string)
         session_id = telemetry_engine._get_or_create_session(user_id, device_type)

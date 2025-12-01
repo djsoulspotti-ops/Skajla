@@ -349,6 +349,9 @@ class TelemetryEngine:
         """
         Track a behavioral telemetry event
         
+        Note: User existence validation is performed at API route level
+        to avoid duplicate database queries.
+        
         Args:
             user_id: Student ID
             event_type: Type of event (page_view, task_submit, etc.)
@@ -479,7 +482,12 @@ class TelemetryEngine:
             return None
     
     def _get_or_create_session(self, user_id: int, device_type: str) -> str:
-        """Get or create telemetry session - returns None on failure"""
+        """
+        Get or create telemetry session - returns None on failure
+        
+        Note: User existence validation is performed at API route level
+        to avoid duplicate database queries.
+        """
         session_id = f"session_{user_id}_{int(datetime.now().timestamp())}_{secrets.token_hex(4)}"
         
         try:
