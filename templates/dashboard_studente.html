@@ -6,566 +6,331 @@
     <title>Dashboard Studente - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="/static/css/dashboard-unified.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f6f8; color: #1a1a1a; min-height: 100vh; }
+        
+        .app { display: flex; min-height: 100vh; }
+        
+        .sidebar { width: 260px; background: #fff; border-right: 1px solid #e5e7eb; position: fixed; top: 0; left: 0; height: 100vh; display: flex; flex-direction: column; z-index: 100; }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid #e5e7eb; }
+        .logo { font-size: 24px; font-weight: 800; color: #1a1a1a; text-decoration: none; letter-spacing: -0.5px; }
+        .sidebar-nav { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .nav-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; margin-bottom: 12px; }
+        .nav-list { list-style: none; margin-bottom: 24px; }
+        .nav-link { display: flex; align-items: center; gap: 14px; padding: 12px 24px; color: #64748b; text-decoration: none; font-size: 15px; font-weight: 500; transition: all 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .nav-link:hover { background: #f8fafc; color: #1e293b; }
+        .nav-link.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+        .nav-link i { width: 20px; font-size: 16px; text-align: center; }
+        .sidebar-footer { padding: 20px 24px; border-top: 1px solid #e5e7eb; }
+        .user-box { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .user-avatar { width: 42px; height: 42px; background: #e5e7eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #64748b; font-size: 14px; }
+        .user-name { font-weight: 600; font-size: 14px; color: #1e293b; }
+        .user-role { font-size: 12px; color: #94a3b8; }
+        .logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; color: #64748b; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+        .logout-btn:hover { background: #fee2e2; border-color: #fecaca; color: #dc2626; }
+        
+        .main { flex: 1; margin-left: 260px; padding: 32px 40px; }
+        
         .panel { display: none; }
-        .panel.active { display: block; animation: fadeIn 0.3s ease; }
+        .panel.active { display: block; animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border-light);
-        }
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
-            background: var(--accent);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        .section-icon.green { background: var(--success); }
-        .section-icon.amber { background: var(--warning); }
-        .section-icon.purple { background: #7c3aed; }
-        .section-info { flex: 1; }
-        .section-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
-        .section-subtitle { font-size: 0.8125rem; color: var(--text-muted); }
+        .page-header { margin-bottom: 32px; }
+        .page-breadcrumb { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+        .page-title { font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; margin-bottom: 4px; }
+        .page-desc { font-size: 16px; color: #64748b; }
         
-        .section-divider {
-            height: 1px;
-            background: var(--border-light);
-            margin: 32px 0;
-        }
+        .section { margin-bottom: 40px; }
+        .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb; }
+        .section-icon { width: 48px; height: 48px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0; }
+        .section-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .section-icon.amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .section-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .section-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .section-subtitle { font-size: 14px; color: #64748b; margin-top: 2px; }
         
-        .grade-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 40px;
-            height: 32px;
-            padding: 0 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.875rem;
-        }
-        .grade-badge.excellent { background: var(--success-light); color: var(--success); }
-        .grade-badge.good { background: rgba(37, 99, 235, 0.1); color: var(--accent); }
-        .grade-badge.pass { background: var(--warning-light); color: var(--warning); }
-        .grade-badge.fail { background: var(--danger-light); color: var(--danger); }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-box { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; position: relative; overflow: hidden; }
+        .stat-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #3b82f6; }
+        .stat-box.green::before { background: #10b981; }
+        .stat-box.amber::before { background: #f59e0b; }
+        .stat-box.purple::before { background: #8b5cf6; }
+        .stat-box.red::before { background: #ef4444; }
+        .stat-label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-value { font-size: 36px; font-weight: 800; color: #0f172a; letter-spacing: -1px; line-height: 1; }
+        .stat-value.blue { color: #2563eb; }
+        .stat-value.green { color: #059669; }
+        .stat-value.amber { color: #d97706; }
+        .stat-value.purple { color: #7c3aed; }
+        .stat-value.red { color: #dc2626; }
         
-        .xp-hero {
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-            border-radius: 10px;
-            padding: 28px;
-            color: white;
-            margin-bottom: 24px;
-        }
-        .xp-hero-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .xp-level-label { font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
-        .xp-level-value { font-size: 1.5rem; font-weight: 800; }
-        .xp-total { font-size: 2.5rem; font-weight: 800; text-align: right; }
-        .xp-total-label { font-size: 0.875rem; opacity: 0.9; text-align: right; }
-        .xp-bar {
-            height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 100px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        .xp-fill {
-            height: 100%;
-            background: #fbbf24;
-            border-radius: 100px;
-        }
-        .xp-remaining {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8125rem;
-            opacity: 0.9;
-        }
+        .cards-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: #fafbfc; border-bottom: 1px solid #e5e7eb; }
+        .card-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+        .card-link { font-size: 14px; color: #2563eb; text-decoration: none; font-weight: 500; }
+        .card-link:hover { text-decoration: underline; }
+        .card-body { padding: 24px; }
         
-        .ai-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 180px);
-            min-height: 450px;
-            background: var(--bg-light);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border-light);
-        }
-        .ai-header {
-            background: var(--accent);
-            color: white;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .ai-avatar {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .ai-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8125rem;
-            opacity: 0.9;
-        }
-        .ai-status-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-        }
-        .ai-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .ai-message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.9375rem;
-            line-height: 1.5;
-        }
-        .ai-message.user {
-            background: var(--accent);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        .ai-message.bot {
-            background: white;
-            color: var(--text-primary);
-            align-self: flex-start;
-            border: 1px solid var(--border-light);
-            border-bottom-left-radius: 4px;
-        }
-        .ai-welcome {
-            text-align: center;
-            padding: 32px 20px;
-        }
-        .ai-welcome-icon {
-            width: 64px;
-            height: 64px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 1.5rem;
-            color: white;
-        }
-        .ai-welcome h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
-        .ai-welcome p { color: var(--text-muted); margin-bottom: 20px; max-width: 360px; margin-left: auto; margin-right: auto; }
-        .ai-suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .ai-suggestion {
-            background: white;
-            border: 1px solid var(--border-light);
-            padding: 8px 14px;
-            border-radius: 100px;
-            font-size: 0.8125rem;
-            cursor: pointer;
-            font-family: inherit;
-            color: var(--text-secondary);
-        }
-        .ai-suggestion:hover { background: var(--accent); color: white; border-color: var(--accent); }
-        .typing-indicator {
-            display: none;
-            align-self: flex-start;
-            background: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border-light);
-        }
-        .typing-indicator.active { display: flex; gap: 4px; }
-        .typing-indicator span {
-            width: 6px;
-            height: 6px;
-            background: var(--text-muted);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.6); }
-            40% { transform: scale(1); }
-        }
-        .ai-input-area {
-            padding: 16px 20px;
-            background: white;
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            gap: 12px;
-        }
-        .ai-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--border-light);
-            border-radius: 100px;
-            font-size: 0.9375rem;
-            outline: none;
-            font-family: inherit;
-        }
-        .ai-input:focus { border-color: var(--accent); }
-        .ai-send {
-            width: 44px;
-            height: 44px;
-            min-width: 44px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: none;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        .ai-send:hover { background: var(--accent-hover); }
+        .grade-table { width: 100%; border-collapse: collapse; }
+        .grade-table th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
+        .grade-table td { padding: 16px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+        .grade-table tr:last-child td { border-bottom: none; }
+        .grade-table tr:hover td { background: #f8fafc; }
+        .grade-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 32px; padding: 0 10px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+        .grade-badge.excellent { background: #dcfce7; color: #16a34a; }
+        .grade-badge.good { background: #dbeafe; color: #2563eb; }
+        .grade-badge.pass { background: #fef3c7; color: #d97706; }
+        .grade-badge.fail { background: #fee2e2; color: #dc2626; }
         
-        .challenge-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
-            background: var(--bg-light);
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
+        .subject-row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+        .subject-row:last-child { border-bottom: none; }
+        .subject-name { width: 100px; font-size: 14px; font-weight: 500; color: #374151; flex-shrink: 0; }
+        .subject-bar { flex: 1; height: 10px; background: #e5e7eb; border-radius: 100px; overflow: hidden; }
+        .subject-fill { height: 100%; border-radius: 100px; }
+        .subject-value { width: 50px; text-align: right; font-size: 16px; font-weight: 700; }
+        
+        .empty-box { text-align: center; padding: 48px 24px; color: #94a3b8; }
+        .empty-box i { font-size: 48px; opacity: 0.3; margin-bottom: 16px; display: block; }
+        .empty-box p { font-size: 14px; }
+        
+        .xp-hero { background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 16px; padding: 32px; color: #fff; margin-bottom: 32px; }
+        .xp-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .xp-level-label { font-size: 13px; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .xp-level { font-size: 28px; font-weight: 800; }
+        .xp-total { font-size: 48px; font-weight: 800; text-align: right; line-height: 1; }
+        .xp-total-label { font-size: 14px; opacity: 0.85; text-align: right; margin-top: 4px; }
+        .xp-bar { height: 12px; background: rgba(255,255,255,0.25); border-radius: 100px; overflow: hidden; margin-bottom: 12px; }
+        .xp-fill { height: 100%; background: #fbbf24; border-radius: 100px; }
+        .xp-info { display: flex; justify-content: space-between; font-size: 14px; opacity: 0.9; }
+        
+        .challenge-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #f8fafc; border-radius: 12px; margin-bottom: 12px; }
         .challenge-item:last-child { margin-bottom: 0; }
-        .challenge-icon {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
+        .challenge-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
         .challenge-content { flex: 1; min-width: 0; }
-        .challenge-title { font-weight: 600; font-size: 0.875rem; color: var(--text-primary); }
-        .challenge-desc { font-size: 0.8125rem; color: var(--text-muted); }
+        .challenge-title { font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 2px; }
+        .challenge-desc { font-size: 13px; color: #64748b; }
+        .challenge-badge { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 100px; white-space: nowrap; }
         
-        .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
         .badge-item { text-align: center; }
-        .badge-circle {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 6px;
-            font-size: 1.25rem;
-        }
-        .badge-circle.locked { background: var(--bg-light); color: var(--text-light); }
-        .badge-name { font-size: 0.6875rem; color: var(--text-muted); }
+        .badge-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 24px; }
+        .badge-circle.locked { background: #e5e7eb; color: #9ca3af; }
+        .badge-label { font-size: 12px; color: #64748b; }
         
-        .event-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border-light);
-        }
+        .ai-box { display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 500px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; }
+        .ai-header { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; padding: 20px 24px; display: flex; align-items: center; gap: 16px; }
+        .ai-avatar { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .ai-name { font-size: 18px; font-weight: 700; }
+        .ai-status { font-size: 14px; opacity: 0.9; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+        .ai-status-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; }
+        .ai-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #f8fafc; }
+        .ai-welcome { text-align: center; padding: 40px 20px; }
+        .ai-welcome-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #fff; }
+        .ai-welcome h3 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+        .ai-welcome p { font-size: 15px; color: #64748b; max-width: 400px; margin: 0 auto 24px; line-height: 1.6; }
+        .ai-suggestions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .ai-suggestion { background: #fff; border: 1px solid #e5e7eb; padding: 10px 18px; border-radius: 100px; font-size: 14px; cursor: pointer; color: #475569; font-family: inherit; transition: all 0.15s; }
+        .ai-suggestion:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .ai-msg { max-width: 75%; padding: 16px 20px; border-radius: 16px; font-size: 15px; line-height: 1.6; }
+        .ai-msg.user { background: #2563eb; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .ai-msg.bot { background: #fff; color: #1e293b; align-self: flex-start; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
+        .typing { display: none; align-self: flex-start; background: #fff; padding: 16px 20px; border-radius: 16px; border: 1px solid #e5e7eb; }
+        .typing.active { display: flex; gap: 6px; }
+        .typing span { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
+        .typing span:nth-child(1) { animation-delay: -0.32s; }
+        .typing span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); } 40% { transform: scale(1); } }
+        .ai-input-box { padding: 20px 24px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; }
+        .ai-input { flex: 1; padding: 14px 20px; border: 1px solid #e5e7eb; border-radius: 100px; font-size: 15px; outline: none; font-family: inherit; }
+        .ai-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .ai-send { width: 52px; height: 52px; border-radius: 50%; background: #2563eb; border: none; color: #fff; font-size: 18px; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+        .ai-send:hover { background: #1d4ed8; }
+        
+        .event-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
         .event-item:last-child { border-bottom: none; }
-        .event-date {
-            text-align: center;
-            min-width: 50px;
-            padding: 10px;
-            background: var(--bg-light);
-            border-radius: 8px;
-        }
-        .event-day { font-size: 1.25rem; font-weight: 800; color: var(--accent); line-height: 1; }
-        .event-month { font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+        .event-date { text-align: center; min-width: 60px; padding: 12px; background: #f1f5f9; border-radius: 12px; flex-shrink: 0; }
+        .event-day { font-size: 24px; font-weight: 800; color: #2563eb; line-height: 1; }
+        .event-month { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
         .event-content { flex: 1; min-width: 0; }
-        .event-title { font-weight: 600; font-size: 0.875rem; color: var(--text-primary); }
-        .event-desc { font-size: 0.8125rem; color: var(--text-muted); }
+        .event-title { font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+        .event-desc { font-size: 13px; color: #64748b; }
+        .event-badge { font-size: 12px; font-weight: 600; padding: 6px 12px; background: #f1f5f9; color: #64748b; border-radius: 100px; white-space: nowrap; }
         
-        .media-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-light);
+        .xp-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1e293b; padding: 10px 20px; border-radius: 100px; font-weight: 700; font-size: 15px; }
+        
+        @media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 1024px) { 
+            .sidebar { transform: translateX(-100%); } 
+            .main { margin-left: 0; padding: 24px; } 
+            .cards-row { grid-template-columns: 1fr; }
         }
-        .media-bar:last-child { border-bottom: none; }
-        .media-subject { width: 90px; font-size: 0.8125rem; font-weight: 500; color: var(--text-primary); }
-        .media-track { flex: 1; height: 8px; background: var(--bg-light); border-radius: 100px; overflow: hidden; }
-        .media-fill { height: 100%; border-radius: 100px; }
-        .media-value { font-weight: 700; font-size: 0.9375rem; min-width: 35px; text-align: right; }
-        
-        @media (max-width: 900px) {
+        @media (max-width: 768px) { 
+            .stats-row { grid-template-columns: 1fr; } 
             .badge-grid { grid-template-columns: repeat(2, 1fr); }
+            .page-title { font-size: 26px; }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-layout">
+    <div class="app">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="/" class="sidebar-logo">SKAILA</a>
+                <a href="/" class="logo">SKAILA</a>
             </div>
-            
             <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <div class="nav-section-label">Menu</div>
-                    <ul class="nav-list">
-                        <li class="nav-item">
-                            <a href="#" class="panel-trigger active" data-panel="dashboard">
-                                <i class="fas fa-home"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="panel-trigger" data-panel="ai-coach">
-                                <i class="fas fa-robot"></i>
-                                AI Coach
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="panel-trigger" data-panel="calendario">
-                                <i class="fas fa-calendar"></i>
-                                Calendario
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="panel-trigger" data-panel="gamification">
-                                <i class="fas fa-trophy"></i>
-                                Gamification
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="nav-section-label">Altro</div>
-                    <ul class="nav-list">
-                        <li class="nav-item">
-                            <a href="/registro">
-                                <i class="fas fa-book"></i>
-                                Registro
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/chat">
-                                <i class="fas fa-comments"></i>
-                                Messaggi
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <div class="nav-label">Menu</div>
+                <ul class="nav-list">
+                    <li><button class="nav-link active" data-panel="dashboard"><i class="fas fa-home"></i> Dashboard</button></li>
+                    <li><button class="nav-link" data-panel="ai"><i class="fas fa-robot"></i> AI Coach</button></li>
+                    <li><button class="nav-link" data-panel="calendario"><i class="fas fa-calendar"></i> Calendario</button></li>
+                    <li><button class="nav-link" data-panel="gamification"><i class="fas fa-trophy"></i> Gamification</button></li>
+                </ul>
+                <div class="nav-label">Altro</div>
+                <ul class="nav-list">
+                    <li><a class="nav-link" href="/registro"><i class="fas fa-book"></i> Registro</a></li>
+                    <li><a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Messaggi</a></li>
+                </ul>
             </nav>
-            
             <div class="sidebar-footer">
-                <div class="user-card">
+                <div class="user-box">
                     <div class="user-avatar">{{ user.nome[0]|upper if user and user.nome else 'S' }}{{ user.cognome[0]|upper if user and user.cognome else '' }}</div>
-                    <div class="user-info">
+                    <div>
                         <div class="user-name">{{ user.nome if user else '' }} {{ user.cognome if user else '' }}</div>
                         <div class="user-role">Studente</div>
                     </div>
                 </div>
-                <a href="/logout" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Esci
-                </a>
+                <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Esci</a>
             </div>
         </aside>
         
-        <main class="main-content">
-            <!-- DASHBOARD PANEL -->
+        <main class="main">
+            <!-- DASHBOARD -->
             <div id="panel-dashboard" class="panel active">
                 <div class="page-header">
-                    <p class="page-subtitle" style="margin-bottom: 4px;">Dashboard Personale</p>
+                    <div class="page-breadcrumb">Dashboard Personale</div>
                     <h1 class="page-title">Ciao, {{ user.nome if user and user.nome else 'Studente' }}</h1>
-                    <p class="page-subtitle">Ecco il tuo riepilogo scolastico</p>
+                    <p class="page-desc">Ecco il tuo riepilogo scolastico</p>
                 </div>
                 
-                <div class="section-header">
-                    <div class="section-icon"><i class="fas fa-chart-bar"></i></div>
-                    <div class="section-info">
-                        <div class="section-title">Panoramica</div>
-                        <div class="section-subtitle">Le tue statistiche principali</div>
-                    </div>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Media Generale</div>
-                        <div class="stat-value success">{{ stats.media_voti|round(1) if stats and stats.media_voti else 'N/A' }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Frequenza</div>
-                        <div class="stat-value accent">{{ stats.presenze_percentuale|round(0)|int if stats and stats.presenze_percentuale else 0 }}%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">XP Totali</div>
-                        <div class="stat-value warning">{{ stats.total_xp if stats and stats.total_xp else 0 }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Giorni Streak</div>
-                        <div class="stat-value" style="color: #7c3aed;">{{ stats.current_streak if stats and stats.current_streak else 0 }}</div>
-                    </div>
-                </div>
-                
-                <div class="section-divider"></div>
-                
-                <div class="section-header">
-                    <div class="section-icon green"><i class="fas fa-graduation-cap"></i></div>
-                    <div class="section-info">
-                        <div class="section-title">Rendimento Scolastico</div>
-                        <div class="section-subtitle">Voti e medie per materia</div>
-                    </div>
-                </div>
-                
-                <div class="content-grid">
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Ultimi Voti</span>
-                            <a href="/registro" class="card-action">Vedi tutti</a>
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div>
+                            <div class="section-title">Panoramica</div>
+                            <div class="section-subtitle">Le tue statistiche principali</div>
                         </div>
-                        <div class="card-body no-padding">
-                            {% if voti %}
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Data</th>
-                                        <th>Materia</th>
-                                        <th>Voto</th>
-                                        <th>Tipo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for v in voti[:5] %}
-                                    <tr>
-                                        <td>{{ v.data.strftime('%d/%m') if v.data else '-' }}</td>
-                                        <td style="font-weight: 500;">{{ v.materia }}</td>
-                                        <td>
-                                            <span class="grade-badge {% if v.voto >= 8 %}excellent{% elif v.voto >= 7 %}good{% elif v.voto >= 6 %}pass{% else %}fail{% endif %}">
-                                                {{ v.voto }}
-                                            </span>
-                                        </td>
-                                        <td style="color: var(--text-muted);">{{ v.tipo_valutazione or '-' }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            {% else %}
-                            <div class="empty-state">
-                                <i class="fas fa-clipboard-list"></i>
-                                <p>Nessun voto registrato</p>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-box green">
+                            <div class="stat-label">Media Generale</div>
+                            <div class="stat-value green">{{ stats.media_voti|round(1) if stats and stats.media_voti else 'N/A' }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Frequenza</div>
+                            <div class="stat-value blue">{{ stats.presenze_percentuale|round(0)|int if stats and stats.presenze_percentuale else 0 }}%</div>
+                        </div>
+                        <div class="stat-box amber">
+                            <div class="stat-label">XP Totali</div>
+                            <div class="stat-value amber">{{ stats.total_xp if stats and stats.total_xp else 0 }}</div>
+                        </div>
+                        <div class="stat-box purple">
+                            <div class="stat-label">Giorni Streak</div>
+                            <div class="stat-value purple">{{ stats.current_streak if stats and stats.current_streak else 0 }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon green"><i class="fas fa-graduation-cap"></i></div>
+                        <div>
+                            <div class="section-title">Rendimento Scolastico</div>
+                            <div class="section-subtitle">Voti e medie per materia</div>
+                        </div>
+                    </div>
+                    <div class="cards-row">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Ultimi Voti</span>
+                                <a href="/registro" class="card-link">Vedi tutti</a>
                             </div>
-                            {% endif %}
+                            <div class="card-body" style="padding: 0;">
+                                {% if voti %}
+                                <table class="grade-table">
+                                    <thead><tr><th>Data</th><th>Materia</th><th>Voto</th><th>Tipo</th></tr></thead>
+                                    <tbody>
+                                        {% for v in voti[:5] %}
+                                        <tr>
+                                            <td>{{ v.data.strftime('%d/%m') if v.data else '-' }}</td>
+                                            <td style="font-weight: 500;">{{ v.materia }}</td>
+                                            <td><span class="grade-badge {% if v.voto >= 8 %}excellent{% elif v.voto >= 7 %}good{% elif v.voto >= 6 %}pass{% else %}fail{% endif %}">{{ v.voto }}</span></td>
+                                            <td style="color: #64748b;">{{ v.tipo_valutazione or '-' }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <div class="empty-box"><i class="fas fa-clipboard-list"></i><p>Nessun voto registrato</p></div>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Medie per Materia</span>
-                        </div>
-                        <div class="card-body">
-                            {% if medie_materie %}
-                            {% for m in medie_materie[:6] %}
-                            <div class="media-bar">
-                                <div class="media-subject">{{ m.materia[:10] }}</div>
-                                <div class="media-track">
-                                    <div class="media-fill" style="width: {{ (m.media / 10 * 100)|round }}%; background: {% if m.media >= 7 %}var(--success){% elif m.media >= 6 %}var(--warning){% else %}var(--danger){% endif %};"></div>
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Medie per Materia</span></div>
+                            <div class="card-body">
+                                {% if medie_materie %}
+                                {% for m in medie_materie[:6] %}
+                                <div class="subject-row">
+                                    <div class="subject-name">{{ m.materia[:10] }}</div>
+                                    <div class="subject-bar"><div class="subject-fill" style="width: {{ (m.media / 10 * 100)|round }}%; background: {% if m.media >= 7 %}#10b981{% elif m.media >= 6 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+                                    <div class="subject-value" style="color: {% if m.media >= 7 %}#059669{% elif m.media >= 6 %}#d97706{% else %}#dc2626{% endif %};">{{ m.media }}</div>
                                 </div>
-                                <div class="media-value" style="color: {% if m.media >= 7 %}var(--success){% elif m.media >= 6 %}var(--warning){% else %}var(--danger){% endif %};">{{ m.media }}</div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="empty-box"><i class="fas fa-chart-line"></i><p>Nessuna media disponibile</p></div>
+                                {% endif %}
                             </div>
-                            {% endfor %}
-                            {% else %}
-                            <div class="empty-state">
-                                <i class="fas fa-chart-line"></i>
-                                <p>Nessuna media disponibile</p>
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
                 
-                <div class="section-divider"></div>
-                
-                <div class="section-header">
-                    <div class="section-icon amber"><i class="fas fa-calendar-check"></i></div>
-                    <div class="section-info">
-                        <div class="section-title">Presenze</div>
-                        <div class="section-subtitle">Riepilogo frequenza scolastica</div>
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon amber"><i class="fas fa-calendar-check"></i></div>
+                        <div>
+                            <div class="section-title">Presenze</div>
+                            <div class="section-subtitle">Riepilogo frequenza scolastica</div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Presenze</div>
-                        <div class="stat-value success">{{ presenze_stats.presenze if presenze_stats and presenze_stats.presenze else 0 }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Assenze</div>
-                        <div class="stat-value danger">{{ presenze_stats.assenze if presenze_stats and presenze_stats.assenze else 0 }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Ritardi</div>
-                        <div class="stat-value warning">{{ presenze_stats.ritardi if presenze_stats and presenze_stats.ritardi else 0 }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Giustificate</div>
-                        <div class="stat-value accent">{{ presenze_stats.giustificate if presenze_stats and presenze_stats.giustificate else 0 }}</div>
+                    <div class="stats-row">
+                        <div class="stat-box green"><div class="stat-label">Presenze</div><div class="stat-value green">{{ presenze_stats.presenze if presenze_stats and presenze_stats.presenze else 0 }}</div></div>
+                        <div class="stat-box red"><div class="stat-label">Assenze</div><div class="stat-value red">{{ presenze_stats.assenze if presenze_stats and presenze_stats.assenze else 0 }}</div></div>
+                        <div class="stat-box amber"><div class="stat-label">Ritardi</div><div class="stat-value amber">{{ presenze_stats.ritardi if presenze_stats and presenze_stats.ritardi else 0 }}</div></div>
+                        <div class="stat-box"><div class="stat-label">Giustificate</div><div class="stat-value blue">{{ presenze_stats.giustificate if presenze_stats and presenze_stats.giustificate else 0 }}</div></div>
                     </div>
                 </div>
             </div>
             
-            <!-- AI COACH PANEL -->
-            <div id="panel-ai-coach" class="panel">
+            <!-- AI COACH -->
+            <div id="panel-ai" class="panel">
                 <div class="page-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
                         <div>
-                            <p class="page-subtitle" style="margin-bottom: 4px;">Tutoring Personalizzato</p>
+                            <div class="page-breadcrumb">Tutoring Personalizzato</div>
                             <h1 class="page-title">AI Coach</h1>
-                            <p class="page-subtitle">Il tuo assistente personale per lo studio</p>
+                            <p class="page-desc">Il tuo assistente personale per lo studio</p>
                         </div>
-                        <div class="badge badge-warning" style="padding: 10px 16px; font-size: 0.875rem;">
-                            <i class="fas fa-star" style="margin-right: 6px;"></i>
-                            <span id="chatXP">{{ stats.total_xp if stats and stats.total_xp else 0 }}</span> XP
-                        </div>
+                        <div class="xp-badge"><i class="fas fa-star"></i> <span id="chatXP">{{ stats.total_xp if stats and stats.total_xp else 0 }}</span> XP</div>
                     </div>
                 </div>
                 
-                <div class="ai-container">
+                <div class="ai-box">
                     <div class="ai-header">
                         <div class="ai-avatar"><i class="fas fa-robot"></i></div>
                         <div>
-                            <div style="font-weight: 700;">SKAILA AI Coach</div>
-                            <div class="ai-status">
-                                <span class="ai-status-dot"></span>
-                                Online - Pronto ad aiutarti
-                            </div>
+                            <div class="ai-name">SKAILA AI Coach</div>
+                            <div class="ai-status"><span class="ai-status-dot"></span> Online - Pronto ad aiutarti</div>
                         </div>
                     </div>
                     <div class="ai-messages" id="chatMessages">
@@ -579,151 +344,130 @@
                                 <button class="ai-suggestion" onclick="sendSuggestion('Aiutami a studiare storia')">Aiuto studio</button>
                             </div>
                         </div>
-                        <div class="typing-indicator" id="typingIndicator">
-                            <span></span><span></span><span></span>
-                        </div>
+                        <div class="typing" id="typing"><span></span><span></span><span></span></div>
                     </div>
-                    <div class="ai-input-area">
+                    <div class="ai-input-box">
                         <input type="text" class="ai-input" id="chatInput" placeholder="Scrivi una domanda..." onkeypress="if(event.key==='Enter')sendMessage()">
                         <button class="ai-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
             
-            <!-- CALENDARIO PANEL -->
+            <!-- CALENDARIO -->
             <div id="panel-calendario" class="panel">
                 <div class="page-header">
-                    <p class="page-subtitle" style="margin-bottom: 4px;">Pianificazione</p>
+                    <div class="page-breadcrumb">Pianificazione</div>
                     <h1 class="page-title">Calendario</h1>
-                    <p class="page-subtitle">I tuoi impegni scolastici</p>
+                    <p class="page-desc">I tuoi impegni scolastici</p>
                 </div>
                 
-                <div class="section-header">
-                    <div class="section-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <div class="section-info">
-                        <div class="section-title">Prossimi Eventi</div>
-                        <div class="section-subtitle">Verifiche, compiti e scadenze</div>
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div>
+                            <div class="section-title">Prossimi Eventi</div>
+                            <div class="section-subtitle">Verifiche, compiti e scadenze</div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        {% if upcoming_events %}
-                        {% for e in upcoming_events %}
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">{{ e.start_datetime.day if e.start_datetime else '-' }}</div>
-                                <div class="event-month">{{ e.start_datetime.strftime('%b') if e.start_datetime else '' }}</div>
+                    <div class="card">
+                        <div class="card-body">
+                            {% if upcoming_events %}
+                            {% for e in upcoming_events %}
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <div class="event-day">{{ e.start_datetime.day if e.start_datetime else '-' }}</div>
+                                    <div class="event-month">{{ e.start_datetime.strftime('%b') if e.start_datetime else '' }}</div>
+                                </div>
+                                <div class="event-content">
+                                    <div class="event-title">{{ e.title }}</div>
+                                    <div class="event-desc">{{ e.description or '' }}</div>
+                                </div>
+                                <span class="event-badge">{{ e.event_type or 'Evento' }}</span>
                             </div>
-                            <div class="event-content">
-                                <div class="event-title">{{ e.title }}</div>
-                                <div class="event-desc">{{ e.description or '' }}</div>
-                            </div>
-                            <span class="badge badge-neutral">{{ e.event_type or 'Evento' }}</span>
+                            {% endfor %}
+                            {% else %}
+                            <div class="empty-box"><i class="fas fa-calendar"></i><p>Nessun evento in programma</p></div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
-                        {% else %}
-                        <div class="empty-state">
-                            <i class="fas fa-calendar"></i>
-                            <p>Nessun evento in programma</p>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
             
-            <!-- GAMIFICATION PANEL -->
+            <!-- GAMIFICATION -->
             <div id="panel-gamification" class="panel">
                 <div class="page-header">
-                    <p class="page-subtitle" style="margin-bottom: 4px;">Progressi e Premi</p>
+                    <div class="page-breadcrumb">Progressi e Premi</div>
                     <h1 class="page-title">Gamification</h1>
-                    <p class="page-subtitle">Guadagna XP e sblocca badge</p>
+                    <p class="page-desc">Guadagna XP e sblocca badge</p>
                 </div>
                 
                 <div class="xp-hero">
-                    <div class="xp-hero-top">
+                    <div class="xp-top">
                         <div>
                             <div class="xp-level-label">Livello Attuale</div>
-                            <div class="xp-level-value">Livello {{ stats.current_level if stats and stats.current_level else 1 }}</div>
+                            <div class="xp-level">Livello {{ stats.current_level if stats and stats.current_level else 1 }}</div>
                         </div>
                         <div>
                             <div class="xp-total">{{ stats.total_xp if stats and stats.total_xp else 0 }}</div>
                             <div class="xp-total-label">XP Totali</div>
                         </div>
                     </div>
-                    <div class="xp-bar">
-                        <div class="xp-fill" style="width: {{ ((stats.total_xp or 0) % 1000) / 10 if stats else 0 }}%;"></div>
-                    </div>
-                    <div class="xp-remaining">
+                    <div class="xp-bar"><div class="xp-fill" style="width: {{ ((stats.total_xp or 0) % 1000) / 10 if stats else 0 }}%;"></div></div>
+                    <div class="xp-info">
                         <span>Prossimo livello</span>
                         <span>{{ 1000 - ((stats.total_xp or 0) % 1000) if stats else 1000 }} XP rimanenti</span>
                     </div>
                 </div>
                 
-                <div class="content-grid">
+                <div class="cards-row">
                     <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Sfide Attive</span>
-                        </div>
+                        <div class="card-header"><span class="card-title">Sfide Attive</span></div>
                         <div class="card-body">
                             <div class="challenge-item">
-                                <div class="challenge-icon" style="background: var(--warning-light); color: var(--warning);">
-                                    <i class="fas fa-fire"></i>
-                                </div>
+                                <div class="challenge-icon" style="background: #fef3c7; color: #d97706;"><i class="fas fa-fire"></i></div>
                                 <div class="challenge-content">
                                     <div class="challenge-title">Streak 7 giorni</div>
-                                    <div class="challenge-desc">{{ stats.current_streak if stats and stats.current_streak else 0 }}/7 giorni</div>
+                                    <div class="challenge-desc">{{ stats.current_streak if stats and stats.current_streak else 0 }}/7 giorni completati</div>
                                 </div>
-                                <span class="badge badge-warning">+100 XP</span>
+                                <span class="challenge-badge" style="background: #fef3c7; color: #d97706;">+100 XP</span>
                             </div>
                             <div class="challenge-item">
-                                <div class="challenge-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--accent);">
-                                    <i class="fas fa-robot"></i>
-                                </div>
+                                <div class="challenge-icon" style="background: #dbeafe; color: #2563eb;"><i class="fas fa-robot"></i></div>
                                 <div class="challenge-content">
                                     <div class="challenge-title">Chatta con AI Coach</div>
                                     <div class="challenge-desc">Fai 5 domande oggi</div>
                                 </div>
-                                <span class="badge badge-neutral">+50 XP</span>
+                                <span class="challenge-badge" style="background: #f1f5f9; color: #64748b;">+50 XP</span>
                             </div>
                             <div class="challenge-item">
-                                <div class="challenge-icon" style="background: var(--success-light); color: var(--success);">
-                                    <i class="fas fa-book-reader"></i>
-                                </div>
+                                <div class="challenge-icon" style="background: #dcfce7; color: #16a34a;"><i class="fas fa-book-reader"></i></div>
                                 <div class="challenge-content">
                                     <div class="challenge-title">Studio Giornaliero</div>
                                     <div class="challenge-desc">Studia per 30 minuti</div>
                                 </div>
-                                <span class="badge badge-success">+75 XP</span>
+                                <span class="challenge-badge" style="background: #dcfce7; color: #16a34a;">+75 XP</span>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Badge Sbloccati</span>
-                        </div>
+                        <div class="card-header"><span class="card-title">Badge Sbloccati</span></div>
                         <div class="card-body">
                             <div class="badge-grid">
                                 <div class="badge-item">
-                                    <div class="badge-circle" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white;">
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <div class="badge-name">Prima Stella</div>
+                                    <div class="badge-circle" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff;"><i class="fas fa-star"></i></div>
+                                    <div class="badge-label">Prima Stella</div>
                                 </div>
                                 <div class="badge-item">
-                                    <div class="badge-circle" style="background: linear-gradient(135deg, #059669, #10b981); color: white;">
-                                        <i class="fas fa-check"></i>
-                                    </div>
-                                    <div class="badge-name">Primo Voto</div>
+                                    <div class="badge-circle" style="background: linear-gradient(135deg, #10b981, #34d399); color: #fff;"><i class="fas fa-check"></i></div>
+                                    <div class="badge-label">Primo Voto</div>
                                 </div>
                                 <div class="badge-item">
                                     <div class="badge-circle locked"><i class="fas fa-lock"></i></div>
-                                    <div class="badge-name">Bloccato</div>
+                                    <div class="badge-label">Bloccato</div>
                                 </div>
                                 <div class="badge-item">
                                     <div class="badge-circle locked"><i class="fas fa-lock"></i></div>
-                                    <div class="badge-name">Bloccato</div>
+                                    <div class="badge-label">Bloccato</div>
                                 </div>
                             </div>
                         </div>
@@ -734,47 +478,36 @@
     </div>
     
     <script>
-        document.querySelectorAll('.panel-trigger').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
+        document.querySelectorAll('.nav-link[data-panel]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
                 var panelId = this.dataset.panel;
-                
-                document.querySelectorAll('.panel-trigger').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.nav-link').forEach(function(b) { b.classList.remove('active'); });
                 this.classList.add('active');
-                
                 document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
                 document.getElementById('panel-' + panelId).classList.add('active');
-                
-                if (panelId === 'ai-coach') {
-                    setTimeout(function() { document.getElementById('chatInput').focus(); }, 100);
-                }
+                if (panelId === 'ai') { setTimeout(function() { document.getElementById('chatInput').focus(); }, 100); }
             });
         });
         
-        function sendSuggestion(text) {
-            document.getElementById('chatInput').value = text;
-            sendMessage();
-        }
+        function sendSuggestion(text) { document.getElementById('chatInput').value = text; sendMessage(); }
         
         async function sendMessage() {
             var input = document.getElementById('chatInput');
             var message = input.value.trim();
             if (!message) return;
             
-            var messagesArea = document.getElementById('chatMessages');
-            var welcomeCard = messagesArea.querySelector('.ai-welcome');
-            if (welcomeCard) welcomeCard.remove();
+            var area = document.getElementById('chatMessages');
+            var welcome = area.querySelector('.ai-welcome');
+            if (welcome) welcome.remove();
             
             var userMsg = document.createElement('div');
-            userMsg.className = 'ai-message user';
+            userMsg.className = 'ai-msg user';
             userMsg.textContent = message;
-            messagesArea.insertBefore(userMsg, document.getElementById('typingIndicator'));
-            
+            area.insertBefore(userMsg, document.getElementById('typing'));
             input.value = '';
             
-            var typing = document.getElementById('typingIndicator');
-            typing.classList.add('active');
-            messagesArea.scrollTop = messagesArea.scrollHeight;
+            document.getElementById('typing').classList.add('active');
+            area.scrollTop = area.scrollHeight;
             
             try {
                 var response = await fetch('/demo/ai/chat', {
@@ -782,28 +515,25 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: message })
                 });
-                
                 var data = await response.json();
-                typing.classList.remove('active');
+                document.getElementById('typing').classList.remove('active');
                 
                 var botMsg = document.createElement('div');
-                botMsg.className = 'ai-message bot';
+                botMsg.className = 'ai-msg bot';
                 botMsg.innerHTML = data.response.replace(/\n/g, '<br>');
-                
                 if (data.xp_earned) {
-                    botMsg.innerHTML += '<div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 4px; background: var(--warning-light); color: var(--warning); padding: 4px 10px; border-radius: 100px; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-star"></i> +' + data.xp_earned + ' XP</div>';
+                    botMsg.innerHTML += '<div style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1e293b; padding: 6px 14px; border-radius: 100px; font-size: 13px; font-weight: 700;"><i class="fas fa-star"></i> +' + data.xp_earned + ' XP</div>';
                     var xpEl = document.getElementById('chatXP');
                     if (xpEl) xpEl.textContent = data.new_total_xp || (parseInt(xpEl.textContent) + data.xp_earned);
                 }
-                
-                messagesArea.insertBefore(botMsg, typing);
-                messagesArea.scrollTop = messagesArea.scrollHeight;
+                area.insertBefore(botMsg, document.getElementById('typing'));
+                area.scrollTop = area.scrollHeight;
             } catch (error) {
-                typing.classList.remove('active');
-                var errorMsg = document.createElement('div');
-                errorMsg.className = 'ai-message bot';
-                errorMsg.textContent = 'Mi dispiace, si e verificato un errore. Riprova tra qualche secondo.';
-                messagesArea.insertBefore(errorMsg, typing);
+                document.getElementById('typing').classList.remove('active');
+                var errMsg = document.createElement('div');
+                errMsg.className = 'ai-msg bot';
+                errMsg.textContent = 'Mi dispiace, si e verificato un errore. Riprova.';
+                area.insertBefore(errMsg, document.getElementById('typing'));
             }
         }
     </script>
