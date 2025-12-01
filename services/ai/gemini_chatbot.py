@@ -4,12 +4,14 @@ Uses Google Gemini API for intelligent tutoring with XP rewards
 """
 
 import os
+import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
 from services.database.database_manager import DatabaseManager
 from services.gamification.xp_manager_v2 import XPManagerV2
+from services.gamification.challenge_manager_v2 import ChallengeManagerV2
 from shared.error_handling.structured_logger import get_logger
 
 logger = get_logger(__name__)
@@ -26,6 +28,7 @@ class GeminiChatbot:
         self.api_key = os.environ.get("GEMINI_API_KEY")
         self.client = None
         self.xp_manager = XPManagerV2()
+        self.challenge_manager = ChallengeManagerV2()
         self.gemini_available = False
         
         if self.api_key:
@@ -182,24 +185,31 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
             return self._mock_response(message, user_name, user_id, gamification)
     
     def _award_chat_xp(self, user_id: int, message: str, response: str) -> Dict:
-        """Award XP based on chat interaction quality"""
+        """Award XP based on chat interaction quality and update gamification"""
         try:
             is_study_related = any(word in message.lower() for word in [
                 'studio', 'esame', 'materia', 'compiti', 'lezione',
                 'matematica', 'italiano', 'storia', 'scienze', 'inglese',
-                'fisica', 'chimica', 'aiuto', 'capire', 'spiegami'
+                'fisica', 'chimica', 'aiuto', 'capire', 'spiegami',
+                'latino', 'filosofia', 'geografia', 'quiz', 'test'
             ])
             
             is_long_conversation = len(message) > 100
             
             is_first_today = self._is_first_interaction_today(user_id)
             
-            return self.xp_manager.xp_chatbot(
+            xp_result = self.xp_manager.xp_chatbot(
                 user_id=user_id,
                 is_prima_oggi=is_first_today,
                 conversazione_lunga=is_long_conversation,
                 per_studio=is_study_related
             )
+            
+            self._update_streak(user_id)
+            
+            self._update_challenge_progress(user_id, 'chatbot_interazioni', 1)
+            
+            return xp_result
         except Exception as e:
             logger.warning(
                 event_type='xp_award_failed',
@@ -208,6 +218,88 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                 error=str(e)
             )
             return {'xp_assegnati': 0, 'success': False}
+    
+    def _update_streak(self, user_id: int):
+        """Update user's streak on daily interaction"""
+        try:
+            db_manager.execute('''
+                UPDATE user_gamification_v2 
+                SET streak_giorni = CASE 
+                    WHEN DATE(ultimo_accesso) = CURRENT_DATE - INTERVAL '1 day' 
+                    THEN streak_giorni + 1
+                    WHEN DATE(ultimo_accesso) = CURRENT_DATE 
+                    THEN streak_giorni
+                    ELSE 1
+                END,
+                streak_max = GREATEST(streak_max, CASE 
+                    WHEN DATE(ultimo_accesso) = CURRENT_DATE - INTERVAL '1 day' 
+                    THEN streak_giorni + 1
+                    WHEN DATE(ultimo_accesso) = CURRENT_DATE 
+                    THEN streak_giorni
+                    ELSE 1
+                END),
+                ultimo_accesso = CURRENT_TIMESTAMP
+                WHERE user_id = %s
+            ''', (user_id,))
+        except Exception as e:
+            logger.warning(
+                event_type='streak_update_failed',
+                domain='ai',
+                user_id=user_id,
+                error=str(e)
+            )
+    
+    def _update_challenge_progress(self, user_id: int, action_type: str, amount: int = 1):
+        """Update progress on active challenges based on action type"""
+        try:
+            challenges = db_manager.query('''
+                SELECT uc.id, uc.progresso, c.obiettivi, c.reward_xp
+                FROM user_challenges_v2 uc
+                JOIN challenges_v2 c ON uc.challenge_id = c.id
+                WHERE uc.user_id = %s AND uc.completato = FALSE
+            ''', (user_id,))
+            
+            for challenge in challenges:
+                progresso = challenge['progresso'] if isinstance(challenge['progresso'], dict) else {}
+                obiettivi = challenge['obiettivi'] if isinstance(challenge['obiettivi'], dict) else {}
+                
+                if action_type in obiettivi:
+                    current = progresso.get(action_type, 0)
+                    new_value = current + amount
+                    progresso[action_type] = new_value
+                    
+                    completed = all(
+                        progresso.get(k, 0) >= v 
+                        for k, v in obiettivi.items()
+                    )
+                    
+                    db_manager.execute('''
+                        UPDATE user_challenges_v2 
+                        SET progresso = %s, completato = %s, completata_at = CASE WHEN %s THEN CURRENT_TIMESTAMP ELSE NULL END
+                        WHERE id = %s
+                    ''', (json.dumps(progresso), completed, completed, challenge['id']))
+                    
+                    if completed:
+                        self.xp_manager.assegna_xp(
+                            user_id=user_id,
+                            amount=challenge['reward_xp'],
+                            source='sfida_completata',
+                            description='Sfida completata!'
+                        )
+                        logger.info(
+                            event_type='challenge_completed',
+                            domain='gamification',
+                            user_id=user_id,
+                            challenge_id=challenge['id'],
+                            reward_xp=challenge['reward_xp']
+                        )
+        except Exception as e:
+            logger.warning(
+                event_type='challenge_progress_update_failed',
+                domain='ai',
+                user_id=user_id,
+                error=str(e)
+            )
     
     def _is_first_interaction_today(self, user_id: int) -> bool:
         """Check if this is user's first chatbot interaction today"""
