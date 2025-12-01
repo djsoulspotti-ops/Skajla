@@ -91,6 +91,20 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - **Security**: Full tenant isolation - ALL queries filter by scuola_id, no cross-school data exposure
   - **Test Account**: dirigente@skaila.app / password123 (School ID: 1)
   - **Database**: teacher_ratings table for anonymous student feedback
+- **Italian Curriculum-Aligned Quiz System (December 2025)**:
+  - **164 Total Quizzes**: Covering Italian ministerial programs for scuole medie and superiori
+  - **9 Subjects**: Matematica, Italiano, Storia, Scienze, Inglese, Geografia, Fisica, Filosofia, Latino
+  - **Grade Levels**: Separate quiz sets for 'medie' (middle school) and 'superiori' (high school)
+  - **Learning Tracks**: Support for liceo scientifico, classico, linguistico, artistico, tecnico, professionale
+  - **Curriculum Standards**: Each quiz tagged with ministerial curriculum alignment
+  - **Adaptive Selection**: Quiz difficulty adapts based on student performance history
+  - **Weak Topic Targeting**: 80% priority to topics where student struggles
+- **Enhanced Chatbot-Gamification Integration (December 2025)**:
+  - Chatbot interactions automatically update user streak (_update_streak method)
+  - Challenge progress tracking for 'chatbot_interazioni' objectives
+  - Automatic XP rewards when challenges are completed through chat
+  - Full gamification context (rank, XP, streak) in personalized AI responses
+  - ChallengeManagerV2 integration for real-time challenge progress updates
 
 # External Dependencies
 -   **Flask**: Web framework
