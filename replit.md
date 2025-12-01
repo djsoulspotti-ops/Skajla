@@ -42,6 +42,12 @@ A Smart Calendar & Agenda System offers personal and school-wide scheduling with
 
 SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) features, including a TikTok-style vertical feed, offline support, and push notifications. The SKAILA Connect module is an "Opportunity Marketplace" for PCTO placements, featuring dynamic student portfolios, smart matching, and a digital PCTO workflow engine for compliance and paperless operations. A Parent Dashboard provides zero-friction child monitoring with auto-generated student codes and real-time academic and attendance stats.
 
+# Recent Updates (December 2025)
+- **Gemini 3.0 AI Integration**: Upgraded chatbot from Gemini 2.5-flash to Gemini 3.0-flash for enhanced conversational capabilities
+- **XP Reward System**: Chat interactions award 5-50 XP with automatic rank progression and gamification context refresh
+- **Test Accounts Created**: Student (test123), Teacher (prof123), Admin (admin123) accounts with proper bcrypt password hashes
+- **Status**: Gemini API key active, chatbot powered by Gemini 3.0-flash model, telemetry batch endpoint disabled to fix schema issues
+
 # External Dependencies
 -   **Flask**: Web framework
 -   **Flask-SocketIO**: Real-time communication
@@ -55,7 +61,7 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
 -   **redis**: Caching layer
 -   **APScheduler**: Task scheduling
 -   **replit-object-storage**: File storage
--   **openai**: AI integration
+-   **google-genai**: Google Gemini 3.0 API for AI tutoring
 -   **Font Awesome**: Icon library
 -   **Google Fonts (Inter)**: Typography
 -   **Chart.js**: Data visualization

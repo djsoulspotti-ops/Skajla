@@ -133,7 +133,7 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                 system_prompt = self._build_system_prompt(user_name, gamification)
                 
                 response = self.client.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='gemini-3.0-flash',
                     contents=message,
                     config=types.GenerateContentConfig(
                         system_instruction=system_prompt,
