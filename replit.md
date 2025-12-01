@@ -63,10 +63,13 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - XP badge showing current XP earned from chat interactions
   - Message history area with typing indicator
   - Auto-focus on input when switching to panel
-- **Gemini 3.0 AI Integration**: Upgraded chatbot from Gemini 2.5-flash to Gemini 3.0-flash for enhanced conversational capabilities
+- **Gemini 2.0 AI Integration**: AI Coach powered by Google Gemini 2.0-flash model for intelligent conversational tutoring
+  - Demo endpoint at `/demo/ai/chat` works without authentication
+  - Personalized responses based on student's gamification context (rank, XP, streak)
+  - Italian language support with motivational coaching style
 - **XP Reward System**: Chat interactions award 5-50 XP with automatic rank progression and gamification context refresh
 - **Test Accounts Created**: Student (test123), Teacher (prof123), Admin (admin123) accounts with proper bcrypt password hashes
-- **Status**: Gemini API key active, chatbot powered by Gemini 3.0-flash model, telemetry batch endpoint disabled to fix schema issues
+- **Status**: Gemini API key active, chatbot powered by Gemini 2.0-flash model, telemetry batch endpoint disabled to fix schema issues
 
 # External Dependencies
 -   **Flask**: Web framework
