@@ -91,7 +91,7 @@ def dashboard_studente():
             SUM(CASE WHEN presente = true THEN 1 ELSE 0 END) as presenze,
             SUM(CASE WHEN presente = false THEN 1 ELSE 0 END) as assenze,
             SUM(CASE WHEN giustificato = true THEN 1 ELSE 0 END) as giustificate,
-            SUM(CASE WHEN ritardo = true THEN 1 ELSE 0 END) as ritardi
+            SUM(CASE WHEN ritardo > 0 THEN 1 ELSE 0 END) as ritardi
         FROM presenze
         WHERE studente_id = %s AND scuola_id = %s
     ''', (user_id, school_id), one=True) or {
