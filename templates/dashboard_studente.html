@@ -1708,13 +1708,26 @@
             chatInput.focus();
         }
 
+        function formatMarkdown(text) {
+            if (!text) return '';
+            let formatted = text
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                .replace(/^\* /gm, '• ')
+                .replace(/^- /gm, '• ')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            return formatted;
+        }
+
         function addMessage(content, isUser = false, xpAwarded = 0, rankUp = false, newRank = null) {
             if (welcomeCard) welcomeCard.style.display = 'none';
             
             const messageDiv = document.createElement('div');
             messageDiv.className = `ai-message ${isUser ? 'user' : 'ai'}`;
             
-            let html = `<p>${content}</p>`;
+            const formattedContent = isUser ? content : formatMarkdown(content);
+            let html = `<p>${formattedContent}</p>`;
             
             if (!isUser && xpAwarded > 0) {
                 html += `<div class="xp-reward"><i class="fas fa-star"></i> +${xpAwarded} XP</div>`;

@@ -107,8 +107,9 @@ LINEE GUIDA:
 4. Se lo studente chiede aiuto su una materia, spiega in modo chiaro con esempi
 5. Motiva lo studente a continuare il percorso gamificato
 6. Usa emoji occasionalmente per rendere le risposte piu coinvolgenti
-7. Mantieni risposte concise ma utili (max 200 parole)
-8. Se lo studente sembra stressato, offri supporto emotivo prima di consigli pratici
+7. NON usare asterischi o markdown - scrivi in testo semplice e naturale
+8. Usa elenchi puntati con trattino (-) invece di asterischi
+9. Se lo studente sembra stressato, offri supporto emotivo prima di consigli pratici
 
 GAMIFICATION:
 - Ricorda allo studente che sta guadagnando XP per questa conversazione
@@ -138,7 +139,7 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                     config=types.GenerateContentConfig(
                         system_instruction=system_prompt,
                         temperature=0.7,
-                        max_output_tokens=500,
+                        max_output_tokens=2048,
                         top_p=0.95
                     )
                 )
