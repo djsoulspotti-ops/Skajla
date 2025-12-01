@@ -306,12 +306,79 @@ def dashboard_professore():
 @dashboard_bp.route('/dashboard/genitore')
 @require_login
 def dashboard_genitore():
-    """Dashboard genitore"""
+    """Dashboard genitore - Vista semplificata: solo voti, assenze, ritardi"""
     if session.get('ruolo') != 'genitore':
         return redirect('/dashboard')
-
-    # Per ora dashboard base - da espandere con dati figli
-    return render_template('dashboard_genitore.html', user=session)
+    
+    parent_id = session.get('user_id')
+    school_id = session.get('school_id', 1)
+    
+    linked_student = db_manager.query('''
+        SELECT u.id, u.nome, u.cognome, u.email
+        FROM parent_student_links psl
+        JOIN utenti u ON psl.student_id = u.id
+        WHERE psl.parent_id = %s AND psl.is_active = true
+        LIMIT 1
+    ''', (parent_id,), one=True)
+    
+    if not linked_student:
+        return render_template('dashboard_genitore.html', 
+                             user=session, 
+                             studente=None,
+                             voti=[],
+                             medie_materie=[],
+                             presenze_stats={},
+                             ultime_presenze=[])
+    
+    student_id = linked_student['id']
+    
+    voti = db_manager.query('''
+        SELECT materia, voto, tipo_valutazione, data, note
+        FROM voti
+        WHERE studente_id = %s AND scuola_id = %s
+        ORDER BY data DESC
+        LIMIT 15
+    ''', (student_id, school_id)) or []
+    
+    medie_materie = db_manager.query('''
+        SELECT materia, 
+               ROUND(AVG(voto)::numeric, 2) as media, 
+               COUNT(*) as num_voti
+        FROM voti
+        WHERE studente_id = %s AND scuola_id = %s
+        GROUP BY materia
+        ORDER BY materia
+    ''', (student_id, school_id)) or []
+    
+    presenze_stats = db_manager.query('''
+        SELECT 
+            COUNT(*) as giorni_totali,
+            SUM(CASE WHEN presente = true THEN 1 ELSE 0 END) as presenze,
+            SUM(CASE WHEN presente = false THEN 1 ELSE 0 END) as assenze,
+            SUM(CASE WHEN giustificato = true THEN 1 ELSE 0 END) as giustificate,
+            SUM(CASE WHEN ritardo > 0 THEN 1 ELSE 0 END) as ritardi
+        FROM presenze
+        WHERE studente_id = %s AND scuola_id = %s
+    ''', (student_id, school_id), one=True) or {
+        'giorni_totali': 0, 'presenze': 0, 'assenze': 0, 
+        'giustificate': 0, 'ritardi': 0
+    }
+    
+    ultime_presenze = db_manager.query('''
+        SELECT data, presente, giustificato, ritardo, note
+        FROM presenze
+        WHERE studente_id = %s AND scuola_id = %s
+        ORDER BY data DESC
+        LIMIT 10
+    ''', (student_id, school_id)) or []
+    
+    return render_template('dashboard_genitore.html', 
+                         user=session,
+                         studente=linked_student,
+                         voti=voti,
+                         medie_materie=medie_materie,
+                         presenze_stats=presenze_stats,
+                         ultime_presenze=ultime_presenze)
 
 @dashboard_bp.route('/dashboard/admin')
 @require_login

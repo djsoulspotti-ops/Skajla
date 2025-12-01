@@ -22,7 +22,6 @@
             min-height: 100vh;
         }
 
-        /* Navbar */
         .navbar {
             position: fixed;
             top: 0;
@@ -46,43 +45,24 @@
             letter-spacing: -0.5px;
         }
 
-        .nav-buttons {
-            display: flex;
-            gap: 0.75rem;
-        }
-
         .btn {
-            padding: 0.6rem 1.25rem;
+            padding: 0.7rem 1.5rem;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             text-decoration: none;
             transition: all 0.2s ease;
             cursor: pointer;
             border: none;
-        }
-
-        .btn-ghost {
-            background: transparent;
-            color: #64748b;
-        }
-
-        .btn-ghost:hover {
-            color: #1e3a5f;
-            background: #f1f5f9;
-        }
-
-        .btn-primary {
             background: #1e3a5f;
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn:hover {
             background: #0f2744;
             transform: translateY(-1px);
         }
 
-        /* Hero */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -111,6 +91,7 @@
             position: relative;
             z-index: 1;
             max-width: 700px;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .hero-badge {
@@ -152,36 +133,17 @@
             margin-right: auto;
         }
 
-        .hero-cta {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
         .btn-large {
-            padding: 1rem 2rem;
-            font-size: 1rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.05rem;
             border-radius: 14px;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .btn-secondary {
-            background: white;
-            color: #1e3a5f;
-            border: 2px solid #e2e8f0;
-        }
-
-        .btn-secondary:hover {
-            border-color: #1e3a5f;
-            background: #f8fafc;
-        }
-
-        /* Features */
         .features {
-            padding: 4rem 2rem;
+            padding: 5rem 2rem;
             background: white;
         }
 
@@ -196,11 +158,17 @@
         .feature {
             text-align: center;
             padding: 1.5rem;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
         }
 
+        .feature:nth-child(1) { animation-delay: 0.1s; }
+        .feature:nth-child(2) { animation-delay: 0.2s; }
+        .feature:nth-child(3) { animation-delay: 0.3s; }
+
         .feature-icon {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             border-radius: 16px;
             display: flex;
@@ -212,102 +180,22 @@
         }
 
         .feature h3 {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
             color: #0f172a;
         }
 
         .feature p {
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: #64748b;
             line-height: 1.5;
         }
 
-        /* Roles Section */
-        .roles {
-            padding: 5rem 2rem;
-            background: #f8fafc;
-        }
-
-        .roles-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .roles-header h2 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 0.5rem;
-        }
-
-        .roles-header p {
-            color: #64748b;
-            font-size: 1rem;
-        }
-
-        .roles-grid {
-            max-width: 800px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-
-        .role-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .role-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            border-color: transparent;
-        }
-
-        .role-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        .role-icon.student { background: #dbeafe; color: #1d4ed8; }
-        .role-icon.teacher { background: #dcfce7; color: #15803d; }
-        .role-icon.parent { background: #fef3c7; color: #b45309; }
-        .role-icon.admin { background: #f3e8ff; color: #7c3aed; }
-
-        .role-content h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            color: #0f172a;
-        }
-
-        .role-content p {
-            font-size: 0.875rem;
-            color: #64748b;
-            line-height: 1.5;
-        }
-
-        /* Footer */
         .footer {
             padding: 2rem;
             text-align: center;
-            background: white;
+            background: #f8fafc;
             border-top: 1px solid #e2e8f0;
         }
 
@@ -316,7 +204,6 @@
             color: #94a3b8;
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
             .navbar {
                 padding: 1rem;
@@ -324,26 +211,10 @@
 
             .features-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .roles-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-cta {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .btn-large {
-                width: 100%;
-                max-width: 280px;
-                justify-content: center;
+                gap: 1.5rem;
             }
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -354,28 +225,12 @@
                 transform: translateY(0);
             }
         }
-
-        .hero-content {
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .feature, .role-card {
-            animation: fadeInUp 0.6s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .feature:nth-child(1) { animation-delay: 0.1s; }
-        .feature:nth-child(2) { animation-delay: 0.2s; }
-        .feature:nth-child(3) { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <a href="/" class="logo">SKAILA</a>
-        <div class="nav-buttons">
-            <a href="/login" class="btn btn-ghost">Accedi</a>
-            <a href="/register" class="btn btn-primary">Inizia Gratis</a>
-        </div>
+        <a href="/login" class="btn">Accedi</a>
     </nav>
 
     <section class="hero">
@@ -391,16 +246,10 @@
                 La piattaforma che trasforma lo studio in un gioco. 
                 AI coach personale, sfide, XP e classifiche.
             </p>
-            <div class="hero-cta">
-                <a href="/register" class="btn btn-primary btn-large">
-                    <i class="fas fa-rocket"></i>
-                    Inizia Ora
-                </a>
-                <a href="/demo/dashboard/studente" class="btn btn-secondary btn-large">
-                    <i class="fas fa-play"></i>
-                    Prova Demo
-                </a>
-            </div>
+            <a href="/login" class="btn btn-large">
+                <i class="fas fa-arrow-right"></i>
+                Accedi
+            </a>
         </div>
     </section>
 
@@ -427,51 +276,6 @@
                 <h3>Progressi Real-time</h3>
                 <p>Monitora voti, presenze e performance in un'unica dashboard</p>
             </div>
-        </div>
-    </section>
-
-    <section class="roles">
-        <div class="roles-header">
-            <h2>Chi sei?</h2>
-            <p>Scegli il tuo ruolo per iniziare</p>
-        </div>
-        <div class="roles-grid">
-            <a href="/register" class="role-card">
-                <div class="role-icon student">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <div class="role-content">
-                    <h3>Studente</h3>
-                    <p>Trasforma lo studio in un'avventura con AI coach e sfide giornaliere</p>
-                </div>
-            </a>
-            <a href="/register" class="role-card">
-                <div class="role-icon teacher">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </div>
-                <div class="role-content">
-                    <h3>Professore</h3>
-                    <p>Gestisci classi, voti e monitora i progressi degli studenti</p>
-                </div>
-            </a>
-            <a href="/register" class="role-card">
-                <div class="role-icon parent">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="role-content">
-                    <h3>Genitore</h3>
-                    <p>Resta aggiornato su voti, presenze e attività dei tuoi figli</p>
-                </div>
-            </a>
-            <a href="/register" class="role-card">
-                <div class="role-icon admin">
-                    <i class="fas fa-school"></i>
-                </div>
-                <div class="role-content">
-                    <h3>Dirigente</h3>
-                    <p>Gestione completa della scuola con analytics e report avanzati</p>
-                </div>
-            </a>
         </div>
     </section>
 

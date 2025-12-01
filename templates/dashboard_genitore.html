@@ -3,521 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👨‍👩‍👧‍👦 Dashboard Genitore - SKAILA</title>
+    <title>Dashboard Genitore - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -2px rgba(0, 0, 0, 0.04);
-            --border-color: #e2e8f0;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --border-radius-lg: 12px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #f8fafc;
             min-height: 100vh;
-            color: var(--text);
+            color: #1e293b;
         }
 
-        .dashboard-container {
-            max-width: 1200px;
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            text-decoration: none;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
             padding: 2rem;
         }
 
         .header {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
-        .welcome-section h1 {
-            font-size: 2rem;
+        .header h1 {
+            font-size: 1.75rem;
             font-weight: 800;
-            color: var(--primary);
+            color: #0f172a;
             margin-bottom: 0.5rem;
         }
 
-        .welcome-section p {
-            color: var(--text-light);
-            font-size: 1.1rem;
+        .header p {
+            color: #64748b;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-link {
-            padding: 0.75rem 1.5rem;
-            background: var(--gradient-primary);
+        .student-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
             color: white;
-            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+
+        .student-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .student-card p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .no-student {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
             border-radius: 12px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .nav-link:hover {
-            transform: translateY(-2px);
+        .no-student i {
+            font-size: 2.5rem;
+            color: #f59e0b;
+            margin-bottom: 1rem;
         }
 
-        .stats-overview {
+        .no-student h3 {
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-student p {
+            color: #a16207;
+        }
+
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
+            border-radius: 12px;
+            padding: 1.25rem;
             text-align: center;
+            border: 1px solid #e2e8f0;
         }
 
-        .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
+        .stat-value {
+            font-size: 2rem;
             font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
+
+        .stat-value.green { color: #10b981; }
+        .stat-value.red { color: #ef4444; }
+        .stat-value.yellow { color: #f59e0b; }
+        .stat-value.blue { color: #3b82f6; }
 
         .stat-label {
-            color: var(--text-light);
+            font-size: 0.8rem;
+            color: #64748b;
             font-weight: 500;
         }
 
-        .features-section {
+        .section {
             background: white;
             border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
         }
 
         .section-title {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text);
-            margin-bottom: 1.5rem;
+            color: #0f172a;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .coming-soon {
+        .section-title i {
+            color: #3b82f6;
+        }
+
+        .grades-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
         }
 
-        .feature-card {
-            padding: 1.5rem;
-            border: 2px solid var(--border-color);
-            border-radius: var(--border-radius-lg);
+        .grade-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1rem;
             text-align: center;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            transition: all 0.3s ease;
-            cursor: pointer;
         }
 
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            color: var(--primary);
+        .grade-subject {
+            font-size: 0.8rem;
+            color: #64748b;
             margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
-        .feature-title {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.5rem;
+        .grade-value {
+            font-size: 1.75rem;
+            font-weight: 800;
         }
 
-        .feature-description {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin-bottom: 1rem;
+        .grade-value.excellent { color: #10b981; }
+        .grade-value.good { color: #3b82f6; }
+        .grade-value.pass { color: #f59e0b; }
+        .grade-value.fail { color: #ef4444; }
+
+        .grade-count {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
         }
 
-        .coming-soon-badge {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
+        .recent-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .recent-table th,
+        .recent-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .recent-table th {
             font-size: 0.75rem;
+            color: #64748b;
             font-weight: 600;
             text-transform: uppercase;
         }
 
-        .info-box {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 1px solid #60a5fa;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+        .recent-table td {
+            font-size: 0.9rem;
         }
 
-        .info-box h3 {
-            color: #1e40af;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
-        .info-box p {
-            color: #1e40af;
-            line-height: 1.6;
-        }
+        .badge-green { background: #dcfce7; color: #15803d; }
+        .badge-red { background: #fee2e2; color: #dc2626; }
+        .badge-yellow { background: #fef3c7; color: #b45309; }
 
-        /* Modal Coming Soon */
-        .coming-soon-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .coming-soon-modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .coming-soon-modal .modal-content {
-            background: white;
-            border-radius: var(--border-radius-lg);
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow: auto;
-            box-shadow: var(--shadow-xl);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .coming-soon-modal.show .modal-content {
-            transform: scale(1);
-        }
-
-        .coming-soon-modal .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .coming-soon-modal .close-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: var(--gray-100);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .coming-soon-modal .close-btn:hover {
-            background: var(--gray-200);
-            transform: scale(1.1);
-        }
-
-        .coming-soon-modal .modal-body {
-            padding: 2rem;
-        }
-
-        .coming-soon-content {
+        .empty-state {
             text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
         }
 
-        .coming-soon-content h4 {
-            color: var(--text-color);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .coming-soon-content p {
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            line-height: 1.6;
-        }
-
-        .development-progress {
-            margin-top: 2rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--gray-200);
-            border-radius: 4px;
-            overflow: hidden;
+        .empty-state i {
+            font-size: 2rem;
             margin-bottom: 0.5rem;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 4px;
-            transition: width 2s ease;
-            animation: progressPulse 2s infinite;
-        }
-
-        @keyframes progressPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .development-progress small {
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 1rem;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-            }
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .grades-grid { grid-template-columns: repeat(2, 1fr); }
+            .recent-table { font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
+    <nav class="navbar">
+        <a href="/" class="logo">SKAILA</a>
+        <div class="nav-user">
+            <span class="user-name">{{ user.nome }} {{ user.cognome }}</span>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Esci</a>
+        </div>
+    </nav>
+
+    <div class="container">
         <div class="header">
-            <div class="welcome-section">
-                <h1>👨‍👩‍👧‍👦 Benvenuto {{ user.nome }}!</h1>
-                <p>Segui i progressi di tuo figlio su SKAILA</p>
-            </div>
-            <div class="nav-links">
-                <a href="/chat" class="nav-link">💬 Chat</a>
-                <a href="/ai-chat" class="nav-link">🤖 AI Assistant</a>
-                <a href="/logout" class="nav-link">🚪 Esci</a>
-            </div>
+            <h1>Dashboard Genitore</h1>
+            <p>Monitora voti, assenze e ritardi</p>
         </div>
 
-        <!-- Info Box -->
-        <div class="info-box">
-            <h3>
-                <i class="fas fa-info-circle"></i>
-                Funzionalità Genitore
-            </h3>
-            <p>
-                Le funzionalità specifiche per i genitori sono attualmente in fase di sviluppo. 
-                Al momento puoi utilizzare le chat generali per comunicare con la scuola e 
-                l'AI Assistant per supporto educativo.
-            </p>
+        {% if studente %}
+        <div class="student-card">
+            <h2><i class="fas fa-user-graduate"></i> {{ studente.nome }} {{ studente.cognome }}</h2>
+            <p>{{ studente.email }}</p>
         </div>
 
-        <!-- Current Stats -->
-        <div class="stats-overview">
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">💬</div>
-                <div class="stat-number">{{ stats.messaggi_inviati }}</div>
-                <div class="stat-label">Messaggi Inviati</div>
+                <div class="stat-value green">{{ presenze_stats.presenze or 0 }}</div>
+                <div class="stat-label">Presenze</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-number">{{ stats.chat_partecipate }}</div>
-                <div class="stat-label">Chat Partecipate</div>
+                <div class="stat-value red">{{ presenze_stats.assenze or 0 }}</div>
+                <div class="stat-label">Assenze</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value yellow">{{ presenze_stats.ritardi or 0 }}</div>
+                <div class="stat-label">Ritardi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value blue">{{ presenze_stats.giustificate or 0 }}</div>
+                <div class="stat-label">Giustificate</div>
             </div>
         </div>
 
-        <!-- Coming Soon Features -->
-        <div class="features-section">
-            <h2 class="section-title">
-                <i class="fas fa-rocket"></i>
-                Prossime Funzionalità
-            </h2>
-            <div class="coming-soon">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3 class="feature-title">Progressi Figlio/a</h3>
-                    <p class="feature-description">
-                        Monitora i progressi scolastici, voti e partecipazione in tempo reale
-                    </p>
-                    <span class="coming-soon-badge">Presto</span>
+        <div class="section">
+            <h3 class="section-title"><i class="fas fa-graduation-cap"></i> Medie per Materia</h3>
+            {% if medie_materie %}
+            <div class="grades-grid">
+                {% for m in medie_materie %}
+                <div class="grade-card">
+                    <div class="grade-subject">{{ m.materia }}</div>
+                    <div class="grade-value {% if m.media >= 8 %}excellent{% elif m.media >= 7 %}good{% elif m.media >= 6 %}pass{% else %}fail{% endif %}">
+                        {{ m.media }}
+                    </div>
+                    <div class="grade-count">{{ m.num_voti }} voti</div>
                 </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <h3 class="feature-title">Calendario Scolastico</h3>
-                    <p class="feature-description">
-                        Visualizza compiti, verifiche e eventi scolastici programmati
-                    </p>
-                    <span class="coming-soon-badge">Presto</span>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-comments"></i></div>
-                    <h3 class="feature-title">Chat con Professori</h3>
-                    <p class="feature-description">
-                        Comunicazione diretta con i docenti del tuo figlio/figlia
-                    </p>
-                    <span class="coming-soon-badge">Presto</span>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
-                    <h3 class="feature-title">Notifiche Smart</h3>
-                    <p class="feature-description">
-                        Ricevi aggiornamenti su assenze, voti e comunicazioni importanti
-                    </p>
-                    <span class="coming-soon-badge">Presto</span>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
-                    <h3 class="feature-title">Report Mensili</h3>
-                    <p class="feature-description">
-                        Report dettagliati sui progressi e partecipazione mensile
-                    </p>
-                    <span class="coming-soon-badge">Presto</span>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-users"></i></div>
-                    <h3 class="feature-title">Rete Genitori</h3>
-                    <p class="feature-description">
-                        Connettiti con altri genitori della classe per organizzare attività
-                    </p>
-                    <span class="coming-soon-badge">Presto</span>
-                </div>
+                {% endfor %}
             </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <p>Nessun voto registrato</p>
+            </div>
+            {% endif %}
         </div>
+
+        <div class="section">
+            <h3 class="section-title"><i class="fas fa-list"></i> Ultimi Voti</h3>
+            {% if voti %}
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Materia</th>
+                        <th>Voto</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in voti %}
+                    <tr>
+                        <td>{{ v.data.strftime('%d/%m/%Y') if v.data else '-' }}</td>
+                        <td>{{ v.materia }}</td>
+                        <td><strong>{{ v.voto }}</strong></td>
+                        <td>{{ v.tipo_valutazione or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <p>Nessun voto recente</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3 class="section-title"><i class="fas fa-calendar-check"></i> Registro Presenze</h3>
+            {% if ultime_presenze %}
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Stato</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in ultime_presenze %}
+                    <tr>
+                        <td>{{ p.data.strftime('%d/%m/%Y') if p.data else '-' }}</td>
+                        <td>
+                            {% if p.presente %}
+                                {% if p.ritardo %}
+                                <span class="badge badge-yellow">Ritardo</span>
+                                {% else %}
+                                <span class="badge badge-green">Presente</span>
+                                {% endif %}
+                            {% else %}
+                                {% if p.giustificato %}
+                                <span class="badge badge-yellow">Assente (Giust.)</span>
+                                {% else %}
+                                <span class="badge badge-red">Assente</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>{{ p.note or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar"></i>
+                <p>Nessuna presenza registrata</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {% else %}
+        <div class="no-student">
+            <i class="fas fa-user-slash"></i>
+            <h3>Nessuno studente collegato</h3>
+            <p>Il tuo account non è ancora collegato a uno studente. Contatta la segreteria per collegare il profilo del tuo figlio/figlia.</p>
+        </div>
+        {% endif %}
     </div>
-
-    <script>
-        // Dashboard genitore - Funzionalità implementate
-        console.log('🚀 Dashboard Genitore - Caricamento completato');
-
-        // Funzionalità per le card interattive
-        document.querySelectorAll('.quick-action-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const title = this.querySelector('h3').textContent;
-                showComingSoonModal(title);
-            });
-        });
-
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const title = this.querySelector('h3').textContent;
-                showComingSoonModal(title);
-            });
-        });
-
-        // Funzione per mostrare modal "Coming Soon"
-        function showComingSoonModal(feature) {
-            const modal = document.createElement('div');
-            modal.className = 'coming-soon-modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>🚀 ${feature}</h3>
-                        <button class="close-btn" onclick="this.closest('.coming-soon-modal').remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="coming-soon-content">
-                            <i class="fas fa-rocket"></i>
-                            <h4>Funzionalità in Sviluppo</h4>
-                            <p>La funzionalità <strong>${feature}</strong> è attualmente in fase di sviluppo.</p>
-                            <p>Sarà disponibile nei prossimi aggiornamenti di SKAILA!</p>
-                            <div class="development-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill"></div>
-                                </div>
-                                <small>Progresso sviluppo</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
-
-        // Animazioni al caricamento
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Osserva tutti gli elementi animabili
-        document.querySelectorAll('.stats-grid .stat-card, .quick-actions .quick-action-card, .features-grid .feature-card').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'all 0.6s ease';
-            observer.observe(el);
-        });
-    </script>
 </body>
 </html>
