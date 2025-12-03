@@ -10,7 +10,7 @@ from services.ai.coaching_engine import coaching_engine
 from services.ai.skaila_ai_brain import skaila_brain
 from database_manager import db_manager
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import json
 import re
 
@@ -515,7 +515,7 @@ class AISkailaBot:
             )
             return self._fallback_supportive_message(user_name)
     
-    def _generate_action_plan_response(self, message: str, user_name: str, user_id: int) -> str:
+    def _generate_action_plan_response(self, message: str, user_name: str, user_id: int) -> Optional[str]:
         """Genera piano d'azione dettagliato per soft skills"""
         message_lower = message.lower()
         
@@ -598,7 +598,7 @@ Sei pronto a iniziare? 🚀
         
         return response
     
-    def _handle_subject_question(self, message: str, user_name: str, user_id: int) -> str:
+    def _handle_subject_question(self, message: str, user_name: str, user_id: int) -> Optional[str]:
         """Gestisce domande su metodi studio per materie"""
         message_lower = message.lower()
         
@@ -734,12 +734,12 @@ Puoi anche:
 
 Vuoi consigli su come studiare meglio questa materia? 🤝"""
     
-    def _save_conversation(self, user_id: int, message: str, response: str):
+    def _save_conversation(self, user_id: int, message: str, response: str) -> None:
         """Salva conversazione nel database"""
+        category = 'generale'
         try:
             sentiment = coaching_engine.detect_sentiment(message)
             
-            category = 'generale'
             for cat in ['stress', 'motivazione', 'organizzazione', 'obiettivi', 'burnout', 'sociale']:
                 if cat in message.lower():
                     category = cat

@@ -6,7 +6,7 @@ Uses Google Gemini API for intelligent tutoring with XP rewards
 import os
 import json
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Union
 from google import genai
 from google.genai import types
 from services.database.database_manager import DatabaseManager
@@ -84,8 +84,10 @@ class GeminiChatbot:
                 (user_id,),
                 one=True
             )
-            return user.get('nome', 'Studente') if user else 'Studente'
-        except:
+            if user and isinstance(user, dict):
+                return user.get('nome', 'Studente')
+            return 'Studente'
+        except Exception:
             return 'Studente'
     
     def _build_system_prompt(self, user_name: str, gamification: Dict) -> str:
@@ -122,7 +124,7 @@ GAMIFICATION:
 Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorare."""
     
     def generate_response(self, message: str, user_id: int, 
-                         user_name: str = None, user_role: str = 'studente') -> Dict[str, Any]:
+                         user_name: Optional[str] = None, user_role: str = 'studente') -> Dict[str, Any]:
         """
         Generate AI response with gamification integration.
         Awards XP and returns personalized response.
@@ -249,19 +251,28 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                 error=str(e)
             )
     
-    def _update_challenge_progress(self, user_id: int, action_type: str, amount: int = 1):
+    def _update_challenge_progress(self, user_id: int, action_type: str, amount: int = 1) -> None:
         """Update progress on active challenges based on action type"""
         try:
-            challenges = db_manager.query('''
+            challenges_result = db_manager.query('''
                 SELECT uc.id, uc.progresso, c.obiettivi, c.reward_xp
                 FROM user_challenges_v2 uc
                 JOIN challenges_v2 c ON uc.challenge_id = c.id
                 WHERE uc.user_id = %s AND uc.completato = FALSE
             ''', (user_id,))
             
-            for challenge in challenges:
-                progresso = challenge['progresso'] if isinstance(challenge['progresso'], dict) else {}
-                obiettivi = challenge['obiettivi'] if isinstance(challenge['obiettivi'], dict) else {}
+            if not challenges_result or not isinstance(challenges_result, list):
+                return
+            
+            for challenge in challenges_result:
+                if not isinstance(challenge, dict):
+                    continue
+                    
+                raw_progresso = challenge.get('progresso')
+                raw_obiettivi = challenge.get('obiettivi')
+                
+                progresso: Dict[str, Any] = raw_progresso if isinstance(raw_progresso, dict) else {}
+                obiettivi: Dict[str, Any] = raw_obiettivi if isinstance(raw_obiettivi, dict) else {}
                 
                 if action_type in obiettivi:
                     current = progresso.get(action_type, 0)
@@ -273,16 +284,19 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                         for k, v in obiettivi.items()
                     )
                     
+                    challenge_id = challenge.get('id')
+                    reward_xp = challenge.get('reward_xp', 0)
+                    
                     db_manager.execute('''
                         UPDATE user_challenges_v2 
                         SET progresso = %s, completato = %s, completata_at = CASE WHEN %s THEN CURRENT_TIMESTAMP ELSE NULL END
                         WHERE id = %s
-                    ''', (json.dumps(progresso), completed, completed, challenge['id']))
+                    ''', (json.dumps(progresso), completed, completed, challenge_id))
                     
-                    if completed:
+                    if completed and isinstance(reward_xp, int):
                         self.xp_manager.assegna_xp(
                             user_id=user_id,
-                            amount=challenge['reward_xp'],
+                            amount=reward_xp,
                             source='sfida_completata',
                             description='Sfida completata!'
                         )
@@ -290,8 +304,8 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                             event_type='challenge_completed',
                             domain='gamification',
                             user_id=user_id,
-                            challenge_id=challenge['id'],
-                            reward_xp=challenge['reward_xp']
+                            challenge_id=challenge_id,
+                            reward_xp=reward_xp
                         )
         except Exception as e:
             logger.warning(
@@ -310,8 +324,10 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
                   AND source = 'chatbot'
                   AND DATE(created_at) = CURRENT_DATE
             ''', (user_id,), one=True)
-            return result.get('count', 0) == 0
-        except:
+            if result and isinstance(result, dict):
+                return result.get('count', 0) == 0
+            return True
+        except Exception:
             return False
     
     def _get_fallback_response(self, user_name: str, gamification: Dict) -> str:
