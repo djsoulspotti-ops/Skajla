@@ -422,44 +422,63 @@ class SkailaApp:
         print("🔒 Security middlewares initialized (CSRF + Tenant Isolation)")
 
     def init_systems(self):
-        """Inizializza sistemi ausiliari"""
-        # Inizializza AI Bot
+        """Inizializza sistemi ausiliari - deferred to background thread for fast startup"""
+        # Inizializza AI Bot (lightweight, no DB)
         self.ai_bot = AISkailaBot()
-
-        # CRITICO: Inizializza sistema scuole multi-tenant
-        school_system.init_school_tables()
-
-        # Avvia keep-alive database per evitare Neon sleep
-        if db_manager.db_type == 'postgresql':
-            from database_keep_alive import keep_alive
-            keep_alive.start()  # Avvia keep-alive service
-
-        # Inizializza gamification (base + advanced v2)
-        gamification_system.init_gamification_tables()
         
-        # Inizializza Advanced Gamification V2 (ranks, battle pass, challenges, kudos)
-        from services.gamification.advanced_gamification import advanced_gamification
-        if advanced_gamification.init_advanced_tables():
-            advanced_gamification.seed_default_badges()
-            advanced_gamification.seed_default_challenges()
-            advanced_gamification.seed_default_powerups()
-            print("🎮 Advanced Gamification V2 initialized")
+        # Mark as ready for basic health checks immediately
+        self._systems_initialized = False
         
-        # Inizializza calendario smart
-        calendar_system.init_calendar_tables()
+        # Start background initialization thread
+        def _background_init():
+            """Heavy initialization in background after server starts"""
+            try:
+                # CRITICO: Inizializza sistema scuole multi-tenant
+                school_system.init_school_tables()
 
-        # Crea indici database ottimizzati
-        db_manager.create_optimized_indexes()
+                # Avvia keep-alive database per evitare Neon sleep
+                if db_manager.db_type == 'postgresql':
+                    from database_keep_alive import keep_alive
+                    keep_alive.start()  # Avvia keep-alive service
 
-        # Inizializza scheduler report automatici (con app context)
-        try:
-            self.report_scheduler = ReportScheduler(app=self.app)
-            self.report_scheduler.start()
-        except Exception as e:
-            print(f"⚠️ Report scheduler non avviato: {e}")
+                # Inizializza gamification (base + advanced v2)
+                gamification_system.init_gamification_tables()
+                
+                # Inizializza Advanced Gamification V2 (ranks, battle pass, challenges, kudos)
+                from services.gamification.advanced_gamification import advanced_gamification
+                if advanced_gamification.init_advanced_tables():
+                    advanced_gamification.seed_default_badges()
+                    advanced_gamification.seed_default_challenges()
+                    advanced_gamification.seed_default_powerups()
+                    print("🎮 Advanced Gamification V2 initialized")
+                
+                # Inizializza calendario smart
+                calendar_system.init_calendar_tables()
 
-        # Inizializza database se necessario
-        self.init_database()
+                # Crea indici database ottimizzati
+                db_manager.create_optimized_indexes()
+
+                # Inizializza scheduler report automatici (con app context)
+                try:
+                    with self.app.app_context():
+                        self.report_scheduler = ReportScheduler(app=self.app)
+                        self.report_scheduler.start()
+                except Exception as e:
+                    print(f"⚠️ Report scheduler non avviato: {e}")
+
+                # Inizializza database se necessario
+                self.init_database()
+                
+                self._systems_initialized = True
+            except Exception as e:
+                print(f"⚠️ Background init error: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        # Start initialization in background thread after a short delay
+        # This allows the server to start accepting connections first
+        init_thread = threading.Thread(target=_background_init, daemon=True)
+        init_thread.start()
 
     def init_monitoring_delayed(self):
         """TEMPORARILY DISABLED - Monitoring system causing eventlet mainloop blocking"""

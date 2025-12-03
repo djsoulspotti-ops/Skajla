@@ -1459,11 +1459,37 @@ class SchoolSystem:
                 'message': f'Errore durante il toggle: {str(e)}'
             }
 
-# Istanza globale sistema scolastico
-school_system = SchoolSystem()
+# Lazy initialization wrapper to avoid heavy database operations at import time
+# This is critical for Autoscale health checks - Flask must be ready to respond
+# before database migrations run
+class _LazySchoolSystem:
+    """Lazy initialization wrapper for SchoolSystem.
+    Defers database migrations until first access, allowing health checks to pass.
+    """
+    _instance = None
+    _initialized = False
+    
+    def __getattr__(self, name):
+        if not self._initialized:
+            self._initialize()
+        return getattr(self._instance, name)
+    
+    def _initialize(self):
+        if self._initialized:
+            return
+        self._instance = SchoolSystem()
+        self._initialized = True
+        logger.info(
+            event_type='school_system_initialized',
+            domain='school',
+            message='Sistema scuole-classi-professori inizializzato'
+        )
+    
+    def init_school_tables(self):
+        """Explicit initialization method for startup sequence."""
+        if not self._initialized:
+            self._initialize()
+        return self._instance.init_school_tables()
 
-logger.info(
-    event_type='school_system_initialized',
-    domain='school',
-    message='Sistema scuole-classi-professori inizializzato'
-)
+# Lazy instance - won't run migrations until first access
+school_system = _LazySchoolSystem()

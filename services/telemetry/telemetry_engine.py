@@ -733,4 +733,22 @@ class TelemetryEngine:
             return []
 
 
-telemetry_engine = TelemetryEngine()
+# Lazy initialization wrapper to avoid database operations at import time
+# Critical for Autoscale health checks - Flask must respond before heavy init
+class _LazyTelemetryEngine:
+    """Defers TelemetryEngine initialization until first access."""
+    _instance = None
+    _initialized = False
+    
+    def __getattr__(self, name):
+        if not self._initialized:
+            self._initialize()
+        return getattr(self._instance, name)
+    
+    def _initialize(self):
+        if self._initialized:
+            return
+        self._instance = TelemetryEngine()
+        self._initialized = True
+
+telemetry_engine = _LazyTelemetryEngine()
