@@ -3,287 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat - SKAILA</title>
+    <title>Messaggistica - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/professional.css" rel="stylesheet">
-    <link href="/static/css/layouts.css" rel="stylesheet">
-    <style>
-        .chat-list-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: var(--spacing-6);
-        }
-        
-        .chat-list-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: var(--spacing-6);
-            padding-bottom: var(--spacing-4);
-            border-bottom: 2px solid var(--color-border);
-        }
-        
-        .chat-list-title {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-3);
-            color: var(--color-text-primary);
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-        }
-        
-        .chat-list-title i {
-            color: var(--color-primary);
-        }
-        
-        .chat-section-divider {
-            margin: var(--spacing-8) 0 var(--spacing-4) 0;
-            padding-left: var(--spacing-4);
-            border-left: 4px solid var(--color-primary);
-        }
-        
-        .chat-section-divider h3 {
-            color: var(--color-text-primary);
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-        }
-        
-        .chat-section-divider i {
-            color: var(--color-primary);
-            font-size: var(--font-size-base);
-        }
-        
-        .chat-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-2);
-        }
-        
-        .chat-list-item {
-            background: var(--color-bg-elevated);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-4);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .chat-list-item:hover {
-            background: var(--color-bg-hover);
-            border-color: var(--color-primary-light);
-            transform: translateX(4px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .chat-list-item-main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-        }
-        
-        .chat-list-item-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .chat-list-item-icon i {
-            color: white;
-            font-size: var(--font-size-xl);
-        }
-        
-        .chat-list-item-content {
-            flex: 1;
-        }
-        
-        .chat-list-item-title {
-            font-size: var(--font-size-base);
-            font-weight: 600;
-            color: var(--color-text-primary);
-            margin: 0 0 var(--spacing-1) 0;
-        }
-        
-        .chat-list-item-meta {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-3);
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-        
-        .chat-list-item-badge {
-            background: var(--color-primary);
-            color: white;
-            border-radius: var(--radius-full);
-            padding: var(--spacing-1) var(--spacing-3);
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            min-width: 24px;
-            text-align: center;
-        }
-        
-        .chat-list-item-arrow {
-            color: var(--color-text-tertiary);
-            font-size: var(--font-size-lg);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-12) var(--spacing-6);
-            color: var(--color-text-secondary);
-        }
-        
-        .empty-state i {
-            font-size: 48px;
-            color: var(--color-text-tertiary);
-            margin-bottom: var(--spacing-4);
-        }
-        
-        .empty-state p {
-            margin: 0;
-            font-size: var(--font-size-base);
-        }
-        
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            padding: var(--spacing-2) var(--spacing-4);
-            background: var(--color-bg-elevated);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            color: var(--color-text-secondary);
-            text-decoration: none;
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-back:hover {
-            background: var(--color-bg-hover);
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/futuristic-chat.css" rel="stylesheet">
 </head>
-<body>
-    <div class="chat-list-container">
-        <div class="chat-list-header">
-            <h1 class="chat-list-title">
-                <i class="fas fa-comments"></i>
-                Messaggistica Unificata
-            </h1>
-            <a href="/dashboard" class="btn-back">
+<body class="futuristic-body">
+    <div class="grid-overlay"></div>
+    
+    <div class="chat-hub-container">
+        <header class="chat-hub-header glass-panel">
+            <div class="chat-hub-title">
+                <div class="icon-wrapper">
+                    <i class="fas fa-satellite-dish"></i>
+                </div>
+                <span class="neon-text">Messaggistica Quantum</span>
+            </div>
+            <a href="/dashboard" class="btn-futuristic">
                 <i class="fas fa-arrow-left"></i>
                 <span>Dashboard</span>
             </a>
-        </div>
+        </header>
 
         {% if chat_classe and chat_classe|length > 0 %}
-        <div class="chat-section-divider">
-            <h3><i class="fas fa-users"></i> Chat Classe</h3>
-        </div>
-        <ul class="chat-list">
-            {% for chat in chat_classe %}
-            <li class="chat-list-item" onclick="window.location.href='/chat/room/{{ chat.id }}'">
-                <div class="chat-list-item-main">
-                    <div class="chat-list-item-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="chat-list-item-content">
-                        <h4 class="chat-list-item-title">{{ chat.nome or ('Classe ' + chat.classe) }}</h4>
-                        <div class="chat-list-item-meta">
-                            <span><i class="fas fa-comment-dots"></i> {{ chat.message_count or 0 }} messaggi</span>
+        <section class="chat-section">
+            <div class="section-header">
+                <i class="fas fa-users-rectangle"></i>
+                <h3>Chat Classe</h3>
+            </div>
+            <ul class="chat-list">
+                {% for chat in chat_classe %}
+                <li class="chat-item glass-panel neon-border" onclick="window.location.href='/chat/room/{{ chat.id }}'">
+                    <div class="chat-item-main">
+                        <div class="chat-avatar class-chat">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="chat-content">
+                            <h4 class="chat-name">{{ chat.nome or ('Classe ' + chat.classe) }}</h4>
+                            <div class="chat-meta">
+                                <span><i class="fas fa-message"></i> {{ chat.message_count or 0 }} messaggi</span>
+                                {% if chat.ultimo_messaggio %}
+                                <span><i class="fas fa-clock"></i> Attiva</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <i class="fas fa-chevron-right chat-list-item-arrow"></i>
-            </li>
-            {% endfor %}
-        </ul>
+                    <i class="fas fa-chevron-right chat-arrow"></i>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
         {% endif %}
 
         {% if gruppi_materia and gruppi_materia|length > 0 %}
-        <div class="chat-section-divider">
-            <h3><i class="fas fa-book"></i> Gruppi Materia</h3>
-        </div>
-        <ul class="chat-list">
-            {% for gruppo in gruppi_materia %}
-            <li class="chat-list-item" onclick="window.location.href='/chat/room/{{ gruppo.id }}'">
-                <div class="chat-list-item-main">
-                    <div class="chat-list-item-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="chat-list-item-content">
-                        <h4 class="chat-list-item-title">{{ gruppo.nome or gruppo.materia }}</h4>
-                        <div class="chat-list-item-meta">
-                            <span><i class="fas fa-comment-dots"></i> {{ gruppo.message_count or 0 }} messaggi</span>
-                            {% if gruppo.classe %}
-                            <span><i class="fas fa-graduation-cap"></i> {{ gruppo.classe }}</span>
-                            {% endif %}
+        <section class="chat-section">
+            <div class="section-header">
+                <i class="fas fa-book-open-reader"></i>
+                <h3>Gruppi Materia</h3>
+            </div>
+            <ul class="chat-list">
+                {% for gruppo in gruppi_materia %}
+                <li class="chat-item glass-panel neon-border" onclick="window.location.href='/chat/room/{{ gruppo.id }}'">
+                    <div class="chat-item-main">
+                        <div class="chat-avatar subject-chat">
+                            <i class="fas fa-atom"></i>
+                        </div>
+                        <div class="chat-content">
+                            <h4 class="chat-name">{{ gruppo.nome or gruppo.materia }}</h4>
+                            <div class="chat-meta">
+                                <span><i class="fas fa-message"></i> {{ gruppo.message_count or 0 }} messaggi</span>
+                                {% if gruppo.classe %}
+                                <span><i class="fas fa-graduation-cap"></i> {{ gruppo.classe }}</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <i class="fas fa-chevron-right chat-list-item-arrow"></i>
-            </li>
-            {% endfor %}
-        </ul>
+                    <i class="fas fa-chevron-right chat-arrow"></i>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
         {% endif %}
 
         {% if conversazioni_private and conversazioni_private|length > 0 %}
-        <div class="chat-section-divider">
-            <h3><i class="fas fa-envelope"></i> Messaggi Privati</h3>
-        </div>
-        <ul class="chat-list">
-            {% for conv in conversazioni_private %}
-            <li class="chat-list-item" onclick="window.location.href='/chat/room/{{ conv.id }}'">
-                <div class="chat-list-item-main">
-                    <div class="chat-list-item-icon">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="chat-list-item-content">
-                        <h4 class="chat-list-item-title">{{ conv.nome }} {{ conv.cognome }}</h4>
-                        <div class="chat-list-item-meta">
-                            <span><i class="fas fa-user-tag"></i> {{ conv.ruolo or 'Utente' }}</span>
-                            {% if conv.message_count and conv.message_count > 0 %}
-                            <span><i class="fas fa-comment-dots"></i> {{ conv.message_count }} messaggi</span>
-                            {% endif %}
+        <section class="chat-section">
+            <div class="section-header">
+                <i class="fas fa-lock"></i>
+                <h3>Messaggi Privati</h3>
+            </div>
+            <ul class="chat-list">
+                {% for conv in conversazioni_private %}
+                <li class="chat-item glass-panel neon-border" onclick="window.location.href='/chat/room/{{ conv.id }}'">
+                    <div class="chat-item-main">
+                        <div class="chat-avatar private-chat">
+                            <i class="fas fa-user-astronaut"></i>
+                        </div>
+                        <div class="chat-content">
+                            <h4 class="chat-name">{{ conv.nome }} {{ conv.cognome }}</h4>
+                            <div class="chat-meta">
+                                <span><i class="fas fa-id-badge"></i> {{ conv.ruolo|capitalize or 'Utente' }}</span>
+                                {% if conv.message_count and conv.message_count > 0 %}
+                                <span><i class="fas fa-message"></i> {{ conv.message_count }} msg</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                {% if conv.message_count and conv.message_count > 0 %}
-                <span class="chat-list-item-badge">{{ conv.message_count }}</span>
-                {% endif %}
-                <i class="fas fa-chevron-right chat-list-item-arrow"></i>
-            </li>
-            {% endfor %}
-        </ul>
+                    {% if conv.message_count and conv.message_count > 0 %}
+                    <span class="chat-badge">{{ conv.message_count }}</span>
+                    {% endif %}
+                    <i class="fas fa-chevron-right chat-arrow"></i>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if available_users and available_users|length > 0 %}
+        <section class="chat-section">
+            <div class="section-header">
+                <i class="fas fa-user-plus"></i>
+                <h3>Nuova Conversazione</h3>
+            </div>
+            <ul class="chat-list">
+                {% for user in available_users[:5] %}
+                <li class="chat-item glass-panel neon-border" onclick="window.location.href='/chat/private/{{ user.id }}'">
+                    <div class="chat-item-main">
+                        <div class="chat-avatar private-chat" style="background: linear-gradient(135deg, #00ff88, #00cc6a);">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="chat-content">
+                            <h4 class="chat-name">{{ user.nome }} {{ user.cognome }}</h4>
+                            <div class="chat-meta">
+                                <span><i class="fas fa-id-badge"></i> {{ user.ruolo|capitalize or 'Utente' }}</span>
+                                <span><i class="fas fa-paper-plane"></i> Inizia chat</span>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right chat-arrow"></i>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
         {% endif %}
 
         {% if (not chat_classe or chat_classe|length == 0) and (not gruppi_materia or gruppi_materia|length == 0) and (not conversazioni_private or conversazioni_private|length == 0) %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>Nessuna conversazione disponibile al momento</p>
+        <div class="empty-state-futuristic glass-panel">
+            <div class="empty-state-icon">
+                <i class="fas fa-satellite"></i>
+            </div>
+            <h3 class="empty-state-title">Nessuna Trasmissione Attiva</h3>
+            <p class="empty-state-text">Non hai ancora conversazioni. Inizia una nuova chat per connetterti!</p>
         </div>
         {% endif %}
     </div>
+
+    <script>
+        document.querySelectorAll('.chat-item').forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.05}s`;
+        });
+        
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(8px) scale(1.01)';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+    </script>
 </body>
 </html>

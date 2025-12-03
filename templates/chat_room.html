@@ -5,86 +5,294 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ chat.nome or 'Chat' }} - SKAILA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/static/css/tokens.css" rel="stylesheet">
-    <link href="/static/css/professional.css" rel="stylesheet">
-    <link href="/static/css/layouts.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/futuristic-chat.css" rel="stylesheet">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        .chat-room-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .participants-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--futuristic-glass);
+            border: 1px solid var(--futuristic-border);
+            color: var(--futuristic-text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .participants-btn:hover {
+            border-color: var(--futuristic-primary);
+            box-shadow: var(--glow-cyan);
+        }
+        
+        .date-separator {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .date-separator::before,
+        .date-separator::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--futuristic-border), transparent);
+        }
+        
+        .date-separator span {
+            font-size: 12px;
+            color: var(--futuristic-text-muted);
+            padding: 6px 16px;
+            background: var(--futuristic-glass);
+            border-radius: 20px;
+            border: 1px solid var(--futuristic-border);
+        }
+        
+        .message-reactions {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        
+        .reaction {
+            background: var(--futuristic-glass);
+            border: 1px solid var(--futuristic-border);
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .reaction:hover {
+            border-color: var(--futuristic-primary);
+            transform: scale(1.1);
+        }
+        
+        .attachment-preview {
+            margin-top: 8px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .attachment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--futuristic-primary), var(--futuristic-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .quick-action-btn {
+            padding: 8px 16px;
+            background: var(--futuristic-glass);
+            border: 1px solid var(--futuristic-border);
+            border-radius: 20px;
+            color: var(--futuristic-text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .quick-action-btn:hover {
+            border-color: var(--futuristic-primary);
+            color: var(--futuristic-text);
+        }
+        
+        .scroll-to-bottom {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--futuristic-primary), var(--futuristic-secondary));
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-cyan);
+            animation: float 2s ease-in-out infinite;
+            z-index: 50;
+        }
+        
+        .scroll-to-bottom.visible {
+            display: flex;
+        }
+    </style>
 </head>
-<body>
-    <header class="chat-header">
-        <div class="chat-header-left">
-            <h1 class="chat-title">{{ chat.nome or 'Chat' }}</h1>
-            {% if chat.tipo %}
-            <span class="chat-meta">{{ chat.tipo }}</span>
-            {% endif %}
-        </div>
-        <a href="/chat" class="btn-back">
-            <i class="fas fa-arrow-left"></i>
-            <span>Indietro</span>
-        </a>
-    </header>
+<body class="futuristic-body">
+    <div class="grid-overlay"></div>
+    
+    <div class="chat-room-wrapper">
+        <header class="chat-room-header">
+            <div class="chat-room-info">
+                <div class="chat-room-avatar">
+                    {% if chat.tipo == 'classe' %}
+                    <i class="fas fa-users"></i>
+                    {% elif chat.tipo == 'materia' %}
+                    <i class="fas fa-atom"></i>
+                    {% else %}
+                    <i class="fas fa-user-astronaut"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h1 class="chat-room-title neon-text">{{ chat.nome or 'Chat' }}</h1>
+                    <div class="chat-room-status">
+                        <span class="status-dot"></span>
+                        <span>{{ participants|length if participants else 0 }} partecipanti online</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="participants-btn" onclick="toggleParticipants()" title="Partecipanti">
+                    <i class="fas fa-users"></i>
+                </button>
+                <a href="/chat" class="btn-futuristic">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Indietro</span>
+                </a>
+            </div>
+        </header>
 
-    <div class="chat-container">
-        <div class="messages-container" id="messagesContainer">
+        <div class="messages-area" id="messagesContainer">
             {% if messages and messages|length > 0 %}
                 {% for msg in messages %}
-                <div class="message {% if msg.utente_id == current_user_id %}own{% else %}other{% endif %}">
+                <div class="message-wrapper {% if msg.utente_id == user.user_id %}own{% else %}other{% endif %}" data-message-id="{{ msg.id }}">
                     <div class="message-bubble">
-                        <div class="message-header">
-                            <span class="message-author">{{ msg.nome }} {{ msg.cognome }}</span>
-                            <span class="message-time">{{ msg.created_at.strftime('%H:%M') if msg.created_at else '' }}</span>
+                        {% if msg.utente_id != user.user_id %}
+                        <div class="message-sender">{{ msg.nome }} {{ msg.cognome }}</div>
+                        {% endif %}
+                        <div class="message-text">{{ msg.contenuto }}</div>
+                        <div class="message-time">
+                            {% if msg.timestamp %}
+                            {{ msg.timestamp.strftime('%H:%M') }}
+                            {% endif %}
                         </div>
-                        <div class="message-content">{{ msg.contenuto }}</div>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-comments"></i>
-                    <p>Nessun messaggio. Inizia la conversazione!</p>
+                <div class="empty-state-futuristic">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="empty-state-title">Canale Aperto</h3>
+                    <p class="empty-state-text">Nessun messaggio ancora. Sii il primo a scrivere!</p>
                 </div>
             {% endif %}
-        </div>
-
-        <div class="input-container">
-            <textarea 
-                id="messageInput" 
-                class="message-input" 
-                placeholder="Scrivi un messaggio..."
-                rows="1"
-            ></textarea>
-            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                <i class="fas fa-paper-plane"></i>
-                <span>Invia</span>
-            </button>
-        </div>
-
-        {% if participants and participants|length > 0 %}
-        <div class="participants-panel">
-            <div class="participants-title">Partecipanti ({{ participants|length }})</div>
-            <div class="participants-list">
-                {% for participant in participants %}
-                <span class="participant-badge">{{ participant.nome }} {{ participant.cognome }}</span>
-                {% endfor %}
+            
+            <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span id="typingUser">Qualcuno sta scrivendo...</span>
             </div>
         </div>
-        {% endif %}
+
+        <button class="scroll-to-bottom" id="scrollToBottom" onclick="scrollToBottom()">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+
+        <div class="input-area">
+            <div class="input-container">
+                <div class="message-input-wrapper">
+                    <textarea 
+                        id="messageInput" 
+                        class="message-input" 
+                        placeholder="Scrivi un messaggio..."
+                        rows="1"
+                    ></textarea>
+                    <button class="emoji-btn" onclick="toggleEmoji()">
+                        <i class="fas fa-face-smile"></i>
+                    </button>
+                </div>
+                <button class="send-button" id="sendBtn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
     </div>
+
+    <aside class="participants-sidebar" id="participantsSidebar">
+        <div class="participants-header">
+            <h3 class="participants-title">Partecipanti ({{ participants|length if participants else 0 }})</h3>
+            <button class="close-sidebar" onclick="toggleParticipants()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% if participants %}
+            {% for p in participants %}
+            <div class="participant-item">
+                <div class="participant-avatar">{{ p.nome[0] }}{{ p.cognome[0] }}</div>
+                <div class="participant-info">
+                    <div class="participant-name">{{ p.nome }} {{ p.cognome }}</div>
+                    <div class="participant-role">{{ p.ruolo|capitalize if p.ruolo else 'Utente' }}</div>
+                </div>
+                <div class="online-indicator"></div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </aside>
 
     <script>
         const chatId = {{ chat.id }};
-        const currentUserId = {{ current_user_id }};
+        const currentUserId = {{ user.user_id }};
         const socket = io();
+        let typingTimeout;
 
-        // Auto-resize textarea
         const messageInput = document.getElementById('messageInput');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const scrollToBottomBtn = document.getElementById('scrollToBottom');
+
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            
+            socket.emit('typing_start', { conversation_id: chatId });
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing_stop', { conversation_id: chatId });
+            }, 1000);
         });
 
-        // Send on Enter (without Shift)
         messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -92,61 +300,97 @@
             }
         });
 
-        // Socket.IO connection
+        messagesContainer.addEventListener('scroll', function() {
+            const isNearBottom = this.scrollHeight - this.scrollTop - this.clientHeight < 200;
+            scrollToBottomBtn.classList.toggle('visible', !isNearBottom);
+        });
+
         socket.on('connect', function() {
-            console.log('Connected to server');
-            socket.emit('join_conversation', { chat_id: chatId });
+            console.log('Connected to SKAILA Quantum Network');
+            socket.emit('join_conversation', { conversation_id: chatId });
         });
 
         socket.on('new_message', function(data) {
             appendMessage(data);
+            hideTypingIndicator();
+        });
+
+        socket.on('user_typing', function(data) {
+            if (data.user_id !== currentUserId) {
+                showTypingIndicator(data.user_name);
+            }
+        });
+
+        socket.on('user_stopped_typing', function(data) {
+            hideTypingIndicator();
         });
 
         function sendMessage() {
             const content = messageInput.value.trim();
             if (!content) return;
 
-            const data = {
-                chat_id: chatId,
+            socket.emit('send_message', {
+                conversation_id: chatId,
                 contenuto: content
-            };
+            });
 
-            socket.emit('send_message', data);
             messageInput.value = '';
             messageInput.style.height = 'auto';
+            socket.emit('typing_stop', { conversation_id: chatId });
         }
 
         function appendMessage(data) {
-            const messagesContainer = document.getElementById('messagesContainer');
-            
-            // Remove empty state if present
-            const emptyState = messagesContainer.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
+            const emptyState = messagesContainer.querySelector('.empty-state-futuristic');
+            if (emptyState) emptyState.remove();
 
             const isOwn = data.utente_id === currentUserId;
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            messageDiv.className = `message-wrapper ${isOwn ? 'own' : 'other'}`;
+            messageDiv.dataset.messageId = data.id;
             
             const now = new Date();
             const time = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
             
             messageDiv.innerHTML = `
                 <div class="message-bubble">
-                    <div class="message-header">
-                        <span class="message-author">${data.nome} ${data.cognome}</span>
-                        <span class="message-time">${time}</span>
-                    </div>
-                    <div class="message-content">${escapeHtml(data.contenuto)}</div>
+                    ${!isOwn ? `<div class="message-sender">${escapeHtml(data.nome || '')} ${escapeHtml(data.cognome || '')}</div>` : ''}
+                    <div class="message-text">${escapeHtml(data.contenuto)}</div>
+                    <div class="message-time">${time}</div>
                 </div>
             `;
 
-            messagesContainer.appendChild(messageDiv);
+            const typingIndicator = document.getElementById('typingIndicator');
+            messagesContainer.insertBefore(messageDiv, typingIndicator);
+            
+            messageDiv.style.animation = 'fade-in-up 0.3s ease';
+            
+            scrollToBottom();
+        }
+
+        function showTypingIndicator(userName) {
+            const indicator = document.getElementById('typingIndicator');
+            document.getElementById('typingUser').textContent = `${userName} sta scrivendo...`;
+            indicator.style.display = 'flex';
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function toggleParticipants() {
+            document.getElementById('participantsSidebar').classList.toggle('open');
+        }
+
+        function toggleEmoji() {
+            console.log('Emoji picker - coming soon');
+        }
+
+        function scrollToBottom() {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const map = {
                 '&': '&amp;',
                 '<': '&lt;',
@@ -154,13 +398,13 @@
                 '"': '&quot;',
                 "'": '&#039;'
             };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // Auto-scroll to bottom on load
-        window.addEventListener('load', function() {
-            const messagesContainer = document.getElementById('messagesContainer');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        window.addEventListener('load', scrollToBottom);
+        
+        document.querySelectorAll('.message-wrapper').forEach((msg, i) => {
+            msg.style.animationDelay = `${i * 0.02}s`;
         });
     </script>
 </body>
