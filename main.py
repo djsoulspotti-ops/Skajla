@@ -190,8 +190,16 @@ class SkailaApp:
                     pass  # Timestamp invalido, ignora
 
         # Route principali
-        @self.app.route('/')
+        @self.app.route('/', methods=['GET', 'HEAD'])
         def index():
+            # Fast path for health check probes (Autoscale, load balancers)
+            # Detect HEAD requests or specific User-Agents used by health checkers
+            if request.method == 'HEAD' or \
+               'GoogleHC' in request.headers.get('User-Agent', '') or \
+               'kube-probe' in request.headers.get('User-Agent', '') or \
+               'Replit' in request.headers.get('User-Agent', ''):
+                return '', 200
+            
             if 'user_id' in session:
                 return redirect('/dashboard')
             

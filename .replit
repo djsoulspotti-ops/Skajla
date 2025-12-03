@@ -9,8 +9,8 @@ channel = "stable-24_05"
 packages = ["cargo", "iana-etc", "imagemagick", "libiconv", "rustc"]
 
 [deployment]
-run = ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:socketio_app"]
-deploymentTarget = "vm"
+run = ["gunicorn", "--config", "gunicorn.conf.py", "main:app"]
+deploymentTarget = "autoscale"
 build = ["pip", "install", "-r", "requirements.txt"]
 
 [[ports]]
@@ -24,6 +24,10 @@ externalPort = 6000
 [[ports]]
 localPort = 35717
 externalPort = 6800
+
+[[ports]]
+localPort = 37343
+externalPort = 8099
 
 [[ports]]
 localPort = 38573
@@ -60,10 +64,6 @@ externalPort = 8080
 [[ports]]
 localPort = 44515
 externalPort = 4200
-
-[[ports]]
-localPort = 46325
-externalPort = 8099
 
 [[ports]]
 localPort = 53849

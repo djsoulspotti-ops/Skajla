@@ -379,57 +379,8 @@ class SchoolSystem:
             ]
             
             for column_name, column_def in columns_to_add:
-                try:
-                    # SAVEPOINT per PostgreSQL: permette rollback parziale senza abortire transazione
-                    if db_manager.db_type == 'postgresql':
-                        cursor.execute(f'SAVEPOINT before_alter_{column_name}')
-                    
-                    if db_manager.db_type == 'postgresql':
-                        cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
-                    else:
-                        cursor.execute(f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}')
-                    logger.debug(
-                        event_type='migration_column_added',
-                        domain='database',
-                        table='scuole',
-                        column=column_name,
-                        message=f'Aggiunta colonna {column_name} alla tabella scuole'
-                    )
-                except Exception as e:
-                    # Rollback al savepoint invece di abortire intera transazione
-                    if db_manager.db_type == 'postgresql':
-                        cursor.execute(f'ROLLBACK TO SAVEPOINT before_alter_{column_name}')
-                    
-                    # Colonna già esiste o altro errore
-                    if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
-                        logger.debug(
-                            event_type='migration_column_exists',
-                            domain='database',
-                            table='scuole',
-                            column=column_name,
-                            message='Colonna già presente'
-                        )
-                    else:
-                        logger.warning(
-                            event_type='migration_column_error',
-                            domain='database',
-                            table='scuole',
-                            column=column_name,
-                            error=str(e),
-                            message=f'Attenzione durante migrazione colonna {column_name}'
-                        )
-                finally:
-                    # Release savepoint se tutto ok
-                    if db_manager.db_type == 'postgresql':
-                        try:
-                            cursor.execute(f'RELEASE SAVEPOINT before_alter_{column_name}')
-                        except Exception as e:
-                            logger.debug(
-                                event_type='savepoint_release_failed',
-                                domain='database',
-                                column=column_name,
-                                error=str(e)
-                            )
+                sql = f'ALTER TABLE scuole ADD COLUMN {column_name} {column_def}'
+                db_manager.safe_alter_table(cursor, sql, 'scuole', column_name)
                         
             # Gestione speciale per UNIQUE constraint su dirigente_invite_token
             self._ensure_dirigente_invite_token_unique(cursor)
