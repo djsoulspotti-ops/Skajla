@@ -308,6 +308,10 @@ class SkailaApp:
         # Production monitoring routes
         from routes.monitoring_routes import monitoring_bp
         self.app.register_blueprint(monitoring_bp)
+        
+        # Health check endpoints (lightweight, for Autoscale)
+        from routes.health_routes import health_bp
+        self.app.register_blueprint(health_bp)
 
         # Registra blueprint documentazione
         self.app.register_blueprint(documentation_bp)

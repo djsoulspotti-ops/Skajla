@@ -37,10 +37,10 @@ preload_app = True
 max_requests = 1000
 max_requests_jitter = 50
 
-# Timeouts ottimizzati per carico elevato
-timeout = 180  # 3 minuti per operazioni lunghe
-keepalive = 10  # Keepalive più lungo
-graceful_timeout = 60  # Più tempo per shutdown graceful
+# Timeouts ottimizzati per Autoscale health checks
+timeout = 30  # 30 secondi - Autoscale expects fast responses
+keepalive = 5  # Shorter keepalive for Autoscale compatibility
+graceful_timeout = 30  # Graceful shutdown timeout
 
 # Security
 limit_request_line = 4094

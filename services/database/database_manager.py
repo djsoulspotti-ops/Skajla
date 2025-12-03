@@ -467,6 +467,77 @@ class DatabaseManager:
                 # SQLite - ritorna cursor originale per compatibilità
                 return cursor
 
+    def safe_alter_table(self, cursor, sql: str, table: str, column: str) -> bool:
+        """
+        Safely execute ALTER TABLE with proper transaction handling.
+        Uses savepoints for PostgreSQL to prevent transaction abortion.
+        
+        Returns True if column was added, False if it already exists or failed.
+        """
+        try:
+            if self.db_type == 'postgresql':
+                # Use savepoint to isolate this operation
+                savepoint_name = f"sp_{table}_{column}"
+                cursor.execute(f"SAVEPOINT {savepoint_name}")
+                try:
+                    cursor.execute(sql)
+                    cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+                    logger.debug(
+                        event_type='migration_column_added',
+                        domain='database',
+                        table=table,
+                        column=column
+                    )
+                    return True
+                except Exception as e:
+                    # Rollback to savepoint - this clears the error state
+                    cursor.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+                    error_str = str(e).lower()
+                    if "already exists" in error_str or "duplicate" in error_str:
+                        logger.debug(
+                            event_type='migration_column_exists',
+                            domain='database',
+                            table=table,
+                            column=column
+                        )
+                    else:
+                        logger.warning(
+                            event_type='migration_column_error',
+                            domain='database',
+                            table=table,
+                            column=column,
+                            error=str(e)
+                        )
+                    return False
+            else:
+                # SQLite doesn't have the same transaction issues
+                cursor.execute(sql)
+                logger.debug(
+                    event_type='migration_column_added',
+                    domain='database',
+                    table=table,
+                    column=column
+                )
+                return True
+        except Exception as e:
+            error_str = str(e).lower()
+            if "already exists" in error_str or "duplicate" in error_str:
+                logger.debug(
+                    event_type='migration_column_exists',
+                    domain='database',
+                    table=table,
+                    column=column
+                )
+            else:
+                logger.warning(
+                    event_type='migration_column_error',
+                    domain='database',
+                    table=table,
+                    column=column,
+                    error=str(e)
+                )
+            return False
+
     def create_optimized_indexes(self):
         """Crea indici per performance ottimali"""
         indexes = [

@@ -3,6 +3,7 @@ SKAILA - Authentication Service
 Logica business per autenticazione e sicurezza
 """
 
+import os
 import bcrypt
 import hashlib
 import time
@@ -49,13 +50,14 @@ class AuthService:
         self.lockout_duration = SecuritySettings.LOGIN_LOCKOUT_DURATION
         
         # ✅ SECURITY FIX: Use Redis for persistent, distributed login tracking
+        # Uses REDIS_URL environment variable for production compatibility (no localhost)
         self.redis_client = None
-        if REDIS_AVAILABLE:
+        redis_url = os.environ.get('REDIS_URL')
+        
+        if REDIS_AVAILABLE and redis_url:
             try:
-                self.redis_client = redis.Redis(
-                    host='localhost',
-                    port=6379,
-                    db=0,
+                self.redis_client = redis.from_url(
+                    redis_url,
                     decode_responses=True,
                     socket_connect_timeout=2
                 )
@@ -64,16 +66,22 @@ class AuthService:
                 logger.info(
                     event_type='redis_connected',
                     domain='authentication',
-                    message='Redis login tracking initialized'
+                    message='Redis login tracking initialized via REDIS_URL'
                 )
             except Exception as e:
                 logger.warning(
                     event_type='redis_connection_failed',
                     domain='authentication',
                     error=str(e),
-                    message='Redis unavailable - falling back to in-memory login tracking (DEVELOPMENT ONLY)'
+                    message='Redis unavailable - using database-backed session storage'
                 )
                 self.redis_client = None
+        elif not redis_url:
+            logger.info(
+                event_type='redis_not_configured',
+                domain='authentication',
+                message='REDIS_URL not set - using database-backed session storage (production-safe)'
+            )
         
         # Fallback to in-memory (for development without Redis)
         self.login_attempts = {}

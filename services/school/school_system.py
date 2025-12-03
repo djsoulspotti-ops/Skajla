@@ -239,67 +239,45 @@ class SchoolSystem:
     
     def _extend_user_table(self, cursor):
         """Estende tabella utenti per supportare scuole"""
-        try:
-            cursor.execute('ALTER TABLE utenti ADD COLUMN scuola_id INTEGER REFERENCES scuole(id)')
-            logger.debug(event_type='migration_column_added', domain='database', table='utenti', column='scuola_id')
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                logger.debug(event_type='migration_column_exists', domain='database', table='utenti', column='scuola_id')
-            else:
-                logger.warning(event_type='migration_column_error', domain='database', table='utenti', column='scuola_id', error=str(e))
-            
-        try:
-            cursor.execute('ALTER TABLE utenti ADD COLUMN classe_id INTEGER REFERENCES classi(id)')
-            logger.debug(event_type='migration_column_added', domain='database', table='utenti', column='classe_id')
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                logger.debug(event_type='migration_column_exists', domain='database', table='utenti', column='classe_id')
-            else:
-                logger.warning(event_type='migration_column_error', domain='database', table='utenti', column='classe_id', error=str(e))
+        db_manager.safe_alter_table(
+            cursor, 
+            'ALTER TABLE utenti ADD COLUMN scuola_id INTEGER REFERENCES scuole(id)',
+            'utenti', 
+            'scuola_id'
+        )
+        db_manager.safe_alter_table(
+            cursor, 
+            'ALTER TABLE utenti ADD COLUMN classe_id INTEGER REFERENCES classi(id)',
+            'utenti', 
+            'classe_id'
+        )
     
     def _extend_chat_table(self, cursor):
         """Estende tabella chat per supportare organizzazione scolastica"""
-        try:
-            if db_manager.db_type == 'postgresql':
-                cursor.execute("ALTER TABLE chat ADD COLUMN tipo TEXT DEFAULT 'gruppo' CHECK (tipo IN ('scuola','classe','docenti','gruppo','privata'))")
-            else:
-                cursor.execute("ALTER TABLE chat ADD COLUMN tipo TEXT DEFAULT 'gruppo'")
-            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='tipo')
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='tipo')
-            else:
-                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='tipo', error=str(e))
-            
-        try:
-            cursor.execute('ALTER TABLE chat ADD COLUMN scuola_id INTEGER REFERENCES scuole(id)')
-            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='scuola_id')
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='scuola_id')
-            else:
-                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='scuola_id', error=str(e))
-            
-        try:
-            cursor.execute('ALTER TABLE chat ADD COLUMN classe_id INTEGER REFERENCES classi(id)')
-            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='classe_id')
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='classe_id')
-            else:
-                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='classe_id', error=str(e))
-            
-        try:
-            if db_manager.db_type == 'postgresql':
-                cursor.execute('ALTER TABLE chat ADD COLUMN sistema BOOLEAN DEFAULT false')
-            else:
-                cursor.execute('ALTER TABLE chat ADD COLUMN sistema BOOLEAN DEFAULT 0')
-            logger.debug(event_type='migration_column_added', domain='database', table='chat', column='sistema')
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                logger.debug(event_type='migration_column_exists', domain='database', table='chat', column='sistema')
-            else:
-                logger.warning(event_type='migration_column_error', domain='database', table='chat', column='sistema', error=str(e))
+        if db_manager.db_type == 'postgresql':
+            tipo_sql = "ALTER TABLE chat ADD COLUMN tipo TEXT DEFAULT 'gruppo' CHECK (tipo IN ('scuola','classe','docenti','gruppo','privata'))"
+        else:
+            tipo_sql = "ALTER TABLE chat ADD COLUMN tipo TEXT DEFAULT 'gruppo'"
+        db_manager.safe_alter_table(cursor, tipo_sql, 'chat', 'tipo')
+        
+        db_manager.safe_alter_table(
+            cursor, 
+            'ALTER TABLE chat ADD COLUMN scuola_id INTEGER REFERENCES scuole(id)',
+            'chat', 
+            'scuola_id'
+        )
+        db_manager.safe_alter_table(
+            cursor, 
+            'ALTER TABLE chat ADD COLUMN classe_id INTEGER REFERENCES classi(id)',
+            'chat', 
+            'classe_id'
+        )
+        
+        if db_manager.db_type == 'postgresql':
+            sistema_sql = 'ALTER TABLE chat ADD COLUMN sistema BOOLEAN DEFAULT false'
+        else:
+            sistema_sql = 'ALTER TABLE chat ADD COLUMN sistema BOOLEAN DEFAULT 0'
+        db_manager.safe_alter_table(cursor, sistema_sql, 'chat', 'sistema')
     
     def setup_default_school(self):
         """Configura scuola predefinita per migrazione"""
