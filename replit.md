@@ -115,6 +115,12 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - **Message Bubbles**: Gradient backgrounds for own messages, glass panels for others
   - **Responsive Design**: Mobile-optimized with touch-friendly button sizes
   - **Files**: static/css/futuristic-chat.css, templates/chat_hub.html, templates/chat_room.html
+- **Autoscale Deployment Fixes (December 2025)**:
+  - **Health Check Endpoints**: Added lightweight `/healthz`, `/health`, and `/ready` endpoints that return 200 immediately (~46ms) without database operations
+  - **Database Migration Safety**: Added `safe_alter_table()` method with PostgreSQL savepoints to prevent "current transaction is aborted" errors during schema migrations
+  - **Redis Configuration**: Changed from hardcoded localhost:6379 to REDIS_URL environment variable; falls back to database-backed session storage when Redis is not configured
+  - **Gunicorn Optimization**: Reduced timeout from 180s to 30s, keepalive from 10s to 5s for Autoscale compatibility
+  - **Files**: routes/health_routes.py, services/database/database_manager.py, services/auth_service.py, gunicorn.conf.py
 
 # External Dependencies
 -   **Flask**: Web framework
