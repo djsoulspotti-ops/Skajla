@@ -84,11 +84,17 @@ class SkailaApp:
         self.metrics_collector = None
         self.performance_monitor = None
 
+        # Track initialization state for readiness checks
+        self._systems_initialized = False
+        
         self.setup_app()
         self.register_routes()
         self.setup_socketio()
         self.init_systems()
         self.init_monitoring_delayed()
+        
+        # Store reference for health checks
+        self.app.config['SKAILA_APP'] = self
 
     def setup_app(self):
         """Configurazione base Flask con gestione sicura environment"""

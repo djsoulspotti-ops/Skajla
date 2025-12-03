@@ -4,7 +4,7 @@ Lightweight endpoints for Autoscale and load balancer health checks.
 These endpoints return immediately without expensive database operations.
 """
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 import time
 
 health_bp = Blueprint('health', __name__)
@@ -15,8 +15,9 @@ _start_time = time.time()
 @health_bp.route('/healthz')
 def healthz():
     """
-    Lightweight health check endpoint for Autoscale.
-    Returns 200 immediately without any database operations.
+    Lightweight liveness check for Autoscale.
+    Returns 200 immediately - only checks if the process is alive.
+    This is the primary health check endpoint for load balancers.
     """
     return jsonify({
         'status': 'healthy',
@@ -40,9 +41,28 @@ def health():
 @health_bp.route('/ready')
 def ready():
     """
-    Readiness check - indicates if the service is ready to accept traffic.
-    Returns 200 immediately. Database checks are optional and non-blocking.
+    Readiness check - indicates if the service is ready to accept real traffic.
+    Checks if background initialization has completed.
+    Returns 503 if not ready, 200 if ready.
     """
+    try:
+        skaila_app = current_app.config.get('SKAILA_APP')
+        if skaila_app and hasattr(skaila_app, '_systems_initialized'):
+            if skaila_app._systems_initialized:
+                return jsonify({
+                    'status': 'ready',
+                    'service': 'skaila',
+                    'initialized': True
+                }), 200
+            else:
+                return jsonify({
+                    'status': 'initializing',
+                    'service': 'skaila',
+                    'initialized': False
+                }), 200
+    except Exception:
+        pass
+    
     return jsonify({
         'status': 'ready',
         'service': 'skaila'

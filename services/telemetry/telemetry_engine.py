@@ -735,10 +735,15 @@ class TelemetryEngine:
 
 # Lazy initialization wrapper to avoid database operations at import time
 # Critical for Autoscale health checks - Flask must respond before heavy init
+import threading
+
 class _LazyTelemetryEngine:
-    """Defers TelemetryEngine initialization until first access."""
+    """Defers TelemetryEngine initialization until first access.
+    Thread-safe with double-checked locking.
+    """
     _instance = None
     _initialized = False
+    _lock = threading.Lock()
     
     def __getattr__(self, name):
         if not self._initialized:
@@ -748,7 +753,10 @@ class _LazyTelemetryEngine:
     def _initialize(self):
         if self._initialized:
             return
-        self._instance = TelemetryEngine()
-        self._initialized = True
+        with self._lock:
+            if self._initialized:
+                return
+            self._instance = TelemetryEngine()
+            self._initialized = True
 
 telemetry_engine = _LazyTelemetryEngine()

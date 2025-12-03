@@ -1462,12 +1462,16 @@ class SchoolSystem:
 # Lazy initialization wrapper to avoid heavy database operations at import time
 # This is critical for Autoscale health checks - Flask must be ready to respond
 # before database migrations run
+import threading
+
 class _LazySchoolSystem:
     """Lazy initialization wrapper for SchoolSystem.
     Defers database migrations until first access, allowing health checks to pass.
+    Thread-safe with double-checked locking.
     """
     _instance = None
     _initialized = False
+    _lock = threading.Lock()
     
     def __getattr__(self, name):
         if not self._initialized:
@@ -1477,13 +1481,16 @@ class _LazySchoolSystem:
     def _initialize(self):
         if self._initialized:
             return
-        self._instance = SchoolSystem()
-        self._initialized = True
-        logger.info(
-            event_type='school_system_initialized',
-            domain='school',
-            message='Sistema scuole-classi-professori inizializzato'
-        )
+        with self._lock:
+            if self._initialized:
+                return
+            self._instance = SchoolSystem()
+            self._initialized = True
+            logger.info(
+                event_type='school_system_initialized',
+                domain='school',
+                message='Sistema scuole-classi-professori inizializzato'
+            )
     
     def init_school_tables(self):
         """Explicit initialization method for startup sequence."""
