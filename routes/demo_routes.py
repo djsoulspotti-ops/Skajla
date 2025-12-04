@@ -335,3 +335,179 @@ def demo_ai_chat():
     demo_user = get_demo_session_studente()
     
     return render_template('ai_chat.html', user=demo_user)
+
+def get_demo_session_dirigente():
+    """Sessione demo per dirigente"""
+    return {
+        'user_id': -997,
+        'nome': 'Dott.',
+        'cognome': 'Dirigente Demo',
+        'email': 'dirigente.demo@skaila.it',
+        'ruolo': 'dirigente',
+        'scuola_id': -1,
+        'demo_mode': True
+    }
+
+@demo_bp.route('/dashboard/dirigente')
+def demo_dashboard_dirigente():
+    """Demo dashboard dirigente - SOLO DATI MOCK"""
+    from datetime import datetime
+    
+    demo_user = get_demo_session_dirigente()
+    
+    school_overview = {
+        'total_students': 450,
+        'total_teachers': 32,
+        'total_classes': 18,
+        'avg_student_age': 15.5,
+        'active_users_today': 287
+    }
+    
+    classes_analytics = [
+        {'nome': '1A', 'student_count': 25, 'avg_grade': 7.8, 'attendance_rate': 94},
+        {'nome': '1B', 'student_count': 24, 'avg_grade': 7.5, 'attendance_rate': 92},
+        {'nome': '2A', 'student_count': 26, 'avg_grade': 7.9, 'attendance_rate': 95},
+        {'nome': '2B', 'student_count': 23, 'avg_grade': 7.2, 'attendance_rate': 89},
+        {'nome': '3A', 'student_count': 25, 'avg_grade': 8.1, 'attendance_rate': 96},
+        {'nome': '3B', 'student_count': 24, 'avg_grade': 7.6, 'attendance_rate': 91}
+    ]
+    
+    teachers_with_ratings = [
+        {'nome': 'Prof. Rossi', 'cognome': 'Marco', 'materia': 'Matematica', 'rating': 4.8, 'rating_count': 45},
+        {'nome': 'Prof.ssa Bianchi', 'cognome': 'Laura', 'materia': 'Italiano', 'rating': 4.5, 'rating_count': 42},
+        {'nome': 'Prof. Verdi', 'cognome': 'Giuseppe', 'materia': 'Storia', 'rating': 4.2, 'rating_count': 38},
+        {'nome': 'Prof.ssa Neri', 'cognome': 'Anna', 'materia': 'Inglese', 'rating': 4.7, 'rating_count': 50},
+        {'nome': 'Prof. Gialli', 'cognome': 'Paolo', 'materia': 'Fisica', 'rating': 4.0, 'rating_count': 35}
+    ]
+    
+    economic_kpis = {
+        'monthly_revenue': 599,
+        'cost_per_student': 1.33,
+        'revenue_trend': [500, 520, 545, 560, 580, 599],
+        'months': ['Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']
+    }
+    
+    engagement_stats = {
+        'weekly_engagement_rate': 78.5,
+        'ai_coach_usage': 156,
+        'gamification_active_users': 312,
+        'parent_engagement': 65.2
+    }
+    
+    grade_distribution = {
+        'labels': ['Insufficiente (<6)', 'Sufficiente (6)', 'Buono (7)', 'Distinto (8)', 'Ottimo (9-10)'],
+        'data': [45, 120, 180, 150, 105]
+    }
+    
+    return render_template('dashboard_dirigente_new.html',
+                         user=demo_user,
+                         overview=school_overview,
+                         classes=classes_analytics,
+                         teachers=teachers_with_ratings,
+                         kpis=economic_kpis,
+                         engagement=engagement_stats,
+                         grades=grade_distribution)
+
+@demo_bp.route('/gamification')
+def demo_gamification():
+    """Demo gamification dashboard - SOLO DATI MOCK"""
+    from datetime import datetime, timedelta
+    
+    demo_user = get_demo_session_studente()
+    
+    profile = {
+        'rank': 'Esploratore',
+        'rank_icon': 'fa-compass',
+        'rank_color': '#00d4ff',
+        'xp_totale': 2450,
+        'xp_for_next_rank': 3000,
+        'current_streak': 7,
+        'longest_streak': 14,
+        'level': 12
+    }
+    
+    challenges = [
+        {
+            'id': 1,
+            'titolo': 'Quiz Master',
+            'descrizione': 'Completa 5 quiz oggi',
+            'tipo': 'daily',
+            'progresso': 3,
+            'obiettivo': 5,
+            'xp_reward': 50,
+            'scadenza': datetime.now() + timedelta(hours=8)
+        },
+        {
+            'id': 2,
+            'titolo': 'Studioso Costante',
+            'descrizione': 'Mantieni una streak di 7 giorni',
+            'tipo': 'weekly',
+            'progresso': 7,
+            'obiettivo': 7,
+            'xp_reward': 200,
+            'completata': True,
+            'scadenza': datetime.now() + timedelta(days=3)
+        },
+        {
+            'id': 3,
+            'titolo': 'AI Explorer',
+            'descrizione': 'Fai 10 domande all\'AI Coach',
+            'tipo': 'daily',
+            'progresso': 6,
+            'obiettivo': 10,
+            'xp_reward': 75,
+            'scadenza': datetime.now() + timedelta(hours=12)
+        }
+    ]
+    
+    badges = [
+        {'id': 1, 'nome': 'Primo Login', 'icona': 'fa-door-open', 'rarità': 'comune', 'sbloccato': True, 'data': datetime.now() - timedelta(days=30)},
+        {'id': 2, 'nome': 'Quiz Perfetto', 'icona': 'fa-star', 'rarità': 'raro', 'sbloccato': True, 'data': datetime.now() - timedelta(days=15)},
+        {'id': 3, 'nome': 'Streak Master', 'icona': 'fa-fire', 'rarità': 'epico', 'sbloccato': True, 'data': datetime.now() - timedelta(days=5)},
+        {'id': 4, 'nome': 'AI Whisperer', 'icona': 'fa-robot', 'rarità': 'raro', 'sbloccato': True, 'data': datetime.now() - timedelta(days=10)},
+        {'id': 5, 'nome': 'Social Butterfly', 'icona': 'fa-comments', 'rarità': 'comune', 'sbloccato': False},
+        {'id': 6, 'nome': 'Leggenda', 'icona': 'fa-crown', 'rarità': 'leggendario', 'sbloccato': False}
+    ]
+    
+    leaderboard = [
+        {'posizione': 1, 'nome': 'Marco R.', 'xp': 3200, 'rank': 'Maestro'},
+        {'posizione': 2, 'nome': 'Sara B.', 'xp': 2950, 'rank': 'Esploratore'},
+        {'posizione': 3, 'nome': 'Luca V.', 'xp': 2800, 'rank': 'Esploratore'},
+        {'posizione': 4, 'nome': 'Tu', 'xp': 2450, 'rank': 'Esploratore', 'is_current_user': True},
+        {'posizione': 5, 'nome': 'Anna M.', 'xp': 2300, 'rank': 'Apprendista'}
+    ]
+    
+    power_ups = [
+        {'id': 1, 'nome': 'XP Booster 2x', 'icona': 'fa-rocket', 'descrizione': 'Raddoppia XP per 1 ora', 'costo': 100, 'disponibile': True},
+        {'id': 2, 'nome': 'Streak Shield', 'icona': 'fa-shield-alt', 'descrizione': 'Proteggi la tua streak', 'costo': 150, 'disponibile': True},
+        {'id': 3, 'nome': 'Seconda Chance', 'icona': 'fa-redo', 'descrizione': 'Ripeti un quiz', 'costo': 75, 'disponibile': True}
+    ]
+    
+    activity_timeline = [
+        {'tipo': 'xp', 'descrizione': '+50 XP - Quiz completato', 'timestamp': datetime.now() - timedelta(hours=2)},
+        {'tipo': 'badge', 'descrizione': 'Badge sbloccato: Streak Master', 'timestamp': datetime.now() - timedelta(days=1)},
+        {'tipo': 'challenge', 'descrizione': 'Sfida completata: Studioso Costante', 'timestamp': datetime.now() - timedelta(days=1)},
+        {'tipo': 'xp', 'descrizione': '+25 XP - AI Chat interazione', 'timestamp': datetime.now() - timedelta(days=2)}
+    ]
+    
+    ranks_progression = [
+        {'nome': 'Germoglio', 'xp_min': 0, 'icona': 'fa-seedling', 'colore': '#90EE90'},
+        {'nome': 'Apprendista', 'xp_min': 200, 'icona': 'fa-book-open', 'colore': '#87CEEB'},
+        {'nome': 'Esploratore', 'xp_min': 500, 'icona': 'fa-compass', 'colore': '#00d4ff', 'current': True},
+        {'nome': 'Avventuriero', 'xp_min': 1000, 'icona': 'fa-hiking', 'colore': '#FFD700'},
+        {'nome': 'Maestro', 'xp_min': 2000, 'icona': 'fa-graduation-cap', 'colore': '#FF6347'},
+        {'nome': 'Campione', 'xp_min': 4000, 'icona': 'fa-trophy', 'colore': '#9370DB'},
+        {'nome': 'Leggenda', 'xp_min': 7000, 'icona': 'fa-crown', 'colore': '#FF4500'},
+        {'nome': 'Mito', 'xp_min': 10000, 'icona': 'fa-dragon', 'colore': '#8B0000'},
+        {'nome': 'Immortale', 'xp_min': 13000, 'icona': 'fa-gem', 'colore': '#E6E6FA'}
+    ]
+    
+    return render_template('gamification_dashboard.html',
+                         user=demo_user,
+                         profile=profile,
+                         challenges=challenges,
+                         badges=badges,
+                         leaderboard=leaderboard,
+                         power_ups=power_ups,
+                         activity_timeline=activity_timeline,
+                         ranks_progression=ranks_progression)
