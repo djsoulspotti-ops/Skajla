@@ -260,13 +260,19 @@
         </div>
         {% if participants %}
             {% for p in participants %}
-            <div class="participant-item">
-                <div class="participant-avatar">{{ p.nome[0] }}{{ p.cognome[0] }}</div>
+            <div class="participant-item" data-participant-id="{{ p.id }}">
+                <div class="participant-avatar-wrapper" id="participant-avatar-{{ p.id }}">
+                    <div class="participant-avatar">{{ p.nome[0] }}{{ p.cognome[0] }}</div>
+                    <div class="orbit-container">
+                        <div class="orbit-ring"></div>
+                        <div class="orbit-ring ring-2"></div>
+                    </div>
+                    <span class="presence-dot offline" id="participant-presence-{{ p.id }}"></span>
+                </div>
                 <div class="participant-info">
                     <div class="participant-name">{{ p.nome }} {{ p.cognome }}</div>
                     <div class="participant-role">{{ p.ruolo|capitalize if p.ruolo else 'Utente' }}</div>
                 </div>
-                <div class="online-indicator"></div>
             </div>
             {% endfor %}
         {% endif %}
@@ -308,7 +314,47 @@
         socket.on('connect', function() {
             console.log('Connected to SKAILA Quantum Network');
             socket.emit('join_conversation', { conversation_id: chatId });
+            socket.emit('request_online_users');
         });
+
+        socket.on('online_users_list', function(data) {
+            if (data.users && Array.isArray(data.users)) {
+                data.users.forEach(userId => {
+                    setParticipantOnline(userId, true);
+                });
+            }
+        });
+
+        socket.on('user_connected', function(data) {
+            if (data.user_id) {
+                setParticipantOnline(data.user_id, true);
+            }
+        });
+
+        socket.on('user_disconnected', function(data) {
+            if (data.user_id) {
+                setParticipantOnline(data.user_id, false);
+            }
+        });
+
+        function setParticipantOnline(userId, isOnline) {
+            const avatarWrapper = document.getElementById(`participant-avatar-${userId}`);
+            const presenceDot = document.getElementById(`participant-presence-${userId}`);
+            
+            if (isOnline) {
+                if (avatarWrapper) avatarWrapper.classList.add('is-online');
+                if (presenceDot) {
+                    presenceDot.classList.remove('offline');
+                    presenceDot.classList.add('online');
+                }
+            } else {
+                if (avatarWrapper) avatarWrapper.classList.remove('is-online');
+                if (presenceDot) {
+                    presenceDot.classList.remove('online');
+                    presenceDot.classList.add('offline');
+                }
+            }
+        }
 
         socket.on('new_message', function(data) {
             appendMessage(data);

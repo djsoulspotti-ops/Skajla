@@ -322,10 +322,12 @@ def demo_chat():
         {'id': 103, 'nome': 'Marco', 'cognome': 'Verdi'}
     ]
     
-    return render_template('chat.html',
+    return render_template('chat_hub.html',
                          user=demo_user,
-                         chats=chats,
-                         utenti_online=utenti_online)
+                         chat_classe=[c for c in chats if c['tipo'] == 'classe'],
+                         gruppi_materia=[c for c in chats if c['tipo'] == 'materia'],
+                         conversazioni_private=[],
+                         available_users=utenti_online)
 
 @demo_bp.route('/ai-chat')
 def demo_ai_chat():

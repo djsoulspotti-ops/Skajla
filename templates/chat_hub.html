@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="/static/css/futuristic-chat.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 <body class="futuristic-body">
     <div class="grid-overlay"></div>
@@ -123,19 +124,30 @@
             <div class="section-header">
                 <i class="fas fa-user-plus"></i>
                 <h3>Nuova Conversazione</h3>
+                <span class="online-count-badge" id="onlineCount">0 online</span>
             </div>
-            <ul class="chat-list">
-                {% for user in available_users[:5] %}
-                <li class="chat-item glass-panel neon-border" onclick="window.location.href='/chat/private/{{ user.id }}'">
+            <ul class="chat-list" id="usersList">
+                {% for user in available_users[:10] %}
+                <li class="chat-item glass-panel neon-border" onclick="window.location.href='/chat/private/{{ user.id }}'" data-user-id="{{ user.id }}">
                     <div class="chat-item-main">
-                        <div class="chat-avatar private-chat" style="background: linear-gradient(135deg, #00ff88, #00cc6a);">
-                            <i class="fas fa-plus"></i>
+                        <div class="user-avatar-wrapper" id="avatar-{{ user.id }}">
+                            <div class="chat-avatar private-chat" style="background: linear-gradient(135deg, #00ff88, #00cc6a);">
+                                {{ user.nome[0] if user.nome else '' }}{{ user.cognome[0] if user.cognome else '' }}
+                            </div>
+                            <div class="orbit-container">
+                                <div class="orbit-ring"></div>
+                                <div class="orbit-ring ring-2"></div>
+                                <div class="orbit-ring ring-3"></div>
+                            </div>
+                            <span class="presence-dot offline" id="presence-{{ user.id }}"></span>
                         </div>
                         <div class="chat-content">
                             <h4 class="chat-name">{{ user.nome }} {{ user.cognome }}</h4>
                             <div class="chat-meta">
                                 <span><i class="fas fa-id-badge"></i> {{ user.ruolo|capitalize or 'Utente' }}</span>
-                                <span><i class="fas fa-paper-plane"></i> Inizia chat</span>
+                                <span class="online-status-text" id="status-{{ user.id }}">
+                                    <i class="fas fa-circle status-icon" style="font-size: 6px;"></i> Offline
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -158,6 +170,76 @@
     </div>
 
     <script>
+        const socket = io();
+        const onlineUsers = new Set();
+
+        socket.on('connect', function() {
+            console.log('Connected to SKAILA Presence Network');
+            socket.emit('request_online_users');
+        });
+
+        socket.on('user_connected', function(data) {
+            if (data.user_id) {
+                setUserOnline(data.user_id, true);
+            }
+        });
+
+        socket.on('user_disconnected', function(data) {
+            if (data.user_id) {
+                setUserOnline(data.user_id, false);
+            }
+        });
+
+        socket.on('online_users_list', function(data) {
+            if (data.users && Array.isArray(data.users)) {
+                data.users.forEach(userId => {
+                    setUserOnline(userId, true);
+                });
+            }
+        });
+
+        function setUserOnline(userId, isOnline) {
+            const avatarWrapper = document.getElementById(`avatar-${userId}`);
+            const presenceDot = document.getElementById(`presence-${userId}`);
+            const statusText = document.getElementById(`status-${userId}`);
+
+            if (isOnline) {
+                onlineUsers.add(userId);
+                if (avatarWrapper) avatarWrapper.classList.add('is-online');
+                if (presenceDot) {
+                    presenceDot.classList.remove('offline');
+                    presenceDot.classList.add('online');
+                }
+                if (statusText) {
+                    statusText.classList.add('is-online');
+                    statusText.innerHTML = '<i class="fas fa-circle status-icon" style="font-size: 6px;"></i> Online';
+                }
+            } else {
+                onlineUsers.delete(userId);
+                if (avatarWrapper) avatarWrapper.classList.remove('is-online');
+                if (presenceDot) {
+                    presenceDot.classList.remove('online');
+                    presenceDot.classList.add('offline');
+                }
+                if (statusText) {
+                    statusText.classList.remove('is-online');
+                    statusText.innerHTML = '<i class="fas fa-circle status-icon" style="font-size: 6px;"></i> Offline';
+                }
+            }
+
+            updateOnlineCount();
+        }
+
+        function updateOnlineCount() {
+            const countBadge = document.getElementById('onlineCount');
+            if (countBadge) {
+                countBadge.textContent = `${onlineUsers.size} online`;
+                countBadge.style.background = onlineUsers.size > 0 ? 
+                    'linear-gradient(135deg, #00ff88, #00cc6a)' : 
+                    'var(--futuristic-glass)';
+            }
+        }
+
         document.querySelectorAll('.chat-item').forEach((item, index) => {
             item.style.animationDelay = `${index * 0.05}s`;
         });

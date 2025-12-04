@@ -29,6 +29,7 @@ def register_socket_events(socketio):
 
                 # Emit solo alla scuola dell'utente, NON broadcast globale
                 emit('user_connected', {
+                    'user_id': session['user_id'],
                     'nome': session['nome'],
                     'cognome': session['cognome'],
                     'ruolo': session['ruolo']
@@ -49,6 +50,7 @@ def register_socket_events(socketio):
                 db_manager.execute('UPDATE utenti SET status_online = %s WHERE id = %s', (False, session['user_id']))
 
                 emit('user_disconnected', {
+                    'user_id': session['user_id'],
                     'nome': session['nome'],
                     'cognome': session['cognome']
                 }, to=f"school_{school_id}")
@@ -57,6 +59,24 @@ def register_socket_events(socketio):
             except TenantGuardException:
                 # User senza school_id, skip presence broadcast
                 pass
+
+    @socketio.on('request_online_users')
+    def handle_request_online_users():
+        """Return list of currently online users for this school"""
+        if 'user_id' not in session:
+            return
+        
+        try:
+            school_id = get_current_school_id()
+            online_users = db_manager.query('''
+                SELECT id FROM utenti 
+                WHERE scuola_id = %s AND status_online = true AND attivo = true
+            ''', (school_id,))
+            
+            user_ids = [u[0] if isinstance(u, tuple) else u.get('id', u['id']) for u in (online_users or [])]
+            emit('online_users_list', {'users': user_ids})
+        except TenantGuardException:
+            pass
 
     @socketio.on('join_conversation')
     def handle_join_conversation(data):

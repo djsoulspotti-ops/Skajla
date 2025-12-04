@@ -105,6 +105,19 @@ SKAILA also implements a Gen-Z Mobile-First UX with Progressive Web App (PWA) fe
   - Automatic XP rewards when challenges are completed through chat
   - Full gamification context (rank, XP, streak) in personalized AI responses
   - ChallengeManagerV2 integration for real-time challenge progress updates
+- **Unified Messaging System Cleanup (December 2025)**: Consolidated messaging system with cleaner architecture:
+  - **Templates Cleanup**: Removed redundant chat.html (93KB) and chat_modern.html (25KB), keeping unified chat_hub.html and chat_room.html
+  - **Demo Route Updated**: Demo chat now uses the unified chat_hub.html template
+  - **File Reduction**: From 4 chat templates to 2 clean, maintainable templates
+- **3D Orbital Online Indicator (December 2025)**: Advanced CSS 3D animated presence system:
+  - **Orbiting Particles**: Three concentric rings with glowing particles rotating in 3D space around online users
+  - **Real-time Presence**: Socket.IO integration for instant online/offline status updates
+  - **Color-coded Particles**: Green (success), cyan (primary), and purple (secondary) glowing orbs
+  - **Presence Dot**: Fallback indicator with pulsing animation for online status
+  - **Socket Events**: Added `request_online_users`, `user_connected`, `user_disconnected` events with user_id
+  - **Online Counter Badge**: Shows live count of online users in the messaging hub
+  - **CSS Animations**: `orbit-rotate` (3D rotation), `particle-glow` (scale pulse), `presence-pulse` (glow effect)
+  - **Files**: static/css/futuristic-chat.css (3D indicator styles), routes/socket_routes.py (presence events)
 - **Futuristic Messaging UI (December 2025)**: Complete redesign of messaging system with cyberpunk aesthetic:
   - **Glassmorphism Design**: Frosted glass panels with backdrop blur effects
   - **Neon Glow Effects**: Cyan, purple, and pink accent colors with CSS glow shadows
