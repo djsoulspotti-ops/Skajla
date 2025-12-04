@@ -3,10 +3,16 @@ SKAILA - Demo Routes
 Route demo sicure con SOLO dati mock (nessun accesso database reale)
 """
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from services.ai.gemini_chatbot import gemini_chatbot
 
 demo_bp = Blueprint('demo', __name__, url_prefix='/demo')
+
+
+@demo_bp.route('/dashboard')
+def demo_dashboard_redirect():
+    """Redirect to student dashboard demo (default)"""
+    return redirect(url_for('demo.demo_dashboard_studente'))
 
 
 @demo_bp.route('/ai/chat', methods=['POST'])
