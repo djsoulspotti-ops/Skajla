@@ -848,6 +848,7 @@ def create_app():
     """Factory per creare l'app"""
     return SkailaApp()
 
+
 if __name__ == '__main__':
     # Crea e avvia applicazione
     skaila_app = create_app()
