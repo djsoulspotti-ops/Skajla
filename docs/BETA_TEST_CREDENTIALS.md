@@ -112,12 +112,15 @@ Per testare rapidamente le funzionalita senza autenticazione:
 | Funzionalita | URL | Descrizione |
 |--------------|-----|-------------|
 | Homepage | `/` | Landing page principale |
-| Dashboard Studente | `/demo/dashboard` | Preview dashboard studente |
-| Dashboard Docente | `/demo/dashboard/docente` | Preview dashboard docente |
+| Dashboard Studente | `/demo/dashboard/studente` | Preview dashboard studente |
+| Dashboard Docente | `/demo/dashboard/professore` | Preview dashboard docente |
 | Dashboard Dirigente | `/demo/dashboard/dirigente` | Preview dashboard dirigente |
-| AI Chat Demo | `/demo/ai/chat` | Test chatbot AI senza login |
+| AI Chat Demo | `/demo/ai-chat` | Pagina chatbot AI |
+| AI Chat API | `POST /demo/ai/chat` | API chatbot (JSON) |
 | Gamification | `/demo/gamification` | Preview sistema gamification |
 | Messaggistica | `/demo/chat` | Preview hub messaggi |
+| Calendario | `/demo/calendario` | Preview calendario |
+| API Docs | `/api/docs` | Documentazione Swagger API |
 
 ---
 
