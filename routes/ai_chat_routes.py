@@ -1,5 +1,5 @@
 """
-SKAILA - AI Chat Routes
+SKAJLA - AI Chat Routes
 API endpoints per AI Coach with Gemini + Gamification
 """
 

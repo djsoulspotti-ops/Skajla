@@ -1,5 +1,5 @@
 """
-Sistema Calendario Integrato con Coaching SKAILA
+Sistema Calendario Integrato con Coaching SKAJLA
 Pianificazione intelligente studio basata su scadenze reali
 """
 

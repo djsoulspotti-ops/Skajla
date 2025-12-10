@@ -1,5 +1,5 @@
 """
-SKAILA Environment Management
+SKAJLA Environment Management
 Gestione sicura delle variabili di ambiente e configurazione
 """
 

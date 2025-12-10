@@ -219,7 +219,7 @@ class SchoolCodesManager:
         codes = self.get_all_codes(include_assigned=False)
         
         export_text = "=" * 70 + "\n"
-        export_text += "SKAILA - CODICI SCUOLE PARTNER (PRIME 10 SCUOLE)\n"
+        export_text += "SKAJLA - CODICI SCUOLE PARTNER (PRIME 10 SCUOLE)\n"
         export_text += "=" * 70 + "\n\n"
         
         for idx, code in enumerate(codes, 1):

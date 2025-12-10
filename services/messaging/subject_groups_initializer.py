@@ -1,5 +1,5 @@
 """
-SKAILA - Subject Groups Initializer
+SKAJLA - Subject Groups Initializer
 Automatically creates predefined subject-based chat groups for classes
 """
 

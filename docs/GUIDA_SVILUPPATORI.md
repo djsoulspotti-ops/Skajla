@@ -1,8 +1,8 @@
-# 🛠️ Guida per Sviluppatori SKAILA
+# 🛠️ Guida per Sviluppatori SKAJLA
 
 ## 📋 Panoramica Architettura
 
-SKAILA è un'applicazione Flask con architettura modulare che include:
+SKAJLA è un'applicazione Flask con architettura modulare che include:
 - **Backend:** Flask + Socket.IO per comunicazione real-time
 - **Database:** PostgreSQL (Neon) in produzione
 - **AI Coach:** Sistema coaching personalizzato senza OpenAI
@@ -34,7 +34,7 @@ skaila/
 ├── main.py                         # Entry point dell'applicazione
 ├── database_manager.py             # Gestione database PostgreSQL
 ├── gamification.py                 # Sistema XP e livelli
-├── ai_chatbot.py                   # Chatbot AI SKAILA Coach
+├── ai_chatbot.py                   # Chatbot AI SKAJLA Coach
 ├── coaching_engine.py              # Motore coaching soft skills
 │
 ├── core/
@@ -343,7 +343,7 @@ pkill -f "python main.py" && python main.py
 ### Verificare Logs
 ```bash
 # Controlla errori nel server
-tail -f /tmp/logs/SKAILA_Server_*.log
+tail -f /tmp/logs/SKAJLA_Server_*.log
 ```
 
 ### Database Console

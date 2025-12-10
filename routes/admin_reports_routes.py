@@ -1,5 +1,5 @@
 """
-SKAILA - Admin Reports Routes
+SKAJLA - Admin Reports Routes
 Gestione report aziendali automatici
 """
 

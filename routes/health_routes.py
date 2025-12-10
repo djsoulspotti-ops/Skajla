@@ -1,5 +1,5 @@
 """
-SKAILA Health Check Routes
+SKAJLA Health Check Routes
 Lightweight endpoints for Autoscale and load balancer health checks.
 These endpoints return immediately without expensive database operations.
 """
@@ -46,7 +46,7 @@ def ready():
     Returns 503 if not ready, 200 if ready.
     """
     try:
-        skaila_app = current_app.config.get('SKAILA_APP')
+        skaila_app = current_app.config.get('SKAJLA_APP')
         if skaila_app and hasattr(skaila_app, '_systems_initialized'):
             if skaila_app._systems_initialized:
                 return jsonify({

@@ -1,5 +1,5 @@
 """
-SKAILA - Cyberpunk Presence System Routes
+SKAJLA - Cyberpunk Presence System Routes
 Demo page for the enhanced presence visualization
 """
 

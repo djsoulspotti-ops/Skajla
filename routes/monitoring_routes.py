@@ -1,5 +1,5 @@
 """
-Production Monitoring Routes per SKAILA
+Production Monitoring Routes per SKAJLA
 Health checks, metrics, e system monitoring endpoints
 """
 
@@ -149,7 +149,7 @@ def metrics_endpoint():
     # Formato Prometheus
     output = []
     for metric_name, value in app_metrics.items():
-        output.append(f"# HELP {metric_name} SKAILA application metric")
+        output.append(f"# HELP {metric_name} SKAJLA application metric")
         output.append(f"# TYPE {metric_name} gauge")
         output.append(f"{metric_name} {value}")
         output.append("")
@@ -215,7 +215,7 @@ def metrics_json():
         "database": db_info,
         "environment": env_info,
         "application": {
-            "name": "SKAILA",
+            "name": "SKAJLA",
             "version": "1.0.0",
             "environment": "production" if env_manager.is_production() else "development"
         }

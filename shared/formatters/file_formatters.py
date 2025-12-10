@@ -1,5 +1,5 @@
 """
-SKAILA - Formattatori File Centralizzati
+SKAJLA - Formattatori File Centralizzati
 Formattazione consistente di file size e nomi in tutta l'applicazione
 """
 

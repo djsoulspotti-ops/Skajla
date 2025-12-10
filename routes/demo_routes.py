@@ -1,5 +1,5 @@
 """
-SKAILA - Demo Routes
+SKAJLA - Demo Routes
 Route demo sicure con SOLO dati mock (nessun accesso database reale)
 """
 

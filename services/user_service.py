@@ -1,5 +1,5 @@
 """
-SKAILA - User Service
+SKAJLA - User Service
 Gestione utenti e profili - PostgreSQL Edition
 """
 

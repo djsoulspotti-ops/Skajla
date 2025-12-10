@@ -1,4 +1,4 @@
-<!-- SKAILA AI Interface - Complete Integration -->
+<!-- SKAJLA AI Interface - Complete Integration -->
 <style>
 :root {
     --primary: #00d4ff;
@@ -402,7 +402,7 @@
 }
 </style>
 
-<!-- SKAILA AI Modal -->
+<!-- SKAJLA AI Modal -->
 <div id="skailaAIModal" class="skaila-ai-modal">
     <div class="skaila-ai-container">
         <!-- Header -->
@@ -410,7 +410,7 @@
             <div class="ai-header-info">
                 <div class="ai-avatar-circle">🤖</div>
                 <div>
-                    <h3 id="skailaBotName">SKAILA AI Brain</h3>
+                    <h3 id="skailaBotName">SKAJLA AI Brain</h3>
                     <div class="ai-stats">
                         <div class="ai-stat">
                             <span>⭐</span>
@@ -435,7 +435,7 @@
             <div class="skaila-message message-ai">
                 <div class="message-header">
                     <span>🤖</span>
-                    <strong>SKAILA AI Brain</strong>
+                    <strong>SKAJLA AI Brain</strong>
                 </div>
                 <div>
                     Ciao! Sono il tuo assistente AI personale. Posso aiutarti con:
@@ -464,8 +464,8 @@
                 </div>
             </form>
             <div class="quick-actions">
-                <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Come funziona SKAILA?')">
-                    ℹ️ Guida SKAILA
+                <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Come funziona SKAJLA?')">
+                    ℹ️ Guida SKAJLA
                 </button>
                 <button class="quick-action-btn" onclick="sendQuickSkailaMsg('Sistema gamification')">
                     🏆 XP e Badge
@@ -494,7 +494,7 @@
 </div>
 
 <script>
-// SKAILA AI Global State
+// SKAJLA AI Global State
 let currentQuiz = null;
 let selectedAnswer = null;
 let skailaProfile = {
@@ -503,7 +503,7 @@ let skailaProfile = {
     streak: 0
 };
 
-// Open/Close SKAILA AI Modal
+// Open/Close SKAJLA AI Modal
 function openSkailaAI() {
     document.getElementById('skailaAIModal').style.display = 'flex';
     loadSkailaProfile();
@@ -534,7 +534,7 @@ async function loadSkailaProfile() {
     }
 }
 
-// Send Message to SKAILA AI Brain
+// Send Message to SKAJLA AI Brain
 async function sendSkailaMessage(event) {
     event.preventDefault();
     
@@ -605,7 +605,7 @@ function addSkailaMessage(content, sender) {
         msgDiv.innerHTML = `
             <div class="message-header">
                 <span>🤖</span>
-                <strong>SKAILA AI</strong>
+                <strong>SKAJLA AI</strong>
             </div>
             <div>${content}</div>
         `;
@@ -627,7 +627,7 @@ function showSkailaTyping() {
         <div class="typing-dot"></div>
         <div class="typing-dot"></div>
         <div class="typing-dot"></div>
-        <span>SKAILA sta pensando...</span>
+        <span>SKAJLA sta pensando...</span>
     `;
     container.appendChild(typingDiv);
     container.scrollTop = container.scrollHeight;
@@ -839,5 +839,5 @@ document.getElementById('skailaAIModal')?.addEventListener('click', function(e) 
     }
 });
 
-console.log('✅ SKAILA AI Interface loaded');
+console.log('✅ SKAJLA AI Interface loaded');
 </script>

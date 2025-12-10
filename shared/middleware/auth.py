@@ -1,5 +1,5 @@
 """
-SKAILA Authentication & Authorization Middleware
+SKAJLA Authentication & Authorization Middleware
 Decorators centralizzati per gestione autenticazione e controllo ruoli
 """
 

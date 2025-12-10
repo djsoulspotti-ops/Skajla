@@ -1,6 +1,6 @@
 
 """
-SKAILA - Socket.IO Events
+SKAJLA - Socket.IO Events
 Eventi real-time per chat, notifiche e presenza avanzata
 """
 
@@ -308,7 +308,7 @@ def register_socket_events(socketio):
             gamification_system.award_xp(
                 session['user_id'], 
                 'ai_interaction', 
-                context="Interazione con SKAILA Coach"
+                context="Interazione con SKAJLA Coach"
             )
             
         except Exception as e:

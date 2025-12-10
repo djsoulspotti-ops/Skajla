@@ -1,10 +1,10 @@
-# 🎉 SKAILA BACKEND - COMPLETATO AL 100%!
+# 🎉 SKAJLA BACKEND - COMPLETATO AL 100%!
 
 ## 📊 **RIEPILOGO LAVORO SVOLTO**
 
 ### **GIORNO 1-2: AI Brain Engine & Quiz System** ✅
 **File creati:**
-- `skaila_ai_brain.py` - Motore AI nativo SKAILA (NO OpenAI)
+- `skaila_ai_brain.py` - Motore AI nativo SKAJLA (NO OpenAI)
 - `skaila_quiz_manager.py` - Sistema quiz adattivo
 - `populate_quiz_database.py` - Popolazione database quiz
 - `skaila_ai_routes.py` - 6 API endpoints per AI
@@ -180,7 +180,7 @@
 
 ### **Frontend Integration:**
 1. ✅ Backend completo al 100%
-2. ⏳ UI Chat AI con SKAILA Brain
+2. ⏳ UI Chat AI con SKAJLA Brain
 3. ⏳ UI Quiz interattivo
 4. ⏳ Dashboard upload materiali
 5. ⏳ Dashboard registro professori

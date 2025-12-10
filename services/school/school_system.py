@@ -1,4 +1,4 @@
-# Sistema Scuole-Classi-Professori per SKAILA
+# Sistema Scuole-Classi-Professori per SKAJLA
 # Estensione multi-tenant con gestione organizzazioni scolastiche
 
 from database_manager import db_manager
@@ -728,26 +728,26 @@ class SchoolSystem:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🎓 Benvenuto/a in SKAILA</h1>
+                    <h1>🎓 Benvenuto/a in SKAJLA</h1>
                     <p>{school_name}</p>
                 </div>
                 <div class="content">
                     <h2>Ciao!</h2>
                     <p>Sei stato/a registrato/a come <strong>{role_it}</strong> presso <strong>{school_name}</strong>.</p>
-                    <p>Per completare la registrazione su SKAILA, usa il tuo codice personale:</p>
+                    <p>Per completare la registrazione su SKAJLA, usa il tuo codice personale:</p>
                     <div class="code-box">{code}</div>
                     <p><strong>Come procedere:</strong></p>
                     <ol>
                         <li>Vai su <a href="https://skaila.replit.app/register">skaila.replit.app/register</a></li>
                         <li>Inserisci questo codice nel campo "Codice Personale"</li>
                         <li>Completa i tuoi dati (usa questa email: <strong>{email}</strong>)</li>
-                        <li>Inizia subito a usare SKAILA!</li>
+                        <li>Inizia subito a usare SKAJLA!</li>
                     </ol>
                     <p style="color: #e74c3c;"><strong>⚠️ Importante:</strong> Questo codice è valido per 90 giorni e può essere usato una sola volta.</p>
                     <a href="https://skaila.replit.app/register" class="button">Registrati Ora</a>
                 </div>
                 <div class="footer">
-                    <p>© {datetime.now().year} SKAILA - Piattaforma Educativa Innovativa</p>
+                    <p>© {datetime.now().year} SKAJLA - Piattaforma Educativa Innovativa</p>
                     <p>Questa email è stata inviata automaticamente. Non rispondere a questo messaggio.</p>
                 </div>
             </div>
@@ -773,7 +773,7 @@ class SchoolSystem:
         # from email.mime.text import MIMEText
         # 
         # msg = MIMEMultipart('alternative')
-        # msg['Subject'] = f"🎓 Il tuo codice personale SKAILA per {school_name}"
+        # msg['Subject'] = f"🎓 Il tuo codice personale SKAJLA per {school_name}"
         # msg['From'] = "noreply@skaila.it"
         # msg['To'] = email
         # msg.attach(MIMEText(email_html, 'html'))

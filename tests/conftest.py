@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for SKAILA tests
+Pytest configuration and shared fixtures for SKAJLA tests
 """
 import pytest
 import sys

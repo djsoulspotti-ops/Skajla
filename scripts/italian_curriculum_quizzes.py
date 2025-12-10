@@ -1,5 +1,5 @@
 """
-SKAILA - Database Quiz Programmi Ministeriali Italiani
+SKAJLA - Database Quiz Programmi Ministeriali Italiani
 Quiz allineati ai programmi del MIUR per Scuole Medie e Superiori
 """
 

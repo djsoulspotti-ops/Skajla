@@ -1,5 +1,5 @@
 """
-SKAILA Parent Dashboard - API Routes
+SKAJLA Parent Dashboard - API Routes
 Provides endpoints for parent-student linking and child monitoring
 """
 

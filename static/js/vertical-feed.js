@@ -1,5 +1,5 @@
 /**
- * SKAILA Vertical Feed Component
+ * SKAJLA Vertical Feed Component
  * TikTok-style vertical scrolling feed with swipeable cards
  * Part of Feature #2: Gen-Z Mobile-First UX
  */

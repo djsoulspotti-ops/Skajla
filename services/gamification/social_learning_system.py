@@ -1,5 +1,5 @@
 """
-SKAILA Social Learning System
+SKAJLA Social Learning System
 Peer help, study groups, collaborative learning
 """
 

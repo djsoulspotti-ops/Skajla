@@ -1,5 +1,5 @@
 """
-SKAILA - Tenant Guard System
+SKAJLA - Tenant Guard System
 Sistema centralizzato per garantire isolamento multi-tenant tra scuole
 """
 

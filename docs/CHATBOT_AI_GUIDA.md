@@ -1,8 +1,8 @@
-# 🤖 SKAILA Coach - Chatbot AI Potenziato
+# 🤖 SKAJLA Coach - Chatbot AI Potenziato
 
 ## 📋 Panoramica
 
-Il chatbot SKAILA è stato completamente potenziato per offrire supporto intelligente su:
+Il chatbot SKAJLA è stato completamente potenziato per offrire supporto intelligente su:
 - ✅ **Soft Skills**: Stress, motivazione, organizzazione, obiettivi
 - ✅ **Metodi Studio**: Consigli dettagliati per ogni materia
 - ✅ **Piani d'Azione**: Programmi settimanali personalizzati
@@ -89,7 +89,7 @@ LIVELLO 3: Redirect domande tecniche a professore
     ↓ (se non match)
 LIVELLO 4: Coaching soft skills con template database
     ↓ (se non match)
-LIVELLO 5: Info generali SKAILA Brain
+LIVELLO 5: Info generali SKAJLA Brain
 ```
 
 ---
@@ -100,7 +100,7 @@ LIVELLO 5: Info generali SKAILA Brain
 
 **Studente**: *"Sono molto stressato per gli esami"*
 
-**SKAILA Coach**: 
+**SKAJLA Coach**: 
 ```
 Ciao Alice! 🎯
 
@@ -141,7 +141,7 @@ Sei pronto a iniziare? 🚀
 
 **Studente**: *"Come posso migliorare in matematica?"*
 
-**SKAILA Coach**:
+**SKAJLA Coach**:
 ```
 Ciao Marco! 📚
 
@@ -167,7 +167,7 @@ Ecco i miei consigli per **MATEMATICA**:
 💪 Per te consiglio:
 1. Ripassa le basi prima di andare avanti
 2. Chiedi aiuto al professore
-3. Fai quiz SKAILA per verificare
+3. Fai quiz SKAJLA per verificare
 
 Hai altre domande su questa materia? 🤝
 ```
@@ -178,7 +178,7 @@ Hai altre domande su questa materia? 🤝
 
 **Studente**: *"Come si risolve l'equazione x² + 5x + 6 = 0?"*
 
-**SKAILA Coach**:
+**SKAJLA Coach**:
 ```
 Ciao Sofia! 👋
 
@@ -213,14 +213,14 @@ Il chatbot analizza automaticamente:
 - ✅ **Attività recente** (quiz, messaggi)
 - ✅ **Presenze e assenze**
 
-### Integrazione Ecosistema SKAILA
+### Integrazione Ecosistema SKAJLA
 
 Il chatbot accede a:
 - 📊 **Registro elettronico** (voti, presenze)
 - 🎮 **Sistema gamification** (XP, livelli, badge)
 - 📝 **Quiz completati** e performance
 - 💬 **Attività social** (messaggi, collaborazione)
-- 🚀 **SKAILA Connect** (candidature, settori interesse)
+- 🚀 **SKAJLA Connect** (candidature, settori interesse)
 
 ### Database Tracking
 
@@ -236,7 +236,7 @@ Ogni conversazione viene salvata con:
 
 ### Accesso
 
-1. Login su SKAILA
+1. Login su SKAJLA
 2. Dashboard studente
 3. Sezione "AI Coach" o icona chatbot
 
@@ -290,13 +290,13 @@ Dashboard admin può vedere:
 4. **Analytics utili** per identificare problemi comuni
 5. **Scalabile** (può gestire infinite conversazioni)
 6. **Zero costi** (senza OpenAI)
-7. **Dati reali** integrati con tutto SKAILA
+7. **Dati reali** integrati con tutto SKAJLA
 
 ---
 
 ## 🎓 Conclusione
 
-Il chatbot SKAILA Coach è ora un **assistente intelligente completo** che può:
+Il chatbot SKAJLA Coach è ora un **assistente intelligente completo** che può:
 - Creare piani d'azione personalizzati di 7 giorni
 - Dare consigli dettagliati su 6 materie scolastiche
 - Supportare studenti su soft skills

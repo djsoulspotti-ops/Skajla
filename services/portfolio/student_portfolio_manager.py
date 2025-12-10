@@ -1,6 +1,6 @@
 """
 Student Portfolio Manager
-Generates comprehensive "Candidate Cards" for SKAILA Connect
+Generates comprehensive "Candidate Cards" for SKAJLA Connect
 Aggregates: Grades, Badges, Skills, Projects, Gamification Data
 """
 

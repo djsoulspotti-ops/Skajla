@@ -1,5 +1,5 @@
 /**
- * SKAILA - Interactive Classmate Spirals Visualization
+ * SKAJLA - Interactive Classmate Spirals Visualization
  * Real-time visualization of online classmates as interactive moving spirals
  * Privacy-first: ONLY shows users from the same class (classe_id filtering)
  * 

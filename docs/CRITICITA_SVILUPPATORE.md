@@ -1,4 +1,4 @@
-# 🚨 CRITICITÀ DA RISOLVERE - SKAILA
+# 🚨 CRITICITÀ DA RISOLVERE - SKAJLA
 
 **Data analisi**: 24 Ottobre 2025  
 **Gravità**: ⚠️ ALTA - Alcune criticità bloccanti per produzione
@@ -112,7 +112,7 @@ if not sql_protector.is_safe(email) or not sql_protector.is_safe(nome):
 ### 7. **OPENAI_API_KEY MANCANTE**
 **File**: Logs server  
 **Problema**: AI chatbot in "mock mode" - NON funziona in produzione  
-**Impatto**: Feature AI SKAILA Coach completamente inutilizzabile  
+**Impatto**: Feature AI SKAJLA Coach completamente inutilizzabile  
 **Fix richiesto**: 
 1. Richiedere OPENAI_API_KEY all'utente
 2. Configurare in secrets Replit
@@ -125,7 +125,7 @@ if not sql_protector.is_safe(email) or not sql_protector.is_safe(nome):
 ## 🔧 MIGLIORAMENTI CONSIGLIATI
 
 ### 8. **CODICE DUPLICATO - Coach Initialization**
-**File**: Logs server (3 volte "✅ SKAILA Coach inizializzato")  
+**File**: Logs server (3 volte "✅ SKAJLA Coach inizializzato")  
 **Problema**: Coaching engine viene inizializzato 3 volte  
 **Fix**: Verifica `coaching_engine.py` e rimuovi inizializzazioni duplicate  
 **Impatto**: Performance minimo ma codice confuso  

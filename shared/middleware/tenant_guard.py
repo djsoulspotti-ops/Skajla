@@ -1,5 +1,5 @@
 """
-SKAILA Tenant Isolation Middleware
+SKAJLA Tenant Isolation Middleware
 Enforces multi-tenant data isolation to prevent cross-school data access
 """
 

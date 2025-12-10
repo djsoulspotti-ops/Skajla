@@ -1,5 +1,5 @@
 """
-SKAILA - Authentication Service
+SKAJLA - Authentication Service
 Logica business per autenticazione e sicurezza
 """
 

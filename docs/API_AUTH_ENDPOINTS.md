@@ -1,4 +1,4 @@
-# SKAILA - API Authentication Endpoints
+# SKAJLA - API Authentication Endpoints
 
 Documentazione completa degli endpoint REST API per l'autenticazione.
 

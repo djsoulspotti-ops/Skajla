@@ -1,6 +1,6 @@
 
 """
-SKAILA - School Features Manager
+SKAJLA - School Features Manager
 Gestisce abilitazione/disabilitazione moduli per singola scuola
 """
 
@@ -31,7 +31,7 @@ class SchoolFeaturesManager:
             'default': True
         },
         'skaila_connect': {
-            'name': 'SKAILA Connect',
+            'name': 'SKAJLA Connect',
             'description': 'Orientamento carriera e aziende',
             'routes': ['/skaila-connect', '/api/companies/*'],
             'default': True

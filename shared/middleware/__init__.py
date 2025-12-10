@@ -1,5 +1,5 @@
 """
-SKAILA Shared Middleware
+SKAJLA Shared Middleware
 Middleware centralizzati per autenticazione, autorizzazione e gestione errori
 """
 

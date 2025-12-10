@@ -1,6 +1,6 @@
-# SKAILA Beta Test Credentials
+# SKAJLA Beta Test Credentials
 
-Documento credenziali per il testing dell'applicazione SKAILA in versione beta.
+Documento credenziali per il testing dell'applicazione SKAJLA in versione beta.
 
 ---
 
@@ -92,7 +92,7 @@ Documento credenziali per il testing dell'applicazione SKAILA in versione beta.
 
 | Username | Email | Password | Nome | Cognome | Livello |
 |----------|-------|----------|------|---------|---------|
-| `admin` | `admin@skaila.it` | `admin123` | Admin | SKAILA | Super Admin |
+| `admin` | `admin@skaila.it` | `admin123` | Admin | SKAJLA | Super Admin |
 | `founder` | `founder@skaila.it` | `founder123` | Daniele | Founder | Founder |
 | `dev_support` | `dev.support@skaila.it` | `dev2024!` | Alex | Developer | Developer |
 
@@ -187,7 +187,7 @@ Per segnalare bug o problemi durante il beta test:
     {"email": "genitore@skaila.test", "password": "parent123", "name": "Luigi Genitori"}
   ],
   "admins": [
-    {"email": "admin@skaila.it", "password": "admin123", "name": "Admin SKAILA"}
+    {"email": "admin@skaila.it", "password": "admin123", "name": "Admin SKAJLA"}
   ]
 }
 ```

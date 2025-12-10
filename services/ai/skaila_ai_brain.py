@@ -1,6 +1,6 @@
 """
-SKAILA AI Brain Engine - Sistema Intelligente Nativo
-Chatbot completamente integrato nell'ecosistema SKAILA
+SKAJLA AI Brain Engine - Sistema Intelligente Nativo
+Chatbot completamente integrato nell'ecosistema SKAJLA
 Zero dipendenze OpenAI - 100% personalizzato
 """
 
@@ -11,14 +11,14 @@ import random
 from database_manager import db_manager
 from gamification import gamification_system
 
-class SKAILABrain:
-    """Cervello decisionale del chatbot SKAILA"""
+class SKAJLABrain:
+    """Cervello decisionale del chatbot SKAJLA"""
 
     def __init__(self):
         self.init_knowledge_base()
 
     def init_knowledge_base(self):
-        """Inizializza la knowledge base SKAILA"""
+        """Inizializza la knowledge base SKAJLA"""
         self.subjects = ['matematica', 'italiano', 'storia', 'scienze', 'inglese', 'fisica', 'chimica', 'geografia']
 
         # Pattern di riconoscimento per materie
@@ -47,10 +47,10 @@ class SKAILABrain:
             'help_request': ['aiuto', 'help', 'non so', 'spiegami', 'mi serve']
         }
 
-        # Knowledge Base per servizi SKAILA
+        # Knowledge Base per servizi SKAJLA
         self.skaila_services_kb = {
             'help': {
-                'info': """SKAILA è una piattaforma di apprendimento innovativa che integra didattica, gamification e social learning.
+                'info': """SKAJLA è una piattaforma di apprendimento innovativa che integra didattica, gamification e social learning.
                 Ecco cosa puoi fare:
                 📚 **Studio Personalizzato**: Accedi a materiali didattici, quiz interattivi e spiegazioni dettagliate per ogni materia.
                 🏆 **Gamification**: Guadagna XP, sali di livello, sblocca badge e mantieni la tua streak per rendere lo studio più divertente e motivante.
@@ -62,7 +62,7 @@ class SKAILABrain:
                 Scrivi 'quiz [materia]' per iniziare a studiare, o chiedimi 'come funziona' per più dettagli su una funzionalità specifica! 😊"""
             },
             'didattica': {
-                'info': """Il sistema didattico di SKAILA offre una vasta gamma di risorse per ogni materia scolastica.
+                'info': """Il sistema didattico di SKAJLA offre una vasta gamma di risorse per ogni materia scolastica.
                 Puoi accedere a:
                 - 📖 Lezioni complete con spiegazioni dettagliate.
                 - 📝 Esercizi interattivi e quiz di autovalutazione.
@@ -72,7 +72,7 @@ class SKAILABrain:
                 Inizia un quiz scrivendo 'quiz [materia]' (es. 'quiz matematica')."""
             },
             'gamification': {
-                'info': """La gamification in SKAILA trasforma lo studio in un gioco!
+                'info': """La gamification in SKAJLA trasforma lo studio in un gioco!
                 - **XP (Experience Points)**: Guadagni XP completando quiz, partecipando a discussioni e raggiungendo obiettivi.
                 - **Livelli**: Accumulando XP, sali di livello sbloccando nuove funzionalità e ricompense.
                 - **Badge**: Ottieni badge per traguardi speciali (es. 'Knowledge Master', 'Streak Warrior').
@@ -81,7 +81,7 @@ class SKAILABrain:
                 Tieni d'occhio la tua streak e punta a nuovi badge! Scrivi 'mio livello' per vedere i tuoi progressi. 😉"""
             },
             'registro': {
-                'info': """Il Registro Elettronico di SKAILA ti permette di monitorare facilmente i tuoi risultati accademici.
+                'info': """Il Registro Elettronico di SKAJLA ti permette di monitorare facilmente i tuoi risultati accademici.
                 Puoi visualizzare:
                 - 💯 Voti per ogni materia e compito.
                 - 📅 Dettaglio delle assenze e puntualità.
@@ -91,7 +91,7 @@ class SKAILABrain:
                 Scrivi 'miei voti' per un riepilogo, o 'voti [materia]' per dettagli specifici."""
             },
             'funzionalita_professori': {
-                'info': """Per i docenti, SKAILA offre strumenti potenti per la gestione della classe e dei materiali didattici:
+                'info': """Per i docenti, SKAJLA offre strumenti potenti per la gestione della classe e dei materiali didattici:
                 - 📤 **Caricamento Materiali**: Carica facilmente PDF, video, presentazioni e altri contenuti per le tue lezioni.
                 - 🧑‍🏫 **Gestione Classi**: Organizza studenti, crea gruppi e monitora l'andamento didattico.
                 - 📝 **Creazione Quiz**: Genera quiz personalizzati per valutare la comprensione degli studenti.
@@ -105,18 +105,18 @@ class SKAILABrain:
                 - 📅 **Attività Giornaliera**: Tieni traccia dell'impegno dello studente sulla piattaforma.
                 - 🏆 **Obiettivi Gamification**: Monitora i livelli e i badge sbloccati dal figlio.
 
-                Rimani sempre aggiornato sull'educazione dei tuoi figli con SKAILA."""
+                Rimani sempre aggiornato sull'educazione dei tuoi figli con SKAJLA."""
             },
             'sistema_scuole': {
-                'info': """SKAILA supporta anche la gestione amministrativa delle scuole:
+                'info': """SKAJLA supporta anche la gestione amministrativa delle scuole:
                 - 🏫 **Anagrafica Scolastica**: Gestione di codici identificativi, indirizzi e contatti.
                 - 🧑‍🎓 **Gestione Classi e Alunni**: Organizzazione degli studenti per anno e classe.
                 - 👨‍💼 **Ruoli Dirigenziali**: Accesso a dati aggregati e reportistica per dirigenti scolastici.
 
-                Semplifica l'amministrazione scolastica con SKAILA."""
+                Semplifica l'amministrazione scolastica con SKAJLA."""
             },
             'chat_social': {
-                'info': """La sezione Chat e Social Learning di SKAILA favorisce la collaborazione e la comunicazione:
+                'info': """La sezione Chat e Social Learning di SKAJLA favorisce la collaborazione e la comunicazione:
                 - 💬 **Chat di Classe**: Interagisci con i tuoi compagni e docenti su argomenti di studio.
                 - 🤝 **Gruppi di Studio**: Crea o unisciti a gruppi per progetti collaborativi.
                 - ❓ **Q&A Forum**: Poni domande e ottieni risposte dalla community.
@@ -510,7 +510,7 @@ class SKAILABrain:
         streak = context['streak']
         message = context['message_original'].lower()
 
-        # Risposte rapide per info specifiche sui servizi SKAILA
+        # Risposte rapide per info specifiche sui servizi SKAJLA
         if 'materiali didattici' in message or 'lezioni' in message or 'dispense' in message:
             return self.skaila_services_kb['didattica']['info']
         if 'gamification' in message or 'xp' in message or 'livelli' in message or 'badge' in message or 'streak' in message or 'achievement' in message:
@@ -636,5 +636,5 @@ class SKAILABrain:
 
 
 # Inizializza sistema
-skaila_brain = SKAILABrain()
-print("✅ SKAILA AI Brain Engine inizializzato!")
+skaila_brain = SKAJLABrain()
+print("✅ SKAJLA AI Brain Engine inizializzato!")

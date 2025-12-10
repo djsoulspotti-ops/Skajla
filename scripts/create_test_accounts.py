@@ -1,7 +1,7 @@
 
 #!/usr/bin/env python3
 """
-Script per creare account di test per SKAILA
+Script per creare account di test per SKAJLA
 """
 
 import sqlite3
@@ -9,7 +9,7 @@ import hashlib
 from services.auth_service import auth_service
 
 def create_test_accounts():
-    """Crea account di test per demo SKAILA"""
+    """Crea account di test per demo SKAJLA"""
     
     # Account di test da creare
     test_accounts = [
@@ -72,7 +72,7 @@ def create_test_accounts():
         cursor.execute('''
             INSERT INTO scuole (nome, codice_pubblico, indirizzo, citta, codice_invito_docenti, codice_dirigente)
             VALUES (%s, %s, %s, %s, %s, %s)
-        ''', ('Istituto Demo SKAILA', 'DEFAULT_SCHOOL', 'Via della Scuola, 1', 'Milano', 'PROF2024', 'DIR2024'))
+        ''', ('Istituto Demo SKAJLA', 'DEFAULT_SCHOOL', 'Via della Scuola, 1', 'Milano', 'PROF2024', 'DIR2024'))
         
         scuola_id = cursor.lastrowid
         print(f"✅ Scuola demo creata (ID: {scuola_id})")
@@ -127,7 +127,7 @@ def create_test_accounts():
         else:
             print(f"❌ Errore creazione {account['email']}: {result['message']}")
     
-    print(f"\n🎉 Account di test creati! Connettiti a SKAILA su http://0.0.0.0:5000")
+    print(f"\n🎉 Account di test creati! Connettiti a SKAJLA su http://0.0.0.0:5000")
     print("\n📧 CREDENZIALI DI ACCESSO:")
     print("👨‍🎓 Studente: studente.test@skaila.it / test123")
     print("👩‍🏫 Professore: prof.test@skaila.it / prof123") 

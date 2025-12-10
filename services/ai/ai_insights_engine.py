@@ -1,5 +1,5 @@
 """
-SKAILA - AI Insights Engine
+SKAJLA - AI Insights Engine
 Sistema intelligente con ML e statistica avanzata per suggerimenti personalizzati
 """
 

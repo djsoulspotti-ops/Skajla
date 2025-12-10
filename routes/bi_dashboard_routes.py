@@ -1,6 +1,6 @@
 
 """
-SKAILA - Business Intelligence Dashboard Routes
+SKAJLA - Business Intelligence Dashboard Routes
 Dashboard BI per dirigenti e professori con organigrammi visuali
 """
 

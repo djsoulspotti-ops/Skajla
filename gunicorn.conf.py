@@ -1,5 +1,5 @@
 """
-Gunicorn configuration per SKAILA production deployment
+Gunicorn configuration per SKAJLA production deployment
 Ottimizzato per SocketIO + eventlet workers
 """
 
@@ -58,7 +58,7 @@ else:
 # Eventlet monkey patching moved to wsgi.py (happens before imports)
 def when_ready(server):
     """Server ready callback - monkey patching now handled in wsgi.py"""
-    server.log.info("SKAILA Server ready - eventlet monkey patching handled in wsgi.py")
+    server.log.info("SKAJLA Server ready - eventlet monkey patching handled in wsgi.py")
 
 def worker_int(worker):
     """Graceful shutdown per SocketIO connections"""
@@ -66,4 +66,4 @@ def worker_int(worker):
 
 def on_exit(server):
     """Cleanup on server exit"""
-    server.log.info("SKAILA Server shutdown completato")
+    server.log.info("SKAJLA Server shutdown completato")

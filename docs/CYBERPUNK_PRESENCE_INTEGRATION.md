@@ -409,7 +409,7 @@ const presence = new CyberpunkPresence('container', {
 
 ## 📝 License & Credits
 
-Part of SKAILA educational platform.
+Part of SKAJLA educational platform.
 
 **Technologies Used:**
 - GSAP 3.12.5 (GreenSock Animation Platform)

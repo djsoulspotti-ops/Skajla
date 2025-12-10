@@ -1,5 +1,5 @@
 """
-SKAILA Structured Logging
+SKAJLA Structured Logging
 
 JSON-formatted logging for production observability and debugging.
 """

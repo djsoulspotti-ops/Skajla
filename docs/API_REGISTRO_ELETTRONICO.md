@@ -1,4 +1,4 @@
-# 📚 API REGISTRO ELETTRONICO - SKAILA
+# 📚 API REGISTRO ELETTRONICO - SKAJLA
 
 **Documentazione completa degli endpoint API per gestione voti, presenze, note e calendario**
 

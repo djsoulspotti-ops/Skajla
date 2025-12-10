@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 WSGI entry point per production deployment con Gunicorn + eventlet
-SKAILA Platform - Production WSGI Application
+SKAJLA Platform - Production WSGI Application
 
 Usage with Gunicorn:
   gunicorn --config gunicorn.conf.py wsgi:application
@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 # Import create_app factory
 from main import create_app
 
-# Crea applicazione SKAILA
-print("🚀 WSGI: Creating SKAILA application...")
+# Crea applicazione SKAJLA
+print("🚀 WSGI: Creating SKAJLA application...")
 skaila_app = create_app()
 
 # WSGI application per Gunicorn standard

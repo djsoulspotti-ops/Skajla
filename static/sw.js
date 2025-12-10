@@ -127,7 +127,7 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('push', (event) => {
   const options = {
-    body: event.data ? event.data.text() : 'Nuova notifica da SKAILA',
+    body: event.data ? event.data.text() : 'Nuova notifica da SKAJLA',
     icon: '/static/icons/icon-192x192.png',
     badge: '/static/icons/icon-192x192.png',
     vibrate: [100, 50, 100],
@@ -138,7 +138,7 @@ self.addEventListener('push', (event) => {
     actions: [
       {
         action: 'explore',
-        title: 'Apri SKAILA'
+        title: 'Apri SKAJLA'
       },
       {
         action: 'close',
@@ -148,7 +148,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('SKAILA', options)
+    self.registration.showNotification('SKAJLA', options)
   );
 });
 

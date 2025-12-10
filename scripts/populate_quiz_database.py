@@ -1,5 +1,5 @@
 """
-SKAILA Quiz Database Population
+SKAJLA Quiz Database Population
 Inserisce 150+ quiz iniziali per tutte le materie
 """
 

@@ -1,5 +1,5 @@
 """
-SKAILA Connect Routes
+SKAJLA Connect Routes
 Sistema per connettere scuole con aziende per alternanza scuola-lavoro
 """
 
@@ -16,23 +16,23 @@ db_manager = DatabaseManager()
 
 @skaila_connect_bp.before_request
 def check_skaila_connect_feature():
-    """Verifica che SKAILA Connect sia abilitato prima di ogni request"""
+    """Verifica che SKAJLA Connect sia abilitato prima di ogni request"""
     if 'user_id' not in session:
         return  # Auth middleware gestirà questo
     
     try:
         school_id = get_current_school_id()
-        if not check_feature_enabled(school_id, Features.SKAILA_CONNECT):
+        if not check_feature_enabled(school_id, Features.SKAJLA_CONNECT):
             # API endpoint - ritorna JSON 403
             if request.path.startswith('/api/'):
                 return jsonify({
                     'error': 'Feature non disponibile',
-                    'message': 'SKAILA Connect non è disponibile per la tua scuola.',
-                    'feature': Features.SKAILA_CONNECT,
+                    'message': 'SKAJLA Connect non è disponibile per la tua scuola.',
+                    'feature': Features.SKAJLA_CONNECT,
                     'upgrade_required': True
                 }), 403
             # Web endpoint - redirect con flash
-            flash('⚠️ SKAILA Connect non è disponibile per la tua scuola.', 'warning')
+            flash('⚠️ SKAJLA Connect non è disponibile per la tua scuola.', 'warning')
             return redirect('/dashboard')
     except Exception as e:
         logger.error(
@@ -40,10 +40,10 @@ def check_skaila_connect_feature():
             domain='skaila_connect',
             user_id=session.get('user_id'),
             school_id=session.get('scuola_id'),
-            feature=Features.SKAILA_CONNECT,
+            feature=Features.SKAJLA_CONNECT,
             error=str(e),
             error_type=type(e).__name__,
-            message='Error checking SKAILA Connect feature availability',
+            message='Error checking SKAJLA Connect feature availability',
             exc_info=True
         )
         if request.path.startswith('/api/'):
@@ -135,7 +135,7 @@ MOCK_COMPANIES = [
 @require_login
 def connect_hub():
     """
-    Hub SKAILA Connect - Opportunity Marketplace
+    Hub SKAJLA Connect - Opportunity Marketplace
     """
     user_id = session.get('user_id')
     ruolo = session.get('ruolo')

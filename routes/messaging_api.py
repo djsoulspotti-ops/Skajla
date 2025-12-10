@@ -1,5 +1,5 @@
 """
-SKAILA - Messaging API Routes
+SKAJLA - Messaging API Routes
 API endpoints per sistema messaggistica
 """
 

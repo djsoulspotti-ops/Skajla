@@ -1,6 +1,6 @@
 
 """
-SKAILA - Admin Features Routes
+SKAJLA - Admin Features Routes
 Route per presidi/admin per gestire feature abilitate
 """
 

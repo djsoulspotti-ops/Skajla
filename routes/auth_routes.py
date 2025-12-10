@@ -1,6 +1,6 @@
 
 """
-SKAILA - Routes Autenticazione
+SKAJLA - Routes Autenticazione
 Gestisce login, logout, registrazione e sessioni
 """
 
@@ -221,7 +221,7 @@ def register():
                                                       codice_dirigente, attiva, created_at)
                                     VALUES (%s, %s, %s, %s, TRUE, CURRENT_TIMESTAMP)
                                     RETURNING id
-                                """, ('SKAILA Community', 'DEFAULT_SCHOOL', 'DEFAULT_TEACHER', 'DEFAULT_DIRECTOR'))
+                                """, ('SKAJLA Community', 'DEFAULT_SCHOOL', 'DEFAULT_TEACHER', 'DEFAULT_DIRECTOR'))
                                 scuola_id = cursor.fetchone()[0]
                                 conn.commit()
                                 print(f"✅ Scuola predefinita creata (ID: {scuola_id})")

@@ -1,4 +1,4 @@
-# SKAILA - Confronto Piani e Funzionalità
+# SKAJLA - Confronto Piani e Funzionalità
 
 ## 📊 Tabella Comparativa Completa
 
@@ -133,7 +133,7 @@
 
 ---
 
-## 💼 SKAILA CONNECT (Carriera & Stage)
+## 💼 SKAJLA CONNECT (Carriera & Stage)
 
 | Feature | BASIC | PROFESSIONAL | ENTERPRISE |
 |---------|-------|--------------|------------|
@@ -261,7 +261,7 @@
 **-20% permanente** per scuole paritarie non-profit con certificazione
 
 ### 🌟 Referral Program
-**1 mese gratis** per ogni scuola che porti su SKAILA (max 3 mesi/anno)
+**1 mese gratis** per ogni scuola che porti su SKAJLA (max 3 mesi/anno)
 
 ### 📚 Multi-School Bundle
 **-15% per scuola** quando registri 3+ scuole (solo Enterprise)

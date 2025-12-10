@@ -1,5 +1,5 @@
 """
-SKAILA API Documentation Configuration
+SKAJLA API Documentation Configuration
 Swagger/OpenAPI documentation for all REST API endpoints
 """
 
@@ -25,10 +25,10 @@ swagger_config = {
 swagger_template = {
     "swagger": "2.0",
     "info": {
-        "title": "SKAILA API Documentation",
-        "description": "Complete API documentation for SKAILA Educational Platform",
+        "title": "SKAJLA API Documentation",
+        "description": "Complete API documentation for SKAJLA Educational Platform",
         "contact": {
-            "name": "SKAILA Support",
+            "name": "SKAJLA Support",
             "email": "support@skaila.app"
         },
         "version": "1.0.0"

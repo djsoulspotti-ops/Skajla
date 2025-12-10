@@ -1,4 +1,4 @@
-# Sistema di monitoring produzione per SKAILA
+# Sistema di monitoring produzione per SKAJLA
 # Ottimizzato per ambiente scolastico ad alto traffico
 
 import time

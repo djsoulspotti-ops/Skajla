@@ -1,5 +1,5 @@
 """
-SKAILA Structured Logging System
+SKAJLA Structured Logging System
 Task 7: Enhanced error handling and structured logging
 """
 
@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 class StructuredLogger:
-    """Production-ready structured logging for SKAILA"""
+    """Production-ready structured logging for SKAJLA"""
     
     def __init__(self, name: str):
         self.logger = logging.getLogger(name)

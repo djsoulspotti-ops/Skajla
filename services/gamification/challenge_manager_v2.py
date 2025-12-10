@@ -1,6 +1,6 @@
 """
 Challenge Manager V2 - Manages daily, weekly, and class challenges
-Adapted for SKAILA's DatabaseManager pattern
+Adapted for SKAJLA's DatabaseManager pattern
 """
 
 import json

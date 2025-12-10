@@ -1,5 +1,5 @@
 """
-SKAILA - Dashboard Routes
+SKAJLA - Dashboard Routes
 Routes per dashboard specifiche per ruolo
 """
 
@@ -160,7 +160,7 @@ def dashboard_studente():
         'giorni_totali': presenze_stats['giorni_totali'] or 0
     }
 
-    # SKAILA Connect - Aziende disponibili
+    # SKAJLA Connect - Aziende disponibili
     companies = db_manager.query('''
         SELECT id, nome, settore, descrizione, logo, citta, posizione_offerta, 
                tipo_opportunita, requisiti, retribuzione

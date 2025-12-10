@@ -1,5 +1,5 @@
 """
-SKAILA Teaching Materials Manager
+SKAJLA Teaching Materials Manager
 Sistema upload e gestione materiali didattici per professori
 """
 
@@ -119,7 +119,7 @@ class TeachingMaterialsManager:
         """Upload materiale didattico"""
         
         # FIX BUG CRITICO: Validate teacher - supporta sia 'professore' che 'docente' per retrocompatibilità
-        # Nel database SKAILA il ruolo è 'professore', ma manteniamo supporto per 'docente' se esistente
+        # Nel database SKAJLA il ruolo è 'professore', ma manteniamo supporto per 'docente' se esistente
         teacher = db_manager.query('SELECT ruolo FROM utenti WHERE id = %s', (teacher_id,), one=True)
         if not teacher or teacher['ruolo'] not in ['professore', 'docente', 'dirigente']:
             return {'error': 'Solo i professori possono caricare materiali'}

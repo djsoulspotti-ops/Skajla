@@ -1,5 +1,5 @@
 """
-SKAILA Exception Hierarchy
+SKAJLA Exception Hierarchy
 
 Domain-specific exceptions for proper error handling and user-safe error messages.
 """
@@ -9,7 +9,7 @@ from typing import Optional, Dict, Any
 
 class BaseSkailaError(Exception):
     """
-    Base exception for all SKAILA custom errors.
+    Base exception for all SKAJLA custom errors.
     
     Attributes:
         message: Internal error message (logged server-side)
@@ -256,13 +256,13 @@ class EmailServiceError(ExternalServiceError):
 
 def map_exception(exc: Exception) -> BaseSkailaError:
     """
-    Map external exceptions (psycopg2, bcrypt, etc.) to SKAILA exceptions.
+    Map external exceptions (psycopg2, bcrypt, etc.) to SKAJLA exceptions.
     
     Args:
         exc: External exception to map
     
     Returns:
-        Mapped SKAILA exception
+        Mapped SKAJLA exception
     """
     # PostgreSQL exceptions
     try:

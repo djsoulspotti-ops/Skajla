@@ -1,9 +1,9 @@
 /**
- * SKAILA Network Manager
+ * SKAJLA Network Manager
  * Gestione avanzata connessione Socket.IO con heartbeat, presence e notifiche
  */
 
-class SKAILANetworkManager {
+class SKAJLANetworkManager {
     constructor() {
         this.socket = null;
         this.connected = false;
@@ -23,7 +23,7 @@ class SKAILANetworkManager {
         this.setupPresenceHandlers();
         this.setupNotificationHandlers();
         this.setupMessageHandlers();
-        console.log('🌐 SKAILA Network Manager initialized');
+        console.log('🌐 SKAJLA Network Manager initialized');
     }
 
     setupConnectionHandlers() {
@@ -33,7 +33,7 @@ class SKAILANetworkManager {
             this.startHeartbeat();
             this.startPresencePing();
             this.requestOnlineUsers();
-            console.log('✅ Connected to SKAILA Network');
+            console.log('✅ Connected to SKAJLA Network');
             this.emit('network:connected');
         });
 
@@ -41,7 +41,7 @@ class SKAILANetworkManager {
             this.connected = false;
             this.stopHeartbeat();
             this.stopPresencePing();
-            console.log('❌ Disconnected from SKAILA Network');
+            console.log('❌ Disconnected from SKAJLA Network');
             this.emit('network:disconnected');
         });
 
@@ -296,7 +296,7 @@ class SKAILANetworkManager {
 
     showNotification(data) {
         if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(data.title || 'SKAILA', {
+            new Notification(data.title || 'SKAJLA', {
                 body: data.message,
                 icon: '/static/logo-skaila.svg',
                 tag: 'skaila-notification'
@@ -384,10 +384,10 @@ class SKAILANetworkManager {
     }
 }
 
-window.SKAILANetwork = new SKAILANetworkManager();
+window.SKAJLANetwork = new SKAJLANetworkManager();
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof io !== 'undefined' && window.socket) {
-        window.SKAILANetwork.init(window.socket);
+        window.SKAJLANetwork.init(window.socket);
     }
 });

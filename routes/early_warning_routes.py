@@ -1,5 +1,5 @@
 """
-SKAILA Early Warning System Routes
+SKAJLA Early Warning System Routes
 Dashboard and management for early warning alerts
 Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine
 """

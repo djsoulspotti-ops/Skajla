@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SKAILA - Quick Load Test
+SKAJLA - Quick Load Test
 Fast performance and capacity testing
 """
 
@@ -136,7 +136,7 @@ class QuickLoadTest:
         """Run all tests"""
         print("""
 ╔═══════════════════════════════════════╗
-║   SKAILA QUICK LOAD TEST              ║
+║   SKAJLA QUICK LOAD TEST              ║
 ╚═══════════════════════════════════════╝
         """)
         

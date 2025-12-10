@@ -1,5 +1,5 @@
 """
-SKAILA Gamification System - Sistema completo di gamification
+SKAJLA Gamification System - Sistema completo di gamification
 Sistema avanzato di punti, livelli, achievement e classifiche per motivare gli studenti
 """
 
@@ -13,7 +13,7 @@ from shared.error_handling.structured_logger import get_logger
 
 logger = get_logger(__name__)
 
-class SKAILAGamification:
+class SKAJLAGamification:
     def __init__(self):
         self.xp_multipliers = XPConfig.MULTIPLIERS
         self.xp_actions = XPConfig.ACTIONS
@@ -384,7 +384,7 @@ class SKAILAGamification:
                 'recent_activity': []
             }
 
-gamification_system = SKAILAGamification()
+gamification_system = SKAJLAGamification()
 
 def init_gamification():
     """Inizializza il sistema di gamification"""
@@ -392,7 +392,7 @@ def init_gamification():
         gamification_system.init_gamification_tables()
         logger.info(
             event_type='system_initialized',
-            message='Sistema di Gamification SKAILA completo inizializzato',
+            message='Sistema di Gamification SKAJLA completo inizializzato',
             domain='gamification'
         )
     except Exception as e:

@@ -1,6 +1,6 @@
 
 """
-SKAILA - Database Upgrade per Scalabilità Produzione
+SKAJLA - Database Upgrade per Scalabilità Produzione
 Migrazione da SQLite a PostgreSQL per supportare 1000+ utenti
 """
 

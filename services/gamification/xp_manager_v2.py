@@ -1,6 +1,6 @@
 """
 XP Manager V2 - Advanced XP calculation and assignment
-Adapted for SKAILA's DatabaseManager pattern
+Adapted for SKAJLA's DatabaseManager pattern
 """
 
 import json

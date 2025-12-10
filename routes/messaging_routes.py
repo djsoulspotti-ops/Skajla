@@ -1,5 +1,5 @@
 """
-SKAILA - Messaging Routes
+SKAJLA - Messaging Routes
 Sistema messaggistica granulare: 1-to-1, gruppi materia, chat classe
 """
 

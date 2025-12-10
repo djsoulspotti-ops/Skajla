@@ -1,7 +1,7 @@
 
 #!/usr/bin/env python3
 """
-Test Login Credentials - SKAILA
+Test Login Credentials - SKAJLA
 Verifica tutte le credenziali disponibili
 """
 
@@ -24,7 +24,7 @@ def test_all_credentials():
         ('prof@test.skaila.it', 'prof123', 'Prof Demo'),
     ]
     
-    print("🧪 Test Login Credentials SKAILA\n")
+    print("🧪 Test Login Credentials SKAJLA\n")
     print("=" * 60)
     
     working_creds = []

@@ -1,5 +1,5 @@
 """
-SKAILA - Email Sender
+SKAJLA - Email Sender
 Sistema per invio email report (tramite integrazione Resend)
 """
 
@@ -96,9 +96,9 @@ class EmailSender:
     def _get_subject(self, report_data):
         """Genera subject email in base al tipo report"""
         if report_data['type'] == 'weekly':
-            return f"📊 SKAILA Report Settimanale - {report_data['period']}"
+            return f"📊 SKAJLA Report Settimanale - {report_data['period']}"
         else:
-            return f"📈 SKAILA Report Mensile - {report_data['period']}"
+            return f"📈 SKAJLA Report Mensile - {report_data['period']}"
     
     def _save_to_file(self, recipient_email, report_data, html_content):
         """Salva report come file HTML (fallback se Resend non disponibile)"""

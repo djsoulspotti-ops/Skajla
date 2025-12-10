@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SKAILA - Load Testing Script
+SKAJLA - Load Testing Script
 Tests maximum concurrent users and database query capacity
 """
 
@@ -12,8 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 import json
 
-class SKAILALoadTester:
-    """Comprehensive load testing for SKAILA platform"""
+class SKAJLALoadTester:
+    """Comprehensive load testing for SKAJLA platform"""
     
     def __init__(self, base_url="http://localhost:5000"):
         self.base_url = base_url
@@ -300,12 +300,12 @@ def main():
     """Run comprehensive load tests"""
     print("""
     ╔═══════════════════════════════════════════════╗
-    ║   SKAILA LOAD TESTING SUITE                   ║
+    ║   SKAJLA LOAD TESTING SUITE                   ║
     ║   Testing Maximum Capacity & Performance      ║
     ╚═══════════════════════════════════════════════╝
     """)
     
-    tester = SKAILALoadTester()
+    tester = SKAJLALoadTester()
     
     # Run all tests
     try:

@@ -1,5 +1,5 @@
 """
-SKAILA - Script per popolare il database con quiz del programma ministeriale italiano
+SKAJLA - Script per popolare il database con quiz del programma ministeriale italiano
 """
 
 import sys
@@ -18,7 +18,7 @@ def populate_curriculum_quizzes():
     total_inserted = 0
     
     print("=" * 60)
-    print("SKAILA - Inserimento Quiz Programmi Ministeriali Italiani")
+    print("SKAJLA - Inserimento Quiz Programmi Ministeriali Italiani")
     print("=" * 60)
     
     for level, subjects in all_quizzes.items():

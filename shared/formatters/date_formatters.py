@@ -1,5 +1,5 @@
 """
-SKAILA - Formattatori Date Centralizzati
+SKAJLA - Formattatori Date Centralizzati
 Formattazione consistente di date e tempi in tutta l'applicazione
 """
 

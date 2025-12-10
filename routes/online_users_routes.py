@@ -1,5 +1,5 @@
 """
-SKAILA - Online Users API
+SKAJLA - Online Users API
 Real-time online presence tracking for circulating avatars
 """
 

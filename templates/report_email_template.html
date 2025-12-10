@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKAILA Report {{ report.type|title }}</title>
+    <title>SKAJLA Report {{ report.type|title }}</title>
     <style>
         * {
             margin: 0;
@@ -212,7 +212,7 @@
     <div class="email-container">
         <!-- Header -->
         <div class="header">
-            <h1> SKAILA</h1>
+            <h1> SKAJLA</h1>
             <p>Report {{ 'Settimanale' if report.type == 'weekly' else 'Mensile' }}</p>
         </div>
         
@@ -299,7 +299,7 @@
             
             <!-- AI Coach Insights -->
             <div class="section">
-                <h2 class="section-title">🤖 SKAILA Coach - Insights</h2>
+                <h2 class="section-title">🤖 SKAJLA Coach - Insights</h2>
                 <p>
                     <strong>Totale interazioni:</strong> {{ report.statistics.ai_coach.total_interactions }}
                 </p>
@@ -377,7 +377,7 @@
                 <a href="http://localhost:5000/admin/dashboard">Visualizza Dashboard Admin</a>
             </p>
             <p>
-                SKAILA - Piattaforma Educativa per Scuole Italiane
+                SKAJLA - Piattaforma Educativa per Scuole Italiane
             </p>
         </div>
     </div>

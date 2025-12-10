@@ -1,5 +1,5 @@
 """
-SKAILA CSRF Middleware - Global CSRF Protection
+SKAJLA CSRF Middleware - Global CSRF Protection
 Enforces CSRF token validation on all state-changing requests (POST, PUT, DELETE, PATCH)
 """
 

@@ -1,5 +1,5 @@
 """
-SKAILA AI Registro Intelligence
+SKAJLA AI Registro Intelligence
 AI analizza registro e suggerisce interventi personalizzati
 """
 

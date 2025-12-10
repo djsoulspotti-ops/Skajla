@@ -1,5 +1,5 @@
 """
-SKAILA Gemini Chatbot - AI Coach with Gamification Integration
+SKAJLA Gemini Chatbot - AI Coach with Gamification Integration
 Uses Google Gemini API for intelligent tutoring with XP rewards
 """
 
@@ -97,7 +97,7 @@ class GeminiChatbot:
         streak = gamification.get('streak_days', 0)
         badges = gamification.get('badges_count', 0)
         
-        return f"""Sei SKAILA Coach, un tutor AI amichevole e motivazionale per studenti italiani.
+        return f"""Sei SKAJLA Coach, un tutor AI amichevole e motivazionale per studenti italiani.
 
 CONTESTO STUDENTE:
 - Nome: {user_name}
@@ -354,7 +354,7 @@ Rispondi come un amico esperto che vuole davvero aiutare lo studente a migliorar
             'studio': f"Ciao {user_name}! Come {rank} con {xp_total} XP, hai dimostrato grande impegno. Per studiare meglio, ti consiglio: 1) Dividi lo studio in sessioni di 25 minuti 2) Fai pause regolari 3) Usa schemi e mappe concettuali. Ogni domanda che mi fai ti fa guadagnare XP!",
             'aiuto': f"Sono qui per aiutarti, {user_name}! Il tuo rango {rank} dimostra che sei sulla strada giusta. Dimmi di piu su cosa ti serve e insieme troveremo la soluzione. Ricorda: chiedere aiuto e da studenti intelligenti!",
             'stress': f"{user_name}, capisco che a volte lo studio puo essere stressante. Ma guarda quanta strada hai fatto: sei un {rank}! Prenditi un momento per respirare, poi torniamo a lavorare insieme. Sei piu forte di quanto pensi.",
-            'default': f"Ciao {user_name}! Sono SKAILA Coach, il tuo tutor AI. Come {rank}, hai gia accumulato {xp_total} XP - ottimo lavoro! Chiedimi qualsiasi cosa sullo studio e guadagnerai altri punti esperienza."
+            'default': f"Ciao {user_name}! Sono SKAJLA Coach, il tuo tutor AI. Come {rank}, hai gia accumulato {xp_total} XP - ottimo lavoro! Chiedimi qualsiasi cosa sullo studio e guadagnerai altri punti esperienza."
         }
         
         message_lower = message.lower()

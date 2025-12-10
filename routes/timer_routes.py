@@ -1,5 +1,5 @@
 """
-SKAILA - Study Timer Routes
+SKAJLA - Study Timer Routes
 API endpoints per gestione timer studio
 """
 

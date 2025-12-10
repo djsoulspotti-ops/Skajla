@@ -1,5 +1,5 @@
 """
-Production Monitoring Service per SKAILA
+Production Monitoring Service per SKAJLA
 Structured logging, metrics collection, e performance monitoring
 """
 

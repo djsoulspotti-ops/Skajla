@@ -1,15 +1,15 @@
-# SKAILA - Sistema di Gestione Educativa Intelligente
+# SKAJLA - Sistema di Gestione Educativa Intelligente
 
 ## 📋 Panoramica
 
-**SKAILA** (Sistema Knowledge-Augmented Integrato per Learning e Analytics) è una piattaforma educativa enterprise progettata specificamente per il sistema scolastico italiano. Connette studenti, docenti, genitori e dirigenti scolastici in un ecosistema digitale integrato che migliora l'apprendimento, semplifica la gestione scolastica e fornisce insights basati su intelligenza artificiale.
+**SKAJLA** (Sistema Knowledge-Augmented Integrato per Learning e Analytics) è una piattaforma educativa enterprise progettata specificamente per il sistema scolastico italiano. Connette studenti, docenti, genitori e dirigenti scolastici in un ecosistema digitale integrato che migliora l'apprendimento, semplifica la gestione scolastica e fornisce insights basati su intelligenza artificiale.
 
 ### Missione
 Trasformare l'esperienza educativa italiana attraverso tecnologie moderne, analisi dei dati e intelligenza artificiale, mantenendo la semplicità d'uso e la sicurezza dei dati al centro del design.
 
 ---
 
-## 🎯 Cosa Offre SKAILA
+## 🎯 Cosa Offre SKAJLA
 
 ### Per gli Studenti 📚
 
@@ -55,7 +55,7 @@ Trasformare l'esperienza educativa italiana attraverso tecnologie moderne, anali
 - Download e visualizzazione documenti, presentazioni, video
 - Sistema di ricerca avanzato
 
-**8. SKAILA Connect - Portale Carriera** 💼
+**8. SKAJLA Connect - Portale Carriera** 💼
 - Database aziende per stage e tirocini
 - Opportunità di lavoro e formazione
 - Strumenti per la preparazione al mondo del lavoro
@@ -141,7 +141,7 @@ Trasformare l'esperienza educativa italiana attraverso tecnologie moderne, anali
   - Gamification
   - AI Coach
   - Registro Elettronico
-  - SKAILA Connect
+  - SKAJLA Connect
   - Materiali Didattici
   - Calendario
   - Business Intelligence
@@ -194,7 +194,7 @@ Trasformare l'esperienza educativa italiana attraverso tecnologie moderne, anali
 
 **AI & Machine Learning:**
 - **OpenAI Integration** - AI Coach e sistema quiz adattivi
-- **SKAILA AI Brain Engine** - Analisi profilo studente context-aware
+- **SKAJLA AI Brain Engine** - Analisi profilo studente context-aware
 - **AI Insights Engine** - Predizioni performance e trend analysis
 
 **Sicurezza:**
@@ -309,7 +309,7 @@ Trasformare l'esperienza educativa italiana attraverso tecnologie moderne, anali
 ✅ **Motivazione Aumentata** - Gamification rende lo studio coinvolgente  
 ✅ **Supporto 24/7** - AI tutor sempre disponibile per aiuto  
 ✅ **Organizzazione Semplificata** - Calendario, voti, materiali tutto in un posto  
-✅ **Preparazione Carriera** - SKAILA Connect facilita ingresso mondo lavoro  
+✅ **Preparazione Carriera** - SKAJLA Connect facilita ingresso mondo lavoro  
 
 ### Per i Docenti
 ✅ **Efficienza Operativa** - Quick actions per operazioni quotidiane ripetitive  
@@ -328,7 +328,7 @@ Trasformare l'esperienza educativa italiana attraverso tecnologie moderne, anali
 
 ## 💡 Innovazioni Distintive
 
-### 1. SKAILA AI Brain Engine
+### 1. SKAJLA AI Brain Engine
 Sistema AI proprietario che analizza il profilo completo dello studente (voti, presenze, interazioni, tempo studio) per fornire:
 - Raccomandazioni di studio personalizzate
 - Previsione aree di difficoltà
@@ -432,7 +432,7 @@ Calendario intelligente che si adatta al ruolo:
 
 ## ✨ Conclusione
 
-**SKAILA** rappresenta la nuova frontiera della gestione educativa digitale in Italia, combinando tecnologie enterprise, intelligenza artificiale e design user-centric per creare un ecosistema che:
+**SKAJLA** rappresenta la nuova frontiera della gestione educativa digitale in Italia, combinando tecnologie enterprise, intelligenza artificiale e design user-centric per creare un ecosistema che:
 
 - **Semplifica** la gestione scolastica quotidiana
 - **Potenzia** l'apprendimento con AI e gamification
@@ -440,11 +440,11 @@ Calendario intelligente che si adatta al ruolo:
 - **Protegge** i dati con sicurezza enterprise-grade
 - **Scala** per servire da piccole scuole a grandi reti scolastiche
 
-Con oltre **28 scuole registrate**, **1.247 utenti attivi** e **99.9% uptime**, SKAILA è già la scelta di istituti educativi all'avanguardia che vogliono offrire ai propri studenti il meglio della tecnologia educativa moderna.
+Con oltre **28 scuole registrate**, **1.247 utenti attivi** e **99.9% uptime**, SKAJLA è già la scelta di istituti educativi all'avanguardia che vogliono offrire ai propri studenti il meglio della tecnologia educativa moderna.
 
 ---
 
-**SKAILA - Il Futuro dell'Educazione è Già Qui** 🚀
+**SKAJLA - Il Futuro dell'Educazione è Già Qui** 🚀
 
 ---
 

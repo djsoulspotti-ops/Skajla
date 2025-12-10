@@ -1,5 +1,5 @@
 """
-SKAILA Telemetry API Routes
+SKAJLA Telemetry API Routes
 Handles behavioral telemetry tracking and early warning system
 Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine
 """

@@ -1,6 +1,6 @@
 {
-  "name": "SKAILA - Smart Educational SuperApp",
-  "short_name": "SKAILA",
+  "name": "SKAJLA - Smart Educational SuperApp",
+  "short_name": "SKAJLA",
   "description": "Multi-tenant EdTech SuperApp per scuole italiane con AI tutoring, early warning system e gamification",
   "start_url": "/",
   "display": "standalone",

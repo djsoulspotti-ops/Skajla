@@ -1,5 +1,5 @@
 """
-SKAILA Registro Elettronico
+SKAJLA Registro Elettronico
 Sistema completo per gestione presenze, voti, note, calendario lezioni
 """
 

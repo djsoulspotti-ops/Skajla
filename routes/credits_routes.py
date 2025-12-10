@@ -1,6 +1,6 @@
 
 """
-SKAILA - Routes Crediti
+SKAJLA - Routes Crediti
 Gestione visualizzazione crediti e monete utente
 """
 

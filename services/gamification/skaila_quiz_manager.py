@@ -1,5 +1,5 @@
 """
-SKAILA Quiz Manager - Sistema Gestione Quiz Intelligente
+SKAJLA Quiz Manager - Sistema Gestione Quiz Intelligente
 Generazione, selezione adattiva, tracking performance
 Supporto curriculum ministeriale italiano (scuole medie e superiori)
 """
@@ -18,7 +18,7 @@ from services.telemetry.telemetry_engine import telemetry_engine
 logger = logging.getLogger(__name__)
 
 class QuizManager:
-    """Gestione completa quiz SKAILA con supporto curriculum ministeriale"""
+    """Gestione completa quiz SKAJLA con supporto curriculum ministeriale"""
     
     def __init__(self):
         self.difficulty_xp = {
@@ -421,4 +421,4 @@ class QuizManager:
 
 # Inizializza sistema
 quiz_manager = QuizManager()
-print("✅ SKAILA Quiz Manager inizializzato!")
+print("✅ SKAJLA Quiz Manager inizializzato!")

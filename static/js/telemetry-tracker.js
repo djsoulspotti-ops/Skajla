@@ -1,5 +1,5 @@
 /**
- * SKAILA Behavioral Telemetry Tracker
+ * SKAJLA Behavioral Telemetry Tracker
  * Automatically tracks student learning behaviors for early warning system
  * Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine
  */
@@ -467,7 +467,7 @@ let telemetryTracker;
 document.addEventListener('DOMContentLoaded', () => {
     telemetryTracker = new TelemetryTracker();
     window.telemetryTracker = telemetryTracker; // Make available globally
-    console.log('🎯 SKAILA Telemetry Tracker initialized');
+    console.log('🎯 SKAJLA Telemetry Tracker initialized');
 });
 
 // Export for module usage

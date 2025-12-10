@@ -100,7 +100,7 @@ class DatabaseManager:
                 # CRITICO: Parametri SNI richiesti da Neon per produzione
                 sslmode='require',
                 connect_timeout=10,
-                application_name='SKAILA_Production',
+                application_name='SKAJLA_Production',
                 # Ottimizzazioni combinate con endpoint SNI
                 options=combined_options
             )

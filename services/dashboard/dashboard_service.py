@@ -1,5 +1,5 @@
 """
-SKAILA Dashboard Service
+SKAJLA Dashboard Service
 Centralizza logica business e query per dashboard multi-ruolo
 """
 

@@ -1,7 +1,7 @@
 """
-Advanced Gamification System for SKAILA
+Advanced Gamification System for SKAJLA
 Complete gamification with ranks, battle pass, challenges, kudos, and leaderboards
-Adapted for SKAILA's DatabaseManager pattern
+Adapted for SKAJLA's DatabaseManager pattern
 """
 
 import json
@@ -408,7 +408,7 @@ class AdvancedGamificationManager:
             challenges = [
                 # Daily challenges
                 {'codice': 'daily_messages_5', 'nome': '📨 Messaggi del Giorno', 'descrizione': 'Invia 5 messaggi oggi', 'tipo': 'giornaliera', 'difficolta': 'facile', 'obiettivi': {'messaggi': 5}, 'reward_xp': 30},
-                {'codice': 'daily_chatbot_3', 'nome': '🤖 Parla con SKAILA', 'descrizione': '3 interazioni con il chatbot', 'tipo': 'giornaliera', 'difficolta': 'facile', 'obiettivi': {'chatbot_interazioni': 3}, 'reward_xp': 25},
+                {'codice': 'daily_chatbot_3', 'nome': '🤖 Parla con SKAJLA', 'descrizione': '3 interazioni con il chatbot', 'tipo': 'giornaliera', 'difficolta': 'facile', 'obiettivi': {'chatbot_interazioni': 3}, 'reward_xp': 25},
                 {'codice': 'daily_quiz_1', 'nome': '📝 Quiz Giornaliero', 'descrizione': 'Completa un quiz', 'tipo': 'giornaliera', 'difficolta': 'facile', 'obiettivi': {'quiz': 1}, 'reward_xp': 40},
                 {'codice': 'daily_help_1', 'nome': '🤝 Aiuta un Compagno', 'descrizione': 'Aiuta un compagno oggi', 'tipo': 'giornaliera', 'difficolta': 'media', 'obiettivi': {'aiuti': 1}, 'reward_xp': 50},
                 

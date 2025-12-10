@@ -1,5 +1,5 @@
 """
-SKAILA Error Handling Framework
+SKAJLA Error Handling Framework
 
 Centralized error handling with typed exceptions, decorators, and structured logging.
 Replaces 250+ bare except: blocks across the codebase with proper error management.

@@ -1,12 +1,12 @@
 
-# 📚 DOCUMENTAZIONE COMPLETA SKAILA
+# 📚 DOCUMENTAZIONE COMPLETA SKAJLA
 ## Piattaforma Educativa del Futuro
 
 ---
 
 ## 🎯 PANORAMICA
 
-**SKAILA** è una piattaforma educativa innovativa progettata per rivoluzionare la comunicazione e l'apprendimento nelle scuole superiori e licei italiani. Integra tecnologie avanzate di AI, gamification, e social learning per creare un ecosistema educativo completo e coinvolgente.
+**SKAJLA** è una piattaforma educativa innovativa progettata per rivoluzionare la comunicazione e l'apprendimento nelle scuole superiori e licei italiani. Integra tecnologie avanzate di AI, gamification, e social learning per creare un ecosistema educativo completo e coinvolgente.
 
 ---
 
@@ -50,7 +50,7 @@
   - Badge speciali per streak milestone
   - Protezione streak (1 giorno di grazia)
 
-#### AI Coach Personalizzato (SKAILA Assistant)
+#### AI Coach Personalizzato (SKAJLA Assistant)
 - **Chatbot Intelligente**: Assistente AI disponibile 24/7
   - Risposte personalizzate basate sul profilo studente
   - Riconoscimento materie e contestualizzazione
@@ -346,12 +346,12 @@
 
 ---
 
-## 🤖 SKAILA AI BRAIN - INTELLIGENZA ARTIFICIALE
+## 🤖 SKAJLA AI BRAIN - INTELLIGENZA ARTIFICIALE
 
 ### Architettura AI
 - **Motore Nativo**: Sistema AI proprietario senza dipendenze esterne
 - **Zero Costi API**: Nessun utilizzo OpenAI o servizi terzi
-- **Privacy First**: Tutti i dati rimangono nel sistema SKAILA
+- **Privacy First**: Tutti i dati rimangono nel sistema SKAJLA
 - **Performance**: Risposte istantanee (<200ms)
 
 ### Funzionalità AI Core
@@ -401,10 +401,10 @@
 - Alert automatici a professori/dirigenti
 - Suggerimenti interventi
 
-### Knowledge Base SKAILA
+### Knowledge Base SKAJLA
 
 #### Info Piattaforma
-- Come funziona SKAILA
+- Come funziona SKAJLA
 - Guida gamification
 - Tutorial quiz
 - FAQ comuni
@@ -767,7 +767,7 @@ TOTALE XP per livello 100: 91,500 XP
 
 ---
 
-## 🎯 PUNTI DI FORZA SKAILA
+## 🎯 PUNTI DI FORZA SKAJLA
 
 ### 1. **AI Nativo**
 Zero dipendenze OpenAI, completamente integrato, nessun costo API
@@ -854,10 +854,10 @@ skaila/
 
 ---
 
-**SKAILA** - *La comunicazione scolastica, rivoluzionata.* 🚀
+**SKAJLA** - *La comunicazione scolastica, rivoluzionata.* 🚀
 
 ---
 
 *Documento aggiornato: Gennaio 2025*
 *Versione: 2.0*
-*Autore: SKAILA Development Team*
+*Autore: SKAJLA Development Team*

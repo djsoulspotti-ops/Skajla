@@ -1,5 +1,5 @@
 """
-SKAILA Study Timer Service
+SKAJLA Study Timer Service
 Sistema timer Pomodoro integrato con gamification
 """
 

@@ -1,5 +1,5 @@
 """
-SKAILA Gamification Configuration
+SKAJLA Gamification Configuration
 Centralized configuration for XP actions, multipliers, levels, badges, and streaks
 """
 
@@ -144,7 +144,7 @@ class BadgeConfig:
         },
         'ai_explorer': {
             'name': '🤖 Esploratore AI',
-            'description': 'Interagisci 50 volte con SKAILA AI',
+            'description': 'Interagisci 50 volte con SKAJLA AI',
             'xp_reward': 400,
             'condition': 'ai_interactions >= 50'
         },

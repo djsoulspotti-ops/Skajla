@@ -1,5 +1,5 @@
 """
-SKAILA - Report Scheduler
+SKAJLA - Report Scheduler
 Sistema automatico per invio report settimanali e mensili
 """
 

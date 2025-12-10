@@ -1,5 +1,5 @@
 """
-SKAILA Dashboard Services
+SKAJLA Dashboard Services
 """
 
 from .dashboard_service import dashboard_service, DashboardService

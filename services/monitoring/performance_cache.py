@@ -1,4 +1,4 @@
-# Sistema di caching avanzato per produzione SKAILA
+# Sistema di caching avanzato per produzione SKAJLA
 # Riferimento integrazione: python_database per ottimizzazioni
 
 import time

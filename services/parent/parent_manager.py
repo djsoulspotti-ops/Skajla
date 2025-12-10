@@ -1,5 +1,5 @@
 """
-SKAILA Parent Dashboard - Parent Manager Service
+SKAJLA Parent Dashboard - Parent Manager Service
 Handles parent-student linking and data access with zero-friction onboarding
 """
 

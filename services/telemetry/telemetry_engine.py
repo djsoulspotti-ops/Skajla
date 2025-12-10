@@ -1,5 +1,5 @@
 """
-SKAILA Behavioral Telemetry Engine
+SKAJLA Behavioral Telemetry Engine
 Real-time tracking and analysis of student learning behaviors for early warning system
 Part of Feature #1: Smart AI-Tutoring & Early-Warning Engine
 """

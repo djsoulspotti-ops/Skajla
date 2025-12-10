@@ -1,5 +1,5 @@
 /**
- * SKAILA API Authentication Examples
+ * SKAJLA API Authentication Examples
  * Esempi di utilizzo degli endpoint REST API
  */
 
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // setupLoginForm();
     // setupRegisterForm();
     
-    console.log('📡 SKAILA API Auth disponibile');
+    console.log('📡 SKAJLA API Auth disponibile');
     console.log('Endpoint disponibili:');
     console.log('  - POST /api/register');
     console.log('  - POST /api/login');

@@ -1,6 +1,6 @@
 """
-SKAILA Coaching Engine - AI Coach per Soft Skills e Monitoraggio Studenti
-Integrato con tutto l'ecosistema SKAILA
+SKAJLA Coaching Engine - AI Coach per Soft Skills e Monitoraggio Studenti
+Integrato con tutto l'ecosistema SKAJLA
 """
 
 from database_manager import db_manager
@@ -18,7 +18,7 @@ calendario_module = None
 
 class SkailaCoachingEngine:
     """
-    Motore di coaching intelligente che analizza dati da tutti i servizi SKAILA
+    Motore di coaching intelligente che analizza dati da tutti i servizi SKAJLA
     e fornisce supporto personalizzato su soft skills, motivazione e organizzazione
     """
     
@@ -46,7 +46,7 @@ class SkailaCoachingEngine:
     
     def analyze_student_ecosystem(self, user_id: int) -> Dict[str, Any]:
         """
-        Analizza TUTTI i dati dello studente dall'ecosistema SKAILA
+        Analizza TUTTI i dati dello studente dall'ecosistema SKAJLA
         """
         data = {
             'user_id': user_id,
@@ -67,7 +67,7 @@ class SkailaCoachingEngine:
         # 3. SOCIALE (Messaggistica + Collaborazione)
         data['social'] = self._analyze_social_activity(user_id)
         
-        # 4. CARRIERA (SKAILA Connect)
+        # 4. CARRIERA (SKAJLA Connect)
         data['career'] = self._analyze_career_activity(user_id)
         
         # 5. RILEVAMENTO ALERT
@@ -283,7 +283,7 @@ class SkailaCoachingEngine:
         return social
     
     def _analyze_career_activity(self, user_id: int) -> Dict[str, Any]:
-        """Analizza attività SKAILA Connect"""
+        """Analizza attività SKAJLA Connect"""
         career = {
             'applications': 0,
             'sectors_interest': [],

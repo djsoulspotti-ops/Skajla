@@ -1,5 +1,5 @@
 """
-SKAILA Parent Reports Generator
+SKAJLA Parent Reports Generator
 Genera report automatici settimanali/mensili per genitori
 """
 

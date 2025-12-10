@@ -1,5 +1,5 @@
 /**
- * SKAILA - Cyberpunk Presence System
+ * SKAJLA - Cyberpunk Presence System
  * 3D floating particle network for online user visualization
  * Uses GSAP for smooth physics-like animations with parallax depth
  */

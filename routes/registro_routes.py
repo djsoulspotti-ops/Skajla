@@ -1,5 +1,5 @@
 """
-SKAILA - Routes API Registro Elettronico
+SKAJLA - Routes API Registro Elettronico
 Gestione voti, presenze, note disciplinari, calendario lezioni
 """
 

@@ -1,5 +1,5 @@
 """
-SKAILA - Validatori Input Centralizzati
+SKAJLA - Validatori Input Centralizzati
 Validazione e sanitizzazione input utente per sicurezza
 """
 

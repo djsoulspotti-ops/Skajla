@@ -1,5 +1,5 @@
 """
-SKAILA Error Handling Decorators
+SKAJLA Error Handling Decorators
 
 Reusable decorators for consistent error handling across routes and services.
 """
@@ -39,7 +39,7 @@ def handle_errors(api: bool = False, fallback_template: Optional[str] = None):
                 return func(*args, **kwargs)
             
             except BaseSkailaError as e:
-                # SKAILA exception - already has safe display message
+                # SKAJLA exception - already has safe display message
                 logger.error(
                     event_type='skaila_error',
                     domain=e.__class__.__name__,

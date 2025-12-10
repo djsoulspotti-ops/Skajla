@@ -1,5 +1,5 @@
 """
-SKAILA Subject Progress Analytics
+SKAJLA Subject Progress Analytics
 Tracking dettagliato progressi per materia, analytics, insights
 """
 

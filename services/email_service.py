@@ -1,6 +1,6 @@
 
 """
-SKAILA Email Service - Production Ready
+SKAJLA Email Service - Production Ready
 Gestione invio email con SMTP reale e fallback
 """
 

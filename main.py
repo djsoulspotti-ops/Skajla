@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-SKAILA - Main Application
+SKAJLA - Main Application
 Applicazione Flask modulare e scalabile
 """
 
@@ -72,7 +72,7 @@ from docs.api_documentation import init_swagger
 from shared.logging.structured_logger import auth_logger, api_logger
 
 class SkailaApp:
-    """Classe principale per l'applicazione SKAILA"""
+    """Classe principale per l'applicazione SKAJLA"""
 
     def __init__(self):
         self.app = Flask(__name__)
@@ -94,7 +94,7 @@ class SkailaApp:
         self.init_monitoring_delayed()
         
         # Store reference for health checks
-        self.app.config['SKAILA_APP'] = self
+        self.app.config['SKAJLA_APP'] = self
 
     def setup_app(self):
         """Configurazione base Flask con gestione sicura environment"""
@@ -122,7 +122,7 @@ class SkailaApp:
         print(f"🗄️ Database: {db_status['primary']}")
         
         # Structured logging for startup
-        api_logger.info("SKAILA application startup", 
+        api_logger.info("SKAJLA application startup", 
                        environment="production" if is_prod else "development",
                        ai_mode=ai_status['mode'],
                        database=db_status['primary'])
@@ -295,7 +295,7 @@ class SkailaApp:
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(messaging_api_bp)
         self.app.register_blueprint(ai_chat_bp)
-        self.app.register_blueprint(skaila_connect_bp)  # SKAILA Connect - Alternanza Scuola-Lavoro
+        self.app.register_blueprint(skaila_connect_bp)  # SKAJLA Connect - Alternanza Scuola-Lavoro
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
         self.app.register_blueprint(admin_reports_bp)  # Report Automatici
         self.app.register_blueprint(bi_bp) # BI Dashboard Blueprint
@@ -631,7 +631,7 @@ class SkailaApp:
                     CREATE TABLE IF NOT EXISTS ai_profiles (
                         id SERIAL PRIMARY KEY,
                         utente_id INTEGER UNIQUE,
-                        bot_name TEXT DEFAULT 'SKAILA Assistant',
+                        bot_name TEXT DEFAULT 'SKAJLA Assistant',
                         bot_avatar TEXT DEFAULT 'bot',
                         conversation_style TEXT DEFAULT 'friendly',
                         learning_preferences TEXT DEFAULT 'adaptive',
@@ -714,7 +714,7 @@ class SkailaApp:
                     CREATE TABLE IF NOT EXISTS ai_profiles (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         utente_id INTEGER UNIQUE,
-                        bot_name TEXT DEFAULT 'SKAILA Assistant',
+                        bot_name TEXT DEFAULT 'SKAJLA Assistant',
                         bot_avatar TEXT DEFAULT '🤖',
                         conversation_style TEXT DEFAULT 'friendly',
                         learning_preferences TEXT DEFAULT 'adaptive',
@@ -767,7 +767,7 @@ class SkailaApp:
 
                 # Crea utenti demo con password sicure
                 demo_users = [
-                    ('admin', 'admin@skaila.it', 'admin123', 'Admin', 'SKAILA', '', 'admin'),
+                    ('admin', 'admin@skaila.it', 'admin123', 'Admin', 'SKAJLA', '', 'admin'),
                     ('founder', 'founder@skaila.it', 'founder123', 'Daniele', 'Founder', '', 'admin'),
                     ('papa', 'papa@skaila.it', 'papa123', 'Papà', 'Famiglia', '', 'genitore'),
                     ('mamma', 'mamma@skaila.it', 'mamma123', 'Mamma', 'Famiglia', '', 'genitore'),
@@ -799,7 +799,7 @@ class SkailaApp:
 
                 # Crea chat demo
                 chat_rooms = [
-                    ('💬 Chat Generale SKAILA', 'Chat generale per tutti gli utenti', 'generale', ''),
+                    ('💬 Chat Generale SKAJLA', 'Chat generale per tutti gli utenti', 'generale', ''),
                     ('📚 Aiuto Compiti', 'Chat per ricevere e dare aiuto con i compiti', 'tematica', ''),
                     ('💻 Informatica & Coding', 'Discussioni su programmazione e tecnologia', 'tematica', ''),
                     ('🧮 Matematica & Fisica', 'Gruppo di studio per materie scientifiche', 'tematica', ''),
@@ -824,7 +824,7 @@ class SkailaApp:
 
     def run(self, host='0.0.0.0', port=5000, debug=False):
         """Avvia l'applicazione"""
-        print(f"🚀 SKAILA Server starting on port {port}")
+        print(f"🚀 SKAJLA Server starting on port {port}")
         print(f"🌐 URL: http://{host}:{port}")
         print(f"📊 Database: {db_manager.db_type}")
         

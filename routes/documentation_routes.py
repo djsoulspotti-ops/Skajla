@@ -18,7 +18,7 @@ def download_documentation(filename):
     # Whitelist file consentiti
     allowed_files = {
         'compliance': 'INTRODUZIONE COMPLIANCE.docx',
-        'guida_utente': 'GUIDA_UTENTE_SKAILA.pdf',
+        'guida_utente': 'GUIDA_UTENTE_SKAJLA.pdf',
         'privacy_policy': 'PRIVACY_POLICY.pdf',
         'termini_servizio': 'TERMINI_SERVIZIO.pdf'
     }

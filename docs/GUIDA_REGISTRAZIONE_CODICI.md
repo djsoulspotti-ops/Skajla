@@ -1,6 +1,6 @@
-# 📋 GUIDA REGISTRAZIONE ESTERNA - SKAILA
+# 📋 GUIDA REGISTRAZIONE ESTERNA - SKAJLA
 
-**Come far registrare persone esterne alla piattaforma SKAILA usando i codici scuola**
+**Come far registrare persone esterne alla piattaforma SKAJLA usando i codici scuola**
 
 ---
 
@@ -151,11 +151,11 @@
 ### **Email Template per Studenti**
 
 ```
-Oggetto: Benvenuto su SKAILA - Il tuo codice di accesso
+Oggetto: Benvenuto su SKAJLA - Il tuo codice di accesso
 
 Ciao!
 
-Benvenuto sulla piattaforma educativa SKAILA 🚀
+Benvenuto sulla piattaforma educativa SKAJLA 🚀
 
 Il tuo codice scuola è: SKAIL01904
 
@@ -166,17 +166,17 @@ Per registrarti:
 4. Clicca "Inizia l'Avventura"
 
 Ci vediamo in piattaforma!
-Team SKAILA
+Team SKAJLA
 ```
 
 ### **Email Template per Professori**
 
 ```
-Oggetto: SKAILA - Codice Accesso Docenti
+Oggetto: SKAJLA - Codice Accesso Docenti
 
 Gentile Professore/Professoressa,
 
-Benvenuto sulla piattaforma SKAILA.
+Benvenuto sulla piattaforma SKAJLA.
 
 Il suo codice docente è: PROF01THH9
 
@@ -188,7 +188,7 @@ Per registrarsi:
 Con questo codice avrà accesso alle funzionalità docente.
 
 Cordiali saluti,
-Team SKAILA
+Team SKAJLA
 ```
 
 ---
@@ -243,4 +243,4 @@ EOF
 
 ---
 
-**Buon lavoro con SKAILA! 🎓**
+**Buon lavoro con SKAJLA! 🎓**

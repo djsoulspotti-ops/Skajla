@@ -1,5 +1,5 @@
 """
-SKAILA AI Cost Manager - Sistema di tracciamento e ottimizzazione costi AI
+SKAJLA AI Cost Manager - Sistema di tracciamento e ottimizzazione costi AI
 Gestisce budget, cache intelligente, e ottimizzazione modelli OpenAI
 Refactored per PostgreSQL con db_manager
 """

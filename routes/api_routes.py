@@ -6,7 +6,7 @@ limiter = Limiter(key_func=get_remote_address,
                   default_limits=["200 per hour"],
                   storage_uri="memory://")
 """
-SKAILA - API Routes
+SKAJLA - API Routes
 Tutte le API REST centralizzate
 """
 
@@ -131,7 +131,7 @@ def messages(conversation_id):
 @limiter.limit("30 per minute")
 def ai_chat():
     """
-    SKAILA Coach - Chatbot soft skills & coaching
+    SKAJLA Coach - Chatbot soft skills & coaching
     Salva automaticamente conversazioni in coaching_interactions
     """
     if 'user_id' not in session:
@@ -154,7 +154,7 @@ def ai_chat():
 
         return jsonify({
             'response': response,
-            'bot_name': 'SKAILA Coach',
+            'bot_name': 'SKAJLA Coach',
             'bot_avatar': '🎓',
             'personalized': True
         })

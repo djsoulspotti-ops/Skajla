@@ -1,5 +1,5 @@
 """
-SKAILA User Analytics & Feature Usage Tracking
+SKAJLA User Analytics & Feature Usage Tracking
 Task 8: User analytics and feature usage tracking system
 """
 

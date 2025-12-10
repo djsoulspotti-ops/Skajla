@@ -1,5 +1,5 @@
 """
-SKAILA - Feature Guard Middleware
+SKAJLA - Feature Guard Middleware
 CRITICO: Blocca accesso alle route quando feature è disabilitata
 """
 
@@ -111,6 +111,6 @@ class Features:
     AI_COACH = 'ai_coach'
     REGISTRO = 'registro_elettronico'
     MATERIALI = 'materiali_didattici'
-    SKAILA_CONNECT = 'skaila_connect'
+    SKAJLA_CONNECT = 'skaila_connect'
     CALENDARIO = 'calendario'
     ANALYTICS = 'analytics'

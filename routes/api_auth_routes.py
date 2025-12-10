@@ -1,5 +1,5 @@
 """
-SKAILA - API Routes Autenticazione
+SKAJLA - API Routes Autenticazione
 Endpoint REST JSON per autenticazione (mantiene sistema session-based)
 """
 

@@ -1,5 +1,5 @@
 """
-SKAILA - Centralized Configuration
+SKAJLA - Centralized Configuration
 Production-grade configuration management for all modules
 """
 

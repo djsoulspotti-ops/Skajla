@@ -1,5 +1,5 @@
 """
-SKAILA Database Keep-Alive + Storage Auto-Cleanup
+SKAJLA Database Keep-Alive + Storage Auto-Cleanup
 Mantiene database PostgreSQL attivo (evita Neon sleep) + pulizia storage automatica
 """
 

@@ -1,5 +1,5 @@
 """
-SKAILA AI Chatbot POTENZIATO - Coach Intelligente Multi-Funzione
+SKAJLA AI Chatbot POTENZIATO - Coach Intelligente Multi-Funzione
 ✅ Soft skills coaching (stress, motivazione, organizzazione)
 ✅ Consigli studio per materie (metodi, tecniche, organizzazione)
 ✅ Piani d'azione personalizzati dettagliati
@@ -25,12 +25,12 @@ logger = get_logger(__name__)
 
 class AISkailaBot:
     """
-    Chatbot SKAILA Potenziato - Coach AI intelligente per studenti
+    Chatbot SKAJLA Potenziato - Coach AI intelligente per studenti
     Supporta: Soft skills + Consigli studio + Piani d'azione personalizzati
     """
     
     def __init__(self):
-        self.bot_name = "SKAILA Coach"
+        self.bot_name = "SKAJLA Coach"
         self.bot_avatar = "🤖"
         self.openai_available = False
         
@@ -42,7 +42,7 @@ class AISkailaBot:
         
         logger.info(
             event_type='ai_chatbot_initialized',
-            message='SKAILA Coach Potenziato inizializzato',
+            message='SKAJLA Coach Potenziato inizializzato',
             domain='ai'
         )
     
@@ -216,7 +216,7 @@ class AISkailaBot:
                         'actions': [
                             "👥 Parla con qualcuno di fiducia",
                             "🤝 Chiedi aiuto quando serve",
-                            "💬 Usa chat SKAILA per supporto compagni"
+                            "💬 Usa chat SKAJLA per supporto compagni"
                         ]
                     },
                     {
@@ -275,7 +275,7 @@ class AISkailaBot:
                         'focus': "Reward system",
                         'actions': [
                             "🎁 Definisci premio ogni obiettivo (film, uscita)",
-                            "📊 Usa SKAILA XP come motivazione visibile",
+                            "📊 Usa SKAJLA XP come motivazione visibile",
                             "🏅 Celebra anche piccoli progressi"
                         ]
                     },
@@ -301,7 +301,7 @@ class AISkailaBot:
                         'day': 7,
                         'focus': "Momentum costante",
                         'actions': [
-                            "🔥 Mantieni streak SKAILA",
+                            "🔥 Mantieni streak SKAJLA",
                             "📈 Traccia progressi visualmente",
                             "🎯 Fissa obiettivo prossima settimana"
                         ]
@@ -325,7 +325,7 @@ class AISkailaBot:
                         'day': 2,
                         'focus': "Sistema planning",
                         'actions': [
-                            "📅 Scegli tool (agenda carta, Google Calendar, SKAILA)",
+                            "📅 Scegli tool (agenda carta, Google Calendar, SKAJLA)",
                             "🗓️ Pianifica settimana prossima",
                             "⏰ Time-block: assegna slot fissi per materie"
                         ]
@@ -417,7 +417,7 @@ class AISkailaBot:
                         'focus': "Accountability system",
                         'actions': [
                             "👥 Condividi obiettivo con qualcuno",
-                            "📱 Usa SKAILA per tracking",
+                            "📱 Usa SKAJLA per tracking",
                             "📊 Check progress settimanale"
                         ]
                     },
@@ -459,7 +459,7 @@ class AISkailaBot:
         2. Check se è domanda su metodo studio materia
         3. Check se è domanda tecnica (redirect)
         4. Usa coaching engine per soft skills generiche
-        5. Usa SKAILA brain per info generali
+        5. Usa SKAJLA brain per info generali
         """
         
         message_lower = message.lower()
@@ -498,7 +498,7 @@ class AISkailaBot:
                     exc_info=True
                 )
         
-        # LIVELLO 5: Info generali SKAILA
+        # LIVELLO 5: Info generali SKAJLA
         try:
             context = skaila_brain.analyze_student_context(user_id, message)
             response = skaila_brain.generate_intelligent_response(context)
@@ -507,7 +507,7 @@ class AISkailaBot:
         except Exception as e:
             logger.error(
                 event_type='skaila_brain_error',
-                message='Failed to generate SKAILA brain response, using fallback',
+                message='Failed to generate SKAJLA brain response, using fallback',
                 domain='ai',
                 user_id=user_id,
                 error=str(e),
@@ -678,7 +678,7 @@ Ecco i miei consigli per **{subject.upper()}**:
                 response += "💪 **Per te consiglio:**\n"
                 response += "1. Ripassa le basi prima di andare avanti\n"
                 response += "2. Chiedi aiuto al professore per chiarire dubbi\n"
-                response += "3. Fai quiz SKAILA per verificare comprensione\n"
+                response += "3. Fai quiz SKAJLA per verificare comprensione\n"
             elif subject_grade >= 8:
                 response += "🏆 **Sei già bravo! Per eccellere:**\n"
                 response += "1. Approfondisci argomenti avanzati\n"
@@ -688,7 +688,7 @@ Ecco i miei consigli per **{subject.upper()}**:
                 response += "📈 **Per migliorare ulteriormente:**\n"
                 response += "1. Pratica costante (meglio 30min/giorno che 3h una volta)\n"
                 response += "2. Focalizzati sugli errori comuni\n"
-                response += "3. Usa quiz SKAILA per monitorare progressi\n"
+                response += "3. Usa quiz SKAJLA per monitorare progressi\n"
         
         response += "\nHai altre domande su questa materia? 🤝"
         

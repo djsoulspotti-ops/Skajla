@@ -1,5 +1,5 @@
 """
-Test SKAILA AI System
+Test SKAJLA AI System
 Esempio di interazione completa con l'AI Brain
 """
 
@@ -13,7 +13,7 @@ def test_ai_interaction():
     user_id = 1
     
     print("=" * 60)
-    print("🤖 TEST SKAILA AI BRAIN ENGINE")
+    print("🤖 TEST SKAJLA AI BRAIN ENGINE")
     print("=" * 60)
     
     # Test 1: Richiesta aiuto matematica
@@ -25,7 +25,7 @@ def test_ai_interaction():
     response = skaila_brain.generate_intelligent_response(context)
     
     print(f"👤 Studente: {message}")
-    print(f"\n🤖 SKAILA AI: {response}")
+    print(f"\n🤖 SKAJLA AI: {response}")
     
     # Test 2: Richiesta quiz
     print("\n\n📝 TEST 2: Richiesta quiz")
@@ -36,7 +36,7 @@ def test_ai_interaction():
     response = skaila_brain.generate_intelligent_response(context)
     
     print(f"👤 Studente: {message}")
-    print(f"\n🤖 SKAILA AI: {response}")
+    print(f"\n🤖 SKAJLA AI: {response}")
     
     # Test 3: Quiz adattivo
     print("\n\n📝 TEST 3: Generazione quiz adattivo")

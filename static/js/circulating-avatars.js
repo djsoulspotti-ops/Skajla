@@ -1,5 +1,5 @@
 /**
- * SKAILA - Circulating Avatars Component
+ * SKAJLA - Circulating Avatars Component
  * Displays online users as avatars circulating around messaging button
  * Real-time updates via Socket.IO
  */

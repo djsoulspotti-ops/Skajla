@@ -1,12 +1,12 @@
-# SKAILA - Guide Utente Complete
+# SKAJLA - Guide Utente Complete
 
 ---
 
 # 📚 Guida Studente
 
-## Benvenuto su SKAILA!
+## Benvenuto su SKAJLA!
 
-Questa guida ti aiuterà a sfruttare al meglio tutte le funzionalità di SKAILA per migliorare il tuo percorso scolastico.
+Questa guida ti aiuterà a sfruttare al meglio tutte le funzionalità di SKAJLA per migliorare il tuo percorso scolastico.
 
 ---
 
@@ -133,7 +133,7 @@ La dashboard è divisa in sezioni chiare:
 
 ### Come Funziona
 
-Ogni azione utile che fai su SKAILA ti fa guadagnare **Punti Esperienza (XP)**:
+Ogni azione utile che fai su SKAJLA ti fa guadagnare **Punti Esperienza (XP)**:
 
 | Azione | XP Guadagnati |
 |--------|---------------|
@@ -159,7 +159,7 @@ Ogni livello ti dà:
 
 ### Streak System 🔥
 
-**Streak** = giorni consecutivi di attività su SKAILA
+**Streak** = giorni consecutivi di attività su SKAJLA
 
 - **7 giorni**: Moltiplicatore XP x1.5
 - **14 giorni**: Moltiplicatore XP x2.0
@@ -348,11 +348,11 @@ Ogni materiale studiato = **+20 XP**!
 
 ---
 
-## 💼 SKAILA Connect (Solo Enterprise)
+## 💼 SKAJLA Connect (Solo Enterprise)
 
 ### Portale Carriera & Stage
 
-1. Vai su **SKAILA Connect**
+1. Vai su **SKAJLA Connect**
 2. **Database Aziende**:
    - Cerca aziende per settore
    - Vedi profili aziende
@@ -417,7 +417,7 @@ Scegli canale:
 
 ### Progressive Web App (PWA)
 
-Su smartphone puoi installare SKAILA come app:
+Su smartphone puoi installare SKAJLA come app:
 
 **iOS (iPhone/iPad):**
 1. Apri Safari → skaila.app
@@ -460,7 +460,7 @@ A: Mantieni lo streak giornaliero, fai quiz, studia materiali, partecipa alle ch
 **Q: L'AI Coach può aiutarmi durante una verifica?**
 A: No! È vietato e sarai segnalato. L'AI è solo per studio e ripasso.
 
-**Q: Posso usare SKAILA da casa?**
+**Q: Posso usare SKAJLA da casa?**
 A: Sì! Puoi accedere da qualsiasi dispositivo con internet.
 
 ---
@@ -481,7 +481,7 @@ Segnala a: bugs@skaila.app con screenshot e descrizione
 
 # 👨‍🏫 Guida Docente
 
-## Benvenuto nella Dashboard Docente SKAILA!
+## Benvenuto nella Dashboard Docente SKAJLA!
 
 Questa guida ti aiuterà a gestire le tue classi in modo efficiente.
 
@@ -1007,9 +1007,9 @@ A: Contatta admin, trasferirà il tuo account. Storico dati vecchia scuola riman
 
 # 🏛️ Guida Dirigente/Amministratore
 
-## Benvenuto nel Pannello Admin SKAILA!
+## Benvenuto nel Pannello Admin SKAJLA!
 
-Questa guida ti aiuterà a gestire la tua scuola (o rete di scuole) su SKAILA.
+Questa guida ti aiuterà a gestire la tua scuola (o rete di scuole) su SKAJLA.
 
 ---
 
@@ -1017,7 +1017,7 @@ Questa guida ti aiuterà a gestire la tua scuola (o rete di scuole) su SKAILA.
 
 ### Setup Scuola
 
-1. Ricevi **credenziali admin** dal team SKAILA
+1. Ricevi **credenziali admin** dal team SKAJLA
 2. Login su **skaila.app/admin**
 3. **Wizard Setup Iniziale**:
    - Nome scuola ufficiale
@@ -1322,7 +1322,7 @@ Feed cronologico:
 
 ### Cosa Sono i Feature Flags
 
-Sistema che permette di **attivare/disattivare moduli SKAILA** per ogni scuola, permettendo piani personalizzati.
+Sistema che permette di **attivare/disattivare moduli SKAJLA** per ogni scuola, permettendo piani personalizzati.
 
 ### Moduli Disponibili
 
@@ -1335,7 +1335,7 @@ Sistema che permette di **attivare/disattivare moduli SKAILA** per ogni scuola, 
 | **Gamification** | Professional | XP, livelli, achievement |
 | **Materiali Didattici** | Professional | Upload illimitato materiali |
 | **Business Intelligence** | Professional | Analytics avanzati |
-| **SKAILA Connect** | Enterprise | Portale carriera |
+| **SKAJLA Connect** | Enterprise | Portale carriera |
 | **Multi-School** | Enterprise | Gestione rete scuole |
 | **Custom Branding** | Enterprise | White-label |
 
@@ -1657,7 +1657,7 @@ Valore nuovo: "4A"
 **Sezioni:**
 
 **A. Generale**
-- Nome piattaforma (default: SKAILA)
+- Nome piattaforma (default: SKAJLA)
 - Logo principale
 - Email supporto
 - Email amministrativa
@@ -1723,7 +1723,7 @@ Valore nuovo: "4A"
    - Log centralizzato
 
 4. **Update Sistema**
-   - Check nuove versioni SKAILA
+   - Check nuove versioni SKAJLA
    - Release notes
    - Schedule update (con downtime minimale)
    - Rollback a versione precedente (se problemi)
@@ -1786,7 +1786,7 @@ A: Basic: 1 giorno. Professional: 3-5 giorni. Enterprise: 1-2 settimane con supp
 
 ---
 
-**Fine delle Guide Utente SKAILA**
+**Fine delle Guide Utente SKAJLA**
 
 Per ulteriori domande: support@skaila.app | www.skaila.app/help
 

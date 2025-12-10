@@ -1,5 +1,5 @@
 """
-SKAILA - Report Generator
+SKAJLA - Report Generator
 Sistema automatico per generazione report settimanali e mensili
 """
 
@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import json
 
 class ReportGenerator:
-    """Genera report aziendali con statistiche SKAILA"""
+    """Genera report aziendali con statistiche SKAJLA"""
     
     def __init__(self):
         self.db = db_manager
