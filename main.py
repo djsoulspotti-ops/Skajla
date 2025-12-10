@@ -60,6 +60,7 @@ from routes.opportunities_api import opportunities_api_bp # Opportunities One-Cl
 from routes.pcto_routes import pcto_bp # PCTO Tracker & Digital Logbook
 from routes.parent_routes import parent_bp # Parent Dashboard - Zero-Friction Child Monitoring
 from routes.gamification_api_v2 import gamification_api_bp # Advanced Gamification API V2
+from routes.google_auth_routes import google_auth_bp # Google OAuth Login
 
 # Import services
 from services.auth_service import auth_service
@@ -310,6 +311,7 @@ class SkailaApp:
         self.app.register_blueprint(pcto_bp) # PCTO Tracker & Digital Logbook
         self.app.register_blueprint(parent_bp) # Parent Dashboard - Child Monitoring
         self.app.register_blueprint(gamification_api_bp) # Advanced Gamification V2
+        self.app.register_blueprint(google_auth_bp) # Google OAuth Login
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp
