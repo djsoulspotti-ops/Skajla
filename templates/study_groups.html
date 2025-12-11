@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gruppi di Studio - SKAJLA</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+        }
+        .app-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+        .btn-new-group {
+            background: var(--color-blue-600);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-new-group:hover {
+            background: var(--color-blue-700);
+        }
+        .groups-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .group-item {
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+        }
+        .group-item:hover {
+            background: var(--bg-surface);
+        }
+        .group-item.active {
+            background: var(--color-blue-50);
+            border: 1px solid var(--color-blue-200);
+        }
+        .group-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        .group-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .group-members-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .group-description {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+        }
+        .content-header {
+            padding: 1.5rem;
+            background: white;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .group-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .tab {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+        .tab:hover {
+            background: var(--bg-surface);
+        }
+        .tab.active {
+            background: var(--color-blue-600);
+            color: white;
+        }
+        .content-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            overflow: hidden;
+        }
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+        }
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-blue-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--color-blue-600);
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        .message-content {
+            flex: 1;
+        }
+        .message-header {
+            display: flex;
+            gap: 0.5rem;
+            align-items: baseline;
+            margin-bottom: 0.25rem;
+        }
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .message-text {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .message-input-container {
+            display: flex;
+            gap: 0.75rem;
+            background: white;
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+        }
+        .message-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            outline: none;
+        }
+        .message-input:focus {
+            border-color: var(--color-blue-500);
+        }
+        .btn-send {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-blue-600);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-send:hover {
+            background: var(--color-blue-700);
+        }
+        .tasks-container {
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .task-item {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            transition: all 0.2s;
+        }
+        .task-item.completed {
+            opacity: 0.6;
+        }
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--color-blue-600);
+        }
+        .task-content {
+            flex: 1;
+        }
+        .task-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+        }
+        .task-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .task-priority {
+            padding: 0.125rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .task-priority.high { background: #fee2e2; color: #dc2626; }
+        .task-priority.normal { background: #dbeafe; color: #2563eb; }
+        .task-priority.low { background: #dcfce7; color: #16a34a; }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+        }
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--color-blue-600);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background: var(--color-blue-700);
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        .back-link:hover {
+            color: var(--color-blue-600);
+        }
+        .no-group-selected {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--text-muted);
+        }
+        .no-group-selected i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-users"></i> Gruppi Studio</h2>
+                <button class="btn-new-group" onclick="openNewGroupModal()">
+                    <i class="fas fa-plus"></i> Nuovo
+                </button>
+            </div>
+            <div class="groups-list" id="groupsList"></div>
+            <div style="padding: 1rem; border-top: 1px solid var(--border-primary);">
+                <a href="/dashboard" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div id="noGroupSelected" class="no-group-selected">
+                <i class="fas fa-users"></i>
+                <p>Seleziona un gruppo o creane uno nuovo</p>
+            </div>
+            
+            <div id="groupView" style="display: none; flex: 1; display: flex; flex-direction: column;">
+                <div class="content-header">
+                    <h1 class="group-title" id="currentGroupName">Nome Gruppo</h1>
+                    <div class="tabs">
+                        <button class="tab active" data-tab="chat" onclick="switchTab('chat')">
+                            <i class="fas fa-comments"></i> Chat
+                        </button>
+                        <button class="tab" data-tab="tasks" onclick="switchTab('tasks')">
+                            <i class="fas fa-tasks"></i> Compiti
+                        </button>
+                        <button class="tab" data-tab="members" onclick="switchTab('members')">
+                            <i class="fas fa-user-friends"></i> Membri
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="content-body">
+                    <div id="chatTab" class="chat-container">
+                        <div class="messages-list" id="messagesList"></div>
+                        <div class="message-input-container">
+                            <input type="text" class="message-input" id="messageInput" placeholder="Scrivi un messaggio..." onkeypress="handleMessageKeypress(event)">
+                            <button class="btn-send" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="tasksTab" class="tasks-container" style="display: none;">
+                        <div class="tasks-header">
+                            <h3>Compiti del gruppo</h3>
+                            <button class="btn-new-group" onclick="openNewTaskModal()">
+                                <i class="fas fa-plus"></i> Nuovo Compito
+                            </button>
+                        </div>
+                        <div id="tasksList"></div>
+                    </div>
+                    
+                    <div id="membersTab" class="tasks-container" style="display: none;">
+                        <div class="tasks-header">
+                            <h3>Membri del gruppo</h3>
+                        </div>
+                        <div id="membersList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="newGroupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Crea Nuovo Gruppo</h3>
+                <button class="modal-close" onclick="closeModal('newGroupModal')">&times;</button>
+            </div>
+            <form onsubmit="createGroup(event)">
+                <div class="form-group">
+                    <label class="form-label">Nome del gruppo</label>
+                    <input type="text" class="form-input" id="groupName" placeholder="Es: Studio Matematica" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrizione (opzionale)</label>
+                    <textarea class="form-textarea" id="groupDescription" placeholder="Descrivi lo scopo del gruppo..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Crea Gruppo</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="modal" id="newTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuovo Compito</h3>
+                <button class="modal-close" onclick="closeModal('newTaskModal')">&times;</button>
+            </div>
+            <form onsubmit="createTask(event)">
+                <div class="form-group">
+                    <label class="form-label">Titolo</label>
+                    <input type="text" class="form-input" id="taskTitle" placeholder="Es: Esercizi pagina 42" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrizione (opzionale)</label>
+                    <textarea class="form-textarea" id="taskDescription" placeholder="Dettagli aggiuntivi..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Scadenza (opzionale)</label>
+                    <input type="datetime-local" class="form-input" id="taskDueDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priorità</label>
+                    <select class="form-input" id="taskPriority">
+                        <option value="low">Bassa</option>
+                        <option value="normal" selected>Normale</option>
+                        <option value="high">Alta</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Aggiungi Compito</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const userId = {{ user.user_id | tojson }};
+        const userName = {{ user.nome | tojson }} + ' ' + {{ user.cognome | tojson }};
+        let currentGroupId = null;
+        let socket = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGroups();
+            initSocket();
+        });
+
+        function initSocket() {
+            socket = io({
+                transports: ['websocket', 'polling']
+            });
+
+            socket.on('connect', () => {
+                console.log('Socket connected');
+            });
+
+            socket.on('study_group_message', (data) => {
+                if (data.group_id === currentGroupId) {
+                    appendMessage(data.message);
+                }
+            });
+
+            socket.on('study_group_task_update', (data) => {
+                if (data.group_id === currentGroupId) {
+                    loadTasks();
+                }
+            });
+        }
+
+        async function loadGroups() {
+            const res = await fetch('/api/study-groups');
+            const data = await res.json();
+            
+            const container = document.getElementById('groupsList');
+            
+            if (!data.groups || data.groups.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>Nessun gruppo ancora</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = data.groups.map(g => `
+                <div class="group-item ${currentGroupId === g.id ? 'active' : ''}" onclick="selectGroup(${g.id})">
+                    <div class="group-item-header">
+                        <span class="group-name">${escapeHtml(g.name)}</span>
+                        <span class="group-members-count"><i class="fas fa-user"></i> ${g.member_count || 1}</span>
+                    </div>
+                    <div class="group-description">${escapeHtml(g.description || 'Nessuna descrizione')}</div>
+                </div>
+            `).join('');
+        }
+
+        async function selectGroup(groupId) {
+            currentGroupId = groupId;
+            
+            document.querySelectorAll('.group-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            document.getElementById('noGroupSelected').style.display = 'none';
+            document.getElementById('groupView').style.display = 'flex';
+            
+            const res = await fetch(`/api/study-groups/${groupId}`);
+            const data = await res.json();
+            
+            if (data.success) {
+                document.getElementById('currentGroupName').textContent = data.group.name;
+                
+                if (socket) {
+                    socket.emit('join_study_group', { group_id: groupId });
+                }
+                
+                loadMessages();
+                loadTasks();
+                loadMembers();
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+            
+            document.getElementById('chatTab').style.display = tab === 'chat' ? 'flex' : 'none';
+            document.getElementById('tasksTab').style.display = tab === 'tasks' ? 'block' : 'none';
+            document.getElementById('membersTab').style.display = tab === 'members' ? 'block' : 'none';
+        }
+
+        async function loadMessages() {
+            const res = await fetch(`/api/study-groups/${currentGroupId}/messages`);
+            const data = await res.json();
+            
+            const container = document.getElementById('messagesList');
+            
+            if (!data.messages || data.messages.length === 0) {
+                container.innerHTML = `<div class="empty-state"><p>Nessun messaggio. Inizia la conversazione!</p></div>`;
+                return;
+            }
+
+            container.innerHTML = data.messages.map(m => createMessageHtml(m)).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function createMessageHtml(m) {
+            const initials = m.sender_name.split(' ').map(n => n[0]).join('').substring(0, 2);
+            const time = m.created_at ? new Date(m.created_at).toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}) : '';
+            
+            return `
+                <div class="message">
+                    <div class="message-avatar">${initials}</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">${escapeHtml(m.sender_name)}</span>
+                            <span class="message-time">${time}</span>
+                        </div>
+                        <div class="message-text">${escapeHtml(m.content)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function appendMessage(m) {
+            const container = document.getElementById('messagesList');
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            container.insertAdjacentHTML('beforeend', createMessageHtml(m));
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleMessageKeypress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content || !currentGroupId) return;
+            
+            input.value = '';
+            
+            const res = await fetch(`/api/study-groups/${currentGroupId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success && data.message) {
+                appendMessage(data.message);
+                
+                if (socket) {
+                    socket.emit('study_group_message', {
+                        group_id: currentGroupId,
+                        message: data.message
+                    });
+                }
+            }
+        }
+
+        async function loadTasks() {
+            const res = await fetch(`/api/study-groups/${currentGroupId}/tasks`);
+            const data = await res.json();
+            
+            const container = document.getElementById('tasksList');
+            
+            if (!data.tasks || data.tasks.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>Nessun compito. Aggiungine uno!</p></div>`;
+                return;
+            }
+
+            container.innerHTML = data.tasks.map(t => {
+                const dueDate = t.due_date ? new Date(t.due_date).toLocaleDateString('it-IT') : '';
+                return `
+                    <div class="task-item ${t.is_completed ? 'completed' : ''}">
+                        <input type="checkbox" class="task-checkbox" ${t.is_completed ? 'checked' : ''} onchange="toggleTask(${t.id})">
+                        <div class="task-content">
+                            <div class="task-title">${escapeHtml(t.title)}</div>
+                            <div class="task-meta">
+                                ${dueDate ? `<i class="fas fa-calendar"></i> ${dueDate}` : ''}
+                                ${t.creator_name ? ` - Creato da ${escapeHtml(t.creator_name)}` : ''}
+                            </div>
+                        </div>
+                        <span class="task-priority ${t.priority}">${t.priority === 'high' ? 'Alta' : t.priority === 'low' ? 'Bassa' : 'Normale'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleTask(taskId) {
+            await fetch(`/api/study-groups/tasks/${taskId}/toggle`, { method: 'POST' });
+            loadTasks();
+            
+            if (socket) {
+                socket.emit('study_group_task_update', { group_id: currentGroupId });
+            }
+        }
+
+        async function loadMembers() {
+            const res = await fetch(`/api/study-groups/${currentGroupId}/members`);
+            const data = await res.json();
+            
+            const container = document.getElementById('membersList');
+            
+            container.innerHTML = data.members.map(m => {
+                const initials = `${m.nome[0]}${m.cognome[0]}`;
+                return `
+                    <div class="task-item">
+                        <div class="message-avatar">${initials}</div>
+                        <div class="task-content">
+                            <div class="task-title">${escapeHtml(m.nome)} ${escapeHtml(m.cognome)}</div>
+                            <div class="task-meta">${m.role === 'admin' ? 'Admin' : 'Membro'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openNewGroupModal() {
+            document.getElementById('newGroupModal').classList.add('active');
+        }
+
+        function openNewTaskModal() {
+            document.getElementById('newTaskModal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        async function createGroup(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('groupName').value.trim();
+            const description = document.getElementById('groupDescription').value.trim();
+            
+            const res = await fetch('/api/study-groups', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                closeModal('newGroupModal');
+                document.getElementById('groupName').value = '';
+                document.getElementById('groupDescription').value = '';
+                loadGroups();
+                selectGroup(data.group_id);
+            } else {
+                alert(data.error || 'Errore nella creazione del gruppo');
+            }
+        }
+
+        async function createTask(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const dueDate = document.getElementById('taskDueDate').value;
+            const priority = document.getElementById('taskPriority').value;
+            
+            const res = await fetch(`/api/study-groups/${currentGroupId}/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description, due_date: dueDate || null, priority })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                closeModal('newTaskModal');
+                document.getElementById('taskTitle').value = '';
+                document.getElementById('taskDescription').value = '';
+                document.getElementById('taskDueDate').value = '';
+                document.getElementById('taskPriority').value = 'normal';
+                loadTasks();
+                
+                if (socket) {
+                    socket.emit('study_group_task_update', { group_id: currentGroupId });
+                }
+            } else {
+                alert(data.error || 'Errore nella creazione del compito');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

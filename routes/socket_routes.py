@@ -669,3 +669,101 @@ def register_socket_events(socketio):
             'receiver_id': session['user_id'],
             'delivered_at': time.time()
         }, to=f"chat_{conversation_id}", include_self=False)
+
+    # ========== STUDY GROUPS REAL-TIME ==========
+    
+    def verify_study_group_membership(group_id, user_id):
+        result = db_manager.query("""
+            SELECT id FROM study_group_members 
+            WHERE group_id = %s AND user_id = %s
+        """, (group_id, user_id), one=True)
+        return result is not None
+    
+    @socketio.on('join_study_group')
+    def handle_join_study_group(data):
+        if 'user_id' not in session:
+            return
+        
+        group_id = data.get('group_id')
+        if not group_id:
+            return
+        
+        if not verify_study_group_membership(group_id, session['user_id']):
+            return
+        
+        room = f"study_group_{group_id}"
+        join_room(room)
+        
+        emit('user_joined_study_group', {
+            'user_id': session['user_id'],
+            'user_name': f"{session.get('nome', '')} {session.get('cognome', '')}",
+            'group_id': group_id
+        }, to=room, include_self=False)
+    
+    @socketio.on('leave_study_group')
+    def handle_leave_study_group(data):
+        if 'user_id' not in session:
+            return
+        
+        group_id = data.get('group_id')
+        if not group_id:
+            return
+        
+        room = f"study_group_{group_id}"
+        leave_room(room)
+    
+    @socketio.on('study_group_message')
+    def handle_study_group_message(data):
+        if 'user_id' not in session:
+            return
+        
+        group_id = data.get('group_id')
+        message = data.get('message')
+        
+        if not group_id or not message:
+            return
+        
+        if not verify_study_group_membership(group_id, session['user_id']):
+            return
+        
+        room = f"study_group_{group_id}"
+        emit('study_group_message', {
+            'group_id': group_id,
+            'message': message
+        }, to=room, include_self=False)
+    
+    @socketio.on('study_group_task_update')
+    def handle_study_group_task_update(data):
+        if 'user_id' not in session:
+            return
+        
+        group_id = data.get('group_id')
+        if not group_id:
+            return
+        
+        if not verify_study_group_membership(group_id, session['user_id']):
+            return
+        
+        room = f"study_group_{group_id}"
+        emit('study_group_task_update', {
+            'group_id': group_id
+        }, to=room, include_self=False)
+    
+    @socketio.on('study_group_typing')
+    def handle_study_group_typing(data):
+        if 'user_id' not in session:
+            return
+        
+        group_id = data.get('group_id')
+        if not group_id:
+            return
+        
+        if not verify_study_group_membership(group_id, session['user_id']):
+            return
+        
+        room = f"study_group_{group_id}"
+        emit('study_group_typing', {
+            'group_id': group_id,
+            'user_id': session['user_id'],
+            'user_name': f"{session.get('nome', '')} {session.get('cognome', '')}"
+        }, to=room, include_self=False)
