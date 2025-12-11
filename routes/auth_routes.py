@@ -335,7 +335,7 @@ def register():
                         if not chat_room:
                             # Crea nuova chat room di classe
                             chat_id = db_manager.query('''
-                                INSERT INTO chat (nome, tipo, classe, scuola_id, created_at, attiva)
+                                INSERT INTO chat (nome, tipo, classe, scuola_id, data_creazione, attiva)
                                 VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, TRUE)
                                 RETURNING id
                             ''', (chat_nome, 'classe', classe_nome, scuola_id), one=True)['id']

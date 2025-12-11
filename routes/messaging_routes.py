@@ -98,12 +98,12 @@ def private_chat(recipient_id):
     ''', (school_id, user_id, recipient_id), one=True)
     
     if existing_chat:
-        chat_id = existing_chat[0]
+        chat_id = existing_chat['id']
     else:
         # Crea nuova chat privata
         with db_manager.get_connection() as conn:
             cursor = conn.execute('''
-                INSERT INTO chat (nome, tipo, scuola_id, created_at)
+                INSERT INTO chat (nome, tipo, scuola_id, data_creazione)
                 VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
                 RETURNING id
             ''', (f'Chat privata', 'privata', school_id))
@@ -137,12 +137,12 @@ def group_chat_materia(materia):
     ''', (school_id, classe, f'%{materia}%'), one=True)
     
     if existing_group:
-        chat_id = existing_group[0]
+        chat_id = existing_group['id']
     else:
         # Crea gruppo materia
         with db_manager.get_connection() as conn:
             cursor = conn.execute('''
-                INSERT INTO chat (nome, descrizione, tipo, classe, scuola_id, created_at)
+                INSERT INTO chat (nome, descrizione, tipo, classe, scuola_id, data_creazione)
                 VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
                 RETURNING id
             ''', (f'📚 {materia} - {classe}', f'Gruppo di studio per {materia}', 'materia', classe, school_id))

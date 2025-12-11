@@ -37,14 +37,15 @@ def initialize_subject_groups_for_class(school_id: int, classe: str) -> list:
     
     for subject in PREDEFINED_SUBJECTS:
         # Check if subject group already exists for this class
-        # Match on materia+classe+tipo to avoid duplicates (nome includes icon+template)
+        # Match on nome pattern + classe + tipo to avoid duplicates
+        group_name = f"{subject['icon']} {subject['nome']} - Classe {classe}"
         existing = db_manager.query('''
             SELECT id FROM chat
             WHERE scuola_id = %s 
             AND classe = %s 
             AND tipo = 'materia'
-            AND materia = %s
-        ''', (school_id, classe, subject['nome']), one=True)
+            AND nome LIKE %s
+        ''', (school_id, classe, f"%{subject['nome']}%"), one=True)
         
         if existing:
             print(f"✅ Gruppo materia '{subject['nome']}' già esistente per classe {classe}")
@@ -53,15 +54,10 @@ def initialize_subject_groups_for_class(school_id: int, classe: str) -> list:
         
         # Create subject group
         result = db_manager.query('''
-            INSERT INTO chat (nome, scuola_id, classe, tipo, materia, created_at)
-            VALUES (%s, %s, %s, 'materia', %s, CURRENT_TIMESTAMP)
+            INSERT INTO chat (nome, scuola_id, classe, tipo, data_creazione)
+            VALUES (%s, %s, %s, 'materia', CURRENT_TIMESTAMP)
             RETURNING id
-        ''', (
-            f"{subject['icon']} {subject['nome']} - Classe {classe}",
-            school_id,
-            classe,
-            subject['nome']
-        ), one=True)
+        ''', (group_name, school_id, classe), one=True)
         
         if result:
             chat_id = result['id']
