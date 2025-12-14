@@ -1,7 +1,8 @@
 <!-- SKAJLA - Navbar Partial -->
 <nav class="navbar">
     <div class="navbar-brand">
-        <a href="/dashboard">
+        <a href="/dashboard" class="brand-link">
+            <img src="/static/images/skajla-logo-new.jpg" alt="SKAJLA" class="navbar-logo">
             <h1>SKAJLA</h1>
         </a>
     </div>
@@ -41,16 +42,35 @@
     box-shadow: var(--shadow-md);
 }
 
+.navbar-logo {
+    height: 40px;
+    width: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
 .navbar-brand h1 {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.navbar-brand a {
+.navbar-brand a, .brand-link {
     text-decoration: none;
     color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-link:hover .navbar-logo {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
 }
 
 .navbar-menu {
