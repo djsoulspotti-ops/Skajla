@@ -9,7 +9,7 @@ channel = "stable-24_05"
 packages = ["cargo", "iana-etc", "imagemagick", "libiconv", "rustc"]
 
 [deployment]
-run = ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:application"]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--worker-class", "eventlet", "--timeout", "120", "main:app"]
 deploymentTarget = "autoscale"
 build = ["pip", "install", "-r", "requirements.txt"]
 
