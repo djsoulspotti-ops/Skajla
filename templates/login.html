@@ -47,6 +47,22 @@
             z-index: 0;
         }
 
+        .brand-side::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            background-image: url('/static/images/skajla-background.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 0;
+        }
+
         .brand-content {
             position: relative;
             z-index: 1;
