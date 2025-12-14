@@ -71,10 +71,32 @@
         }
 
         .logo {
-            font-size: 1.375rem;
-            font-weight: 700;
-            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
             text-decoration: none;
+        }
+
+        .logo-image {
+            height: 42px;
+            width: auto;
+            border-radius: 8px;
+            object-fit: contain;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .logo:hover .logo-image {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             letter-spacing: -0.02em;
         }
 
@@ -733,7 +755,10 @@
 <body>
     <nav class="navbar">
         <div class="container">
-            <a href="/" class="logo">SKAJLA</a>
+            <a href="/" class="logo">
+                <img src="/static/images/skajla-logo.jpg" alt="SKAJLA Logo" class="logo-image">
+                <span class="logo-text">SKAJLA</span>
+            </a>
             <div class="nav-links">
                 <a href="#features">Funzionalita</a>
                 <a href="/login" class="btn btn-primary">Accedi</a>
