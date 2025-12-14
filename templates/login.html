@@ -14,6 +14,24 @@
             padding: 0;
             font-family: var(--font-sans);
             background: var(--bg-secondary);
+            position: relative;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('/static/images/skajla-background.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .login-layout {
