@@ -1,12 +1,12 @@
 run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 entrypoint = "main.py"
-modules = ["python-3.11", "postgresql-16"]
+modules = ["nodejs-20", "postgresql-16", "python-3.11"]
 
 hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cargo", "iana-etc", "imagemagick", "libiconv", "rustc"]
+packages = ["cargo", "iana-etc", "imagemagick", "libiconv", "rustc", "glusterfs", "tuxguitar"]
 
 [deployment]
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--worker-class", "eventlet", "--timeout", "120", "main:app"]
