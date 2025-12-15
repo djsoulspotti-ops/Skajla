@@ -501,26 +501,28 @@
         }
 
         .preview-stat-icon {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 10px;
-            font-size: 1rem;
         }
 
         .preview-stat-icon.blue {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
         }
 
         .preview-stat-icon.green {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
         }
 
         .preview-stat-icon.purple {
-            background: rgba(168, 85, 247, 0.2);
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
         }
 
         .preview-stat-value {
@@ -557,8 +559,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.125rem;
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            color: white;
         }
 
         .ai-text {
@@ -929,23 +931,41 @@
                         </div>
                         <div class="preview-stats">
                             <div class="preview-stat">
-                                <div class="preview-stat-icon blue">📊</div>
+                                <div class="preview-stat-icon blue">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 20V10M12 20V4M6 20v-6"/>
+                                    </svg>
+                                </div>
                                 <div class="preview-stat-value">8.4</div>
                                 <div class="preview-stat-label">Media Voti</div>
                             </div>
                             <div class="preview-stat">
-                                <div class="preview-stat-icon green">✓</div>
+                                <div class="preview-stat-icon green">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 6L9 17l-5-5"/>
+                                    </svg>
+                                </div>
                                 <div class="preview-stat-value">94%</div>
                                 <div class="preview-stat-label">Frequenza</div>
                             </div>
                             <div class="preview-stat">
-                                <div class="preview-stat-icon purple">🏆</div>
+                                <div class="preview-stat-icon purple">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                </div>
                                 <div class="preview-stat-value">12</div>
                                 <div class="preview-stat-label">Badge</div>
                             </div>
                         </div>
                         <div class="preview-ai-widget">
-                            <div class="ai-icon">🤖</div>
+                            <div class="ai-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+                                    <circle cx="8.5" cy="14.5" r="1.5"/>
+                                    <circle cx="15.5" cy="14.5" r="1.5"/>
+                                </svg>
+                            </div>
                             <div class="ai-text">
                                 <div class="ai-title">AI Coach</div>
                                 <div class="ai-subtitle">Pronto ad aiutarti</div>
