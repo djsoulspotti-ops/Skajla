@@ -723,6 +723,104 @@
             flex-grow: 1;
         }
 
+        /* TEAM SECTION */
+        .team-section {
+            padding: 100px 0;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-card) 100%);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .team-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .team-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 4px;
+        }
+
+        .team-role {
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .team-bio {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .team-education {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+
+        .team-linkedin {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #0a66c2;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(10, 102, 194, 0.1);
+            border: 1px solid rgba(10, 102, 194, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .team-linkedin:hover {
+            background: rgba(10, 102, 194, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .team-linkedin svg {
+            width: 18px;
+            height: 18px;
+        }
+
         /* FOOTER - Dark Modern */
         .footer {
             padding: 48px 0;
@@ -1058,6 +1156,54 @@
                         Marketplace per stage e tirocini con gestione documentale 
                         digitale e tracking ore automatico.
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="team-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Il Nostro Team</div>
+                <h2 class="section-title">Leadership</h2>
+                <p class="section-subtitle">
+                    Un team giovane e ambizioso con esperienza in consulenza strategica e tecnologia
+                </p>
+            </div>
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="/static/images/daniele-spotti.png" alt="Daniele Spotti" class="team-photo">
+                    <h3 class="team-name">Daniele Spotti</h3>
+                    <div class="team-role">CEO & Founder</div>
+                    <p class="team-bio">
+                        Esperienza in consulenza strategica presso PwC Italy. Background in Economics e International Business Management.
+                    </p>
+                    <div class="team-education">
+                        Geneva Business School | LIUC - Universita Cattaneo
+                    </div>
+                    <a href="https://www.linkedin.com/in/daniele-spotti/" target="_blank" rel="noopener" class="team-linkedin">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        LinkedIn
+                    </a>
+                </div>
+                <div class="team-card">
+                    <img src="/static/images/niccolo-coletto.png" alt="Niccolo Coletto" class="team-photo">
+                    <h3 class="team-name">Niccolo Coletto</h3>
+                    <div class="team-role">COO & CIO</div>
+                    <p class="team-bio">
+                        ICT Strategy presso KPMG, ex Digital Innovation in PwC Italy. Esperto in trasformazione digitale e gestione processi aziendali.
+                    </p>
+                    <div class="team-education">
+                        LIUC - Universita Cattaneo | MSc Industrial Engineering
+                    </div>
+                    <a href="https://www.linkedin.com/in/niccolo-coletto/" target="_blank" rel="noopener" class="team-linkedin">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        LinkedIn
+                    </a>
                 </div>
             </div>
         </div>
