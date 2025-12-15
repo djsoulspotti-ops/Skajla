@@ -251,6 +251,10 @@ class SkailaApp:
         def contatti():
             return render_template('contatti.html')
 
+        @self.app.route('/team')
+        def team():
+            return render_template('team.html')
+
         @self.app.route('/chat')
         def chat():
             if 'user_id' not in session:
