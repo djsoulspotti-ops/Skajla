@@ -223,100 +223,317 @@
             font-weight: 500;
         }
 
-        /* DASHBOARD PREVIEW */
+        /* DASHBOARD PREVIEW - Modern Design */
         .hero-visual {
-            background: var(--bg-light);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 24px;
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 4px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-visual::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.1), transparent 30%);
+            animation: rotate 8s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
         }
 
         .dashboard-preview {
-            background: var(--bg-white);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 1;
         }
 
         .preview-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border-light);
+            padding: 20px 24px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--bg-white);
+        }
+
+        .preview-user {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .preview-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            position: relative;
+        }
+
+        .preview-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 14px;
+            height: 14px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px solid #1e293b;
+        }
+
+        .preview-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .preview-title {
-            font-size: 0.9375rem;
+            font-size: 1rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #ffffff;
+        }
+
+        .preview-level {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .preview-badge {
             font-size: 0.6875rem;
             font-weight: 600;
-            color: var(--success);
-            background: var(--success-light);
-            padding: 4px 10px;
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+            padding: 6px 12px;
             border-radius: 100px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .preview-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
         .preview-content {
             padding: 24px;
         }
 
+        .preview-xp-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .xp-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .xp-value {
+            font-size: 0.875rem;
+            color: #a78bfa;
+            font-weight: 700;
+        }
+
+        .xp-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            width: 68%;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            border-radius: 100px;
+            position: relative;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .xp-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
         .preview-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .preview-stat {
-            background: var(--bg-light);
-            border-radius: 8px;
-            padding: 20px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 16px 12px;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .preview-stat:hover {
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-2px);
+        }
+
+        .preview-stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1rem;
+        }
+
+        .preview-stat-icon.blue {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .preview-stat-icon.green {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .preview-stat-icon.purple {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
         }
 
         .preview-stat-value {
-            font-size: 1.5rem;
+            font-size: 1.375rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #ffffff;
+            line-height: 1;
         }
 
         .preview-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
+            font-size: 0.6875rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 6px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
-        .preview-chart {
-            height: 72px;
+        .preview-ai-widget {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 16px 18px;
             display: flex;
-            align-items: flex-end;
-            gap: 6px;
-            background: var(--bg-light);
-            border-radius: 8px;
-            padding: 16px;
+            align-items: center;
+            gap: 14px;
         }
 
-        .chart-bar {
+        .ai-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .ai-text {
             flex: 1;
-            background: var(--accent);
-            border-radius: 4px 4px 0 0;
-            min-height: 8px;
         }
 
-        .chart-bar:nth-child(odd) {
-            opacity: 0.5;
+        .ai-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .ai-subtitle {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .ai-action {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
         /* TRUST SECTION */
@@ -797,33 +1014,52 @@
             <div class="hero-visual">
                 <div class="dashboard-preview">
                     <div class="preview-header">
-                        <span class="preview-title">Dashboard Studente</span>
+                        <div class="preview-user">
+                            <div class="preview-avatar">MR</div>
+                            <div class="preview-user-info">
+                                <span class="preview-title">Marco Rossi</span>
+                                <div class="preview-level">
+                                    <span class="level-badge">Lv. 7</span>
+                                    <span>Esploratore</span>
+                                </div>
+                            </div>
+                        </div>
                         <span class="preview-badge">Online</span>
                     </div>
                     <div class="preview-content">
+                        <div class="preview-xp-section">
+                            <div class="xp-header">
+                                <span class="xp-label">Progressione XP</span>
+                                <span class="xp-value">1,250 / 1,850 XP</span>
+                            </div>
+                            <div class="xp-bar">
+                                <div class="xp-fill"></div>
+                            </div>
+                        </div>
                         <div class="preview-stats">
                             <div class="preview-stat">
+                                <div class="preview-stat-icon blue">📊</div>
                                 <div class="preview-stat-value">8.4</div>
-                                <div class="preview-stat-label">Media</div>
+                                <div class="preview-stat-label">Media Voti</div>
                             </div>
                             <div class="preview-stat">
+                                <div class="preview-stat-icon green">✓</div>
                                 <div class="preview-stat-value">94%</div>
                                 <div class="preview-stat-label">Frequenza</div>
                             </div>
                             <div class="preview-stat">
-                                <div class="preview-stat-value">1,250</div>
-                                <div class="preview-stat-label">XP</div>
+                                <div class="preview-stat-icon purple">🏆</div>
+                                <div class="preview-stat-value">12</div>
+                                <div class="preview-stat-label">Badge</div>
                             </div>
                         </div>
-                        <div class="preview-chart">
-                            <div class="chart-bar" style="height: 40%;"></div>
-                            <div class="chart-bar" style="height: 65%;"></div>
-                            <div class="chart-bar" style="height: 50%;"></div>
-                            <div class="chart-bar" style="height: 80%;"></div>
-                            <div class="chart-bar" style="height: 60%;"></div>
-                            <div class="chart-bar" style="height: 90%;"></div>
-                            <div class="chart-bar" style="height: 70%;"></div>
-                            <div class="chart-bar" style="height: 85%;"></div>
+                        <div class="preview-ai-widget">
+                            <div class="ai-icon">🤖</div>
+                            <div class="ai-text">
+                                <div class="ai-title">AI Coach</div>
+                                <div class="ai-subtitle">Pronto ad aiutarti</div>
+                            </div>
+                            <span class="ai-action">Chiedi</span>
                         </div>
                     </div>
                 </div>
