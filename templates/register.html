@@ -273,10 +273,10 @@
             <div class="info-box">
                 <div class="info-box-title">
                     <i class="fas fa-info-circle"></i>
-                    <span>Registrazione Semplificata</span>
+                    <span>Registrazione con Codice Invito</span>
                 </div>
                 <p class="info-box-text">
-                    Non hai bisogno di codici scuola! Verrai automaticamente assegnato alla community SKAJLA per iniziare subito.
+                    Se hai ricevuto un codice invito dalla tua scuola, inseriscilo nel campo dedicato. Altrimenti puoi registrarti liberamente nella community SKAJLA.
                 </p>
             </div>
 
@@ -400,6 +400,26 @@
                             <i class="input-icon fas fa-lock"></i>
                         </div>
                     </div>
+                </div>
+
+                <div class="form-group full-width" style="margin-top: 1.5rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 100%); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: var(--radius-lg);">
+                    <label for="codice_invito" class="form-label">
+                        <i class="fas fa-ticket-alt" style="color: var(--color-gold-500); margin-right: 0.5rem;"></i>
+                        Codice Invito (opzionale)
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="codice_invito" 
+                            name="codice_invito" 
+                            class="form-input" 
+                            placeholder="Es: STU1A2B3C4D"
+                            style="text-transform: uppercase;"
+                        >
+                        <i class="input-icon fas fa-ticket-alt"></i>
+                    </div>
+                    <p class="form-help">Hai ricevuto un codice dalla tua scuola? Inseriscilo qui per essere associato automaticamente</p>
+                    <div id="codeValidation" style="margin-top: 0.5rem; display: none;"></div>
                 </div>
 
                 <div class="form-group full-width">

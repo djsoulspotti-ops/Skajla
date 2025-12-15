@@ -7,7 +7,7 @@ import secrets
 import string
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
-from database.db_manager import db_manager
+from database_manager import db_manager
 
 
 class InvitationCodesManager:
@@ -346,22 +346,21 @@ class InvitationCodesManager:
                 </p>
                 
                 <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #003B73;">
-                    <h3 style="color: #003B73; margin-top: 0;">Le tue credenziali:</h3>
+                    <h3 style="color: #003B73; margin-top: 0;">Il tuo codice di accesso:</h3>
                     
                     <p><strong>Codice di registrazione:</strong></p>
                     <p style="background: #003B73; color: white; padding: 15px; border-radius: 8px; font-size: 24px; text-align: center; letter-spacing: 2px; font-family: monospace;">
                         {code}
                     </p>
-                    
-                    <p><strong>Password temporanea:</strong></p>
-                    <p style="background: #f0f0f0; padding: 15px; border-radius: 8px; font-size: 18px; text-align: center; font-family: monospace;">
-                        {temp_password}
-                    </p>
                 </div>
                 
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                    <p style="margin: 0; color: #856404;">
-                        <strong>Importante:</strong> Al primo accesso ti verrà chiesto di impostare una nuova password personale.
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+                    <p style="margin: 0; color: #2e7d32;">
+                        <strong>Come procedere:</strong><br>
+                        1. Clicca sul pulsante "Registrati ora" qui sotto<br>
+                        2. Inserisci il codice di registrazione<br>
+                        3. Scegli la tua password personale<br>
+                        4. Completa i tuoi dati
                     </p>
                 </div>
                 

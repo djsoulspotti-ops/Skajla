@@ -285,7 +285,7 @@ class AuthService:
                 cursor.execute(
                     '''
                     SELECT id, username, email, password_hash, nome, cognome, 
-                           classe, ruolo, attivo, avatar, scuola_id, classe_id
+                           classe, ruolo, attivo, avatar, scuola_id, classe_id, force_password_change
                     FROM utenti 
                     WHERE email = %s AND attivo = true
                 ''', (email, ))
@@ -293,7 +293,7 @@ class AuthService:
                 cursor.execute(
                     '''
                     SELECT id, username, email, password_hash, nome, cognome, 
-                           classe, ruolo, attivo, avatar, scuola_id, classe_id
+                           classe, ruolo, attivo, avatar, scuola_id, classe_id, force_password_change
                     FROM utenti 
                     WHERE email = ? AND attivo = 1
                 ''', (email, ))
@@ -339,7 +339,8 @@ class AuthService:
                     'ruolo': user[7],
                     'avatar': user[9] or 'default.jpg',
                     'scuola_id': user[10],
-                    'classe_id': user[11]
+                    'classe_id': user[11],
+                    'force_password_change': user[12] if len(user) > 12 else False
                 }
             else:
                 self.record_failed_attempt(email)

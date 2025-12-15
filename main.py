@@ -62,6 +62,7 @@ from routes.parent_routes import parent_bp # Parent Dashboard - Zero-Friction Ch
 from routes.gamification_api_v2 import gamification_api_bp # Advanced Gamification API V2
 from routes.google_auth_routes import google_auth_bp # Google OAuth Login
 from routes.study_groups_routes import study_groups_bp # Study Groups
+from routes.invitation_codes_routes import invitation_codes_bp # Invitation Codes System
 
 # Import services
 from services.auth_service import auth_service
@@ -314,6 +315,7 @@ class SkailaApp:
         self.app.register_blueprint(gamification_api_bp) # Advanced Gamification V2
         self.app.register_blueprint(google_auth_bp) # Google OAuth Login
         self.app.register_blueprint(study_groups_bp) # Study Groups
+        self.app.register_blueprint(invitation_codes_bp) # Invitation Codes System
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp

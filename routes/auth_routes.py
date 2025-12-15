@@ -68,6 +68,13 @@ def login():
                 session['session_expires'] = (datetime.utcnow() + timedelta(days=1)).isoformat()
                 print(f"✅ Sessione breve: 1 giorno")
             
+            # Verifica se richiesto cambio password obbligatorio
+            if user.get('force_password_change'):
+                print(f"🔐 Primo accesso rilevato per {email} - redirect a cambio password")
+                session['force_password_change'] = True
+                flash('Per motivi di sicurezza, devi impostare una nuova password.', 'warning')
+                return redirect('/change-password-required')
+            
             # Aggiorna gamification
             try:
                 gamification_system.update_streak(user['id'])
@@ -234,10 +241,29 @@ def register():
             codice_docente = request.form.get('codice_docente', '').strip()
             codice_dirigente = request.form.get('codice_dirigente', '').strip()
             personal_code = request.form.get('personal_code', '').strip()
+            codice_invito = request.form.get('codice_invito', '').strip().upper()
             personal_code_id = None
+            invitation_code_id = None
+            force_password_change = False
+            
+            # PRIORITÀ 0: Codice Invito (nuovo sistema studenti/docenti)
+            if codice_invito:
+                from services.invitation_codes_manager import invitation_codes_manager
+                validation = invitation_codes_manager.validate_invitation_code(codice_invito)
+                
+                if not validation.get('valid'):
+                    flash(f"Codice invito non valido: {validation.get('error', 'Codice non riconosciuto')}", 'error')
+                    return render_template('register.html', scuole=school_system.get_user_schools())
+                
+                ruolo = validation['role']
+                scuola_id = validation['school_id']
+                invitation_code_id = validation['code_id']
+                force_password_change = True
+                
+                flash(f"Codice valido! Registrazione come {ruolo} per {validation['school_name']}", 'success')
             
             # PRIORITÀ 1: Verifica codice personale (nuovo sistema automatico)
-            if personal_code:
+            elif personal_code:
                 validation = school_system.verify_personal_code(personal_code)
                 if not validation['success']:
                     flash(validation['message'], 'error')
@@ -311,8 +337,18 @@ def register():
             if result['success']:
                 user_id = result['user_id']
                 
+                # NUOVO: Marca codice invito come usato e imposta force_password_change
+                if invitation_code_id is not None:
+                    from services.invitation_codes_manager import invitation_codes_manager
+                    invitation_codes_manager.use_invitation_code(codice_invito, user_id)
+                    db_manager.execute(
+                        'UPDATE utenti SET force_password_change = TRUE WHERE id = %s',
+                        (user_id,)
+                    )
+                    flash('Registrazione completata! Al primo accesso dovrai impostare la tua password.', 'success')
+                
                 # IMPORTANTE: Marca codice personale come usato se utilizzato
-                if personal_code_id is not None:
+                elif personal_code_id is not None:
                     school_system.mark_personal_code_used(personal_code_id, user_id)
                     flash(f'Registrazione completata! Codice personale {personal_code} consumato.', 'success')
                 else:
@@ -479,3 +515,54 @@ def reset_password(token):
         return redirect('/login')
     
     return render_template('reset_password.html', token_valid=True)
+
+
+@auth_bp.route('/change-password-required', methods=['GET', 'POST'])
+@csrf_protect
+def change_password_required():
+    """Pagina cambio password obbligatorio per primo accesso con codice invito"""
+    if 'user_id' not in session:
+        flash('Sessione scaduta. Effettua nuovamente il login.', 'error')
+        return redirect('/login')
+    
+    if not session.get('force_password_change'):
+        return redirect('/dashboard')
+    
+    user_id = session.get('user_id')
+    user_nome = session.get('nome', 'Utente')
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        if new_password != confirm_password:
+            flash('Le password non corrispondono.', 'error')
+            return render_template('force_password_change.html', user_nome=user_nome)
+        
+        is_valid, message = validate_password(new_password)
+        if not is_valid:
+            flash(f'Password non valida: {message}', 'error')
+            return render_template('force_password_change.html', user_nome=user_nome)
+        
+        hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        db_manager.execute('''
+            UPDATE utenti 
+            SET password_hash = %s, force_password_change = FALSE 
+            WHERE id = %s
+        ''', (hashed_password, user_id))
+        
+        session.pop('force_password_change', None)
+        
+        print(f"✅ Password cambiata con successo per utente ID: {user_id}")
+        flash('Password impostata con successo! Ora puoi accedere a tutte le funzionalità.', 'success')
+        
+        try:
+            gamification_system.update_streak(user_id)
+            gamification_system.award_xp(user_id, 'login_daily', multiplier=1.0, context="Login giornaliero")
+        except Exception as e:
+            print(f"⚠️ Gamification error (non-blocking): {e}")
+        
+        return redirect('/dashboard')
+    
+    return render_template('force_password_change.html', user_nome=user_nome)
