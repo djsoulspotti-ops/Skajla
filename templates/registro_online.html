@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="/static/css/tokens.css" rel="stylesheet">
+    <link href="/static/css/dark-theme.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -312,9 +313,9 @@
                 <div class="icon">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <div class="value">{{ "%.1f"|format(media[1]) }}</div>
-                <div class="label">{{ media[0] }}</div>
-                <small>({{ media[2] }} voti)</small>
+                <div class="value">{{ "%.1f"|format(media.media|float) }}</div>
+                <div class="label">{{ media.materia }}</div>
+                <small>({{ media.num_voti }} voti)</small>
             </div>
             {% endfor %}
         </div>
@@ -348,15 +349,16 @@
                     <tbody>
                         {% for voto in voti %}
                         <tr>
-                            <td><strong>{{ voto[0] }}</strong></td>
+                            <td><strong>{{ voto.materia }}</strong></td>
                             <td>
-                                <span class="grade-badge {% if voto[1] >= 8 %}grade-excellent{% elif voto[1] >= 7 %}grade-good{% elif voto[1] >= 6 %}grade-average{% else %}grade-poor{% endif %}">
-                                    {{ voto[1] }}
+                                {% set v = voto.voto|float %}
+                                <span class="grade-badge {% if v >= 8 %}grade-excellent{% elif v >= 7 %}grade-good{% elif v >= 6 %}grade-average{% else %}grade-poor{% endif %}">
+                                    {{ voto.voto }}
                                 </span>
                             </td>
-                            <td>{{ voto[2] }}</td>
-                            <td>{{ voto[3] }}</td>
-                            <td>{{ voto[4] or '-' }}</td>
+                            <td>{{ voto.tipo_valutazione or '-' }}</td>
+                            <td>{{ voto.data }}</td>
+                            <td>{{ voto.note or '-' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -386,25 +388,25 @@
                     <tbody>
                         {% for presenza in presenze %}
                         <tr>
-                            <td><strong>{{ presenza[0] }}</strong></td>
+                            <td><strong>{{ presenza.data }}</strong></td>
                             <td>
-                                {% if presenza[1] %}
+                                {% if presenza.presente %}
                                     <span class="presence-badge presente"><i class="fas fa-check"></i> Presente</span>
                                 {% else %}
                                     <span class="presence-badge assente"><i class="fas fa-times"></i> Assente</span>
                                 {% endif %}
-                                {% if presenza[2] %}
+                                {% if presenza.giustificato %}
                                     <small>(Giustificato)</small>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if presenza[3] > 0 %}
-                                    <span class="presence-badge ritardo"><i class="fas fa-clock"></i> {{ presenza[3] }} min</span>
+                                {% if presenza.ritardo and presenza.ritardo > 0 %}
+                                    <span class="presence-badge ritardo"><i class="fas fa-clock"></i> {{ presenza.ritardo }} min</span>
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
-                            <td>{{ presenza[4] or '-' }}</td>
+                            <td>{{ presenza.note or '-' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -426,7 +428,9 @@
                     <h3 style="color: var(--color-blue-800); margin-bottom: 1rem;">Media Generale</h3>
                     <div style="font-size: var(--text-4xl); font-weight: var(--font-bold); color: var(--color-blue-800); margin-bottom: 2rem;">
                         {% if medie %}
-                            {{ "%.2f"|format(medie|sum(attribute='1')/medie|length) }}/10
+                            {% set total_media = 0 %}
+                            {% for m in medie %}{% set total_media = total_media + m.media|float %}{% endfor %}
+                            {{ "%.2f"|format(total_media / medie|length) }}/10
                         {% else %}
                             N/A
                         {% endif %}
@@ -435,11 +439,11 @@
                     <h3 style="color: var(--color-blue-800); margin-bottom: 1rem;">Performance per Materia</h3>
                     {% for media in medie %}
                     <div class="subject-stat">
-                        <span style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ media[0] }}</span>
-                        <strong style="font-size: var(--text-xl); color: var(--color-blue-800);">{{ "%.1f"|format(media[1]) }}/10</strong>
+                        <span style="font-weight: var(--font-semibold); color: var(--text-primary);">{{ media.materia }}</span>
+                        <strong style="font-size: var(--text-xl); color: var(--color-blue-800);">{{ "%.1f"|format(media.media|float) }}/10</strong>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ (media[1]/10*100)|int }}%"></div>
+                        <div class="progress-fill" style="width: {{ (media.media|float/10*100)|int }}%"></div>
                     </div>
                     {% endfor %}
                 </div>
