@@ -7,6 +7,7 @@
     <title>SKAJLA | Enterprise Education Platform</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0a0e17;
@@ -958,6 +959,312 @@
                 gap: 24px;
             }
         }
+
+        /* SEZIONE DETTAGLIATA */
+        .details-section {
+            padding: 120px 0;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #0c1220 100%);
+        }
+
+        .details-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .details-header .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-violet);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 100px;
+        }
+
+        .details-header h2 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--text-white);
+            margin-bottom: 16px;
+        }
+
+        .details-header p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .detail-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+            margin-bottom: 100px;
+            padding: 48px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+        }
+
+        .detail-block:nth-child(even) {
+            direction: rtl;
+        }
+
+        .detail-block:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .detail-content {
+            padding: 20px 0;
+        }
+
+        .detail-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: white;
+            margin-bottom: 24px;
+            box-shadow: var(--glow-blue);
+        }
+
+        .detail-content h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 16px;
+        }
+
+        .detail-content p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+
+        .detail-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9375rem;
+            color: var(--text-light);
+        }
+
+        .detail-feature i {
+            color: var(--accent-green);
+            font-size: 0.875rem;
+        }
+
+        .detail-visual {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 32px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .visual-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .visual-stat {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .visual-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .visual-stat-label {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .visual-progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .visual-progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .visual-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .visual-progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .visual-progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 4px;
+        }
+
+        .visual-chat-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .chat-bubble.ai {
+            background: var(--gradient-primary);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-bubble.user {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-light);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .visual-badges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .visual-badge {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .visual-badge:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .visual-badge-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .visual-badge-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .tech-stack-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .tech-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--accent-violet);
+        }
+
+        .tech-item i {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+        }
+
+        .tech-item span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 968px) {
+            .detail-block {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding: 32px;
+            }
+
+            .detail-block:nth-child(even) {
+                direction: ltr;
+            }
+
+            .details-header h2 {
+                font-size: 2rem;
+            }
+
+            .visual-stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .tech-stack-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .visual-badges-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .details-section {
+                padding: 80px 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -985,7 +1292,7 @@
                 </p>
                 <div class="hero-cta">
                     <a href="/contatti" class="btn btn-primary">Richiedi Demo</a>
-                    <a href="#features" class="btn btn-secondary">Scopri di piu</a>
+                    <a href="#scopri-dettagli" class="btn btn-secondary">Scopri di piu</a>
                 </div>
                 <div class="hero-metrics">
                     <div class="metric">
@@ -1156,6 +1463,384 @@
                         Marketplace per stage e tirocini con gestione documentale 
                         digitale e tracking ore automatico.
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="scopri-dettagli" class="details-section">
+        <div class="container">
+            <div class="details-header">
+                <div class="section-label">Approfondimento Completo</div>
+                <h2>Ogni funzionalita in dettaglio</h2>
+                <p>Scopri come SKAJLA trasforma la gestione scolastica con strumenti all'avanguardia progettati per il sistema educativo italiano</p>
+            </div>
+
+            <div class="detail-block">
+                <div class="detail-content">
+                    <div class="detail-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI Coach Intelligente</h3>
+                    <p>
+                        Il nostro assistente AI, basato su Google Gemini 2.0-flash, offre supporto didattico 
+                        personalizzato 24/7. L'AI Coach comprende il contesto scolastico italiano, 
+                        si adatta al livello dello studente e fornisce spiegazioni in italiano naturale.
+                    </p>
+                    <div class="detail-features">
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Risposte contestualizzate al curriculum italiano
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Sistema di quiz adattivi con 164+ quiz in 9 materie
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Analisi dei punti deboli e suggerimenti mirati
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Integrazione con il sistema XP per motivazione extra
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Cronologia conversazioni per continuita didattica
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-visual">
+                    <div class="visual-chat-preview">
+                        <div class="chat-bubble user">Come posso risolvere le equazioni di secondo grado?</div>
+                        <div class="chat-bubble ai">Ottima domanda! Le equazioni di secondo grado hanno la forma ax² + bx + c = 0. Ti spiego passo passo la formula risolutiva...</div>
+                        <div class="chat-bubble user">Puoi farmi un esempio pratico?</div>
+                        <div class="chat-bubble ai">Certo! Risolviamo insieme x² - 5x + 6 = 0. Prima identifichiamo a=1, b=-5, c=6...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-block">
+                <div class="detail-content">
+                    <div class="detail-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Dashboard Dirigente Executive</h3>
+                    <p>
+                        Una suite completa di analytics per dirigenti scolastici che fornisce visibilita 
+                        totale sulle performance dell'istituto. Metriche economiche, engagement docenti, 
+                        rendimento studenti e trend storici in un'unica interfaccia intuitiva.
+                    </p>
+                    <div class="detail-features">
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            KPI economici: costo per studente, ROI formazione
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Performance docenti con rating aggregati anonimi
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Early Warning System per studenti a rischio
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Reportistica automatica esportabile in PDF/Excel
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Confronto performance tra classi e periodi
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-visual">
+                    <div class="visual-stat-grid">
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">94%</div>
+                            <div class="visual-stat-label">Tasso Promozione</div>
+                        </div>
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">7.2</div>
+                            <div class="visual-stat-label">Media Istituto</div>
+                        </div>
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">89%</div>
+                            <div class="visual-stat-label">Engagement</div>
+                        </div>
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">12</div>
+                            <div class="visual-stat-label">Alert Attivi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-block">
+                <div class="detail-content">
+                    <div class="detail-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Sistema Gamification Avanzato</h3>
+                    <p>
+                        Un ecosistema motivazionale completo che trasforma l'apprendimento in un'esperienza 
+                        coinvolgente. Con 9 livelli di progressione, badge a rarita, sfide giornaliere e 
+                        classifiche competitive, gli studenti sono incentivati a dare il massimo.
+                    </p>
+                    <div class="detail-features">
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            9 ranghi: da Germoglio a Immortale
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Battle Pass con ricompense esclusive
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Sfide giornaliere, settimanali e di classe
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Sistema Kudos per riconoscimento tra pari
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Power-ups e booster per XP moltiplicati
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-visual">
+                    <div class="visual-badges-grid">
+                        <div class="visual-badge">
+                            <div class="visual-badge-icon">🌱</div>
+                            <div class="visual-badge-name">Germoglio</div>
+                        </div>
+                        <div class="visual-badge">
+                            <div class="visual-badge-icon">📚</div>
+                            <div class="visual-badge-name">Studioso</div>
+                        </div>
+                        <div class="visual-badge">
+                            <div class="visual-badge-icon">🔥</div>
+                            <div class="visual-badge-name">Streak 7</div>
+                        </div>
+                        <div class="visual-badge">
+                            <div class="visual-badge-icon">🏆</div>
+                            <div class="visual-badge-name">Top 10</div>
+                        </div>
+                        <div class="visual-badge">
+                            <div class="visual-badge-icon">💎</div>
+                            <div class="visual-badge-name">Leggendario</div>
+                        </div>
+                        <div class="visual-badge">
+                            <div class="visual-badge-icon">⚡</div>
+                            <div class="visual-badge-name">Velocista</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-block">
+                <div class="detail-content">
+                    <div class="detail-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Portale Genitori Completo</h3>
+                    <p>
+                        Un accesso dedicato per le famiglie che offre visibilita totale sul percorso 
+                        scolastico dei figli. Voti in tempo reale, calendario assenze, comunicazioni 
+                        dalla scuola e notifiche push per eventi importanti.
+                    </p>
+                    <div class="detail-features">
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Codice studente auto-generato per collegamento sicuro
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Visualizzazione voti con trend e grafici
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Calendario assenze e ritardi
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Notifiche push per comunicazioni urgenti
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Accesso multi-figlio da un unico account
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-visual">
+                    <div class="visual-progress-list">
+                        <div class="visual-progress-item">
+                            <div class="visual-progress-label">
+                                <span>Matematica</span>
+                                <span>7.5</span>
+                            </div>
+                            <div class="visual-progress-bar">
+                                <div class="visual-progress-fill" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="visual-progress-item">
+                            <div class="visual-progress-label">
+                                <span>Italiano</span>
+                                <span>8.2</span>
+                            </div>
+                            <div class="visual-progress-bar">
+                                <div class="visual-progress-fill" style="width: 82%"></div>
+                            </div>
+                        </div>
+                        <div class="visual-progress-item">
+                            <div class="visual-progress-label">
+                                <span>Inglese</span>
+                                <span>7.8</span>
+                            </div>
+                            <div class="visual-progress-bar">
+                                <div class="visual-progress-fill" style="width: 78%"></div>
+                            </div>
+                        </div>
+                        <div class="visual-progress-item">
+                            <div class="visual-progress-label">
+                                <span>Storia</span>
+                                <span>6.9</span>
+                            </div>
+                            <div class="visual-progress-bar">
+                                <div class="visual-progress-fill" style="width: 69%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-block">
+                <div class="detail-content">
+                    <div class="detail-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>SKAJLA Connect - Marketplace PCTO</h3>
+                    <p>
+                        Una piattaforma dedicata all'alternanza scuola-lavoro che connette studenti 
+                        con aziende del territorio. Portfolio digitale, matching intelligente, 
+                        gestione documentale e tracking ore automatizzato.
+                    </p>
+                    <div class="detail-features">
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Portfolio studente dinamico con competenze
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Matching AI tra profili e opportunita
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Workflow digitale per convenzioni e documenti
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Timesheet automatico con geolocalizzazione
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Feedback bidirezionale azienda-studente
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-visual">
+                    <div class="visual-stat-grid">
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">45+</div>
+                            <div class="visual-stat-label">Aziende Partner</div>
+                        </div>
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">180</div>
+                            <div class="visual-stat-label">Stage Attivi</div>
+                        </div>
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">96%</div>
+                            <div class="visual-stat-label">Soddisfazione</div>
+                        </div>
+                        <div class="visual-stat">
+                            <div class="visual-stat-value">12k</div>
+                            <div class="visual-stat-label">Ore Registrate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-block">
+                <div class="detail-content">
+                    <div class="detail-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Sicurezza e Conformita Enterprise</h3>
+                    <p>
+                        SKAJLA e progettato con la sicurezza al centro. Conformita GDPR nativa, 
+                        crittografia end-to-end, isolamento multi-tenant e data center EU garantiscono 
+                        la massima protezione dei dati scolastici.
+                    </p>
+                    <div class="detail-features">
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            GDPR Compliant con DPO dedicato
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Crittografia AES-256 per dati a riposo
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            TLS 1.3 per comunicazioni sicure
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Backup automatici con retention 30 giorni
+                        </div>
+                        <div class="detail-feature">
+                            <i class="fas fa-check-circle"></i>
+                            Audit log completo delle attivita
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-visual">
+                    <div class="tech-stack-grid">
+                        <div class="tech-item">
+                            <i class="fas fa-lock"></i>
+                            <span>Crittografia</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-server"></i>
+                            <span>Data Center EU</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-user-shield"></i>
+                            <span>GDPR</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-history"></i>
+                            <span>Backup Auto</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-network-wired"></i>
+                            <span>Multi-Tenant</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Audit Log</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-key"></i>
+                            <span>SSO Ready</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>99.9% Uptime</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
