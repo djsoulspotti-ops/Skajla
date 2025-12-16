@@ -259,6 +259,10 @@
             font-size: 0.75rem;
             color: #9ca3af;
         }
+        .panel { display: none; }
+        .panel.panel-active { display: block; }
+        .nav-item a.active { background: rgba(59, 130, 246, 0.15) !important; }
+        .panel-nav-link { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -273,19 +277,19 @@
                     <div class="nav-section-label">Principale</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a href="/dashboard/dirigente" class="active">
+                            <a class="panel-nav active" data-panel="dashboard">
                                 <i class="fas fa-chart-line"></i>
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/bi/dashboard">
+                            <a class="panel-nav" data-panel="bi">
                                 <i class="fas fa-chart-bar"></i>
                                 Business Intelligence
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/schools/dashboard/dirigente">
+                            <a class="panel-nav" data-panel="codici">
                                 <i class="fas fa-key"></i>
                                 Gestione Codici
                             </a>
@@ -297,19 +301,19 @@
                     <div class="nav-section-label">Gestione</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a href="/registro">
+                            <a class="panel-nav" data-panel="registro">
                                 <i class="fas fa-book"></i>
                                 Registro
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/calendario">
+                            <a class="panel-nav" data-panel="calendario">
                                 <i class="fas fa-calendar"></i>
                                 Calendario
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/messaging">
+                            <a class="panel-nav" data-panel="messaggi">
                                 <i class="fas fa-comments"></i>
                                 Messaggi
                             </a>
@@ -334,22 +338,24 @@
         </aside>
         
         <main class="main-content">
+            <!-- PANNELLO DASHBOARD -->
+            <div class="panel panel-active" id="panel-dashboard">
             <div class="page-header" style="margin-bottom: 40px;">
                 <div class="page-header-top">
                     <div>
-                        <p style="font-size: 0.8125rem; color: #6b7280; margin-bottom: 4px;">Dashboard Esecutiva</p>
+                        <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 4px;">Dashboard Esecutiva</p>
                         <h1 class="page-title" style="font-size: 2rem;">Buongiorno, {{ user.nome }}</h1>
                         <p class="page-subtitle" style="margin-top: 8px;">{{ school_name }} - Panoramica in tempo reale</p>
                     </div>
                     <div class="header-actions">
-                        <a href="/bi/dashboard" class="btn btn-primary">
+                        <button class="btn btn-primary panel-nav-link" data-panel="bi">
                             <i class="fas fa-chart-bar"></i>
                             Analytics Avanzate
-                        </a>
-                        <a href="/schools/dashboard/dirigente" class="btn btn-secondary">
+                        </button>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="codici">
                             <i class="fas fa-cog"></i>
                             Impostazioni
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -682,10 +688,372 @@
                     </div>
                 </div>
             </div>
+            </div><!-- Fine pannello dashboard -->
+
+            <!-- PANNELLO BUSINESS INTELLIGENCE -->
+            <div class="panel" id="panel-bi">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-chart-bar"></i> Business Intelligence</h1>
+                            <p class="page-subtitle">Analytics avanzate e reportistica</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Report Generati</div>
+                        <div class="stat-value">24</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Trend Positivi</div>
+                        <div class="stat-value success">18</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Alert Attivi</div>
+                        <div class="stat-value warning">3</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Obiettivi Raggiunti</div>
+                        <div class="stat-value accent">85%</div>
+                    </div>
+                </div>
+                
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Report Disponibili</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="list-item" style="cursor: pointer;">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-blue), #3b82f6); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-file-pdf" style="color: white;"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Report Andamento Trimestrale</div>
+                                    <div class="list-subtitle">Ultimo aggiornamento: Oggi</div>
+                                </div>
+                                <span class="badge badge-success">Pronto</span>
+                            </div>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-emerald-500), #10b981); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-chart-pie" style="color: white;"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Analisi Performance Classi</div>
+                                    <div class="list-subtitle">Comparazione anno su anno</div>
+                                </div>
+                                <span class="badge badge-success">Pronto</span>
+                            </div>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-amber-500), #f59e0b); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-users" style="color: white;"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Report Engagement Utenti</div>
+                                    <div class="list-subtitle">Metriche di utilizzo piattaforma</div>
+                                </div>
+                                <span class="badge badge-warning">In elaborazione</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO GESTIONE CODICI -->
+            <div class="panel" id="panel-codici">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-key"></i> Gestione Codici</h1>
+                            <p class="page-subtitle">Codici di accesso e inviti</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card-enhanced">
+                        <div class="card-enhanced-header">
+                            <span class="card-enhanced-title">Genera Nuovo Codice</span>
+                        </div>
+                        <div style="padding: 24px;">
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.875rem;">Tipo Utente</label>
+                                    <select style="width: 100%; padding: 12px; border-radius: 8px;">
+                                        <option>Studente</option>
+                                        <option>Docente</option>
+                                        <option>Genitore</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.875rem;">Classe (opzionale)</label>
+                                    <select style="width: 100%; padding: 12px; border-radius: 8px;">
+                                        <option>Seleziona classe...</option>
+                                        <option>3A</option>
+                                        <option>4B</option>
+                                        <option>5C</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%;">
+                                    <i class="fas fa-plus"></i> Genera Codice
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-enhanced">
+                        <div class="card-enhanced-header">
+                            <span class="card-enhanced-title">Codici Attivi</span>
+                            <span class="card-enhanced-badge">12 attivi</span>
+                        </div>
+                        <div style="padding: 24px;">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="list-item">
+                                    <div class="list-content">
+                                        <div class="list-title">STU-2024-A3X9</div>
+                                        <div class="list-subtitle">Studente • Classe 3A</div>
+                                    </div>
+                                    <span class="badge badge-success">Attivo</span>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-content">
+                                        <div class="list-title">DOC-2024-B7K2</div>
+                                        <div class="list-subtitle">Docente • Matematica</div>
+                                    </div>
+                                    <span class="badge badge-success">Attivo</span>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-content">
+                                        <div class="list-title">GEN-2024-C1M5</div>
+                                        <div class="list-subtitle">Genitore</div>
+                                    </div>
+                                    <span class="badge badge-warning">In attesa</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO REGISTRO -->
+            <div class="panel" id="panel-registro">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-book"></i> Registro Istituto</h1>
+                            <p class="page-subtitle">Panoramica generale delle valutazioni</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Voti Totali</div>
+                        <div class="stat-value">1,248</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Media Istituto</div>
+                        <div class="stat-value success">7.2</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Insufficienze</div>
+                        <div class="stat-value danger">156</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Eccellenze</div>
+                        <div class="stat-value accent">312</div>
+                    </div>
+                </div>
+                
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Situazione per Classe</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-primary);">Classe 3A - Matematica</span>
+                                    <span style="font-weight: 600; color: var(--color-emerald-400);">7.8</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill success" style="width: 78%;"></div></div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-primary);">Classe 4B - Fisica</span>
+                                    <span style="font-weight: 600; color: var(--accent-blue);">7.2</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 72%;"></div></div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-primary);">Classe 5C - Italiano</span>
+                                    <span style="font-weight: 600; color: var(--color-amber-400);">6.5</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill warning" style="width: 65%;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO CALENDARIO -->
+            <div class="panel" id="panel-calendario">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-calendar"></i> Calendario Scolastico</h1>
+                            <p class="page-subtitle">Eventi e attivita dell'istituto</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Prossimi Eventi</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="list-item">
+                                <div style="text-align: center; min-width: 56px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);">20</div>
+                                    <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Dic</div>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Consiglio di Istituto</div>
+                                    <div class="list-subtitle">15:00 - Aula Magna</div>
+                                </div>
+                                <span class="badge badge-warning">Importante</span>
+                            </div>
+                            <div class="list-item">
+                                <div style="text-align: center; min-width: 56px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-emerald-400);">22</div>
+                                    <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Dic</div>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Inizio Vacanze Natalizie</div>
+                                    <div class="list-subtitle">Ultimo giorno di lezione</div>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div style="text-align: center; min-width: 56px; padding: 12px; background: rgba(139, 92, 246, 0.1); border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-violet);">07</div>
+                                    <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Gen</div>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Rientro dalle Vacanze</div>
+                                    <div class="list-subtitle">Ripresa delle lezioni</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO MESSAGGI -->
+            <div class="panel" id="panel-messaggi">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-comments"></i> Messaggi</h1>
+                            <p class="page-subtitle">Comunicazioni con docenti e personale</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-enhanced">
+                    <div class="card-enhanced-header">
+                        <span class="card-enhanced-title">Messaggi Recenti</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">PR</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Prof. Rossi</div>
+                                    <div class="list-subtitle">Richiesta materiale per laboratorio di fisica...</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">2 ore fa</div>
+                                    <span class="badge badge-warning" style="margin-top: 4px;">Nuovo</span>
+                                </div>
+                            </div>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">SB</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Segreteria</div>
+                                    <div class="list-subtitle">Report iscrizioni secondo quadrimestre pronto</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Ieri</div>
+                                </div>
+                            </div>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">VB</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Vice Preside Bianchi</div>
+                                    <div class="list-subtitle">Conferma riunione di coordinamento</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">2 giorni fa</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     
     <script>
+        function switchPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('panel-active');
+            });
+            
+            document.querySelectorAll('.nav-item a.panel-nav').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const targetPanel = document.getElementById('panel-' + panelId);
+            if (targetPanel) {
+                targetPanel.classList.add('panel-active');
+            }
+            
+            document.querySelectorAll(`[data-panel="${panelId}"]`).forEach(link => {
+                if (link.classList.contains('panel-nav')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        document.querySelectorAll('.panel-nav, .panel-nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const panelId = link.getAttribute('data-panel');
+                if (panelId) {
+                    switchPanel(panelId);
+                }
+            });
+        });
+        
         Chart.defaults.font.family = 'Inter, sans-serif';
         Chart.defaults.color = '#6b7280';
         

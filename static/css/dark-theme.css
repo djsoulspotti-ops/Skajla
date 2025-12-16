@@ -864,3 +864,254 @@ tbody tr:hover {
 .breadcrumb-item.active {
   color: var(--text-primary) !important;
 }
+
+/* Search Bar and Inputs */
+.search-bar,
+.search-box,
+[class*="search-bar"],
+[class*="search-box"] {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 12px !important;
+}
+
+.search-bar input,
+.search-box input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+}
+
+.search-bar input::placeholder,
+.search-box input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.search-bar input:focus,
+.search-box input:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Quick Link Card buttons */
+.quick-link-card {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-primary) !important;
+}
+
+.quick-link-card:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: var(--accent-blue) !important;
+}
+
+/* Dashboard Unified styles for dark theme */
+.dashboard-layout,
+.dashboard-container {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-card) 50%, #1e293b 100%) !important;
+}
+
+.page-title,
+.page-header h1,
+h1.page-title {
+  color: var(--text-primary) !important;
+}
+
+.page-subtitle,
+.page-header p {
+  color: var(--text-muted) !important;
+}
+
+/* Stat cards dark theme */
+.stat-card,
+.stats-grid .stat-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+}
+
+.stat-label {
+  color: var(--text-muted) !important;
+}
+
+.stat-value {
+  color: var(--text-primary) !important;
+}
+
+.stat-value.success {
+  color: var(--color-emerald-400) !important;
+}
+
+.stat-value.accent {
+  color: var(--accent-blue) !important;
+}
+
+.stat-value.danger,
+.stat-value.warning {
+  color: var(--color-amber-400) !important;
+}
+
+/* List items dark theme */
+.list-item {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+.list-title {
+  color: var(--text-primary) !important;
+}
+
+.list-subtitle {
+  color: var(--text-muted) !important;
+}
+
+.list-avatar {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet)) !important;
+  color: white !important;
+}
+
+/* Header actions */
+.header-actions .btn,
+.btn.btn-primary,
+.btn.btn-secondary {
+  background: var(--accent-blue) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.btn.btn-secondary {
+  background: rgba(255,255,255,0.1) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+/* Progress bars */
+.progress-bar {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.progress-fill {
+  background: var(--accent-blue) !important;
+}
+
+.progress-fill.success {
+  background: var(--color-emerald-500) !important;
+}
+
+.progress-fill.warning {
+  background: var(--color-amber-500) !important;
+}
+
+/* Badges */
+.badge {
+  background: rgba(255,255,255,0.1) !important;
+  color: var(--text-secondary) !important;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: var(--color-emerald-400) !important;
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: var(--color-amber-400) !important;
+}
+
+.badge-neutral {
+  background: rgba(255,255,255,0.1) !important;
+  color: var(--text-muted) !important;
+}
+
+/* User card in sidebar */
+.user-card {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+.user-name {
+  color: var(--text-primary) !important;
+}
+
+.user-role {
+  color: var(--text-muted) !important;
+}
+
+/* Dirigente specific styles */
+.section-header {
+  border-color: var(--border-glass) !important;
+}
+
+.section-title {
+  color: var(--text-primary) !important;
+}
+
+.section-subtitle {
+  color: var(--text-muted) !important;
+}
+
+.executive-stat {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+}
+
+.executive-value {
+  color: var(--text-primary) !important;
+}
+
+.executive-label {
+  color: var(--text-muted) !important;
+}
+
+.card-enhanced {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+}
+
+.card-enhanced-header {
+  background: rgba(255,255,255,0.03) !important;
+  border-color: var(--border-glass) !important;
+}
+
+.card-enhanced-title {
+  color: var(--text-primary) !important;
+}
+
+/* Override inline colors for dark theme */
+[style*="color: #1a1a1a"],
+[style*="color: var(--text-primary)"] {
+  color: var(--text-primary) !important;
+}
+
+[style*="color: #6b7280"],
+[style*="color: var(--text-muted)"] {
+  color: var(--text-muted) !important;
+}
+
+[style*="background: white"],
+[style*="background: #fff"],
+[style*="background: #ffffff"] {
+  background: var(--card-bg) !important;
+}
+
+[style*="background: #fafbfc"],
+[style*="background: var(--bg-light)"] {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+[style*="border: 1px solid #e5e7eb"],
+[style*="border-color: #e5e7eb"] {
+  border-color: var(--border-glass) !important;
+}

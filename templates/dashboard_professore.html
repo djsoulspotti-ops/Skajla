@@ -8,6 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="/static/css/dashboard-unified.css" rel="stylesheet">
     <link href="/static/css/dark-theme.css" rel="stylesheet">
+    <style>
+        .panel { display: none; }
+        .panel.panel-active { display: block; }
+        .nav-item a.active { background: rgba(59, 130, 246, 0.15) !important; }
+        .panel-nav-link { cursor: pointer; }
+    </style>
 </head>
 <body>
     <div class="dashboard-layout">
@@ -21,19 +27,19 @@
                     <div class="nav-section-label">Menu</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a href="/dashboard" class="active">
+                            <a class="panel-nav active" data-panel="dashboard">
                                 <i class="fas fa-home"></i>
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/registro-professore">
+                            <a class="panel-nav" data-panel="registro">
                                 <i class="fas fa-book"></i>
                                 Registro
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/calendario">
+                            <a class="panel-nav" data-panel="calendario">
                                 <i class="fas fa-calendar"></i>
                                 Calendario
                             </a>
@@ -45,19 +51,19 @@
                     <div class="nav-section-label">Strumenti</div>
                     <ul class="nav-list">
                         <li class="nav-item">
-                            <a href="/chat">
+                            <a class="panel-nav" data-panel="messaggi">
                                 <i class="fas fa-comments"></i>
                                 Messaggi
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/materiali">
+                            <a class="panel-nav" data-panel="materiali">
                                 <i class="fas fa-folder"></i>
                                 Materiali
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/bi/dashboard">
+                            <a class="panel-nav" data-panel="analytics">
                                 <i class="fas fa-chart-line"></i>
                                 Analytics
                             </a>
@@ -82,229 +88,638 @@
         </aside>
         
         <main class="main-content">
-            <div class="page-header">
-                <div class="page-header-top">
-                    <div>
-                        <h1 class="page-title">Benvenuto, Prof. {{ user.cognome }}</h1>
-                        <p class="page-subtitle">Gestisci le tue classi</p>
+            <!-- PANNELLO DASHBOARD -->
+            <div class="panel panel-active" id="panel-dashboard">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title">Benvenuto, Prof. {{ user.cognome }}</h1>
+                            <p class="page-subtitle">Gestisci le tue classi</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-primary panel-nav-link" data-panel="registro">
+                                <i class="fas fa-user-check"></i>
+                                Appello
+                            </button>
+                            <button class="btn btn-secondary panel-nav-link" data-panel="registro">
+                                <i class="fas fa-star"></i>
+                                Inserisci Voto
+                            </button>
+                        </div>
                     </div>
-                    <div class="header-actions">
-                        <a href="/registro-professore" class="btn btn-primary">
-                            <i class="fas fa-user-check"></i>
-                            Appello
-                        </a>
-                        <a href="/registro-professore" class="btn btn-secondary">
-                            <i class="fas fa-star"></i>
-                            Inserisci Voto
-                        </a>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Studenti</div>
+                        <div class="stat-value">{{ total_studenti if total_studenti else '24' }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Media Voti</div>
+                        <div class="stat-value success">{{ media_classe if media_classe else '7.8' }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Presenze</div>
+                        <div class="stat-value accent">{{ tasso_presenze if tasso_presenze else '92' }}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Classi</div>
+                        <div class="stat-value">{{ num_classi if num_classi else '3' }}</div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Orario di Oggi</h3>
+                            <a class="card-action panel-nav-link" data-panel="calendario">Vedi settimana</a>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent-blue);">
+                                    <div style="min-width: 80px;">
+                                        <div style="font-size: 0.875rem; font-weight: 600; color: var(--accent-blue);">09:00</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">11:00</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Matematica - 3A</div>
+                                        <div style="font-size: 0.8125rem; color: var(--text-muted);">Aula 201</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid var(--border-glass);">
+                                    <div style="min-width: 80px;">
+                                        <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">11:15</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">13:00</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Fisica - 4B</div>
+                                        <div style="font-size: 0.8125rem; color: var(--text-muted);">Laboratorio</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid var(--border-glass);">
+                                    <div style="min-width: 80px;">
+                                        <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">14:30</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">16:00</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Matematica - 5C</div>
+                                        <div style="font-size: 0.8125rem; color: var(--text-muted);">Aula 105</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Distribuzione Voti - 3A</h3>
+                            <a class="card-action panel-nav-link" data-panel="analytics">Analytics</a>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Eccellenti (9-10)</span>
+                                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--color-emerald-400);">6 studenti</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill success" style="width: 25%;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Buoni (7-8)</span>
+                                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--accent-blue);">12 studenti</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Sufficienti (6)</span>
+                                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--color-amber-400);">6 studenti</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill warning" style="width: 25%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-grid cols-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Messaggi Recenti</h3>
+                            <a class="card-action panel-nav-link" data-panel="messaggi">Vedi tutti</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-item">
+                                <div class="list-avatar">MR</div>
+                                <div class="list-content">
+                                    <div class="list-title">Mario Rossi</div>
+                                    <div class="list-subtitle">Ho una domanda sull'esercizio 5...</div>
+                                </div>
+                                <div class="list-meta">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">10 min fa</span>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-avatar">LB</div>
+                                <div class="list-content">
+                                    <div class="list-title">Laura Bianchi</div>
+                                    <div class="list-subtitle">Grazie per la spiegazione!</div>
+                                </div>
+                                <div class="list-meta">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">1 ora fa</span>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-avatar">GV</div>
+                                <div class="list-content">
+                                    <div class="list-title">Giuseppe Verdi</div>
+                                    <div class="list-subtitle">Posso recuperare la verifica?</div>
+                                </div>
+                                <div class="list-meta">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">2 ore fa</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Da Valutare</h3>
+                            <a class="card-action panel-nav-link" data-panel="registro">Vai al registro</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-item">
+                                <div class="list-content">
+                                    <div class="list-title">Compito in Classe - Algebra</div>
+                                    <div class="list-subtitle">Classe 3A - 24 studenti</div>
+                                </div>
+                                <span class="badge badge-warning">Urgente</span>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-content">
+                                    <div class="list-title">Progetto Fisica</div>
+                                    <div class="list-subtitle">Classe 4B - 8 progetti</div>
+                                </div>
+                                <span class="badge badge-neutral">In corso</span>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-content">
+                                    <div class="list-title">Quiz Online - Derivate</div>
+                                    <div class="list-subtitle">Classe 5C - 15 completati</div>
+                                </div>
+                                <span class="badge badge-success">Pronto</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Prossimi Eventi</h3>
+                            <a class="card-action panel-nav-link" data-panel="calendario">Calendario</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-item">
+                                <div style="text-align: center; min-width: 48px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-blue);">25</div>
+                                    <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Verifica Scritta - 3A</div>
+                                    <div class="list-subtitle">09:00 - 11:00 - Aula 201</div>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div style="text-align: center; min-width: 48px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-blue);">27</div>
+                                    <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Consiglio di Classe</div>
+                                    <div class="list-subtitle">15:00 - 17:00 - Sala Riunioni</div>
+                                </div>
+                            </div>
+                            <div class="list-item">
+                                <div style="text-align: center; min-width: 48px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-blue);">29</div>
+                                    <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">Colloqui Genitori</div>
+                                    <div class="list-subtitle">14:00 - 18:00</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Studenti</div>
-                    <div class="stat-value">{{ total_studenti if total_studenti else '24' }}</div>
+
+            <!-- PANNELLO REGISTRO -->
+            <div class="panel" id="panel-registro">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-book"></i> Registro Elettronico</h1>
+                            <p class="page-subtitle">Gestione voti e presenze</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Media Voti</div>
-                    <div class="stat-value success">{{ media_classe if media_classe else '7.8' }}</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Voti Inseriti Oggi</div>
+                        <div class="stat-value">8</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Assenze Oggi</div>
+                        <div class="stat-value danger">3</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ritardi</div>
+                        <div class="stat-value warning">2</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Note</div>
+                        <div class="stat-value">1</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Presenze</div>
-                    <div class="stat-value accent">{{ tasso_presenze if tasso_presenze else '92' }}%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Classi</div>
-                    <div class="stat-value">{{ num_classi if num_classi else '3' }}</div>
+
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-user-check"></i> Appello - Classe 3A</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="list-item" style="justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="list-avatar">MR</div>
+                                        <div class="list-title">Mario Rossi</div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button style="background: var(--color-emerald-500); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Presente</button>
+                                        <button style="background: var(--color-red-500); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Assente</button>
+                                    </div>
+                                </div>
+                                <div class="list-item" style="justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="list-avatar">LB</div>
+                                        <div class="list-title">Laura Bianchi</div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button style="background: var(--color-emerald-500); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Presente</button>
+                                        <button style="background: var(--color-red-500); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Assente</button>
+                                    </div>
+                                </div>
+                                <div class="list-item" style="justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="list-avatar">GV</div>
+                                        <div class="list-title">Giuseppe Verdi</div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button style="background: var(--color-emerald-500); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Presente</button>
+                                        <button style="background: var(--color-red-500); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Assente</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-star"></i> Inserisci Voto</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.875rem;">Studente</label>
+                                    <select style="width: 100%; padding: 12px; border-radius: 8px;">
+                                        <option>Seleziona studente...</option>
+                                        <option>Mario Rossi</option>
+                                        <option>Laura Bianchi</option>
+                                        <option>Giuseppe Verdi</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.875rem;">Voto</label>
+                                    <input type="number" min="1" max="10" step="0.5" placeholder="Es: 7.5" style="width: 100%; padding: 12px; border-radius: 8px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.875rem;">Tipo</label>
+                                    <select style="width: 100%; padding: 12px; border-radius: 8px;">
+                                        <option>Scritto</option>
+                                        <option>Orale</option>
+                                        <option>Pratico</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%;">
+                                    <i class="fas fa-save"></i> Salva Voto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="content-grid">
+
+            <!-- PANNELLO CALENDARIO -->
+            <div class="panel" id="panel-calendario">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-calendar"></i> Calendario</h1>
+                            <p class="page-subtitle">Orario settimanale e eventi</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Orario di Oggi</h3>
-                        <a href="/calendario" class="card-action">Vedi settimana</a>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;">
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Lunedì</div>
+                                <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">09:00-11:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Mat 3A</div>
+                                </div>
+                                <div style="background: rgba(139, 92, 246, 0.1); padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">14:00-16:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Fis 4B</div>
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Martedì</div>
+                                <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">08:00-10:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Mat 5C</div>
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Mercoledì</div>
+                                <div style="background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">09:00-11:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Mat 3A</div>
+                                </div>
+                                <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">11:00-13:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Fis 4B</div>
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Giovedì</div>
+                                <div style="background: rgba(139, 92, 246, 0.1); padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">10:00-12:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Mat 5C</div>
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Venerdì</div>
+                                <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">08:00-10:00</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">Mat 3A</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO MESSAGGI -->
+            <div class="panel" id="panel-messaggi">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-comments"></i> Messaggi</h1>
+                            <p class="page-subtitle">Comunicazioni con studenti e genitori</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
                     <div class="card-body">
                         <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(37, 99, 235, 0.05); border-radius: 8px; border-left: 3px solid var(--accent);">
-                                <div style="min-width: 80px;">
-                                    <div style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">09:00</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted);">11:00</div>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">MR</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Mario Rossi</div>
+                                    <div class="list-subtitle">Ho una domanda sull'esercizio 5 della pagina 120...</div>
                                 </div>
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">Matematica - 3A</div>
-                                    <div style="font-size: 0.8125rem; color: var(--text-muted);">Aula 201</div>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-light); border-radius: 8px; border-left: 3px solid var(--border-light);">
-                                <div style="min-width: 80px;">
-                                    <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">11:15</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted);">13:00</div>
-                                </div>
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">Fisica - 4B</div>
-                                    <div style="font-size: 0.8125rem; color: var(--text-muted);">Laboratorio</div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">10 min fa</div>
+                                    <span class="badge badge-warning" style="margin-top: 4px;">Nuovo</span>
                                 </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-light); border-radius: 8px; border-left: 3px solid var(--border-light);">
-                                <div style="min-width: 80px;">
-                                    <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">14:30</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted);">16:00</div>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">LB</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Laura Bianchi</div>
+                                    <div class="list-subtitle">Grazie per la spiegazione di oggi!</div>
                                 </div>
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">Matematica - 5C</div>
-                                    <div style="font-size: 0.8125rem; color: var(--text-muted);">Aula 105</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Distribuzione Voti - 3A</h3>
-                        <a href="/bi/dashboard" class="card-action">Analytics</a>
-                    </div>
-                    <div class="card-body">
-                        <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Eccellenti (9-10)</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--success);">6 studenti</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill success" style="width: 25%;"></div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">1 ora fa</div>
                                 </div>
                             </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Buoni (7-8)</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--accent);">12 studenti</span>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">GV</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Giuseppe Verdi</div>
+                                    <div class="list-subtitle">Posso recuperare la verifica di venerdì?</div>
                                 </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill accent" style="width: 50%;"></div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">2 ore fa</div>
                                 </div>
                             </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Sufficienti (6)</span>
-                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--warning);">6 studenti</span>
+                            <div class="list-item" style="cursor: pointer;">
+                                <div class="list-avatar">SR</div>
+                                <div class="list-content" style="flex: 1;">
+                                    <div class="list-title">Sig.ra Rossi (genitore)</div>
+                                    <div class="list-subtitle">Vorrei fissare un colloquio per discutere...</div>
                                 </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill warning" style="width: 25%;"></div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Ieri</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="content-grid cols-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Messaggi Recenti</h3>
-                        <a href="/chat" class="card-action">Vedi tutti</a>
+
+            <!-- PANNELLO MATERIALI -->
+            <div class="panel" id="panel-materiali">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-folder"></i> Materiali Didattici</h1>
+                            <p class="page-subtitle">Gestisci e condividi risorse</p>
+                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
                     </div>
-                    <div class="card-body">
-                        <div class="list-item">
-                            <div class="list-avatar">MR</div>
-                            <div class="list-content">
-                                <div class="list-title">Mario Rossi</div>
-                                <div class="list-subtitle">Ho una domanda sull'esercizio 5...</div>
-                            </div>
-                            <div class="list-meta">
-                                <span style="font-size: 0.75rem; color: var(--text-light);">10 min fa</span>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-upload"></i> Carica Materiale</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="border: 2px dashed var(--border-glass); border-radius: 12px; padding: 40px; text-align: center;">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 16px;"></i>
+                                <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">Trascina i file qui</div>
+                                <div style="color: var(--text-muted); font-size: 0.875rem;">oppure clicca per selezionare</div>
                             </div>
                         </div>
-                        <div class="list-item">
-                            <div class="list-avatar">LB</div>
-                            <div class="list-content">
-                                <div class="list-title">Laura Bianchi</div>
-                                <div class="list-subtitle">Grazie per la spiegazione!</div>
-                            </div>
-                            <div class="list-meta">
-                                <span style="font-size: 0.75rem; color: var(--text-light);">1 ora fa</span>
-                            </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Materiali Caricati</h3>
                         </div>
-                        <div class="list-item">
-                            <div class="list-avatar">GV</div>
-                            <div class="list-content">
-                                <div class="list-title">Giuseppe Verdi</div>
-                                <div class="list-subtitle">Posso recuperare la verifica?</div>
-                            </div>
-                            <div class="list-meta">
-                                <span style="font-size: 0.75rem; color: var(--text-light);">2 ore fa</span>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="list-item">
+                                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-pdf" style="color: white;"></i>
+                                    </div>
+                                    <div class="list-content">
+                                        <div class="list-title">Esercizi Algebra Cap. 5</div>
+                                        <div class="list-subtitle">Classe 3A • 2 giorni fa</div>
+                                    </div>
+                                </div>
+                                <div class="list-item">
+                                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-powerpoint" style="color: white;"></i>
+                                    </div>
+                                    <div class="list-content">
+                                        <div class="list-title">Presentazione Fisica Quantistica</div>
+                                        <div class="list-subtitle">Classe 4B • 1 settimana fa</div>
+                                    </div>
+                                </div>
+                                <div class="list-item">
+                                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-excel" style="color: white;"></i>
+                                    </div>
+                                    <div class="list-content">
+                                        <div class="list-title">Tabella Formule Derivate</div>
+                                        <div class="list-subtitle">Classe 5C • 2 settimane fa</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Da Valutare</h3>
-                        <a href="/registro-professore" class="card-action">Vai al registro</a>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-item">
-                            <div class="list-content">
-                                <div class="list-title">Compito in Classe - Algebra</div>
-                                <div class="list-subtitle">Classe 3A - 24 studenti</div>
-                            </div>
-                            <span class="badge badge-warning">Urgente</span>
+            </div>
+
+            <!-- PANNELLO ANALYTICS -->
+            <div class="panel" id="panel-analytics">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div>
+                            <h1 class="page-title"><i class="fas fa-chart-line"></i> Analytics</h1>
+                            <p class="page-subtitle">Statistiche e analisi delle classi</p>
                         </div>
-                        <div class="list-item">
-                            <div class="list-content">
-                                <div class="list-title">Progetto Fisica</div>
-                                <div class="list-subtitle">Classe 4B - 8 progetti</div>
-                            </div>
-                            <span class="badge badge-neutral">In corso</span>
-                        </div>
-                        <div class="list-item">
-                            <div class="list-content">
-                                <div class="list-title">Quiz Online - Derivate</div>
-                                <div class="list-subtitle">Classe 5C - 15 completati</div>
-                            </div>
-                            <span class="badge badge-success">Pronto</span>
-                        </div>
+                        <button class="btn btn-secondary panel-nav-link" data-panel="dashboard">
+                            <i class="fas fa-arrow-left"></i> Indietro
+                        </button>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Prossimi Eventi</h3>
-                        <a href="/calendario" class="card-action">Calendario</a>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Media Complessiva</div>
+                        <div class="stat-value success">7.4</div>
                     </div>
-                    <div class="card-body">
-                        <div class="list-item">
-                            <div style="text-align: center; min-width: 48px; padding: 8px; background: var(--bg-light); border-radius: 8px;">
-                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">25</div>
-                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
-                            </div>
-                            <div class="list-content">
-                                <div class="list-title">Verifica Scritta - 3A</div>
-                                <div class="list-subtitle">09:00 - 11:00 - Aula 201</div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tasso Promozione</div>
+                        <div class="stat-value accent">94%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Frequenza Media</div>
+                        <div class="stat-value">92%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Studenti a Rischio</div>
+                        <div class="stat-value danger">3</div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Andamento Medie per Classe</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="color: var(--text-primary);">Classe 3A</span>
+                                        <span style="font-weight: 600; color: var(--color-emerald-400);">7.8</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="progress-fill success" style="width: 78%;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="color: var(--text-primary);">Classe 4B</span>
+                                        <span style="font-weight: 600; color: var(--accent-blue);">7.2</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 72%;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="color: var(--text-primary);">Classe 5C</span>
+                                        <span style="font-weight: 600; color: var(--color-amber-400);">6.9</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="progress-fill warning" style="width: 69%;"></div></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="list-item">
-                            <div style="text-align: center; min-width: 48px; padding: 8px; background: var(--bg-light); border-radius: 8px;">
-                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">27</div>
-                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
-                            </div>
-                            <div class="list-content">
-                                <div class="list-title">Consiglio di Classe</div>
-                                <div class="list-subtitle">15:00 - 17:00 - Sala Riunioni</div>
-                            </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Studenti con Difficoltà</h3>
                         </div>
-                        <div class="list-item">
-                            <div style="text-align: center; min-width: 48px; padding: 8px; background: var(--bg-light); border-radius: 8px;">
-                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">29</div>
-                                <div style="font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase;">Nov</div>
-                            </div>
-                            <div class="list-content">
-                                <div class="list-title">Colloqui Genitori</div>
-                                <div class="list-subtitle">14:00 - 18:00</div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="list-item">
+                                    <div class="list-avatar" style="background: linear-gradient(135deg, #ef4444, #dc2626);">AR</div>
+                                    <div class="list-content">
+                                        <div class="list-title">Andrea Ricci - 3A</div>
+                                        <div class="list-subtitle">Media: 5.2 • 3 insufficienze</div>
+                                    </div>
+                                    <span class="badge badge-warning">Attenzione</span>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-avatar" style="background: linear-gradient(135deg, #f59e0b, #d97706);">FM</div>
+                                    <div class="list-content">
+                                        <div class="list-title">Francesca Marini - 4B</div>
+                                        <div class="list-subtitle">Media: 5.8 • 2 insufficienze</div>
+                                    </div>
+                                    <span class="badge badge-neutral">Monitorare</span>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-avatar" style="background: linear-gradient(135deg, #f59e0b, #d97706);">PC</div>
+                                    <div class="list-content">
+                                        <div class="list-title">Paolo Colombo - 5C</div>
+                                        <div class="list-subtitle">Media: 5.5 • Assenze elevate</div>
+                                    </div>
+                                    <span class="badge badge-neutral">Monitorare</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -312,5 +727,38 @@
             </div>
         </main>
     </div>
+
+    <script>
+        function switchPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('panel-active');
+            });
+            
+            document.querySelectorAll('.nav-item a.panel-nav').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const targetPanel = document.getElementById('panel-' + panelId);
+            if (targetPanel) {
+                targetPanel.classList.add('panel-active');
+            }
+            
+            document.querySelectorAll(`[data-panel="${panelId}"]`).forEach(link => {
+                if (link.classList.contains('panel-nav')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        document.querySelectorAll('.panel-nav, .panel-nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const panelId = link.getAttribute('data-panel');
+                if (panelId) {
+                    switchPanel(panelId);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
