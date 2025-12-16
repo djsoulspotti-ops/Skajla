@@ -1630,12 +1630,12 @@
                         </div>
                         {% if medie_materie and medie_materie|length > 0 %}
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            {% for materia, media in medie_materie.items() %}
+                            {% for m in medie_materie %}
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
-                                <span style="color: var(--text-primary);">{{ materia }}</span>
+                                <span style="color: var(--text-primary);">{{ m.materia }}</span>
                                 <span style="font-weight: var(--font-bold); 
-                                    {% if media >= 6 %}color: var(--color-emerald-500);{% else %}color: var(--color-red-500);{% endif %}">
-                                    {{ "%.1f"|format(media) }}
+                                    {% if m.media >= 6 %}color: var(--color-emerald-500);{% else %}color: var(--color-red-500);{% endif %}">
+                                    {{ "%.1f"|format(m.media) }}
                                 </span>
                             </div>
                             {% endfor %}
