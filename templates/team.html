@@ -7,10 +7,12 @@
     <title>Team | SKAJLA</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0a0e17;
             --bg-card: #0f172a;
+            --bg-card-hover: #1e293b;
             --bg-surface: rgba(255,255,255,0.03);
             --text-white: #ffffff;
             --text-light: rgba(255,255,255,0.9);
@@ -21,6 +23,84 @@
             --accent-blue: #3b82f6;
             --accent-violet: #8b5cf6;
             --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --bg-surface: rgba(0,0,0,0.02);
+            --text-white: #0f172a;
+            --text-light: #1e293b;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --border-glass: rgba(0,0,0,0.06);
+            --border-light: rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-surface);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-blue);
+        }
+
+        .theme-toggle i {
+            position: absolute;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle .fa-sun {
+            color: #f59e0b;
+            opacity: 0;
+            transform: rotate(-90deg) scale(0);
+        }
+
+        .theme-toggle .fa-moon {
+            color: #8b5cf6;
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .theme-toggle .fa-sun {
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .theme-toggle .fa-moon {
+            opacity: 0;
+            transform: rotate(90deg) scale(0);
+        }
+
+        [data-theme="light"] .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .page-header {
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        }
+
+        [data-theme="light"] .team-card {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+
+        [data-theme="light"] .footer {
+            background: #f1f5f9;
         }
 
         * {
@@ -349,6 +429,10 @@
             </a>
             <div class="nav-links">
                 <a href="/">Home</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambia tema">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -493,5 +577,28 @@
             <div class="footer-copy">© 2025 SKAJLA</div>
         </div>
     </footer>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        const savedTheme = localStorage.getItem('skajla-theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            if (newTheme === 'dark') {
+                html.removeAttribute('data-theme');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+            
+            localStorage.setItem('skajla-theme', newTheme);
+        });
+    </script>
 </body>
 </html>

@@ -31,6 +31,131 @@
             --glow-violet: 0 0 30px rgba(139, 92, 246, 0.3);
         }
 
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --bg-surface: rgba(0,0,0,0.02);
+            --text-white: #0f172a;
+            --text-light: #1e293b;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --border-glass: rgba(0,0,0,0.06);
+            --border-light: rgba(0,0,0,0.1);
+            --gradient-hero: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            --glow-blue: 0 0 30px rgba(59, 130, 246, 0.15);
+            --glow-violet: 0 0 30px rgba(139, 92, 246, 0.15);
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-surface);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-blue);
+        }
+
+        .theme-toggle i {
+            position: absolute;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle .fa-sun {
+            color: #f59e0b;
+            opacity: 0;
+            transform: rotate(-90deg) scale(0);
+        }
+
+        .theme-toggle .fa-moon {
+            color: #8b5cf6;
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .theme-toggle .fa-sun {
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .theme-toggle .fa-moon {
+            opacity: 0;
+            transform: rotate(90deg) scale(0);
+        }
+
+        [data-theme="light"] .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .logo-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        [data-theme="light"] .gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        [data-theme="light"] .btn-secondary {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.1);
+            color: var(--text-light);
+        }
+
+        [data-theme="light"] .btn-secondary:hover {
+            background: rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .dashboard-preview {
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="light"] .feature-card {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .feature-card:hover {
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.12);
+        }
+
+        [data-theme="light"] .detail-block {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+        }
+
+        [data-theme="light"] .visual-stat-value,
+        [data-theme="light"] .detail-content h3 {
+            color: #0f172a;
+        }
+
+        [data-theme="light"] .chat-bubble.user {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        [data-theme="light"] .trust-dot {
+            background: var(--accent-green);
+        }
+
+        [data-theme="light"] .footer {
+            background: #f1f5f9;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -1276,6 +1401,10 @@
             </a>
             <div class="nav-links">
                 <a href="#features">Funzionalita</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambia tema">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </button>
                 <a href="/login" class="btn btn-primary">Accedi</a>
             </div>
         </div>
@@ -1859,5 +1988,28 @@
             <div class="footer-copy">© 2025 SKAJLA</div>
         </div>
     </footer>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        const savedTheme = localStorage.getItem('skajla-theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            if (newTheme === 'dark') {
+                html.removeAttribute('data-theme');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+            
+            localStorage.setItem('skajla-theme', newTheme);
+        });
+    </script>
 </body>
 </html>
