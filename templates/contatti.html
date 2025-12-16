@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Contattaci - SKAJLA Enterprise Education Platform">
-    <title>Contatti | SKAJLA</title>
+    <meta name="description" content="Richiedi un preventivo personalizzato per SKAJLA - La piattaforma educativa enterprise per istituti italiani.">
+    <title>Richiedi Preventivo | SKAJLA</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-white: #ffffff;
-            --bg-light: #f7f8fa;
-            --text-primary: #1a1a1a;
-            --text-secondary: #4a4a4a;
-            --text-muted: #6b7280;
-            --border-light: #e5e7eb;
-            --border-dark: #d1d5db;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --success: #059669;
-            --success-light: #d1fae5;
+            --bg-dark: #0a0e17;
+            --bg-card: #0f172a;
+            --bg-surface: rgba(255,255,255,0.03);
+            --text-white: #ffffff;
+            --text-light: rgba(255,255,255,0.9);
+            --text-muted: rgba(255,255,255,0.6);
+            --text-dim: rgba(255,255,255,0.4);
+            --border-glass: rgba(255,255,255,0.08);
+            --border-light: rgba(255,255,255,0.12);
+            --accent-blue: #3b82f6;
+            --accent-violet: #8b5cf6;
+            --accent-emerald: #10b981;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --shadow-glow: 0 0 60px rgba(59, 130, 246, 0.15);
         }
 
         * {
@@ -29,20 +32,16 @@
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-white);
-            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 1140px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 32px;
         }
@@ -53,12 +52,12 @@
             left: 0;
             right: 0;
             height: 72px;
-            background: rgba(255,255,255,0.98);
-            border-bottom: 1px solid var(--border-light);
+            background: rgba(10, 14, 23, 0.85);
+            border-bottom: 1px solid var(--border-glass);
             z-index: 1000;
             display: flex;
             align-items: center;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(20px);
         }
 
         .navbar .container {
@@ -77,439 +76,437 @@
 
         .logo-image {
             height: 42px;
-            width: auto;
-            border-radius: 8px;
-            object-fit: contain;
-            transition: transform 0.3s ease;
-        }
-
-        .logo:hover .logo-image {
-            transform: scale(1.05);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .logo-text {
             font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.02em;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 40px;
+            gap: 32px;
         }
 
         .nav-links a {
-            color: var(--text-secondary);
+            color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.9375rem;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .nav-links a:hover {
-            color: var(--text-primary);
+            color: var(--text-white);
         }
 
-        .btn {
-            display: inline-flex;
+        .page-wrapper {
+            padding-top: 72px;
+            min-height: 100vh;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 12px 28px;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: #ffffff !important;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-        }
-
-        .hero {
-            padding: 140px 0 80px;
-            background: linear-gradient(135deg, #001F3F 0%, #003B73 100%);
-            color: white;
-            text-align: center;
-        }
-
-        .hero-title {
-            font-size: 2.75rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: -0.03em;
-        }
-
-        .hero-subtitle {
-            font-size: 1.125rem;
-            opacity: 0.85;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .section {
+        .contact-section {
             padding: 80px 0;
-        }
-
-        .section-white {
-            background: var(--bg-white);
-        }
-
-        .section-light {
-            background: var(--bg-light);
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .section-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 12px;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            letter-spacing: -0.02em;
-        }
-
-        .section-subtitle {
-            font-size: 1rem;
-            color: var(--text-secondary);
+            width: 100%;
         }
 
         .contact-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 32px;
-            max-width: 800px;
-            margin: 0 auto;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 64px;
+            align-items: start;
         }
 
-        .contact-card {
-            background: var(--bg-white);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 40px 32px;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .contact-info {
+            padding-right: 32px;
         }
 
-        .contact-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-        }
-
-        .contact-card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-            transform: translateY(-4px);
-        }
-
-        .contact-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-        }
-
-        .contact-icon i {
-            font-size: 1.75rem;
-            color: var(--accent);
-        }
-
-        .contact-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-        }
-
-        .contact-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-        }
-
-        .contact-link {
+        .page-label {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9375rem;
-            transition: all 0.2s;
-        }
-
-        .contact-link:hover {
-            color: var(--accent-hover);
-            gap: 12px;
-        }
-
-        .faq-list {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .faq-item {
-            background: var(--bg-white);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            margin-bottom: 16px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item:hover {
-            border-color: var(--accent);
-        }
-
-        .faq-question {
-            padding: 24px 28px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 0.75rem;
             font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
-            background: var(--bg-white);
-            transition: background 0.2s;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 100px;
         }
 
-        .faq-question:hover {
-            background: var(--bg-light);
-        }
-
-        .faq-question i {
-            color: var(--accent);
-            transition: transform 0.3s;
+        .page-label i {
             font-size: 0.875rem;
         }
 
-        .faq-item.active .faq-question i {
-            transform: rotate(180deg);
+        .page-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--text-white);
+            margin-bottom: 20px;
+            line-height: 1.2;
         }
 
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease, padding 0.3s ease;
+        .page-title span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .faq-item.active .faq-answer {
-            max-height: 500px;
-        }
-
-        .faq-answer-content {
-            padding: 0 28px 24px;
-            color: var(--text-secondary);
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            margin-bottom: 48px;
             line-height: 1.7;
-            font-size: 0.9375rem;
         }
 
         .info-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            max-width: 1000px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .info-card {
-            background: var(--bg-white);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 32px 24px;
-            text-align: center;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 24px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
             transition: all 0.3s ease;
         }
 
         .info-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
-        .info-card-icon {
+        .info-icon {
             width: 48px;
             height: 48px;
-            background: var(--bg-light);
+            background: var(--gradient-primary);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 16px;
-        }
-
-        .info-card-icon i {
+            color: white;
             font-size: 1.25rem;
-            color: var(--accent);
+            flex-shrink: 0;
         }
 
-        .info-card h3 {
+        .info-content h3 {
             font-size: 1rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text-white);
+            margin-bottom: 4px;
+        }
+
+        .info-content p {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+        }
+
+        .contact-form-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-white);
             margin-bottom: 8px;
         }
 
-        .info-card p {
+        .form-header p {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-label {
+            display: block;
             font-size: 0.875rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 8px;
         }
 
-        .cta-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #001F3F 0%, #003B73 100%);
+        .form-label .required {
+            color: #ef4444;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-dim);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.4)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 20px;
+            padding-right: 48px;
+        }
+
+        .form-select option {
+            background: var(--bg-card);
+            color: var(--text-white);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .checkbox-label a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px 32px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 12px;
             color: white;
-            text-align: center;
-        }
-
-        .cta-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .cta-subtitle {
-            font-size: 1.0625rem;
-            opacity: 0.85;
-            margin-bottom: 32px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .btn-white {
-            background: white;
-            color: var(--accent) !important;
-            padding: 14px 32px;
             font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
         }
 
-        .btn-white:hover {
-            background: var(--bg-light);
+        .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .form-footer p {
+            font-size: 0.8125rem;
+            color: var(--text-dim);
+        }
+
+        .form-footer i {
+            color: var(--accent-emerald);
+            margin-right: 6px;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 48px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .success-message h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 12px;
+        }
+
+        .success-message p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
         }
 
         .footer {
-            padding: 48px 0;
-            background: var(--bg-white);
-            border-top: 1px solid var(--border-light);
+            padding: 32px 0;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border-glass);
         }
 
         .footer .container {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .footer-logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .footer-links {
             display: flex;
-            justify-content: center;
-            gap: 40px;
-        }
-
-        .footer-links a {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: var(--text-primary);
+            justify-content: space-between;
+            align-items: center;
         }
 
         .footer-copy {
             font-size: 0.8125rem;
-            color: var(--text-muted);
+            color: var(--text-dim);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 24px;
-            }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
 
-            .nav-links a:not(.btn) {
-                display: none;
-            }
+        .footer-links a {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
 
-            .hero {
-                padding: 120px 0 60px;
-            }
+        .footer-links a:hover {
+            color: var(--text-white);
+        }
 
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .section {
-                padding: 60px 0;
-            }
-
+        @media (max-width: 968px) {
             .contact-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 48px;
+            }
+
+            .contact-info {
+                padding-right: 0;
+                text-align: center;
             }
 
             .info-cards {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
                 grid-template-columns: 1fr;
+            }
+
+            .contact-form-wrapper {
+                padding: 32px 24px;
             }
 
             .footer .container {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                gap: 16px;
                 text-align: center;
-                gap: 24px;
-            }
-
-            .footer-links {
-                flex-wrap: wrap;
-                gap: 24px;
             }
         }
     </style>
@@ -523,230 +520,216 @@
             </a>
             <div class="nav-links">
                 <a href="/">Home</a>
-                <a href="/login" class="btn btn-primary">Accedi</a>
+                <a href="/team">Team</a>
+                <a href="/login">Accedi</a>
             </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="container">
-            <h1 class="hero-title">Contattaci</h1>
-            <p class="hero-subtitle">
-                Siamo qui per aiutarti. Hai domande su SKAJLA? Contattaci direttamente o consulta le nostre FAQ.
-            </p>
-        </div>
-    </section>
+    <div class="page-wrapper">
+        <section class="contact-section">
+            <div class="container">
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <div class="page-label">
+                            <i class="fas fa-envelope"></i>
+                            Contattaci
+                        </div>
+                        <h1 class="page-title">Richiedi un <span>Preventivo</span> Personalizzato</h1>
+                        <p class="page-subtitle">
+                            Compila il modulo per ricevere una proposta su misura per il tuo istituto. 
+                            Il nostro team ti contatterà entro 24 ore lavorative.
+                        </p>
 
-    <section class="section section-white">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Contatti Diretti</div>
-                <h2 class="section-title">Come raggiungerci</h2>
-                <p class="section-subtitle">Scegli il canale che preferisci per metterti in contatto con noi</p>
-            </div>
-
-            <div class="contact-grid">
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="contact-label">Email</div>
-                    <div class="contact-value">danielspotti83@gmail.com</div>
-                    <a href="mailto:danielspotti83@gmail.com" class="contact-link">
-                        Invia un'email <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                    <div class="contact-label">Telefono</div>
-                    <div class="contact-value">+39 349 248 7913</div>
-                    <a href="tel:+393492487913" class="contact-link">
-                        Chiamaci ora <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section section-light">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Informazioni</div>
-                <h2 class="section-title">Perche scegliere SKAJLA</h2>
-            </div>
-
-            <div class="info-cards">
-                <div class="info-card">
-                    <div class="info-card-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3>Supporto Dedicato</h3>
-                    <p>Il nostro team e disponibile per assisterti nell'implementazione e nell'utilizzo quotidiano della piattaforma.</p>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-card-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <h3>Formazione Inclusa</h3>
-                    <p>Offriamo sessioni di formazione per docenti e personale amministrativo per massimizzare l'efficacia della piattaforma.</p>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-card-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>Sicurezza Garantita</h3>
-                    <p>I dati della tua scuola sono protetti con crittografia avanzata e backup automatici giornalieri.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section section-white">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Domande Frequenti</div>
-                <h2 class="section-title">FAQ</h2>
-                <p class="section-subtitle">Trova rapidamente le risposte alle domande piu comuni</p>
-            </div>
-
-            <div class="faq-list">
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Cos'e SKAJLA e a chi e rivolto?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            SKAJLA e una piattaforma educativa enterprise progettata specificamente per il sistema scolastico italiano. E rivolta a scuole di ogni ordine e grado, offrendo strumenti per studenti, docenti, genitori e dirigenti scolastici. La piattaforma integra tutoring AI, analytics avanzati, gamification e gestione amministrativa in un'unica soluzione.
+                        <div class="info-cards">
+                            <div class="info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="info-content">
+                                    <h3>Risposta Rapida</h3>
+                                    <p>Ti ricontattiamo entro 24 ore lavorative con un preventivo dettagliato.</p>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-sliders-h"></i>
+                                </div>
+                                <div class="info-content">
+                                    <h3>Soluzioni Personalizzate</h3>
+                                    <p>Ogni istituto e unico. Creiamo piani su misura per le tue esigenze.</p>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                <div class="info-content">
+                                    <h3>Supporto Dedicato</h3>
+                                    <p>Un account manager dedicato ti seguira in ogni fase dell'implementazione.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Come funziona l'AI Tutoring?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            L'AI Tutoring di SKAJLA utilizza Google Gemini 2.0-flash per fornire supporto didattico personalizzato. Gli studenti possono fare domande, ricevere spiegazioni dettagliate e esercitarsi con quiz adattivi che si adeguano al loro livello di preparazione. L'AI comunica in italiano e utilizza un approccio motivazionale per incoraggiare l'apprendimento.
+                    <div class="contact-form-wrapper">
+                        <div class="form-header">
+                            <h2>Compila il Modulo</h2>
+                            <p>Tutti i campi contrassegnati con * sono obbligatori</p>
                         </div>
-                    </div>
-                </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>La piattaforma e conforme al GDPR?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            Si, SKAJLA e pienamente conforme al GDPR e alle normative italiane sulla privacy. Utilizziamo crittografia end-to-end, i dati sono ospitati in data center europei, e implementiamo l'isolamento multi-tenant per garantire che i dati di ogni istituto siano completamente separati e protetti.
-                        </div>
-                    </div>
-                </div>
+                        <form id="contactForm" action="/api/contact" method="POST">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Nome <span class="required">*</span></label>
+                                    <input type="text" class="form-input" name="nome" placeholder="Il tuo nome" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Cognome <span class="required">*</span></label>
+                                    <input type="text" class="form-input" name="cognome" placeholder="Il tuo cognome" required>
+                                </div>
+                            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Quanto costa SKAJLA?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            Il costo di SKAJLA varia in base al numero di studenti e alle funzionalita richieste. Offriamo piani flessibili per adattarci alle esigenze di ogni istituto. Contattaci per ricevere un preventivo personalizzato senza impegno.
-                        </div>
-                    </div>
-                </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Email Istituzionale <span class="required">*</span></label>
+                                    <input type="email" class="form-input" name="email" placeholder="email@scuola.edu.it" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Telefono</label>
+                                    <input type="tel" class="form-input" name="telefono" placeholder="+39 xxx xxx xxxx">
+                                </div>
+                            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Come possono i genitori accedere alla piattaforma?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            I genitori ricevono un codice di accesso unico generato automaticamente per ogni figlio. Una volta registrati, possono monitorare voti, assenze, comunicazioni scolastiche e il progresso del proprio figlio in tempo reale, tutto da un'interfaccia semplice e intuitiva.
-                        </div>
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label class="form-label">Nome Istituto <span class="required">*</span></label>
+                                <input type="text" class="form-input" name="istituto" placeholder="Nome completo dell'istituto" required>
+                            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>E possibile integrare SKAJLA con altri sistemi scolastici?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            Si, SKAJLA e progettata per integrarsi con i principali sistemi di gestione scolastica e registri elettronici. Supportiamo l'importazione ed esportazione di dati e possiamo sviluppare integrazioni personalizzate in base alle esigenze specifiche dell'istituto.
-                        </div>
-                    </div>
-                </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Ruolo <span class="required">*</span></label>
+                                    <select class="form-select" name="ruolo" required>
+                                        <option value="" disabled selected>Seleziona il tuo ruolo</option>
+                                        <option value="dirigente">Dirigente Scolastico</option>
+                                        <option value="vicario">Collaboratore del DS</option>
+                                        <option value="dsga">DSGA</option>
+                                        <option value="docente">Docente Referente</option>
+                                        <option value="amministrativo">Personale Amministrativo</option>
+                                        <option value="altro">Altro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Numero Studenti (stima)</label>
+                                    <select class="form-select" name="studenti">
+                                        <option value="" disabled selected>Seleziona fascia</option>
+                                        <option value="0-200">Fino a 200</option>
+                                        <option value="200-500">200 - 500</option>
+                                        <option value="500-1000">500 - 1.000</option>
+                                        <option value="1000-2000">1.000 - 2.000</option>
+                                        <option value="2000+">Oltre 2.000</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Cosa include il sistema di gamification?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            Il sistema di gamification di SKAJLA include 9 livelli di progressione (da Germoglio a Immortale), punti XP, badge con diversi livelli di rarita, sfide giornaliere e settimanali, classifiche individuali e di classe, e un Battle Pass stagionale. Tutto questo per motivare gli studenti e rendere l'apprendimento piu coinvolgente.
-                        </div>
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label class="form-label">Tipo di Istituto</label>
+                                <select class="form-select" name="tipo_istituto">
+                                    <option value="" disabled selected>Seleziona tipologia</option>
+                                    <option value="liceo">Liceo</option>
+                                    <option value="tecnico">Istituto Tecnico</option>
+                                    <option value="professionale">Istituto Professionale</option>
+                                    <option value="comprensivo">Istituto Comprensivo</option>
+                                    <option value="primaria">Scuola Primaria</option>
+                                    <option value="secondaria_1">Scuola Secondaria I grado</option>
+                                    <option value="paritaria">Scuola Paritaria</option>
+                                    <option value="altro">Altro</option>
+                                </select>
+                            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Quanto tempo richiede l'implementazione?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            L'implementazione base di SKAJLA richiede tipicamente 1-2 settimane, inclusa la configurazione iniziale e la formazione del personale. Per implementazioni piu complesse con integrazioni personalizzate, il tempo puo variare da 2 a 4 settimane. Il nostro team ti guidera in ogni fase del processo.
+                            <div class="form-group">
+                                <label class="form-label">Messaggio / Richieste Specifiche</label>
+                                <textarea class="form-textarea" name="messaggio" placeholder="Descrivi le tue esigenze specifiche, funzionalita desiderate o domande..."></textarea>
+                            </div>
+
+                            <div class="form-checkbox-group">
+                                <input type="checkbox" class="form-checkbox" id="privacy" name="privacy" required>
+                                <label class="checkbox-label" for="privacy">
+                                    Acconsento al trattamento dei miei dati personali ai sensi del GDPR (Reg. UE 2016/679) 
+                                    per ricevere informazioni commerciali e un preventivo personalizzato. 
+                                    <a href="/privacy">Leggi l'informativa completa</a>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-paper-plane"></i>
+                                Invia Richiesta
+                            </button>
+
+                            <div class="form-footer">
+                                <p><i class="fas fa-shield-alt"></i> I tuoi dati sono al sicuro e non saranno condivisi con terze parti</p>
+                            </div>
+                        </form>
+
+                        <div class="success-message" id="successMessage">
+                            <div class="success-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h3>Richiesta Inviata!</h3>
+                            <p>Grazie per averci contattato. Il nostro team ti rispondera entro 24 ore lavorative.</p>
+                            <a href="/" class="btn-back">
+                                <i class="fas fa-arrow-left"></i>
+                                Torna alla Home
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section class="cta-section">
-        <div class="container">
-            <h2 class="cta-title">Pronto a trasformare la tua scuola?</h2>
-            <p class="cta-subtitle">Contattaci oggi per una demo gratuita e scopri come SKAJLA puo migliorare l'esperienza educativa nel tuo istituto.</p>
-            <a href="mailto:danielspotti83@gmail.com" class="btn btn-white">Richiedi una Demo</a>
-        </div>
-    </section>
+        </section>
+    </div>
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-logo">SKAJLA</div>
+            <div class="footer-copy">2024 SKAJLA. Tutti i diritti riservati.</div>
             <div class="footer-links">
-                <a href="/">Home</a>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Termini di Servizio</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Termini di Servizio</a>
+                <a href="/team">Chi Siamo</a>
             </div>
-            <div class="footer-copy">© 2025 SKAJLA</div>
         </div>
     </footer>
 
     <script>
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const item = question.parentElement;
-                const isActive = item.classList.contains('active');
-                
-                document.querySelectorAll('.faq-item').forEach(faq => {
-                    faq.classList.remove('active');
-                });
-                
-                if (!isActive) {
-                    item.classList.add('active');
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('.btn-submit');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Invio in corso...';
+            submitBtn.disabled = true;
+            
+            fetch('/api/contact', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('contactForm').style.display = 'none';
+                    document.querySelector('.form-header').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    alert('Si e verificato un errore. Riprova piu tardi.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 }
+            })
+            .catch(error => {
+                alert('Si e verificato un errore. Riprova piu tardi.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             });
         });
     </script>

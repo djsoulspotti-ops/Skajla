@@ -251,6 +251,26 @@ class SkailaApp:
         def contatti():
             return render_template('contatti.html')
 
+        @self.app.route('/api/contact', methods=['POST'])
+        def api_contact():
+            try:
+                nome = request.form.get('nome', '')
+                cognome = request.form.get('cognome', '')
+                email = request.form.get('email', '')
+                telefono = request.form.get('telefono', '')
+                istituto = request.form.get('istituto', '')
+                ruolo = request.form.get('ruolo', '')
+                studenti = request.form.get('studenti', '')
+                tipo_istituto = request.form.get('tipo_istituto', '')
+                messaggio = request.form.get('messaggio', '')
+                
+                print(f"[CONTACT REQUEST] {nome} {cognome} - {email} - {istituto} - {ruolo}")
+                
+                return jsonify({'success': True, 'message': 'Richiesta inviata con successo'})
+            except Exception as e:
+                print(f"Error processing contact form: {e}")
+                return jsonify({'success': False, 'error': str(e)}), 500
+
         @self.app.route('/team')
         def team():
             return render_template('team.html')
