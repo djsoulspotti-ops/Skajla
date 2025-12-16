@@ -1562,6 +1562,8 @@
             padding: 20px 16px;
             text-align: center;
             transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
         }
 
         .tech-item:hover {
@@ -1575,10 +1577,82 @@
             margin-bottom: 8px;
         }
 
-        .tech-item span {
+        .tech-item span.tech-name {
             display: block;
             font-size: 0.75rem;
             color: var(--text-muted);
+        }
+
+        .tech-tooltip {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 16px;
+            width: 260px;
+            text-align: left;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .tech-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: var(--bg-card);
+        }
+
+        .tech-item:hover .tech-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tech-tooltip-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tech-tooltip-title i {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .tech-tooltip-desc {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        [data-theme="light"] .tech-tooltip {
+            background: #ffffff;
+            border-color: rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        [data-theme="light"] .tech-tooltip::after {
+            border-top-color: #ffffff;
+        }
+
+        [data-theme="light"] .tech-tooltip-title {
+            color: #0f172a;
+        }
+
+        [data-theme="light"] .tech-tooltip-desc {
+            color: #475569;
         }
 
         @media (max-width: 968px) {
@@ -2163,35 +2237,67 @@
                     <div class="tech-stack-grid">
                         <div class="tech-item">
                             <i class="fas fa-lock"></i>
-                            <span>Crittografia</span>
+                            <span class="tech-name">Crittografia</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-lock"></i> Crittografia AES-256</div>
+                                <div class="tech-tooltip-desc">Tutti i dati sensibili sono protetti con crittografia AES-256 bit a riposo e TLS 1.3 in transito. Standard bancario per la massima sicurezza.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-server"></i>
-                            <span>Data Center EU</span>
+                            <span class="tech-name">Data Center EU</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-server"></i> Data Center EU</div>
+                                <div class="tech-tooltip-desc">I server sono ubicati in data center certificati nell'Unione Europea, garantendo conformita alle normative europee sulla residenza dei dati.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-user-shield"></i>
-                            <span>GDPR</span>
+                            <span class="tech-name">GDPR</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-user-shield"></i> GDPR Compliant</div>
+                                <div class="tech-tooltip-desc">Piena conformita al Regolamento UE 2016/679. Gestione consensi, diritto all'oblio, portabilita dati e DPO dedicato per ogni istituto.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-history"></i>
-                            <span>Backup Auto</span>
+                            <span class="tech-name">Backup Auto</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-history"></i> Backup Automatici</div>
+                                <div class="tech-tooltip-desc">Backup incrementali ogni 6 ore con retention di 30 giorni. Ripristino point-in-time disponibile per recuperare dati in qualsiasi momento.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-network-wired"></i>
-                            <span>Multi-Tenant</span>
+                            <span class="tech-name">Multi-Tenant</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-network-wired"></i> Isolamento Multi-Tenant</div>
+                                <div class="tech-tooltip-desc">Ogni istituto opera in un ambiente completamente isolato. I dati sono separati a livello di database e applicazione per la massima privacy.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-clipboard-list"></i>
-                            <span>Audit Log</span>
+                            <span class="tech-name">Audit Log</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-clipboard-list"></i> Audit Log Completo</div>
+                                <div class="tech-tooltip-desc">Registro dettagliato di tutte le attivita: accessi, modifiche, esportazioni. Tracciabilita completa per conformita e sicurezza.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-key"></i>
-                            <span>SSO Ready</span>
+                            <span class="tech-name">SSO Ready</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-key"></i> Single Sign-On</div>
+                                <div class="tech-tooltip-desc">Integrazione con i principali provider di identita (Google Workspace, Microsoft 365, SPID). Un'unica password per accedere a tutto.</div>
+                            </div>
                         </div>
                         <div class="tech-item">
                             <i class="fas fa-tachometer-alt"></i>
-                            <span>99.9% Uptime</span>
+                            <span class="tech-name">99.9% Uptime</span>
+                            <div class="tech-tooltip">
+                                <div class="tech-tooltip-title"><i class="fas fa-tachometer-alt"></i> 99.9% Uptime SLA</div>
+                                <div class="tech-tooltip-desc">Infrastruttura ridondante con failover automatico. Massimo 8.76 ore di downtime annuo garantite contrattualmente.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
