@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Privacy Policy - SKAJLA Piattaforma Educativa">
+    <title>Privacy Policy | SKAJLA</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #0f172a;
+            --bg-card-hover: #1e293b;
+            --bg-surface: rgba(255,255,255,0.03);
+            --text-white: #ffffff;
+            --text-light: rgba(255,255,255,0.9);
+            --text-muted: rgba(255,255,255,0.6);
+            --text-dim: rgba(255,255,255,0.4);
+            --border-glass: rgba(255,255,255,0.08);
+            --border-light: rgba(255,255,255,0.12);
+            --accent-blue: #3b82f6;
+            --accent-violet: #8b5cf6;
+            --accent-emerald: #10b981;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --bg-surface: rgba(0,0,0,0.02);
+            --text-white: #0f172a;
+            --text-light: #1e293b;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --border-glass: rgba(0,0,0,0.06);
+            --border-light: rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-surface);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-blue);
+        }
+
+        .theme-toggle i {
+            position: absolute;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle .fa-sun {
+            color: #f59e0b;
+            opacity: 0;
+            transform: rotate(-90deg) scale(0);
+        }
+
+        .theme-toggle .fa-moon {
+            color: #8b5cf6;
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .theme-toggle .fa-sun {
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .theme-toggle .fa-moon {
+            opacity: 0;
+            transform: rotate(90deg) scale(0);
+        }
+
+        [data-theme="light"] .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .footer {
+            background: #f1f5f9;
+        }
+
+        [data-theme="light"] .content-card {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: rgba(10, 14, 23, 0.85);
+            border-bottom: 1px solid var(--border-glass);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-image {
+            height: 42px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-white);
+        }
+
+        .page-header {
+            padding: 140px 0 60px;
+            text-align: center;
+        }
+
+        .page-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 100px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-white);
+            margin-bottom: 16px;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
+
+        .content-section {
+            padding-bottom: 80px;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 48px;
+        }
+
+        .intro-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 40px;
+            font-size: 1.125rem;
+            color: var(--text-light);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin: 40px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: var(--accent-blue);
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .content-text {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .content-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .content-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            color: var(--text-light);
+        }
+
+        .content-list li i {
+            color: var(--accent-emerald);
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+
+        .highlight-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .highlight-box p {
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .contact-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .contact-box h3 {
+            color: var(--text-white);
+            margin-bottom: 12px;
+        }
+
+        .contact-box a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-box a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            padding: 32px 0;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+        }
+
+        .footer-copy {
+            font-size: 0.8125rem;
+            color: var(--text-dim);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-white);
+        }
+
+        @media (max-width: 768px) {
+            .content-card {
+                padding: 32px 24px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .footer .container {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="/static/images/skajla-logo-new.jpg" alt="SKAJLA Logo" class="logo-image">
+                <span class="logo-text">SKAJLA</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambia tema">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="page-label">
+                <i class="fas fa-shield-alt"></i>
+                Documento Legale
+            </div>
+            <h1 class="page-title">Privacy Policy</h1>
+            <p class="page-subtitle">Come proteggiamo i tuoi dati personali</p>
+        </div>
+    </header>
+
+    <section class="content-section">
+        <div class="container">
+            <div class="content-card">
+                <div class="intro-box">
+                    Ciao! Questa e l'informativa privacy di SKAJLA spiegata in modo semplice per te.
+                </div>
+
+                <h2 class="section-title"><i class="fas fa-users"></i> Chi siamo</h2>
+                <p class="content-text">
+                    SKAJLA e una piattaforma che ti aiuta a studiare meglio. La usa la tua scuola per farti fare esercizi, 
+                    vedere i tuoi progressi e imparare in modo personalizzato.
+                </p>
+
+                <h2 class="section-title"><i class="fas fa-database"></i> Che dati raccogliamo su di te?</h2>
+                <p class="content-text">Raccogliamo solo le informazioni necessarie:</p>
+                <ul class="content-list">
+                    <li><i class="fas fa-check-circle"></i> Nome, cognome, classe</li>
+                    <li><i class="fas fa-check-circle"></i> Email (se ne hai una)</li>
+                    <li><i class="fas fa-check-circle"></i> I tuoi voti ed esercizi che fai</li>
+                    <li><i class="fas fa-check-circle"></i> Quando usi SKAJLA e per quanto tempo</li>
+                </ul>
+
+                <h2 class="section-title"><i class="fas fa-question-circle"></i> Perche li raccogliamo?</h2>
+                <ul class="content-list">
+                    <li><i class="fas fa-check-circle"></i> Per farti vedere i tuoi esercizi e i tuoi progressi</li>
+                    <li><i class="fas fa-check-circle"></i> Per suggerirti contenuti adatti a te</li>
+                    <li><i class="fas fa-check-circle"></i> Per permettere ai tuoi prof di seguire come vai a scuola</li>
+                    <li><i class="fas fa-check-circle"></i> Per far funzionare la piattaforma</li>
+                </ul>
+
+                <h2 class="section-title"><i class="fas fa-eye"></i> Chi puo vedere i tuoi dati?</h2>
+                <p class="content-text">Solo poche persone possono vedere le tue informazioni:</p>
+                <ul class="content-list">
+                    <li><i class="fas fa-chalkboard-teacher"></i> I tuoi professori</li>
+                    <li><i class="fas fa-user-friends"></i> I tuoi genitori (se hai meno di 14 anni)</li>
+                    <li><i class="fas fa-school"></i> La tua scuola</li>
+                    <li><i class="fas fa-cog"></i> Le persone di SKAJLA che devono far funzionare il sito (ma solo se necessario)</li>
+                </ul>
+
+                <div class="highlight-box warning">
+                    <p><strong>NON vendiamo i tuoi dati a nessuno!</strong></p>
+                </div>
+
+                <h2 class="section-title"><i class="fas fa-hand-paper"></i> I tuoi diritti</h2>
+                <p class="content-text">Puoi (o i tuoi genitori se hai meno di 14 anni):</p>
+                <ul class="content-list">
+                    <li><i class="fas fa-eye"></i> Vedere tutti i dati che abbiamo su di te</li>
+                    <li><i class="fas fa-edit"></i> Correggere informazioni sbagliate</li>
+                    <li><i class="fas fa-trash-alt"></i> Chiedere di cancellare i tuoi dati</li>
+                    <li><i class="fas fa-download"></i> Scaricare tutti i tuoi dati</li>
+                    <li><i class="fas fa-ban"></i> Chiedere di smettere di usare i tuoi dati</li>
+                </ul>
+
+                <h2 class="section-title"><i class="fas fa-clock"></i> Quanto tempo teniamo i tuoi dati?</h2>
+                <p class="content-text">
+                    Teniamo i tuoi dati solo finche frequenti la scuola che usa SKAJLA. Dopo, li cancelliamo oppure 
+                    li rendiamo anonimi (cioe non si capisce piu che sono tuoi).
+                </p>
+
+                <h2 class="section-title"><i class="fas fa-lock"></i> E sicuro?</h2>
+                <p class="content-text">Si! Proteggiamo i tuoi dati con:</p>
+                <ul class="content-list">
+                    <li><i class="fas fa-key"></i> Password cifrate (nessuno puo vederle)</li>
+                    <li><i class="fas fa-shield-alt"></i> Protezioni contro gli hacker</li>
+                    <li><i class="fas fa-user-lock"></i> Controlli per evitare che persone non autorizzate vedano i tuoi dati</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <p><strong>Ricorda: i tuoi dati sono tuoi e li proteggiamo!</strong></p>
+                </div>
+
+                <div class="contact-box">
+                    <h3>Hai domande?</h3>
+                    <p class="content-text">Se hai dubbi, puoi parlare con i tuoi genitori, chiedere ai tuoi prof oppure scrivere a:</p>
+                    <a href="mailto:privacy@skajla.com">privacy@skajla.com</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-copy">2025 SKAJLA. Tutti i diritti riservati.</div>
+            <div class="footer-links">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Termini di Servizio</a>
+                <a href="/team">Chi Siamo</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        const savedTheme = localStorage.getItem('skajla-theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            if (newTheme === 'dark') {
+                html.removeAttribute('data-theme');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+            
+            localStorage.setItem('skajla-theme', newTheme);
+        });
+    </script>
+</body>
+</html>

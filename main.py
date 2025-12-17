@@ -275,6 +275,14 @@ class SkailaApp:
         def team():
             return render_template('team.html')
 
+        @self.app.route('/privacy')
+        def privacy():
+            return render_template('privacy.html')
+
+        @self.app.route('/terms')
+        def terms():
+            return render_template('terms.html')
+
         @self.app.route('/chat')
         def chat():
             if 'user_id' not in session:
