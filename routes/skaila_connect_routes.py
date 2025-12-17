@@ -163,7 +163,7 @@ def connect_hub():
             JOIN skaila_connect_companies c ON co.company_id = c.id
             WHERE co.is_active = TRUE
             ORDER BY co.created_at DESC
-            LIMIT 50
+            LIMIT 100
         ''') or []
     except Exception as e:
         logger.warning(
@@ -171,30 +171,66 @@ def connect_hub():
             domain='skaila_connect',
             user_id=user_id,
             error=str(e),
-            error_type=type(e).__name__,
-            message='Opportunity tables not found or query failed, showing empty state',
+            message='Opportunity tables not found or query failed',
             fallback='empty_list'
         )
-        opportunities = []
+        opportunities = [] # No more mock data fallback for listing to avoid confusion
     
-    # Get profile completeness for student
-    profile_completeness = 50  # Default
+    # Get profile completeness and SKILLS for matching
+    profile_completeness = 50
+    student_skills_names = []
+    
     if ruolo == 'studente':
         try:
             from services.portfolio.student_portfolio_manager import StudentPortfolioManager
             portfolio_manager = StudentPortfolioManager()
+            # Get full card (cached-like) mainly for completeness and skills
+            # Note: In a real high-scale app, we would fetch only skills specific query.
             candidate_card = portfolio_manager.generate_candidate_card(user_id, include_private=False)
             profile_completeness = candidate_card.get('profile_completeness', 50)
+            
+            # Extract skill names for matching
+            raw_skills = candidate_card.get('skills', [])
+            student_skills_names = [s['name'].lower() for s in raw_skills if 'name' in s]
+            
         except Exception as e:
             logger.warning(
-                event_type='profile_completeness_fallback',
+                event_type='profile_data_fetch_error',
                 domain='skaila_connect',
                 user_id=user_id,
-                error=str(e),
-                message='Profile completeness calculation failed, using default 50%'
+                error=str(e)
             )
             profile_completeness = 50
-    
+
+    # 🧠 SMART MATCHING ALGORITHM
+    # Sort opportunities based on relevance to student skills
+    if student_skills_names and opportunities:
+        for opp in opportunities:
+            score = 0
+            # Text to search in
+            search_text = (
+                str(opp.get('position_title', '')) + " " + 
+                str(opp.get('description', '')) + " " + 
+                str(opp.get('sector', ''))
+            ).lower()
+            
+            # 1. Skill Match (+10 per skill)
+            for skill in student_skills_names:
+                if skill in search_text:
+                    score += 10
+            
+            # 2. Location Preference (Placeholder - assumes user city matching could be added)
+            # if user_city in opp_city: score += 20
+            
+            # 3. Remote Bonus (+5)
+            if opp.get('remote_allowed'):
+                score += 5
+                
+            opp['matching_score'] = score
+            
+        # Sort by score DESC
+        opportunities.sort(key=lambda x: x.get('matching_score', 0), reverse=True)
+
     return render_template('skaila_connect_marketplace.html',
                          user=session,
                          opportunities=opportunities,

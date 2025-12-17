@@ -352,6 +352,7 @@ def send_message():
         message_id = cursor.fetchone()[0]
         conn.commit()
     
+
     # Award XP per partecipazione
     gamification_system.award_xp(user_id, 'message_sent', 5)
     
@@ -359,3 +360,50 @@ def send_message():
         'success': True,
         'message_id': message_id
     })
+
+@messaging_bp.route('/api/chat/upload', methods=['POST'])
+def upload_file():
+    """Upload file per chat (immagini/documenti)"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non autorizzato'}), 401
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'Nessun file inviato'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Nessun file selezionato'}), 400
+        
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
+    
+    def allowed_file(filename):
+        return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
+    if file and allowed_file(file.filename):
+        import os
+        from werkzeug.utils import secure_filename
+        import uuid
+        
+        filename = secure_filename(file.filename)
+        # Unique filename to prevent overwrite
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+        
+        # Ensure directory exists
+        upload_folder = os.path.join('static', 'uploads', 'chat')
+        os.makedirs(upload_folder, exist_ok=True)
+        
+        file_path = os.path.join(upload_folder, unique_filename)
+        file.save(file_path)
+        
+        file_url = f"/static/uploads/chat/{unique_filename}"
+        file_type = 'image' if filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'} else 'document'
+        
+        return jsonify({
+            'success': True,
+            'url': file_url,
+            'filename': filename,
+            'type': file_type
+        })
+    
+    return jsonify({'error': 'Tipo file non consentito'}), 400
