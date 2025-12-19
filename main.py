@@ -305,6 +305,11 @@ class SkailaApp:
         self.app.register_blueprint(admin_codes_bp)
         self.app.register_blueprint(messaging_bp)
         self.app.register_blueprint(messaging_api_bp)
+        
+        # Instant Groups API
+        from routes.instant_groups_api import instant_groups_api_bp
+        self.app.register_blueprint(instant_groups_api_bp)
+        
         self.app.register_blueprint(ai_chat_bp)
         self.app.register_blueprint(skaila_connect_bp)  # SKAJLA Connect - Alternanza Scuola-Lavoro
         self.app.register_blueprint(admin_calendar_bp)  # Dashboard Admin + Calendario
@@ -474,6 +479,19 @@ class SkailaApp:
                 
                 # Inizializza calendario smart
                 calendar_system.init_calendar_tables()
+                
+                # 🚀 Inizializza gruppi istantanei
+                try:
+                    from services.messaging.instant_groups_service import instant_groups_service
+                    if instant_groups_service.init_instant_groups_schema():
+                        print("🚀 Instant Groups schema initialized")
+                        
+                        # Avvia cleanup job
+                        from services.messaging.instant_groups_cleanup import cleanup_job
+                        cleanup_job.start()
+                        print("🗑️ Instant Groups cleanup job started")
+                except Exception as e:
+                    print(f"⚠️ Instant Groups init failed: {e}")
 
                 # Crea indici database ottimizzati
                 db_manager.create_optimized_indexes()

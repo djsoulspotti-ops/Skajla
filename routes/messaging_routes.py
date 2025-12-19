@@ -62,6 +62,64 @@ def chat_hub():
         ORDER BY ultimo_messaggio DESC NULLS LAST
     ''', (school_id, user_id, user_id))
     
+    # 🚀 GRUPPI ISTANTANEI - Nuova sezione
+    # Miei gruppi istantanei
+    miei_gruppi_istantanei = db_manager.query('''
+        SELECT c.*, 
+               COUNT(DISTINCT pc.utente_id) as membri_count,
+               EXTRACT(EPOCH FROM (c.scadenza - CURRENT_TIMESTAMP))/3600 as ore_rimanenti
+        FROM chat c
+        LEFT JOIN partecipanti_chat pc ON c.id = pc.chat_id
+        WHERE c.creatore_id = %s 
+        AND c.tipo_gruppo = 'istantaneo'
+        AND c.attivo = TRUE
+        AND c.scadenza > CURRENT_TIMESTAMP
+        GROUP BY c.id
+        ORDER BY c.data_creazione DESC
+    ''', (user_id,))
+    
+    # Gruppi istantanei dove sono partecipante
+    gruppi_istantanei_partecipante = db_manager.query('''
+        SELECT c.*, 
+               u.nome as creatore_nome,
+               u.cognome as creatore_cognome,
+               COUNT(DISTINCT pc.utente_id) as membri_count,
+               EXTRACT(EPOCH FROM (c.scadenza - CURRENT_TIMESTAMP))/3600 as ore_rimanenti
+        FROM chat c
+        JOIN partecipanti_chat pc ON c.id = pc.chat_id
+        JOIN utenti u ON c.creatore_id = u.id
+        WHERE pc.utente_id = %s 
+        AND c.creatore_id != %s
+        AND c.tipo_gruppo = 'istantaneo'
+        AND c.attivo = TRUE
+        AND c.scadenza > CURRENT_TIMESTAMP
+        GROUP BY c.id, u.nome, u.cognome
+        ORDER BY c.data_creazione DESC
+    ''', (user_id, user_id))
+    
+    # Gruppi istantanei pubblici disponibili
+    gruppi_istantanei_pubblici = db_manager.query('''
+        SELECT c.*, 
+               u.nome as creatore_nome,
+               u.cognome as creatore_cognome,
+               COUNT(DISTINCT pc.utente_id) as membri_count,
+               EXTRACT(EPOCH FROM (c.scadenza - CURRENT_TIMESTAMP))/3600 as ore_rimanenti
+        FROM chat c
+        JOIN utenti u ON c.creatore_id = u.id
+        LEFT JOIN partecipanti_chat pc ON c.id = pc.chat_id
+        WHERE c.scuola_id = %s
+        AND c.tipo_gruppo = 'istantaneo'
+        AND c.pubblico = TRUE
+        AND c.attivo = TRUE
+        AND c.scadenza > CURRENT_TIMESTAMP
+        AND c.id NOT IN (
+            SELECT chat_id FROM partecipanti_chat WHERE utente_id = %s
+        )
+        GROUP BY c.id, u.nome, u.cognome
+        ORDER BY c.data_creazione DESC
+        LIMIT 20
+    ''', (school_id, user_id))
+    
     # Lista utenti per nuova chat 1-to-1
     available_users = db_manager.query('''
         SELECT id, nome, cognome, ruolo
@@ -75,7 +133,10 @@ def chat_hub():
                          chat_classe=chat_classe or [],
                          gruppi_materia=gruppi_materia or [],
                          conversazioni_private=conversazioni_private or [],
-                         available_users=available_users or [])
+                         available_users=available_users or [],
+                         miei_gruppi_istantanei=miei_gruppi_istantanei or [],
+                         gruppi_istantanei_partecipante=gruppi_istantanei_partecipante or [],
+                         gruppi_istantanei_pubblici=gruppi_istantanei_pubblici or [])
 
 @messaging_bp.route('/chat/private/<int:recipient_id>')
 @require_login

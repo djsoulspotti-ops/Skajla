@@ -1,0 +1,724 @@
+<!-- Instant Groups Section -->
+<div class="instant-groups-container" style="margin-top: 30px">
+  <div
+    class="section-header"
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    "
+  >
+    <h2 style="margin: 0">🚀 Gruppi Istantanei</h2>
+    <button
+      id="createInstantGroupBtn"
+      class="btn btn-primary"
+      style="
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+      "
+    >
+      ➕ Crea Gruppo
+    </button>
+  </div>
+
+  <!-- Miei Gruppi Istantanei -->
+  {% if miei_gruppi_istantanei %}
+  <div class="my-instant-groups" style="margin-bottom: 30px">
+    <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea">
+      👤 I Miei Gruppi
+    </h3>
+    <div
+      class="groups-grid"
+      style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+      "
+    >
+      {% for gruppo in miei_gruppi_istantanei %}
+      <div
+        class="instant-group-card"
+        style="
+          background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+          border: 2px solid #667eea;
+          border-radius: 12px;
+          padding: 20px;
+          position: relative;
+        "
+      >
+        <div
+          class="group-badge"
+          style="
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+          "
+        >
+          CREATORE
+        </div>
+
+        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #333">
+          {{ gruppo.nome }}
+        </h4>
+
+        <div
+          class="group-tag"
+          style="
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          #{{ gruppo.argomento }}
+        </div>
+
+        {% if gruppo.descrizione %}
+        <p style="font-size: 14px; color: #666; margin: 10px 0">
+          {{ gruppo.descrizione }}
+        </p>
+        {% endif %}
+
+        <div
+          class="group-info"
+          style="margin: 15px 0; font-size: 13px; color: #555"
+        >
+          <div style="margin-bottom: 5px">
+            👥 <strong>{{ gruppo.membri_count }}</strong> membri
+          </div>
+          <div
+            data-expiry-hours="{{ gruppo.ore_rimanenti }}"
+            style="color: {% if gruppo.ore_rimanenti < 6 %}#ff9800{% else %}#4caf50{% endif %};"
+          >
+            ⏰ Scade tra: {{ "%.0f"|format(gruppo.ore_rimanenti) }}h
+          </div>
+          <div style="margin-top: 5px; font-size: 12px; color: #999">
+            {{ '🌍 Pubblico' if gruppo.pubblico else '🔒 Privato' }}
+          </div>
+        </div>
+
+        <div
+          class="group-actions"
+          style="display: flex; gap: 10px; margin-top: 15px"
+        >
+          <button
+            onclick="openInstantGroupChat({{ gruppo.id }})"
+            class="btn-action"
+            style="
+              flex: 1;
+              padding: 10px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+          >
+            Apri Chat
+          </button>
+          <button
+            onclick="deleteInstantGroup({{ gruppo.id }})"
+            class="btn-danger"
+            style="
+              padding: 10px 15px;
+              background: #f44336;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+            "
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Gruppi dove sono partecipante -->
+  {% if gruppi_istantanei_partecipante %}
+  <div class="participant-instant-groups" style="margin-bottom: 30px">
+    <h3 style="font-size: 18px; margin-bottom: 15px; color: #4caf50">
+      💬 Gruppi Partecipanti
+    </h3>
+    <div
+      class="groups-grid"
+      style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+      "
+    >
+      {% for gruppo in gruppi_istantanei_partecipante %}
+      <div
+        class="instant-group-card"
+        style="
+          background: linear-gradient(135deg, #4caf5015 0%, #8bc34a15 100%);
+          border: 2px solid #4caf50;
+          border-radius: 12px;
+          padding: 20px;
+        "
+      >
+        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #333">
+          {{ gruppo.nome }}
+        </h4>
+
+        <div
+          class="group-tag"
+          style="
+            display: inline-block;
+            background: #8bc34a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          #{{ gruppo.argomento }}
+        </div>
+
+        <div
+          class="group-creator"
+          style="font-size: 13px; color: #666; margin-bottom: 10px"
+        >
+          👤 Creato da:
+          <strong
+            >{{ gruppo.creatore_nome }} {{ gruppo.creatore_cognome }}</strong
+          >
+        </div>
+
+        <div
+          class="group-info"
+          style="margin: 15px 0; font-size: 13px; color: #555"
+        >
+          <div style="margin-bottom: 5px">
+            👥 <strong>{{ gruppo.membri_count }}</strong> membri
+          </div>
+          <div
+            data-expiry-hours="{{ gruppo.ore_rimanenti }}"
+            style="color: {% if gruppo.ore_rimanenti < 6 %}#ff9800{% else %}#4caf50{% endif %};"
+          >
+            ⏰ Scade tra: {{ "%.0f"|format(gruppo.ore_rimanenti) }}h
+          </div>
+        </div>
+
+        <div
+          class="group-actions"
+          style="display: flex; gap: 10px; margin-top: 15px"
+        >
+          <button
+            onclick="openInstantGroupChat({{ gruppo.id }})"
+            class="btn-action"
+            style="
+              flex: 1;
+              padding: 10px;
+              background: #4caf50;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+          >
+            Apri Chat
+          </button>
+          <button
+            onclick="leaveInstantGroup({{ gruppo.id }})"
+            class="btn-secondary"
+            style="
+              padding: 10px 15px;
+              background: #ff9800;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+            "
+          >
+            Esci
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Gruppi Pubblici Disponibili -->
+  {% if gruppi_istantanei_pubblici %}
+  <div class="public-instant-groups" style="margin-bottom: 30px">
+    <h3 style="font-size: 18px; margin-bottom: 15px; color: #2196f3">
+      🌍 Gruppi Pubblici Disponibili
+    </h3>
+    <div
+      class="groups-grid"
+      style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+      "
+    >
+      {% for gruppo in gruppi_istantanei_pubblici %}
+      <div
+        class="instant-group-card"
+        style="
+          background: linear-gradient(135deg, #2196f315 0%, #03a9f415 100%);
+          border: 2px solid #2196f3;
+          border-radius: 12px;
+          padding: 20px;
+        "
+      >
+        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #333">
+          {{ gruppo.nome }}
+        </h4>
+
+        <div
+          class="group-tag"
+          style="
+            display: inline-block;
+            background: #03a9f4;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          #{{ gruppo.argomento }}
+        </div>
+
+        {% if gruppo.descrizione %}
+        <p style="font-size: 14px; color: #666; margin: 10px 0">
+          {{ gruppo.descrizione }}
+        </p>
+        {% endif %}
+
+        <div
+          class="group-creator"
+          style="font-size: 13px; color: #666; margin-bottom: 10px"
+        >
+          👤 Creato da:
+          <strong
+            >{{ gruppo.creatore_nome }} {{ gruppo.creatore_cognome }}</strong
+          >
+        </div>
+
+        <div
+          class="group-info"
+          style="margin: 15px 0; font-size: 13px; color: #555"
+        >
+          <div style="margin-bottom: 5px">
+            👥 <strong>{{ gruppo.membri_count }}</strong> membri
+          </div>
+          <div
+            data-expiry-hours="{{ gruppo.ore_rimanenti }}"
+            style="color: {% if gruppo.ore_rimanenti < 6 %}#ff9800{% else %}#4caf50{% endif %};"
+          >
+            ⏰ Scade tra: {{ "%.0f"|format(gruppo.ore_rimanenti) }}h
+          </div>
+        </div>
+
+        <div class="group-actions" style="margin-top: 15px">
+          <button
+            onclick="joinInstantGroup({{ gruppo.id }})"
+            class="btn-action"
+            style="
+              width: 100%;
+              padding: 12px;
+              background: #2196f3;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-weight: 600;
+              font-size: 15px;
+            "
+          >
+            ➕ Unisciti al Gruppo
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Messaggio se nessun gruppo -->
+  {% if not miei_gruppi_istantanei and not gruppi_istantanei_partecipante and
+  not gruppi_istantanei_pubblici %}
+  <div
+    class="no-groups"
+    style="
+      text-align: center;
+      padding: 60px 20px;
+      background: #f5f5f5;
+      border-radius: 12px;
+    "
+  >
+    <div style="font-size: 48px; margin-bottom: 20px">🚀</div>
+    <h3 style="color: #666; margin-bottom: 10px">
+      Nessun gruppo istantaneo disponibile
+    </h3>
+    <p style="color: #999; margin-bottom: 20px">
+      Crea il primo gruppo per iniziare a collaborare!
+    </p>
+    <button
+      onclick="document.getElementById('createInstantGroupBtn').click()"
+      class="btn btn-primary"
+      style="
+        padding: 12px 30px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      "
+    >
+      Crea Gruppo Istantaneo
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Modal Creazione Gruppo -->
+<div
+  id="createInstantGroupModal"
+  class="modal"
+  style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  "
+>
+  <div
+    class="modal-content"
+    style="
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    "
+  >
+    <div
+      class="modal-header"
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+      "
+    >
+      <h2 style="margin: 0; color: #333">🚀 Crea Gruppo Istantaneo</h2>
+      <button
+        onclick="document.getElementById('createInstantGroupModal').style.display='none'"
+        style="
+          background: none;
+          border: none;
+          font-size: 28px;
+          cursor: pointer;
+          color: #999;
+        "
+      >
+        &times;
+      </button>
+    </div>
+
+    <form id="createInstantGroupForm">
+      <div class="form-group" style="margin-bottom: 20px">
+        <label
+          style="
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+          "
+          >Nome Gruppo *</label
+        >
+        <input
+          type="text"
+          name="nome"
+          required
+          maxlength="100"
+          placeholder="es: Studio Matematica - Esame Domani"
+          style="
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+          "
+        />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px">
+        <label
+          style="
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+          "
+          >Argomento *</label
+        >
+        <input
+          type="text"
+          name="argomento"
+          required
+          maxlength="50"
+          placeholder="es: matematica, fisica, storia..."
+          style="
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+          "
+        />
+        <small style="color: #999; font-size: 12px"
+          >Tag per identificare il gruppo</small
+        >
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px">
+        <label
+          style="
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+          "
+          >Descrizione</label
+        >
+        <textarea
+          name="descrizione"
+          maxlength="500"
+          rows="3"
+          placeholder="Descrizione breve del gruppo..."
+          style="
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+          "
+        ></textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px">
+        <label
+          style="
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+          "
+          >Durata</label
+        >
+        <select
+          name="durata_ore"
+          style="
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+          "
+        >
+          <option value="1">1 ora</option>
+          <option value="6">6 ore</option>
+          <option value="24" selected>24 ore (1 giorno)</option>
+          <option value="48">48 ore (2 giorni)</option>
+          <option value="72">72 ore (3 giorni)</option>
+          <option value="168">1 settimana</option>
+        </select>
+        <small style="color: #999; font-size: 12px"
+          >Il gruppo verrà eliminato automaticamente alla scadenza</small
+        >
+      </div>
+
+      <div class="form-group" style="margin-bottom: 25px">
+        <label style="display: flex; align-items: center; cursor: pointer">
+          <input
+            type="checkbox"
+            name="pubblico"
+            id="gruppoPubblico"
+            style="
+              margin-right: 10px;
+              width: 20px;
+              height: 20px;
+              cursor: pointer;
+            "
+          />
+          <span style="font-weight: 600; color: #555">🌍 Gruppo Pubblico</span>
+        </label>
+        <small style="color: #999; font-size: 12px; margin-left: 30px"
+          >Se pubblico, chiunque nella tua scuola può unirsi</small
+        >
+      </div>
+
+      <div id="inviteUsersSection" style="display: none; margin-bottom: 20px">
+        <label
+          style="
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+          "
+          >Invita Utenti</label
+        >
+        <div
+          style="
+            max-height: 150px;
+            overflow-y: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+          "
+        >
+          {% for user in available_users %}
+          <label
+            style="
+              display: block;
+              padding: 8px;
+              cursor: pointer;
+              border-radius: 4px;
+            "
+          >
+            <input
+              type="checkbox"
+              name="invitati"
+              value="{{ user.id }}"
+              style="margin-right: 8px"
+            />
+            {{ user.nome }} {{ user.cognome }}
+            <span style="color: #999; font-size: 12px">({{ user.ruolo }})</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-actions" style="display: flex; gap: 10px">
+        <button
+          type="button"
+          onclick="document.getElementById('createInstantGroupModal').style.display='none'"
+          class="btn-secondary"
+          style="
+            flex: 1;
+            padding: 12px;
+            background: #ddd;
+            color: #666;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+          "
+        >
+          Annulla
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          style="
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+          "
+        >
+          Crea Gruppo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Include JS -->
+<script src="/static/js/instant_groups.js"></script>
+
+<style>
+  .instant-group-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .instant-group-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-action:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+
+  .btn-danger:hover {
+    background: #d32f2f !important;
+  }
+
+  .btn-secondary:hover {
+    background: #f57c00 !important;
+  }
+
+  #createInstantGroupModal {
+    display: none;
+  }
+
+  #createInstantGroupModal.show {
+    display: flex !important;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+</style>
