@@ -422,6 +422,39 @@ def send_message():
         'message_id': message_id
     })
 
+@messaging_bp.route('/api/chat/messages/<int:chat_id>')
+@require_login
+def get_chat_messages(chat_id):
+    """Recupera messaggi di una chat"""
+    user_id = session['user_id']
+    school_id = get_current_school_id()
+    
+    is_participant = db_manager.query('''
+        SELECT 1 FROM partecipanti_chat
+        WHERE chat_id = %s AND utente_id = %s
+    ''', (chat_id, user_id), one=True)
+    
+    is_authorized = is_participant or session.get('ruolo') in ['admin', 'professore', 'dirigente']
+    
+    if not is_authorized:
+        return jsonify({'success': False, 'error': 'Non autorizzato'}), 403
+    
+    messages = db_manager.query('''
+        SELECT m.id, m.contenuto, m.timestamp, m.utente_id as mittente_id,
+               u.nome || ' ' || u.cognome as mittente_nome
+        FROM messaggi m
+        JOIN utenti u ON m.utente_id = u.id
+        WHERE m.chat_id = %s
+        ORDER BY m.timestamp ASC
+        LIMIT 200
+    ''', (chat_id,))
+    
+    return jsonify({
+        'success': True,
+        'messages': messages or []
+    })
+
+
 @messaging_bp.route('/api/chat/upload', methods=['POST'])
 def upload_file():
     """Upload file per chat (immagini/documenti)"""
