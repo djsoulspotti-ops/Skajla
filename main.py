@@ -4,6 +4,10 @@ SKAJLA - Main Application
 Applicazione Flask modulare e scalabile
 """
 
+# CRITICAL: eventlet monkey_patch MUST be called before ANY other imports
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import time
 import threading  # Import threading for the keep-alive thread
@@ -47,7 +51,9 @@ from routes.socket_routes import register_socket_events
 from routes.admin_calendar_routes import admin_calendar_bp
 from routes.admin_reports_routes import admin_reports_bp
 from routes.documentation_routes import documentation_bp
+
 from routes.skaila_connect_routes import skaila_connect_bp
+from routes.static_routes import static_bp # New Clean Static Routes
 from routes.bi_dashboard_routes import bi_bp # BI Dashboard Blueprint
 from routes.timer_routes import timer_bp # Study Timer
 from routes.online_users_routes import online_users_bp # Online Users API
@@ -199,53 +205,9 @@ class SkailaApp:
                     pass  # Timestamp invalido, ignora
 
         # Route principali
-        @self.app.route('/', methods=['GET', 'HEAD'])
-        def index():
-            # Fast path for health check probes (Autoscale, load balancers)
-            # Detect HEAD requests or specific User-Agents used by health checkers
-            if request.method == 'HEAD' or \
-               'GoogleHC' in request.headers.get('User-Agent', '') or \
-               'kube-probe' in request.headers.get('User-Agent', '') or \
-               'Replit' in request.headers.get('User-Agent', ''):
-                return '', 200
-            
-            if 'user_id' in session:
-                return redirect('/dashboard')
-            
-            # Statistiche pubbliche per la homepage
-            try:
-                total_users = db_manager.query('''
-                    SELECT COUNT(*) as count FROM utenti WHERE attivo = true
-                ''', one=True)
-                
-                total_schools = db_manager.query('''
-                    SELECT COUNT(*) as count FROM scuole WHERE attiva = true
-                ''', one=True)
-                
-                total_students = db_manager.query('''
-                    SELECT COUNT(*) as count FROM utenti WHERE ruolo = 'studente' AND attivo = true
-                ''', one=True)
-                
-                ai_interactions = db_manager.query('''
-                    SELECT COUNT(*) as count FROM ai_conversations
-                ''', one=True)
-                
-                stats = {
-                    'total_users': total_users['count'] if total_users else 0,
-                    'total_schools': total_schools['count'] if total_schools else 0,
-                    'total_students': total_students['count'] if total_students else 0,
-                    'ai_interactions': ai_interactions['count'] if ai_interactions else 0
-                }
-            except Exception as e:
-                print(f"Error loading homepage stats: {e}")
-                stats = {
-                    'total_users': 0,
-                    'total_schools': 0,
-                    'total_students': 0,
-                    'ai_interactions': 0
-                }
-            
-            return render_template('index.html', stats=stats)
+        # Route principali
+        # Index, Contatti, Team, Gamification moved to routes/static_routes.py
+
 
         @self.app.route('/contatti')
         def contatti():
@@ -270,11 +232,6 @@ class SkailaApp:
             except Exception as e:
                 print(f"Error processing contact form: {e}")
                 return jsonify({'success': False, 'error': str(e)}), 500
-
-        @self.app.route('/team')
-        def team():
-            return render_template('team.html')
-
         @self.app.route('/privacy')
         def privacy():
             return render_template('privacy.html')
@@ -313,15 +270,7 @@ class SkailaApp:
                 return redirect('/login')
             return render_template('ai_coach_modern.html', user=session)
 
-        @self.app.route('/gamification')
-        def gamification_dashboard():
-            if 'user_id' not in session:
-                return redirect('/login')
 
-            response = make_response(render_template('gamification_dashboard.html', user=session))
-            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-            response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
-            return response
 
         # Registra blueprints
         self.app.register_blueprint(auth_bp)
@@ -356,7 +305,9 @@ class SkailaApp:
         self.app.register_blueprint(gamification_api_bp) # Advanced Gamification V2
         self.app.register_blueprint(google_auth_bp) # Google OAuth Login
         self.app.register_blueprint(study_groups_bp) # Study Groups
+
         self.app.register_blueprint(invitation_codes_bp) # Invitation Codes System
+        self.app.register_blueprint(static_bp) # Static Pages (Home, Contacts, etc.)
 
         # Demo routes sicure (solo dati mock)
         from routes.demo_routes import demo_bp
@@ -922,3 +873,12 @@ if __name__ == '__main__':
         port=port,
         debug=False
     )
+
+# ==========================================
+# GUNICORN ENTRY POINT
+# ==========================================
+# This exposes the 'app' variable for Gunicorn to pick up
+# It runs only when imported as a module (not when run directly)
+else:
+    skaila_instance = create_app()
+    app = skaila_instance.app

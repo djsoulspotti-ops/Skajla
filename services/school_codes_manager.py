@@ -205,8 +205,8 @@ class SchoolCodesManager:
             else:
                 cursor.execute('''
                     UPDATE school_activation_codes 
-                    SET assigned = 1, assigned_to_school_id = ?, assigned_at = CURRENT_TIMESTAMP
-                    WHERE id = ? AND assigned = 0
+                    SET assigned = 1, assigned_to_school_id = %s, assigned_at = CURRENT_TIMESTAMP
+                    WHERE id = %s AND assigned = 0
                 ''', (school_id, code_id))
             
             affected = cursor.rowcount

@@ -17,7 +17,7 @@ class SubjectProgressAnalytics:
         # Progress generale
         progress = db_manager.query('''
             SELECT * FROM student_subject_progress 
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
         ''', (user_id, subject), one=True)
         
         if not progress:
@@ -27,7 +27,7 @@ class SubjectProgressAnalytics:
         recent_quiz = db_manager.query('''
             SELECT topic, difficulty, is_correct, time_taken, timestamp
             FROM student_quiz_history
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
             ORDER BY timestamp DESC LIMIT 10
         ''', (user_id, subject))
         
@@ -61,7 +61,7 @@ class SubjectProgressAnalytics:
         
         subjects = db_manager.query('''
             SELECT * FROM student_subject_progress 
-            WHERE user_id = ?
+            WHERE user_id = %s
             ORDER BY total_xp DESC
         ''', (user_id,))
         
@@ -70,7 +70,7 @@ class SubjectProgressAnalytics:
             # Get recent performance
             recent = db_manager.query('''
                 SELECT is_correct FROM student_quiz_history
-                WHERE user_id = ? AND subject = ?
+                WHERE user_id = %s AND subject = %s
                 ORDER BY timestamp DESC LIMIT 5
             ''', (user_id, subj['subject']))
             
@@ -99,7 +99,7 @@ class SubjectProgressAnalytics:
                 SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct,
                 AVG(time_taken) as avg_time
             FROM student_quiz_history
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
             GROUP BY topic
             HAVING COUNT(*) >= 3 AND (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) < 70
             ORDER BY (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) ASC
@@ -214,7 +214,7 @@ class SubjectProgressAnalytics:
                 SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct,
                 AVG(time_taken) as avg_time
             FROM student_quiz_history
-            WHERE user_id = ? AND subject = ?
+            WHERE user_id = %s AND subject = %s
             GROUP BY topic
             ORDER BY topic
         ''', (user_id, subject))
@@ -265,7 +265,7 @@ class SubjectProgressAnalytics:
                 SUM(xp_earned) as daily_xp,
                 COUNT(*) as quiz_count
             FROM student_quiz_history
-            WHERE user_id = ? AND subject = ? AND timestamp >= ?
+            WHERE user_id = %s AND subject = %s AND timestamp >= %s
             GROUP BY DATE(timestamp)
             ORDER BY date ASC
         ''', (user_id, subject, cutoff_date))

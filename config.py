@@ -19,6 +19,9 @@ class Config:
     DB_POOL_MAX_SIZE = int(os.getenv('DB_POOL_MAX', '50'))
     DB_QUERY_TIMEOUT = int(os.getenv('DB_QUERY_TIMEOUT', '30'))  # seconds
     
+    # ============== DOMAIN & URLS ==============
+    DOMAIN_URL = os.getenv('DOMAIN', 'http://localhost:5000')
+    
     # ============== STORAGE ==============
     MAX_STORAGE_GB = float(os.getenv('MAX_STORAGE_GB', '9.5'))  # 10 GB - buffer
     MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', '10'))  # 10 MB per file

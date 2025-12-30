@@ -4,7 +4,6 @@ Chatbot completamente integrato nell'ecosistema SKAJLA
 Zero dipendenze OpenAI - 100% personalizzato
 """
 
-import sqlite3
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 import random
@@ -212,17 +211,17 @@ class SKAJLABrain:
         """Recupera attività di oggi"""
         messages_today = db_manager.query('''
             SELECT COUNT(*) as count FROM messaggi
-            WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
+            WHERE utente_id = %s AND DATE(timestamp) = CURRENT_DATE
         ''', (user_id,), one=True)
 
         ai_today = db_manager.query('''
             SELECT COUNT(*) as count FROM ai_conversations
-            WHERE utente_id = ? AND DATE(timestamp) = DATE('now')
+            WHERE utente_id = %s AND DATE(timestamp) = CURRENT_DATE
         ''', (user_id,), one=True)
 
         quiz_today = db_manager.query('''
             SELECT COUNT(*) as count FROM student_quiz_history
-            WHERE user_id = ? AND DATE(timestamp) = DATE('now')
+            WHERE user_id = %s AND DATE(timestamp) = CURRENT_DATE
         ''', (user_id,), one=True)
 
         return {
@@ -237,7 +236,7 @@ class SKAJLABrain:
             SELECT subject, total_quizzes, correct_quizzes, accuracy_percentage,
                    total_xp, topics_weak, last_activity_date
             FROM student_subject_progress
-            WHERE user_id = ?
+            WHERE user_id = %s
         ''', (user_id,))
 
         result = {}
@@ -259,7 +258,7 @@ class SKAJLABrain:
 
         classmates = db_manager.query('''
             SELECT id, nome, cognome FROM utenti
-            WHERE classe = ? AND id != ? AND status_online = ?
+            WHERE classe = %s AND id != %s AND status_online = %s
             LIMIT 5
         ''', (user_data['classe'], user_id, True))
 

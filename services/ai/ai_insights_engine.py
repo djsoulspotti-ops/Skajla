@@ -59,7 +59,7 @@ class AIInsightsEngine:
         voti = db_manager.query('''
             SELECT voto, data, materia
             FROM voti 
-            WHERE studente_id = ? 
+            WHERE studente_id = %s 
             ORDER BY data DESC 
             LIMIT 10
         ''', (student_id,))
@@ -122,7 +122,7 @@ class AIInsightsEngine:
         presenze = db_manager.query('''
             SELECT presente, ritardo, data
             FROM presenze 
-            WHERE studente_id = ? 
+            WHERE studente_id = %s 
             ORDER BY data DESC 
             LIMIT 30
         ''', (student_id,))
@@ -168,9 +168,9 @@ class AIInsightsEngine:
         """Analizza progresso gamification e obiettivi"""
         profile = db_manager.query('''
             SELECT total_xp, current_level, current_streak, 
-                   (SELECT COUNT(*) FROM user_badges WHERE utente_id = ?) as badges_count
+                   (SELECT COUNT(*) FROM user_badges WHERE utente_id = %s) as badges_count
             FROM gamification_profiles 
-            WHERE utente_id = ?
+            WHERE utente_id = %s
         ''', (student_id, student_id), one=True)
         
         if not profile:
@@ -206,7 +206,7 @@ class AIInsightsEngine:
         medie = db_manager.query('''
             SELECT materia, AVG(voto) as media, COUNT(*) as num_voti
             FROM voti
-            WHERE studente_id = ?
+            WHERE studente_id = %s
             GROUP BY materia
             HAVING COUNT(*) >= 2
         ''', (student_id,))
@@ -244,7 +244,7 @@ class AIInsightsEngine:
         voti = db_manager.query('''
             SELECT voto, data
             FROM voti 
-            WHERE studente_id = ? 
+            WHERE studente_id = %s 
             ORDER BY data DESC 
             LIMIT 15
         ''', (student_id,))
@@ -290,7 +290,7 @@ class AIInsightsEngine:
         ai_subjects = db_manager.query('''
             SELECT message, COUNT(*) as count
             FROM ai_conversations
-            WHERE utente_id = ?
+            WHERE utente_id = %s
             GROUP BY message
             ORDER BY count DESC
             LIMIT 5
@@ -300,7 +300,7 @@ class AIInsightsEngine:
         low_grades = db_manager.query('''
             SELECT materia, AVG(voto) as media
             FROM voti
-            WHERE studente_id = ? AND voto < 6
+            WHERE studente_id = %s AND voto < 6
             GROUP BY materia
             ORDER BY media ASC
             LIMIT 3
@@ -319,7 +319,7 @@ class AIInsightsEngine:
         media_generale = db_manager.query('''
             SELECT AVG(voto) as media
             FROM voti
-            WHERE studente_id = ?
+            WHERE studente_id = %s
         ''', (student_id,), one=True)
         
         if not media_generale or not media_generale[0]:

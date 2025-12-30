@@ -163,7 +163,7 @@ class AIRegistroIntelligence:
         try:
             students = db_manager.query('''
                 SELECT id, nome, cognome FROM utenti 
-                WHERE classe = ? AND ruolo = 'studente'
+                WHERE classe = %s AND ruolo = 'studente'
             ''', (class_name,))
         except Exception as e:
             logger.error(
@@ -223,7 +223,7 @@ class AIRegistroIntelligence:
         try:
             grades = db_manager.query('''
                 SELECT subject, voto, date FROM registro_voti
-                WHERE student_id = ?
+                WHERE student_id = %s
                 ORDER BY date DESC LIMIT 20
             ''', (student_id,))
         except Exception as e:
@@ -269,14 +269,14 @@ class AIRegistroIntelligence:
         try:
             recent_absences = db_manager.query('''
                 SELECT COUNT(*) as count FROM registro_presenze
-                WHERE student_id = ? AND status = 'assente' 
-                AND date >= ?
+                WHERE student_id = %s AND status = 'assente' 
+                AND date >= %s
             ''', (student_id, date.today() - timedelta(days=30)), one=True)
             
             older_absences = db_manager.query('''
                 SELECT COUNT(*) as count FROM registro_presenze
-                WHERE student_id = ? AND status = 'assente'
-                AND date BETWEEN ? AND ?
+                WHERE student_id = %s AND status = 'assente'
+                AND date BETWEEN %s AND %s
             ''', (student_id, date.today() - timedelta(days=90), date.today() - timedelta(days=30)), one=True)
             
             if recent_absences and older_absences:
@@ -399,7 +399,7 @@ class AIRegistroIntelligence:
         try:
             grades = db_manager.query('''
                 SELECT voto, date FROM registro_voti
-                WHERE student_id = ? AND date >= ?
+                WHERE student_id = %s AND date >= %s
                 ORDER BY date ASC
             ''', (student_id, date.today() - timedelta(days=90)))
         except Exception as e:
@@ -525,7 +525,7 @@ class AIRegistroIntelligence:
         
         try:
             students = db_manager.query('''
-                SELECT id FROM utenti WHERE classe = ? AND ruolo = 'studente'
+                SELECT id FROM utenti WHERE classe = %s AND ruolo = 'studente'
             ''', (class_name,))
         except Exception as e:
             logger.error(
@@ -570,7 +570,7 @@ class AIRegistroIntelligence:
                 ) as avg_presence
                 FROM registro_presenze rp
                 JOIN utenti u ON rp.student_id = u.id
-                WHERE u.classe = ? AND rp.date >= ?
+                WHERE u.classe = %s AND rp.date >= %s
             ''', (class_name, date.today() - timedelta(days=30)), one=True)
         except Exception as e:
             logger.warning(
@@ -587,7 +587,7 @@ class AIRegistroIntelligence:
                 SELECT rv.subject, AVG(rv.voto) as avg_voto
                 FROM registro_voti rv
                 JOIN utenti u ON rv.student_id = u.id
-                WHERE u.classe = ? AND rv.date >= ?
+                WHERE u.classe = %s AND rv.date >= %s
                 GROUP BY rv.subject
             ''', (class_name, date.today() - timedelta(days=30)))
         except Exception as e:

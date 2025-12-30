@@ -107,7 +107,7 @@ class AdvancedGamificationManager:
                 
                 is_postgres = db_manager.db_type == 'postgresql'
                 serial_type = 'SERIAL' if is_postgres else 'INTEGER'
-                timestamp_default = 'CURRENT_TIMESTAMP' if is_postgres else "datetime('now')"
+                timestamp_default = 'CURRENT_TIMESTAMP'
                 
                 # User Gamification V2 - Extended profile
                 cursor.execute(f'''

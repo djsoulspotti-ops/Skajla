@@ -205,21 +205,17 @@ class InstantGroupsManager {
     }
 
     showNotification(message, type = 'info') {
-        // Crea notifica toast
         const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
+        toast.className = `alert alert-${type === 'error' ? 'danger' : type} notification-toast`;
         toast.textContent = message;
         toast.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
             padding: 15px 25px;
-            background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 10000;
             animation: slideIn 0.3s ease;
+            box-shadow: var(--shadow-lg);
         `;
 
         document.body.appendChild(toast);

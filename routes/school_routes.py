@@ -159,7 +159,7 @@ def setup_dirigente_account():
             cursor.execute('''
                 SELECT email, metadata FROM email_verifications 
                 WHERE token = %s AND purpose = 'dirigente_account_setup' 
-                AND expires_at > datetime('now') AND consumed_at IS NULL
+                AND expires_at > CURRENT_TIMESTAMP AND consumed_at IS NULL
             ''', (token,))
             result = cursor.fetchone()
     

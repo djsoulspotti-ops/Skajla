@@ -9,7 +9,7 @@
       margin-bottom: 20px;
     "
   >
-    <h2 style="margin: 0">🚀 Gruppi Istantanei</h2>
+    <h2 style="margin: 0; color: var(--text-primary);">🚀 Gruppi Istantanei</h2>
     <button
       id="createInstantGroupBtn"
       class="btn btn-primary"
@@ -30,7 +30,7 @@
   <!-- Miei Gruppi Istantanei -->
   {% if miei_gruppi_istantanei %}
   <div class="my-instant-groups" style="margin-bottom: 30px">
-    <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea">
+    <h3 style="font-size: 18px; margin-bottom: 15px; color: var(--accent-blue)">
       👤 I Miei Gruppi
     </h3>
     <div
@@ -45,11 +45,12 @@
       <div
         class="instant-group-card"
         style="
-          background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-          border: 2px solid #667eea;
+          background: rgba(59, 130, 246, 0.1);
+          border: 1px solid rgba(59, 130, 246, 0.3);
           border-radius: 12px;
           padding: 20px;
           position: relative;
+          backdrop-filter: blur(10px);
         "
       >
         <div
@@ -58,7 +59,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #667eea;
+            background: var(--accent-blue);
             color: white;
             padding: 4px 12px;
             border-radius: 12px;
@@ -69,7 +70,7 @@
           CREATORE
         </div>
 
-        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #333">
+        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: var(--text-primary)">
           {{ gruppo.nome }}
         </h4>
 
@@ -89,14 +90,14 @@
         </div>
 
         {% if gruppo.descrizione %}
-        <p style="font-size: 14px; color: #666; margin: 10px 0">
+        <p style="font-size: 14px; color: var(--text-secondary); margin: 10px 0">
           {{ gruppo.descrizione }}
         </p>
         {% endif %}
 
         <div
           class="group-info"
-          style="margin: 15px 0; font-size: 13px; color: #555"
+          style="margin: 15px 0; font-size: 13px; color: var(--text-tertiary)"
         >
           <div style="margin-bottom: 5px">
             👥 <strong>{{ gruppo.membri_count }}</strong> membri
@@ -122,7 +123,7 @@
             style="
               flex: 1;
               padding: 10px;
-              background: #667eea;
+              background: var(--accent-blue);
               color: white;
               border: none;
               border-radius: 8px;
@@ -177,7 +178,7 @@
           padding: 20px;
         "
       >
-        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #333">
+        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: var(--text-primary)">
           {{ gruppo.nome }}
         </h4>
 
@@ -208,7 +209,7 @@
 
         <div
           class="group-info"
-          style="margin: 15px 0; font-size: 13px; color: #555"
+          style="margin: 15px 0; font-size: 13px; color: var(--text-tertiary)"
         >
           <div style="margin-bottom: 5px">
             👥 <strong>{{ gruppo.membri_count }}</strong> membri
@@ -286,7 +287,7 @@
           padding: 20px;
         "
       >
-        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #333">
+        <h4 style="margin: 0 0 10px 0; font-size: 18px; color: var(--text-primary)">
           {{ gruppo.nome }}
         </h4>
 
@@ -306,7 +307,7 @@
         </div>
 
         {% if gruppo.descrizione %}
-        <p style="font-size: 14px; color: #666; margin: 10px 0">
+        <p style="font-size: 14px; color: var(--text-secondary); margin: 10px 0">
           {{ gruppo.descrizione }}
         </p>
         {% endif %}
@@ -323,7 +324,7 @@
 
         <div
           class="group-info"
-          style="margin: 15px 0; font-size: 13px; color: #555"
+          style="margin: 15px 0; font-size: 13px; color: var(--text-tertiary)"
         >
           <div style="margin-bottom: 5px">
             👥 <strong>{{ gruppo.membri_count }}</strong> membri
@@ -369,8 +370,9 @@
     style="
       text-align: center;
       padding: 60px 20px;
-      background: #f5f5f5;
+      background: var(--bg-surface);
       border-radius: 12px;
+      border: 1px dashed var(--border-primary);
     "
   >
     <div style="font-size: 48px; margin-bottom: 20px">🚀</div>
@@ -419,13 +421,16 @@
   <div
     class="modal-content"
     style="
-      background: white;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
       border-radius: 16px;
       padding: 30px;
       max-width: 500px;
       width: 90%;
       max-height: 90vh;
       overflow-y: auto;
+      backdrop-filter: blur(20px);
     "
   >
     <div
@@ -666,8 +671,7 @@
   </div>
 </div>
 
-<!-- Include JS -->
-<script src="/static/js/instant_groups.js"></script>
+<!-- JS already included in dashboard -->
 
 <style>
   .instant-group-card {

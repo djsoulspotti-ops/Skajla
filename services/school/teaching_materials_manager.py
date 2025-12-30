@@ -609,13 +609,13 @@ class TeachingMaterialsManager:
                 COUNT(*) as total_materials,
                 SUM(downloads) as total_downloads,
                 SUM(file_size) as total_size
-            FROM teaching_materials WHERE teacher_id = ?
+            FROM teaching_materials WHERE teacher_id = %s
         ''', (teacher_id,), one=True)
         
         # Most downloaded
         most_downloaded = db_manager.query('''
             SELECT title, downloads FROM teaching_materials
-            WHERE teacher_id = ?
+            WHERE teacher_id = %s
             ORDER BY downloads DESC LIMIT 5
         ''', (teacher_id,))
         
@@ -623,7 +623,7 @@ class TeachingMaterialsManager:
         by_subject = db_manager.query('''
             SELECT subject, COUNT(*) as count, SUM(downloads) as downloads
             FROM teaching_materials
-            WHERE teacher_id = ?
+            WHERE teacher_id = %s
             GROUP BY subject
             ORDER BY count DESC
         ''', (teacher_id,))
@@ -645,7 +645,7 @@ class TeachingMaterialsManager:
             SELECT tm.*, u.nome as teacher_name, u.cognome as teacher_surname
             FROM teaching_materials tm
             JOIN utenti u ON tm.teacher_id = u.id
-            WHERE (tm.title LIKE ? OR tm.description LIKE ? OR tm.subject LIKE ?)
+            WHERE (tm.title LIKE %s OR tm.description LIKE %s OR tm.subject LIKE %s)
         '''
         params = [f'%{query}%', f'%{query}%', f'%{query}%']
         

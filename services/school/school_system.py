@@ -319,7 +319,7 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         INSERT INTO scuole (nome, codice_pubblico, codice_invito_docenti, codice_dirigente)
-                        VALUES (?, ?, ?, ?)
+                        VALUES (%s, %s, %s, %s)
                     ''', ('Scuola Predefinita', 'DEFAULT_SCHOOL', self.generate_invite_code(), 'DIR2024'))
                     default_school_id = cursor.lastrowid
                 
@@ -803,7 +803,7 @@ class SchoolSystem:
                         SELECT pc.id, pc.school_id, pc.email, pc.role, s.nome as school_name
                         FROM personal_codes pc
                         JOIN scuole s ON pc.school_id = s.id
-                        WHERE pc.code = ? AND pc.used = 0 AND pc.expires_at > datetime('now')
+                        WHERE pc.code = %s AND pc.used = 0 AND pc.expires_at > CURRENT_TIMESTAMP
                     ''', (code,))
                 
                 result = cursor.fetchone()
@@ -847,8 +847,8 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         UPDATE personal_codes 
-                        SET used = 1, used_by = ?, used_at = datetime('now')
-                        WHERE id = ?
+                        SET used = 1, used_by = %s, used_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
                     ''', (user_id, code_id))
                 
                 conn.commit()
@@ -899,8 +899,8 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         UPDATE utenti 
-                        SET scuola_id = ?, ruolo = ? 
-                        WHERE id = ?
+                        SET scuola_id = %s, ruolo = %s 
+                        WHERE id = %s
                     ''', (school_id, 'admin_scuola', admin_user_id))
             
             # Crea chat di sistema per la scuola
@@ -1064,7 +1064,7 @@ class SchoolSystem:
                 cursor.execute('''
                     SELECT id, nome, anno, sezione, codice_classe 
                     FROM classi 
-                    WHERE scuola_id = ? AND attiva = 1 
+                    WHERE scuola_id = %s AND attiva = 1 
                     ORDER BY anno, sezione, nome
                 ''', (scuola_id,))
             return cursor.fetchall()
@@ -1196,7 +1196,7 @@ class SchoolSystem:
                 else:
                     cursor.execute('''
                         SELECT email, metadata, expires_at FROM email_verifications 
-                        WHERE token = ? AND purpose = ? AND consumed_at IS NULL
+                        WHERE token = %s AND purpose = %s AND consumed_at IS NULL
                     ''', (token, 'dirigente_school_verification'))
                 
                 verification = cursor.fetchone()
@@ -1269,7 +1269,7 @@ class SchoolSystem:
                         SELECT u.ruolo, s.nome, s.codice_invito_docenti, s.codice_dirigente,
                                s.domain_trust_enabled, s.dominio_email
                         FROM utenti u JOIN scuole s ON u.scuola_id = s.id 
-                        WHERE u.id = ? AND s.id = ? AND u.ruolo = 'dirigente'
+                        WHERE u.id = %s AND s.id = %s AND u.ruolo = 'dirigente'
                     ''', (user_id, school_id))
                 
                 result = cursor.fetchone()

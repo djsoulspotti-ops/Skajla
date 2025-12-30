@@ -17,7 +17,7 @@ class ParentReportsGenerator:
         
         # Get student info
         student = db_manager.query('''
-            SELECT nome, cognome, classe FROM utenti WHERE id = ?
+            SELECT nome, cognome, classe FROM utenti WHERE id = %s
         ''', (student_id,), one=True)
         
         if not student:
@@ -28,7 +28,7 @@ class ParentReportsGenerator:
         # Attendance this week
         attendance_week = db_manager.query('''
             SELECT status, date FROM registro_presenze
-            WHERE student_id = ? AND date >= ?
+            WHERE student_id = %s AND date >= %s
             ORDER BY date DESC
         ''', (student_id, week_start))
         
@@ -37,20 +37,20 @@ class ParentReportsGenerator:
             SELECT rv.*, u.nome as teacher_name, u.cognome as teacher_surname
             FROM registro_voti rv
             JOIN utenti u ON rv.teacher_id = u.id
-            WHERE rv.student_id = ? AND rv.date >= ?
+            WHERE rv.student_id = %s AND rv.date >= %s
             ORDER BY rv.date DESC
         ''', (student_id, week_start))
         
         # Disciplinary notes this week
         notes_week = db_manager.query('''
             SELECT * FROM registro_note_disciplinari
-            WHERE student_id = ? AND date >= ?
+            WHERE student_id = %s AND date >= %s
         ''', (student_id, week_start))
         
         # Homework/Lessons this week
         lessons_week = db_manager.query('''
             SELECT rcl.* FROM registro_calendario_lezioni rcl
-            WHERE rcl.class = ? AND rcl.lesson_date >= ? AND rcl.homework IS NOT NULL
+            WHERE rcl.class = %s AND rcl.lesson_date >= %s AND rcl.homework IS NOT NULL
             ORDER BY rcl.lesson_date DESC
         ''', (student['classe'], week_start))
         
@@ -136,7 +136,7 @@ class ParentReportsGenerator:
         
         # Get student info
         student = db_manager.query('''
-            SELECT nome, cognome, classe FROM utenti WHERE id = ?
+            SELECT nome, cognome, classe FROM utenti WHERE id = %s
         ''', (student_id,), one=True)
         
         if not student:
@@ -216,7 +216,7 @@ class ParentReportsGenerator:
         """Genera notifica immediata per genitori"""
         
         student = db_manager.query('''
-            SELECT nome, cognome FROM utenti WHERE id = ?
+            SELECT nome, cognome FROM utenti WHERE id = %s
         ''', (student_id,), one=True)
         
         notifications = {
@@ -247,7 +247,7 @@ class ParentReportsGenerator:
         # Grade trends
         grades = db_manager.query('''
             SELECT subject, voto, date FROM registro_voti
-            WHERE student_id = ? AND date >= ?
+            WHERE student_id = %s AND date >= %s
             ORDER BY date ASC
         ''', (student_id, month_start))
         

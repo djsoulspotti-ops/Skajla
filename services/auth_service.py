@@ -316,7 +316,7 @@ class AuthService:
                         '''
                         UPDATE utenti 
                         SET ultimo_accesso = CURRENT_TIMESTAMP 
-                        WHERE id = ?
+                        WHERE id = %s
                     ''', (user[0], ))
                 conn.commit()
 
@@ -482,7 +482,7 @@ class AuthService:
                     cursor.execute(
                         '''
                         SELECT COUNT(*) FROM login_attempts 
-                        WHERE ip_address = ? AND timestamp > datetime('now', '-15 minutes')
+                        WHERE ip_address = %s AND timestamp > CURRENT_TIMESTAMP - INTERVAL '15 minutes'
                     ''', (client_ip, ))
 
                 recent_attempts = cursor.fetchone()[0]

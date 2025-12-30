@@ -416,9 +416,10 @@ Calendario intelligente che si adatta al ruolo:
 ## 🌐 Deployment & Scalabilità
 
 ### Infrastructure
+- **Compute**: Hetzner Cloud VPS (Dockerized Deployment)
 - **Database**: PostgreSQL (Neon) con connection pooling
 - **Caching**: Redis per session e dati frequenti
-- **Server**: Gunicorn WSGI per production
+- **Server**: Gunicorn WSGI + Nginx per production
 - **Real-time**: Eventlet per Socket.IO async networking
 
 ### Performance
