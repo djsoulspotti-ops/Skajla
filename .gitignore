@@ -189,4 +189,8 @@ poetry.lock
 # Production secrets
 .env
 .env.local
-.env.production
+.env.production.DS_Store
+__pycache__
+.env
+.venv
+skajla-deploy.tar.gz
